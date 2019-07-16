@@ -18,7 +18,6 @@ export default class Core extends React.Component<any, any> {
 
     constructor(props: any) {
         super(props);
-        this.LOGGER.info('props', props);
     }
 
     public componentWillMount() {
