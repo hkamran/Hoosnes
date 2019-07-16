@@ -1,0 +1,101 @@
+body {
+    margin: 20px;
+}
+
+#searchInput {
+    margin: 10px;
+    padding: 5px;
+    border: 1px solid black;
+}
+
+.posting {
+    margin: 5px;
+    border: 1px solid #000;
+    padding: 5px;
+}
+
+.posting.highlight {
+    background-color: #fff61a;
+}
+
+.document.highlight {
+    background-color: #fff61a;
+}
+
+.token {
+    margin: 5px;
+    border: 1px solid #000;
+    padding: 5px;
+}
+
+.token.highlight {
+    background-color: #fff61a;
+}
+
+.search-row {
+    height: 32px;
+}
+
+.box legend {
+    margin-bottom: 0px;
+    width: auto;
+    border-bottom: 0px;
+}
+
+.box fieldset {
+    border: 1px solid #000000;
+    margin: 0px;
+    padding: 10px;
+
+}
+
+.box .menu {
+    float: right;
+    margin-bottom: 15px;
+    margin-top: -30px;
+    border: 1px solid #000;
+    padding: 7px;
+    border-radius: 2px;
+    background: #fff;
+    position: relative;
+    top: 40px;
+    right: 20px;
+}
+
+.box {
+    min-height: 50px;
+    margin-bottom: 20px;
+}
+
+.react-tabs {
+    padding: 10px;
+}
+
+.react-tabs__tab--selected {
+    border: 1px solid black;
+    border-bottom-color: white;
+    border-bottom-style: solid;
+    border-radius: 0px;
+    border-bottom: 0px;
+}
+
+.react-tabs__tab-panel {
+    padding: 20px;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    padding-top: 30px;
+    overflow: auto;
+}
+
+.react-tabs__tab-list {
+    border-bottom: 1px solid black;
+}
+
+.react-tabs__tab-list {
+    margin: 0px;
+}
+
+.search-row span {
+    white-space: nowrap;
+}

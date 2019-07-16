@@ -1,0 +1,20 @@
+{
+  "extends": "tslint:recommended",
+  "rules": {
+	"no-consecutive-blank-lines": false,
+    "forin": false,
+    "max-classes-per-file": [false, 1],
+    "prefer-for-of": false,
+    "ordered-imports": false,
+    "no-console": [false, "log", "error"],
+	"no-trailing-whitespace": false,
+    "quotemark": [true, "single", "avoid-escape"],
+    "prefer-const": false,
+    "member-ordering": [false, {"order": "fields-first"}],
+	"typedef-whitespace": [
+      false,
+      {},
+      { "call-signature": "space" }
+    ]
+  }
+}
