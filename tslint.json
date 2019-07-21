@@ -8,9 +8,10 @@
     "ordered-imports": false,
     "no-console": [false, "log", "error"],
 	"no-trailing-whitespace": false,
-    "quotemark": [true, "single", "avoid-escape"],
+    "quotemark": [false, "single", "avoid-escape"],
     "prefer-const": false,
     "member-ordering": [false, {"order": "fields-first"}],
+    "no-bitwise": false,
 	"typedef-whitespace": [
       false,
       {},

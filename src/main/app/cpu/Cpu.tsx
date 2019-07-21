@@ -5,8 +5,8 @@ import {Opcodes} from "./Opcodes";
 
 export class Cpu {
 
-    registers : Registers = new Registers();
-    opcodes : Opcodes = new Opcodes();
+    public registers : Registers = new Registers();
+    public opcodes : Opcodes = new Opcodes();
 
 }
 

@@ -3,9 +3,10 @@ import * as ReactDOM from 'react-dom';
 import Core from './core/Core';
 import Console from './../app/Console';
 
-let console = new Console();
+declare let window : any;
+window.snes = new Console();
 
 ReactDOM.render(
-    <Core console={console} />,
+    <div></div>,
     document.getElementById('main'),
 );

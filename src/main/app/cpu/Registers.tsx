@@ -39,15 +39,15 @@ export class StatusRegister extends Register {
 
 export class Registers {
 
-    p : StatusRegister = new StatusRegister(Modes.bit8);
-    a : Register = new Register(Modes.bit16);
-    x : Register = new Register(Modes.bit16);
-    y : Register = new Register(Modes.bit8);
-    sp : Register = new Register(Modes.bit16);
-    dp : Register = new Register(Modes.bit16);
-    pc : Register = new Register(Modes.bit8);
-    pb : Register = new Register(Modes.bit8);
-    e : Register = new Register(Modes.bit8);
+    public p : StatusRegister = new StatusRegister(Modes.bit8);
+    public a : Register = new Register(Modes.bit16);
+    public x : Register = new Register(Modes.bit16);
+    public y : Register = new Register(Modes.bit8);
+    public sp : Register = new Register(Modes.bit16);
+    public dp : Register = new Register(Modes.bit16);
+    public pc : Register = new Register(Modes.bit8);
+    public pb : Register = new Register(Modes.bit8);
+    public e : Register = new Register(Modes.bit8);
 
     public setMode(mode : Mode) {
         this.a.setMode(mode);
