@@ -4,6 +4,11 @@ import {Registers} from "./Registers";
 import {Opcodes} from "./Opcodes";
 import {Memory} from "../Memory";
 
+
+export class Interrupts {
+
+}
+
 export class Cpu {
 
     public registers : Registers = new Registers();

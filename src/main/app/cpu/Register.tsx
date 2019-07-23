@@ -2,8 +2,8 @@ import {Mode, Modes} from "../Modes";
 
 export class Register {
 
-    private val : number;
-    private mode : Mode = Modes.bit8;
+    protected val : number;
+    protected mode : Mode = Modes.bit8;
 
     constructor(mode: Mode) {
         this.mode = mode;
