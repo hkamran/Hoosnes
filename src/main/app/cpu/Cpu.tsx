@@ -7,6 +7,16 @@ import {Memory} from "../Memory";
 
 export class Interrupts {
 
+    private cpu : Cpu;
+
+    constructor(cpu : Cpu) {
+        this.cpu = cpu;
+    }
+
+    public tick() : void {
+
+    }
+
 }
 
 export class Cpu {
@@ -20,31 +30,26 @@ export class Cpu {
         this.memory = memory;
     }
 
-    public tick() : void {
+    public tick() : number {
 
         //interupt tick
         let pc = this.registers.pc.get();
         let cycles = this.cycles;
 
-        let opaddr : number = this.registers.pc.get();
-        let opcode : number = this.memory.readBytes(0x00, opaddr, 2);
-        let op : Opcode =  this.opcodes.get(opcode);
+        let opAddr : number = this.registers.pc.get();
+        let opCode : number = this.memory.readBytes(0x00, opAddr, 2);
+        let opFunc : Opcode =  this.opcodes.get(opCode);
+        let operand = opFunc.getAddressMode().get(opAddr);
+        let opContext = new OpContext(pc, opAddr, operand, opFunc);
 
-        let operand = op.mode.get(opaddr);
-
-        // Prepare context
-        let opContext = new OpContext(pc, opaddr, operand, op);
-
-        // update pc
-        // this.registers.pc.set(opaddr + op.size);
-
-        // update cycles
+        this.registers.pc.set(opAddr + opFunc.getSize());
+        this.cycles += opFunc.getCycles();
 
         // Execute operation
-        op.execute(opContext);
+        opFunc.execute(opContext);
 
-        // Update cpu information
-
+        let cyclesTaken = this.cycles - cycles;
+        return cyclesTaken;
     }
 
 }

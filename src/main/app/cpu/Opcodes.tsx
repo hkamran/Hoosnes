@@ -12,9 +12,9 @@ export class OpContext {
 
 export class Opcode {
     public name: string;
-    public cycles: number[];
-    public size: number[];
-    public mode: Address;
+    private cycles: number[];
+    private size: number[];
+    private mode: Address;
 
     constructor(cycles: number[], size: number[], mode: Address) {
         this.cycles = cycles;
@@ -24,6 +24,28 @@ export class Opcode {
 
     public execute(state: OpContext): number {
         return -1;
+    }
+
+    public getCycles() : number {
+        if (this.cycles == null || this.cycles.length == 0) {
+            throw new Error("Invalid cycle set");
+        }
+
+        // TODO
+        return this.cycles[0];
+    }
+
+    public getSize() : number {
+        if (this.size == null || this.size.length == 0) {
+            throw new Error("Invalid cycle set");
+        }
+
+        // TODO
+        return this.size[0];
+    }
+
+    public getAddressMode() : Address {
+        return this.mode;
     }
 }
 
