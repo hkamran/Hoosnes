@@ -2,25 +2,27 @@ import {Log, Level} from 'typescript-logger/build/index';
 import {Cpu} from './Cpu';
 import {Memory} from "../Memory";
 import {Mode} from "../Modes";
-import {Addressing} from "./Addressing";
+import {Address, Addressing} from "./Addressing";
 
-export class OpState {
+export class OpContext {
+    constructor(pc: number, opaddr: number, operand: number, op: Opcode) {
 
+    }
 }
 
 export class Opcode {
     public name: string;
     public cycles: number[];
     public size: number[];
-    public mode: Addressing;
+    public mode: Address;
 
-    constructor(cycles: number[], size: number[], mode: Addressing) {
+    constructor(cycles: number[], size: number[], mode: Address) {
         this.cycles = cycles;
         this.mode = mode;
         this.size = size;
     }
 
-    public execute(state: OpState): number {
+    public execute(state: OpContext): number {
         return -1;
     }
 }

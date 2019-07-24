@@ -1,6 +1,22 @@
 export class Address {
 
+    public get(opaddr : number) : number {
+        return 0;
+    }
+
 }
+//
+// Name           Native   Nocash
+// Implied        -        A,X,Y,S,P
+// Immediate      #nn      nn
+// Zero Page      nn       [nn]
+// Zero Page,X    nn,X     [nn+X]
+// Zero Page,Y    nn,Y     [nn+Y]
+// Absolute       nnnn     [nnnn]
+// Absolute,X     nnnn,X   [nnnn+X]
+// Absolute,Y     nnnn,Y   [nnnn+Y]
+// (Indirect,X)   (nn,X)   [[nn+X]]
+// (Indirect),Y   (nn),Y   [[nn]+Y]
 
 export class Addressing {
     public static implied : Address = new Address();

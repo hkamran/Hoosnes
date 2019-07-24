@@ -4,9 +4,11 @@ export class Register {
 
     protected val : number;
     protected mode : Mode = Modes.bit8;
+    protected label : string;
 
-    constructor(mode: Mode) {
+    constructor(label : string, mode: Mode) {
         this.mode = mode;
+        this.label = label;
     }
 
     public set(val : number) : void {
