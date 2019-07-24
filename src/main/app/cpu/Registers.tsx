@@ -3,6 +3,8 @@ import {Mode, Modes} from "../Modes";
 
 export class StatusRegister extends Register {
 
+
+
     // Carry
     public getC() : number {
         return (this.val >> 0) & 0x1;

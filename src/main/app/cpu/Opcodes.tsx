@@ -5,9 +5,36 @@ import {Mode} from "../Modes";
 import {Address, Addressing} from "./Addressing";
 
 export class OpContext {
-    constructor(pc: number, opaddr: number, operand: number, op: Opcode) {
 
+    public pc : number;
+    public opaddr : number;
+    public operand : number;
+    public op : Opcode;
+    public cpu : Cpu;
+
+    constructor(pc: number, opaddr: number, operand: number, op: Opcode, cpu : Cpu) {
+        this.pc = pc;
+        this.opaddr = opaddr;
+        this.operand = operand;
+        this.op = op;
+        this.cpu = cpu;
     }
+}
+
+export class OpCalculation {
+
+    public operands : number[] = [0, 0];
+    public result : number = 0;
+
+    public getOperand(index : number) : number {
+        if (this.operands == null || index > this.operands.length) return 0;
+        if (index < 0) return 0;
+    }
+
+    public getResult() : number {
+        return this.result;
+    }
+
 }
 
 export class Opcode {
@@ -47,6 +74,60 @@ export class Opcode {
     public getAddressMode() : Address {
         return this.mode;
     }
+
+    // C carry
+    // Z zero
+    // O overflow
+    // N negative
+
+    private setFlagC(context : OpContext, output : OpCalculation) : void {
+        if (output == null || context) {
+            throw new Error("Invalid flag calculation!");
+        }
+
+        let val = output.getOperand(0);
+        let isOverflow : boolean = val > 0xFF;
+        context.cpu.registers.p.setC(isOverflow ? 1: 0);
+    }
+
+
+    private setFlagZ(context : OpContext, output : OpCalculation) : void {
+        if (output == null || context) {
+            throw new Error("Invalid flag calculation!");
+        }
+
+        let val = output.getOperand(0);
+        let isZero : boolean = (val & 0xFF) == 0;
+        context.cpu.registers.p.setZ(isZero ? 1 : 0);
+    }
+
+    private setFlagV(context : OpContext, output : OpCalculation) : void {
+        if (output == null || context) {
+            throw new Error("Invalid flag calculation!");
+        }
+
+        let a = output.getOperand(0);
+        let b = output.getOperand(1);
+        let sum = output.getResult();
+
+        let isOverflow = (((a ^ b) >> 7) != 0) && (((a ^ sum) >> 7) != 0);
+        context.cpu.registers.p.setV(isOverflow ? 1 : 0);
+
+    }
+
+    private setFlagN(context : OpContext, output : OpCalculation) : void {
+        if (output == null || context) {
+            throw new Error("Invalid flag calculation!");
+        }
+
+        let val = output.getOperand(0);
+        let isNegative : boolean = ((val >> 7) & 1) == 1;
+        context.cpu.registers.p.setN(isNegative ? 1 : 0);
+    }
+
+
+
+
 }
 
 export class ADC extends Opcode {
