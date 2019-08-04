@@ -10,14 +10,14 @@ export class OpContext {
     public opaddr : number;
     public operand : number;
     public op : Opcode;
-    public cpu : Cpu;
+    private mode: Mode;
 
-    constructor(pc: number, opaddr: number, operand: number, op: Opcode, cpu : Cpu) {
+    constructor(pc: number, opaddr: number, operand: number, op: Opcode, mode : Mode) {
         this.pc = pc;
         this.opaddr = opaddr;
         this.operand = operand;
         this.op = op;
-        this.cpu = cpu;
+        this.mode = mode;
     }
 }
 
@@ -25,6 +25,11 @@ export class OpCalculation {
 
     public operands : number[] = [0, 0];
     public result : number = 0;
+
+    constructor(operands : number[], result : number) {
+        this.operands = this.operands;
+        this.result = result;
+    }
 
     public getOperand(index : number) : number {
         if (this.operands == null || index > this.operands.length) return 0;
@@ -49,8 +54,7 @@ export class Opcode {
         this.size = size;
     }
 
-    public execute(state: OpContext): number {
-        return -1;
+    public execute(cpu : Cpu, state: OpContext): void {
     }
 
     public getCycles() : number {
@@ -80,28 +84,28 @@ export class Opcode {
     // O overflow
     // N negative
 
-    private setFlagC(context : OpContext, output : OpCalculation) : void {
+    protected setFlagC(cpu : Cpu, context : OpContext, output : OpCalculation) : void {
         if (output == null || context) {
             throw new Error("Invalid flag calculation!");
         }
 
         let val = output.getOperand(0);
         let isOverflow : boolean = val > 0xFF;
-        context.cpu.registers.p.setC(isOverflow ? 1: 0);
+        cpu.registers.p.setC(isOverflow ? 1 : 0);
     }
 
 
-    private setFlagZ(context : OpContext, output : OpCalculation) : void {
+    protected setFlagZ(cpu : Cpu, context : OpContext, output : OpCalculation) : void {
         if (output == null || context) {
             throw new Error("Invalid flag calculation!");
         }
 
         let val = output.getOperand(0);
         let isZero : boolean = (val & 0xFF) == 0;
-        context.cpu.registers.p.setZ(isZero ? 1 : 0);
+        cpu.registers.p.setZ(isZero ? 1 : 0);
     }
 
-    private setFlagV(context : OpContext, output : OpCalculation) : void {
+    protected setFlagV(cpu : Cpu, context : OpContext, output : OpCalculation) : void {
         if (output == null || context) {
             throw new Error("Invalid flag calculation!");
         }
@@ -111,18 +115,18 @@ export class Opcode {
         let sum = output.getResult();
 
         let isOverflow = (((a ^ b) >> 7) != 0) && (((a ^ sum) >> 7) != 0);
-        context.cpu.registers.p.setV(isOverflow ? 1 : 0);
+        cpu.registers.p.setV(isOverflow ? 1 : 0);
 
     }
 
-    private setFlagN(context : OpContext, output : OpCalculation) : void {
+    protected setFlagN(cpu : Cpu, context : OpContext, output : OpCalculation) : void {
         if (output == null || context) {
             throw new Error("Invalid flag calculation!");
         }
 
         let val = output.getOperand(0);
         let isNegative : boolean = ((val >> 7) & 1) == 1;
-        context.cpu.registers.p.setN(isNegative ? 1 : 0);
+        cpu.registers.p.setN(isNegative ? 1 : 0);
     }
 
 
@@ -132,85 +136,221 @@ export class Opcode {
 
 export class ADC extends Opcode {
     public name: string = "ADC";
+
+    public execute(cpu : Cpu, context: OpContext): void {
+        console.log(this.name);
+
+        let a : number = cpu.registers.a.get();
+        let b : number = context.operand;
+        let c : number = cpu.registers.p.getC();
+
+        let result : number = a + b + c;
+        let output : OpCalculation = new OpCalculation([b], result);
+
+        this.setFlagN(cpu, context, output);
+        this.setFlagV(cpu, context, output);
+        this.setFlagZ(cpu, context, output);
+        this.setFlagC(cpu, context, output);
+    }
 }
 
 export class AND extends Opcode {
     public name: string = "AND";
+
+    public execute(cpu : Cpu, context: OpContext): void {
+        console.log(this.name);
+
+        let a : number = cpu.registers.a.get();
+        let b : number = context.operand;
+
+        let result : number = a & b;
+        let output : OpCalculation = new OpCalculation([b], result);
+
+        this.setFlagZ(cpu, context, output);
+        this.setFlagN(cpu, context, output);
+    }
 }
 
 export class ASL extends Opcode {
     public name: string = "ASL";
+
+    public execute(cpu : Cpu, context: OpContext): void {
+        console.log(this.name);
+
+        // TODO
+
+        let a : number = context.operand;
+        let c : number;
+
+        c = (a >> cpu.mode.size) & 1;
+        a = (a << 1) % cpu.mode.size;
+
+        cpu.registers.a.set(a);
+
+        let output : OpCalculation = new OpCalculation([c, a], c);
+
+        this.setFlagN(cpu, context, output);
+        this.setFlagN(cpu, context, output);
+        this.setFlagC(cpu, context, output);
+    }
 }
 
 export class BCC extends Opcode {
     public name: string = "BCC";
+
+    public execute(cpu : Cpu, context: OpContext): void {
+        console.log(this.name);
+        let c : number = cpu.registers.p.getC();
+        if (c == 0) {
+            cpu.registers.pc.set(context.operand);
+            // TODO
+        }
+
+    }
 }
 
 export class BCS extends Opcode {
     public name: string = "BCS";
+
+    public execute(cpu : Cpu, context: OpContext): void {
+        console.log(this.name);
+        let c : number = cpu.registers.p.getC();
+        if (c != 0) {
+            cpu.registers.pc.set(context.operand);
+            // TODO
+        }
+    }
 }
 
 export class BEQ extends Opcode {
     public name: string = "BEQ";
+
+    public execute(cpu : Cpu, context: OpContext): void {
+        console.log(this.name);
+        let z : number = cpu.registers.p.getZ();
+        if (z != 0) {
+            cpu.registers.pc.set(context.operand);
+            // TODO
+        }
+    }
 }
 
 export class BIT extends Opcode {
     public name: string = "BIT";
+
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class BMI extends Opcode {
     public name: string = "BMI";
 
+    public execute(cpu : Cpu, context: OpContext): void {
+        console.log(this.name);
+        let n : number = cpu.registers.p.getN();
+        if (n == 1) {
+            cpu.registers.pc.set(context.operand);
+            // TODO
+        }
+    }
+
 }
 
 class BNE extends Opcode {
     public name: string = "BNE";
+
+    public execute(cpu : Cpu, context: OpContext): void {
+        console.log(this.name);
+        let z : number = cpu.registers.p.getZ();
+        if (z == 0) {
+            cpu.registers.pc.set(context.operand);
+            // TODO
+        }
+    }
 }
 
 class BPL extends Opcode {
     public name: string = "BPL";
+
+    public execute(cpu : Cpu, context: OpContext): void {
+        console.log(this.name);
+        let n : number = cpu.registers.p.getN();
+        if (n == 0) {
+            cpu.registers.pc.set(context.operand);
+            // TODO
+        }
+    }
 
 }
 
 class CMP extends Opcode {
     public name: string = "CMP";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
+
 }
 
 class COP extends Opcode {
     public name: string = "COP";
+
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class CPX extends Opcode {
     public name: string = "CPX";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
+
 }
 
 class CPY extends Opcode {
     public name: string = "CPY";
 
-
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class CLC extends Opcode {
     public name: string = "CLC";
 
-
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class CLD extends Opcode {
     public name: string = "CLD";
+
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class CLI extends Opcode {
     public name: string = "CLI";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
+
 }
 
 class CLV extends Opcode {
     public name: string = "CLV";
+
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 
 }
@@ -218,404 +358,631 @@ class CLV extends Opcode {
 class BRA extends Opcode {
     public name: string = "BRA";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
+
 
 }
 
 class BRK extends Opcode {
     public name: string = "BRK";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
+
 }
 
 class BVS extends Opcode {
     public name: string = "BVS";
+
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class BVC extends Opcode {
     public name: string = "BVC";
 
+    public execute(cpu : Cpu, context: OpContext): void {
+        console.log(this.name);
+        let v : number = cpu.registers.p.getV();
+        if (v == 0) {
+            cpu.registers.pc.set(context.operand);
+            // TODO
+        }
+    }
+
 }
 
 class BRL extends Opcode {
     public name: string = "BRL";
+
+    public execute(cpu : Cpu, context: OpContext): void {
+        console.log(this.name);
+        let v : number = cpu.registers.p.getV();
+        if (v == 1) {
+            cpu.registers.pc.set(context.operand);
+            // TODO
+        }
+    }
 
 }
 
 class DEC extends Opcode {
     public name: string = "DEC";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
+
 }
 
 class DEX extends Opcode {
     public name: string = "DEX";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class DEY extends Opcode {
     public name: string = "DEY";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class EOR extends Opcode {
     public name: string = "EOR";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class INC extends Opcode {
     public name: string = "INC";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class INY extends Opcode {
     public name: string = "INY";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class XCE extends Opcode {
     public name: string = "XCE";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class XBA extends Opcode {
     public name: string = "XBA";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class WDM extends Opcode {
     public name: string = "WDM";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class WAI extends Opcode {
     public name: string = "WAI";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class TYX extends Opcode {
     public name: string = "TYX";
 
-
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class TYA extends Opcode {
     public name: string = "TYA";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class TXY extends Opcode {
     public name: string = "TXY";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class TAX extends Opcode {
     public name: string = "TAX";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class TAY extends Opcode {
     public name: string = "TAY";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class TCD extends Opcode {
     public name: string = "TCD";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class TCS extends Opcode {
     public name: string = "TCS";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class TDC extends Opcode {
     public name: string = "TDC";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class TRB extends Opcode {
     public name: string = "TRB";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class TXS extends Opcode {
     public name: string = "TXS";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class TSB extends Opcode {
     public name: string = "TSB";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class TXA extends Opcode {
     public name: string = "TXA";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class TSX extends Opcode {
     public name: string = "TSX";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class TSC extends Opcode {
     public name: string = "TSC";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class STZ extends Opcode {
     public name: string = "STZ";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class JMP extends Opcode {
     public name: string = "JMP";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class JSR extends Opcode {
     public name: string = "JSR";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class LDA extends Opcode {
     public name: string = "LDA";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class LDX extends Opcode {
     public name: string = "LDX";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class LDY extends Opcode {
     public name: string = "LDY";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class LSR extends Opcode {
     public name: string = "LSR";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class MVN extends Opcode {
     public name: string = "MVN";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class MVP extends Opcode {
     public name: string = "MVP";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class NOP extends Opcode {
     public name: string = "NOP";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class ORA extends Opcode {
     public name: string = "ORA";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class PEA extends Opcode {
     public name: string = "PEA";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class PEI extends Opcode {
     public name: string = "PEI";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class PER extends Opcode {
     public name: string = "PER";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class PHA extends Opcode {
     public name: string = "PHA";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class PHB extends Opcode {
     public name: string = "PHB";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class SBC extends Opcode {
     public name: string = "SBC";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class STA extends Opcode {
     public name: string = "STA";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class ROL extends Opcode {
     public name: string = "ROL";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class ROR extends Opcode {
     public name: string = "ROR";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class STY extends Opcode {
     public name: string = "STY";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class PHD extends Opcode {
     public name: string = "PHD";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class PHK extends Opcode {
     public name: string = "PHK";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class PHP extends Opcode {
     public name: string = "PHP";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class PHX extends Opcode {
     public name: string = "PHX";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class PHY extends Opcode {
     public name: string = "PHY";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class PLA extends Opcode {
     public name: string = "PLA";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class PLB extends Opcode {
     public name: string = "PLB";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class PLD extends Opcode {
     public name: string = "PLD";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class PLP extends Opcode {
     public name: string = "PLP";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class PLX extends Opcode {
     public name: string = "PLX";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class PLY extends Opcode {
     public name: string = "PLY";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class REP extends Opcode {
     public name: string = "REP";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class STX extends Opcode {
     public name: string = "STX";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class STP extends Opcode {
     public name: string = "STP";
 
-
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class RTI extends Opcode {
     public name: string = "RTI";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 class RTL extends Opcode {
     public name: string = "RTL";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class RTS extends Opcode {
     public name: string = "RTS";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class SEC extends Opcode {
     public name: string = "SEC";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class SED extends Opcode {
     public name: string = "SED";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class SEI extends Opcode {
     public name: string = "SEI";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 
 }
 
 class SEP extends Opcode {
     public name: string = "SEP";
 
+    public execute(cpu : Cpu, state: OpContext): void {
+        console.log(this.name);
+    }
 }
 
 export class Opcodes {

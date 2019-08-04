@@ -12,6 +12,9 @@
     "prefer-const": false,
     "member-ordering": [false, {"order": "fields-first"}],
     "no-bitwise": false,
+    "no-empty": false,
+    "curly": false,
+    "triple-equals": false,
 	"typedef-whitespace": [
       false,
       {},

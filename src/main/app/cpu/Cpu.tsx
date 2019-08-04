@@ -1,23 +1,9 @@
 import {Mode, Modes} from "../Modes";
-import {Register} from "./Register";
 import {Registers} from "./Registers";
 import {Opcode, Opcodes, OpContext} from "./Opcodes";
 import {Memory} from "../Memory";
+import {InterruptHandler} from "./Interrupts";
 
-
-export class Interrupts {
-
-    private cpu : Cpu;
-
-    constructor(cpu : Cpu) {
-        this.cpu = cpu;
-    }
-
-    public tick() : void {
-
-    }
-
-}
 
 export class Cpu {
 
@@ -25,28 +11,31 @@ export class Cpu {
     public opcodes : Opcodes = new Opcodes();
     public memory : Memory;
     public cycles : number = 0;
+    public mode : Mode = Modes.bit16;
+    public interrupts;
 
     constructor(memory : Memory) {
         this.memory = memory;
+        this.interrupts = new InterruptHandler(this);
     }
 
     public tick() : number {
+        this.interrupts.tick();
 
-        //interupt tick
         let pc = this.registers.pc.get();
         let cycles = this.cycles;
 
-        let opAddr : number = this.registers.pc.get();
-        let opCode : number = this.memory.readBytes(0x00, opAddr, 2);
-        let opFunc : Opcode =  this.opcodes.get(opCode);
-        let operand = opFunc.getAddressMode().get(opAddr);
-        let opContext = new OpContext(pc, opAddr, operand, opFunc);
+        let addr : number = this.registers.pc.get();
+        let code : number = this.memory.readBytes(0x00, addr, 2);
+        let operation : Opcode =  this.opcodes.get(code);
+        let operand = operation.getAddressMode().get(addr);
+        let context = new OpContext(pc, addr, operand, operation, this.mode);
 
-        this.registers.pc.set(opAddr + opFunc.getSize());
-        this.cycles += opFunc.getCycles();
+        this.registers.pc.set(addr + operation.getSize());
+        this.cycles += operation.getCycles();
 
         // Execute operation
-        opFunc.execute(opContext);
+        operation.execute(this, context);
 
         let cyclesTaken = this.cycles - cycles;
         return cyclesTaken;

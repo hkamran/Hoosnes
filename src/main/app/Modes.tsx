@@ -1,11 +1,11 @@
 export class Mode {
 
     public label : string = "8 bit";
-    public mask : number = 0xFF;
+    public size : number = 0xFF;
 
-    constructor(label : string, mask : number) {
+    constructor(label : string, size : number) {
         this.label = label;
-        this.mask = mask;
+        this.size = size;
     }
 
 }

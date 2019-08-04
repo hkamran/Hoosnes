@@ -1,5 +1,44 @@
-import {Register} from "./Register";
 import {Mode, Modes} from "../Modes";
+
+export class Register {
+
+    protected val : number;
+    protected mode : Mode = Modes.bit8;
+    protected label : string;
+
+    constructor(label : string, mode: Mode) {
+        this.mode = mode;
+        this.label = label;
+    }
+
+    public set(val : number) : void {
+        this.val = val & this.mode.size;
+    }
+
+    public get() : number {
+        return this.val & this.mode.size;
+    }
+
+    public increment(val : number) : number {
+        let maskedVal = val & this.mode.size;
+        this.val = (maskedVal + this.val) & this.mode.size;
+        return this.val;
+    }
+
+    public decrement(val : number) : number {
+        return this.increment(-1 * val);
+    }
+
+    public setMode(mode : Mode) {
+        this.mode = mode;
+        this.val = this.val & mode.size;
+    }
+
+    public getMode() : Mode {
+        return this.mode;
+    }
+
+}
 
 export class StatusRegister extends Register {
 
