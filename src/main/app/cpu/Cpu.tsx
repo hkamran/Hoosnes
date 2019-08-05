@@ -25,18 +25,17 @@ export class Cpu {
         let pc = this.registers.pc.get();
         let cycles = this.cycles;
 
-        let addr : number = this.registers.pc.get();
-        let code : number = this.memory.readBytes(0x00, addr, 2);
-        let operation : Opcode =  this.opcodes.get(code);
-        let operand = operation.getAddressMode().get(addr);
-        let context = new OpContext(pc, addr, operand, operation, this.mode);
+        let opaddr : number = this.registers.pc.get();
+        let opcode : number = this.memory.readBytes(0x00, opaddr, 2);
+        let operation : Opcode =  this.opcodes.get(opcode);
+        let context = new OpContext(pc, opaddr, operation, this.mode, this);
 
-        this.registers.pc.set(addr + operation.getSize());
-        this.cycles += operation.getCycles();
+        this.registers.pc.set(opaddr + operation.getSize());
 
         // Execute operation
-        operation.execute(this, context);
+        operation.execute(context);
 
+        this.cycles += operation.getCycle();
         let cyclesTaken = this.cycles - cycles;
         return cyclesTaken;
     }

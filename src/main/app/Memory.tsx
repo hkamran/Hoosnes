@@ -2,31 +2,17 @@ export class Stack {
 
     public stack : number[] = [];
 
-    public pushBytes(value : number, size : number) {
-        for (let i = 0; i < size; i ++) {
-            let byte = value & 0xFF;
-            value = value >> 8;
-            this.stack.push(byte);
-        }
+    public pushByte(value : number) {
+        let byte = value & 0xFF;
+        value = value >> 8;
+        this.stack.push(byte);
     }
 
-    public popBytes(size : number) : number {
+    public popByte() : number {
         if (this.stack.length <= 0) {
             return 0;
         }
-
-        let result = 0;
-        for (let i = 0; i < size; i++) {
-
-            if (this.stack.length <= 0) {
-                throw new Error("Stack is empty!");
-            }
-
-            result = result << 8;
-            result |= this.stack.pop();
-
-        }
-        return result;
+        return this.stack.pop();
     }
 
 }
@@ -34,7 +20,6 @@ export class Stack {
 export class Bank {
 
     public memory : number[] = new Array<number>(0xFFFF);
-    public stack : Stack = new Stack();
 
     public readBytes(address : number, size : number) {
         if (address > 0xFFFF || address < 0) {
@@ -68,6 +53,7 @@ export class Bank {
 export class Memory {
 
     public banks : Bank[] = new Array<Bank>(0xFF);
+    public stack : Stack = new Stack();
 
     constructor() {
         for (let i = 0; i < 0xFF; i++) {
@@ -109,4 +95,7 @@ export class Memory {
     }
 
 
+    public writeByte(opaddr: number, val: number) : void {
+
+    }
 }

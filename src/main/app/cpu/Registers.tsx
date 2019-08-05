@@ -69,7 +69,7 @@ export class StatusRegister extends Register {
         return (this.val >> 4) & 0x1;
     }
 
-    // Unused (always 1)
+    // Accumulator register size
     public getM() : number {
         return (this.val >> 5) & 0x1;
     }
