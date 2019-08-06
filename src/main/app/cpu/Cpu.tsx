@@ -26,7 +26,7 @@ export class Cpu {
         let cycles = this.cycles;
 
         let opaddr : number = this.registers.pc.get();
-        let opcode : number = this.memory.readBytes(0x00, opaddr, 2);
+        let opcode : number = this.memory.readByte(opaddr);
         let operation : Opcode =  this.opcodes.get(opcode);
         let context = new OpContext(pc, opaddr, operation, this.mode, this);
 

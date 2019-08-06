@@ -15,6 +15,7 @@
     "no-empty": false,
     "curly": false,
     "triple-equals": false,
+    "only-arrow-functions": false,
 	"typedef-whitespace": [
       false,
       {},

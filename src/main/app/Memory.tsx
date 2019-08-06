@@ -17,85 +17,40 @@ export class Stack {
 
 }
 
-export class Bank {
-
-    public memory : number[] = new Array<number>(0xFFFF);
-
-    public readBytes(address : number, size : number) {
-        if (address > 0xFFFF || address < 0) {
-            throw Error("Invalid memory address read!");
-        }
-
-        let result = 0;
-        for (let i = size - 1; i >= 0; i--) {
-            let byte = this.memory[address + i];
-            result = result << 8;
-            result |= byte;
-        }
-
-        return result;
-    }
-
-    public writeBytes(address : number, value : number, size : number) {
-        if (address > 0xFFFF || address < 0) {
-            throw Error("Invalid memory address write!");
-        }
-
-        for (let i = 0; i < size; i++) {
-            let byte = value & 0xFF;
-            this.memory[address + i] = byte;
-            value = value >> 8;
-        }
-    }
-
-}
-
 export class Memory {
 
-    public banks : Bank[] = new Array<Bank>(0xFF);
+    public data : number[] = new Array<number>(0xFFFFFF);
     public stack : Stack = new Stack();
 
-    constructor() {
-        for (let i = 0; i < 0xFF; i++) {
-            this.banks[i] = new Bank();
+    public readByte(address : number) : number {
+        if (address == null || address < 0) {
+            throw new Error("Invalid memory read at " + address.toString(16));
         }
+
+        let bank : number = (address & 0xFFFFFF) >> 16;
+        let location : number = (address & 0xFFFF);
+
+        let byte : number = this.data[address];
+        if (byte > 0xFF) {
+            throw new Error("Invalid memory value at " + bank.toString(16) + " " + location.toString(16));
+        }
+
+        return byte;
     }
 
-    public readBytes(bank : number, address : number, size : number) : number {
-        if (bank > 0xFF || bank < 0x0) {
-            throw Error("Invalid bank address!");
+    public writeByte(address : number, value : number) : void {
+        if (address == null || address < 0) {
+            throw new Error("Invalid memory write at " + address.toString(16));
         }
 
-        let memory : Bank = this.banks[bank];
+        let bank : number = (address & 0xFFFFFF) >> 16;
+        let location : number = (address & 0xFFFF);
 
-        if (memory == null) {
-            throw Error("No bank found at 0x" + bank.toString(16));
+        if (value > 0xFF || value < 0) {
+            throw new Error("Invalid memory value at " + bank.toString(16) + " " + location.toString(16));
         }
 
-        let result = memory.readBytes(address, size);
-        if (result == null || result < 0x0) {
-            throw Error("Invalid Read");
-        }
-
-        return result;
+        this.data[address] = value;
     }
 
-    public writeBytes(bank : number, address : number, value : number, size : number) : void {
-        if (bank > 0xFF || bank < 0x0) {
-            throw Error("Invalid bank address!");
-        }
-
-        let memory : Bank = this.banks[bank];
-
-        if (memory == null) {
-            throw Error("No bank found at 0x" + bank.toString(16));
-        }
-
-        memory.writeBytes(address, value, size);
-    }
-
-
-    public writeByte(opaddr: number, val: number) : void {
-
-    }
 }

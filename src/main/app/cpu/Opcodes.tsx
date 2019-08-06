@@ -1,4 +1,4 @@
-import {Log, Level} from 'typescript-logger/build/index';
+
 import {Cpu} from './Cpu';
 import {Memory} from "../Memory";
 import {Mode} from "../Modes";
@@ -486,7 +486,7 @@ class DEC extends Opcode {
         this.setFlagN(context, output);
 
         // TODO
-        context.cpu.memory.writeBytes(0x00, context.opaddr, result & context.mode.mask, 2);
+        // context.cpu.memory.writeBytes(0x00, context.opaddr, result & context.mode.mask, 2);
     }
 
 }
@@ -565,7 +565,7 @@ class INC extends Opcode {
         this.setFlagN(context, output);
 
         // TODO
-        context.cpu.memory.writeBytes(0x00, context.opaddr, result & context.mode.mask, 2);
+        // context.cpu.memory.writeBytes(0x00, context.opaddr, result & context.mode.mask, 2);
     }
 
 }
@@ -1147,7 +1147,7 @@ class PHX extends Opcode {
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
-        this.setFlagZ(context, output)
+        this.setFlagZ(context, output);
 
         context.cpu.registers.x.set(result);
     }
@@ -1164,7 +1164,7 @@ class PHY extends Opcode {
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
-        this.setFlagZ(context, output)
+        this.setFlagZ(context, output);
 
         context.cpu.registers.y.set(result);
     }
@@ -1181,7 +1181,7 @@ class PLA extends Opcode {
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
-        this.setFlagZ(context, output)
+        this.setFlagZ(context, output);
 
         context.cpu.registers.a.set(result);
     }
@@ -1198,7 +1198,7 @@ class PLB extends Opcode {
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
-        this.setFlagZ(context, output)
+        this.setFlagZ(context, output);
 
         context.cpu.registers.db.set(result);
     }
@@ -1355,8 +1355,6 @@ class SEP extends Opcode {
 }
 
 export class Opcodes {
-
-    public Log = Log.create('Opcodes');
 
     private opcodes: Opcode[] = new Array<Opcode>(256);
 
@@ -1653,14 +1651,10 @@ export class Opcodes {
 
     public get(code: number): Opcode {
         if (code < 0 || code > this.opcodes.length) {
-            this.Log.warn("got invalid opcode: " + code);
-            return null;
+            throw new Error("got invalid opcode: " + code);
         }
         let opcode: Opcode = this.opcodes[code];
-        if (opcode == null) {
-            this.Log.warn("got null opcode: " + code);
-            return null;
-        }
+        Objects.requireNonNull(opcode, "got null opcode: " + code);
 
         return opcode;
     }

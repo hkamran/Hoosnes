@@ -1,11 +1,10 @@
-import { Event } from 'typescript.events';
+
 import CoreStoreDispatcher from './CoreStoreDispatcher';
 import {ReduceStore} from 'flux/utils';
-import {Log, Level} from 'typescript-logger/build/index';
 import CoreStoreActions, {Types} from './CoreStoreActions';
-class CoreStore extends Event {
+import Event from "typescript.events";
 
-    public log = Log.create('CoreStore');
+export class CoreStore extends Event {
 
     constructor() {
         super();
@@ -23,12 +22,12 @@ class CoreStore extends Event {
         switch (action.type) {
             case Types.REBUILD:
             default:
-                this.log.info('handleAction', action);
+                console.log('handleAction', action);
         }
     }
 
     public register() {
-        this.log.info('register', 'ready');
+        console.log('register', 'ready');
         CoreStoreDispatcher.register(coreStore.handleAction.bind(coreStore));
     }
 
