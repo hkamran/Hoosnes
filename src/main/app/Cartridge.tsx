@@ -1,19 +1,39 @@
 import {Objects} from "./util/Objects";
 
 
-export class SMS {
+let SMS_HEADER_SIZE : number  = 512;
+let HEADER_SIZE_NON_ZERO : number = 3;
 
-    // SMC ROM files may have an additional 512-byte SMC header at the beginning:
-    //   offset  size in bytes    contents
-    //  ----------------------------------------------------------------------------
-    //   0       2                ROM dump size, in units of 8kB (little-endian).
-    //   2       1                Binary flags for the ROM layout and save-RAM size.
-    //   3       509              All zero.
+export class Sms {
 
-    public static HEADER_SIZE : number = 512;
-    public static HEADER_SIZE_NON_ZERO : number = 3;
-    public static HEADER_FORMAT : string = "@HB";
+    public size : number;
+    public flags : number;
 
+    public static parse(rom : number[]) {
+        let hasSms : boolean = this.checkForSms(rom);
+        let sms : Sms = new Sms();
+        if (hasSms) {
+            sms.size = (rom[1] << 4) | rom[0];
+            sms.flags = rom[2];
+            return sms;
+        } else {
+            sms.size = 0;
+            sms.flags = 0;
+        }
+        return sms;
+    }
+
+    private static checkForSms(rom: number[]) : boolean {
+        let size : number = rom.length;
+        let remainder = size % 1024;
+        if (remainder == 0) {
+            return false;
+        }
+        if (remainder == 512) {
+            return true;
+        }
+        throw new Error("Error is malformed!");
+    }
 }
 
 export enum CartridgeLayout {
@@ -31,6 +51,7 @@ let SNES_OFFSET_LOROM : number = 0x7fc0;
 let SNES_OFFSET_HIROM : number = 0xffc0;
 let SNES_OFFSET_SIZE : number = 21;
 
+
 export class Cartridge {
 
     public rom : number[];
@@ -38,37 +59,41 @@ export class Cartridge {
     public layout : CartridgeLayout;
     public type : CartridgeType;
     public offset: number;
+    public size : string; // kb
+    public sms : Sms;
 
     constructor(bytes : number[]) {
         Objects.requireNonNull(bytes, "Rom cannot be empty!");
 
         this.rom = bytes;
-        this.layout = this.getLayoutType(this.rom);
-        this.offset = this.getHeaderOffset(this.layout);
+        this.size = (bytes.length / 1024) + " kb";
+        this.sms = Sms.parse(this.rom);
+        this.layout = this.getLayoutType(this.rom, this.sms);
+        this.offset = this.getHeaderOffset(this.layout, this.sms);
         this.name = this.getName(this.offset);
         this.type = this.getType(this.rom, this.offset);
     }
 
-    private getLayoutType(bytes : number[]) : CartridgeLayout {
+    private getLayoutType(bytes : number[], sms : Sms) : CartridgeLayout {
         let value : number;
         let layout : CartridgeLayout;
 
-        value = bytes[SNES_OFFSET_LOROM + SNES_OFFSET_SIZE];
+        value = bytes[SNES_OFFSET_LOROM + SNES_OFFSET_SIZE + (sms.size * SMS_HEADER_SIZE)];
         layout = CartridgeLayout[value as unknown as keyof typeof CartridgeLayout];
         if (layout == null) {
-            value = bytes[SNES_OFFSET_HIROM + SNES_OFFSET_SIZE];
+            value = bytes[SNES_OFFSET_HIROM + SNES_OFFSET_SIZE + (sms.size * SMS_HEADER_SIZE)];
             layout = CartridgeLayout[value as unknown as keyof typeof CartridgeLayout];
         }
         Objects.requireNonNull(layout, "Unable to parse layout type from rom");
         return layout;
     }
 
-    private getHeaderOffset(layout : CartridgeLayout) : number {
+    private getHeaderOffset(layout: CartridgeLayout, sms: Sms) : number {
         if (CartridgeLayout[CartridgeLayout.HIROM] === layout.toString()) {
-            return SNES_OFFSET_HIROM;
+            return SNES_OFFSET_HIROM + (sms.size * SMS_HEADER_SIZE);
         }
         if (CartridgeLayout[CartridgeLayout.LOROM] === layout.toString()) {
-            return SNES_OFFSET_LOROM;
+            return SNES_OFFSET_LOROM + (sms.size * SMS_HEADER_SIZE);
         }
         throw Error("Unable to parse header offset from " + layout);
     }
