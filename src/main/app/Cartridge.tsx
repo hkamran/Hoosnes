@@ -1,10 +1,11 @@
 import {Objects} from "./util/Objects";
+import {Memory} from "./memory/Memory";
 
 
 let SMS_HEADER_SIZE : number  = 512;
 let HEADER_SIZE_NON_ZERO : number = 3;
 
-export class Sms {
+export class Sms extends Memory {
 
     public size : number;
     public flags : number;
@@ -34,6 +35,13 @@ export class Sms {
         }
         throw new Error("Error is malformed!");
     }
+
+    readByte(bank: number, offset: number): number {
+        return 0;
+    }
+
+    writeByte(bank: number, offset: number, byte: number): void {
+    }
 }
 
 export enum CartridgeLayout {
@@ -50,9 +58,9 @@ export enum CartridgeType {
 let SNES_OFFSET_LOROM : number = 0x7fc0;
 let SNES_OFFSET_HIROM : number = 0xffc0;
 let SNES_OFFSET_SIZE : number = 21;
+let SNES_OFFSET_SRAM : number = 18;
 
-
-export class Cartridge {
+export class Cartridge extends Memory {
 
     public rom : number[];
     public name : string;
@@ -63,6 +71,7 @@ export class Cartridge {
     public sms : Sms;
 
     constructor(bytes : number[]) {
+        super();
         Objects.requireNonNull(bytes, "Rom cannot be empty!");
 
         this.rom = bytes;
@@ -110,6 +119,13 @@ export class Cartridge {
 
         Objects.requireNonNull(type, "Unable to parse cartridge type");
         return type;
+    }
+
+    readByte(bank: number, offset: number): number {
+        return 0;
+    }
+
+    writeByte(bank: number, offset: number, byte: number): void {
     }
 
 }

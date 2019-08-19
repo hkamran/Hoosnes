@@ -17,38 +17,76 @@ export class Stack {
         }
         return this.stack.pop();
     }
-
 }
+
 
 export abstract class Memory {
 
-    public readByte(address: number): number {
-        Objects.requireNonNull(address);
+    public abstract readByte(bank: number, offset: number): number;
 
-        if (address < 0) {
-            throw new Error("Invalid address read " + address.toString(16));
-        }
-        let bank = (address >> 16) & 0xFF;
-        let offset = address & 0xFFFF;
-
-        return this.read(bank, offset);
-    }
-
-    public writeByte(address: number, byte: number): void {
-        Objects.requireNonNull(address);
-        Objects.requireNonNull(byte);
-
-        if (address < 0 || address > 0xFFFFFF || byte > 0xFF) {
-            throw new Error("Invalid address read " + address.toString(16));
-        }
-        let bank = (address >> 16) & 0xFF;
-        let offset = address & 0xFFFF;
-
-        this.write(bank, offset, byte);
-    }
-
-    public abstract read(bank: number, offset: number): number;
-
-    public abstract write(bank: number, offset: number, byte: number): void;
+    public abstract writeByte(bank: number, offset: number, byte: number): void;
 }
+
+export class WorkMemory extends Memory {
+
+    public ram = new Array(0x1FFFFF);
+
+    readByte(bank: number, offset: number): number {
+        Objects.requireNonNull(bank);
+        Objects.requireNonNull(offset);
+
+        let address : number = bank << 8 || offset;
+        if (address < 0 || address > 0x1FFFFF) {
+            throw new Error("Invalid wram read " + address.toString(16));
+        }
+
+        return this.ram[address];
+    }
+
+    writeByte(bank: number, offset: number, byte: number): void {
+        Objects.requireNonNull(bank);
+        Objects.requireNonNull(offset);
+
+        let address : number = bank << 8 || offset;
+        if (address < 0 || address > 0x1FFFFF || bank < 0 || bank > 0xFF) {
+            throw new Error("Invalid wram write " + address.toString(16) + " " + byte.toString(16));
+        }
+
+        this.ram[address] = byte;
+    }
+}
+
+export class SaveRam extends Memory {
+
+    public ram : number[] = new Array(0x40000);
+
+    constructor(rom : number[]) {
+        super();
+    }
+
+    readByte(bank: number, offset: number): number {
+        return 0;
+    }
+
+    writeByte(bank: number, offset: number, byte: number): void {
+    }
+}
+
+export class HardwareMemory extends Memory {
+
+    readByte(bank: number, offset: number): number {
+        Objects.requireNonNull(bank);
+        Objects.requireNonNull(offset);
+
+        return 0;
+    }
+
+    writeByte(bank: number, offset: number, byte: number): void {
+        Objects.requireNonNull(bank);
+        Objects.requireNonNull(offset);
+
+    }
+}
+
+
 
