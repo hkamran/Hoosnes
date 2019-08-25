@@ -125,4 +125,11 @@ export class HiRomMemory extends Memory {
         }
     }
 
+    readByte(bank: number, offset: number): number {
+        return 0;
+    }
+
+    writeByte(bank: number, offset: number, byte: number): void {
+    }
+
 }

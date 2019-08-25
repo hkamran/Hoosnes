@@ -184,10 +184,11 @@ export class ASL extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
+        let mode: Mode = context.cpu.registers.e.getMode();
         let a: number = this.getOperand(context);
-        let c: number = (a >> context.cpu.mode.size) & 1;
+        let c: number = (a >> mode.size) & 1;
 
-        a = (a << 1) % context.cpu.mode.size;
+        a = (a << 1) % mode.size;
         let output: OpCalculation = new OpCalculation([c, a], c);
 
         this.setFlagN(context, output);

@@ -43,6 +43,9 @@ export class Register {
 export class StatusRegister extends Register {
 
 
+    public getB() : number {
+        return this.getX();
+    }
 
     // Carry
     public getC() : number {
@@ -85,6 +88,10 @@ export class StatusRegister extends Register {
     }
 
     // Setting
+
+    public setB(value: number): void {
+        this.setX(value);
+    }
 
     // Carry
     public setC(value : number) : void {
@@ -137,6 +144,23 @@ export class StatusRegister extends Register {
 
 }
 
+
+export class EmulationRegister extends Register {
+    
+    public set(value: number) {
+        if (value == null || (value != 0 && value != 1)) {
+            throw new Error("Invalid value set!");
+        }
+        if (value == 1) {
+            this.mode = Modes.bit16;
+        } else if (value == 0) {
+            this.mode = Modes.bit8;
+        }
+    }
+
+}
+
+
 export class Registers {
 
     public a : Register = new Register("Accumulator", Modes.bit16);                           // 8/16
@@ -148,6 +172,7 @@ export class Registers {
     public d : Register = new Register("Direct Page", Modes.bit16);                       // 16
     public db : Register = new Register("Data Bank ", Modes.bit8);                            // 8
     public pb : Register = new Register("Program Counter Bank", Modes.bit8);                  // 8
+    public e: Register = new EmulationRegister("Emulation Mode", Modes.bit16);
 
     public setMode(mode : Mode) {
         this.a.setMode(mode);

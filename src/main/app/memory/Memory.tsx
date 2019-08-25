@@ -1,5 +1,5 @@
 import {Objects} from "../util/Objects";
-import {CartridgeLayout} from "../Cartridge";
+import {CartridgeMap} from "../Cartridge";
 
 export class Stack {
 
@@ -31,7 +31,7 @@ export class WorkMemory extends Memory {
 
     public ram = new Array(0x1FFFFF);
 
-    readByte(bank: number, offset: number): number {
+    public readByte(bank: number, offset: number): number {
         Objects.requireNonNull(bank);
         Objects.requireNonNull(offset);
 
@@ -43,7 +43,7 @@ export class WorkMemory extends Memory {
         return this.ram[address];
     }
 
-    writeByte(bank: number, offset: number, byte: number): void {
+    public writeByte(bank: number, offset: number, byte: number): void {
         Objects.requireNonNull(bank);
         Objects.requireNonNull(offset);
 
@@ -64,24 +64,24 @@ export class SaveRam extends Memory {
         super();
     }
 
-    readByte(bank: number, offset: number): number {
+    public readByte(bank: number, offset: number): number {
         return 0;
     }
 
-    writeByte(bank: number, offset: number, byte: number): void {
+    public writeByte(bank: number, offset: number, byte: number): void {
     }
 }
 
 export class HardwareMemory extends Memory {
 
-    readByte(bank: number, offset: number): number {
+    public readByte(bank: number, offset: number): number {
         Objects.requireNonNull(bank);
         Objects.requireNonNull(offset);
 
         return 0;
     }
 
-    writeByte(bank: number, offset: number, byte: number): void {
+    public writeByte(bank: number, offset: number, byte: number): void {
         Objects.requireNonNull(bank);
         Objects.requireNonNull(offset);
 
