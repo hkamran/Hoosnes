@@ -10,7 +10,7 @@ export class ByteReader {
     public static readWord(data: number[], address: number): number {
         let low = this.readByte(data, address);
         let high = this.readByte(data, address + 1);
-        return high | low;
+        return (high << 8) | low;
     }
 
 }

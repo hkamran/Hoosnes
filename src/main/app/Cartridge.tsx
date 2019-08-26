@@ -1,8 +1,8 @@
 import {Objects} from "./util/Objects";
-import {Memory} from "./memory/Memory";
+import {Memory} from "./Memory";
 import {ByteReader} from "./util/ByteReader";
 
-export class InterruptAddress {
+export class InterruptAddresses {
     public COP: number;
     public BRK: number;
     public ABORT: number;
@@ -13,8 +13,8 @@ export class InterruptAddress {
 
 export class InterruptVectors {
 
-    public emulation: InterruptAddress = new InterruptAddress();
-    public native: InterruptAddress = new InterruptAddress();
+    public emulation: InterruptAddresses = new InterruptAddresses();
+    public native: InterruptAddresses = new InterruptAddresses();
 
     constructor(rom: number[], offset: number) {
         this.native.COP = ByteReader.readWord(rom, offset + 0x24);
@@ -25,10 +25,10 @@ export class InterruptVectors {
         this.native.IRQ = ByteReader.readWord(rom, offset + 0x2E);
 
         this.emulation.COP = ByteReader.readWord(rom, offset + 0x34);
-        this.emulation.BRK = ByteReader.readWord(rom, offset + 0x38);
-        this.emulation.ABORT = ByteReader.readWord(rom, offset + 0x3A);
-        this.emulation.NMI = ByteReader.readWord(rom, offset + 0x3C);
-        this.emulation.RESET = ByteReader.readWord(rom, offset + 0x3E);
+        this.emulation.ABORT = ByteReader.readWord(rom, offset + 0x38);
+        this.emulation.NMI = ByteReader.readWord(rom, offset + 0x3A);
+        this.emulation.RESET = ByteReader.readWord(rom, offset + 0x3C);
+        this.emulation.BRK = ByteReader.readWord(rom, offset + 0x3E);
         this.emulation.IRQ = ByteReader.readWord(rom, offset + 0x3E);
     }
 }
@@ -47,7 +47,7 @@ export class SramMemory {
 
 const SMC_HEADER_SIZE: number = 512;
 
-export class SmcHeader extends Memory {
+export class SmcHeader {
 
     public size: number;
     public flags: number;
@@ -111,7 +111,7 @@ const SNES_OFFSET_VERSION: number = 0x1b; // xFDB
 const SNES_OFFSET_COMPLEMENT_CHECK: number = 0x1c; // xFDC
 const SNES_OFFSET_CHECKSUM: number = 0x1e; // xFDE
 
-export class Cartridge extends Memory {
+export class Cartridge {
 
     public rom: number[];
 
@@ -128,7 +128,6 @@ export class Cartridge extends Memory {
     public interrupts: InterruptVectors;
 
     constructor(bytes: number[]) {
-        super();
         Objects.requireNonNull(bytes, "Rom cannot be empty!");
 
         this.rom = bytes;

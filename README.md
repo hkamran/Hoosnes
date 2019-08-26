@@ -2,6 +2,7 @@
 
 # Documentation
 
+* http://www.mkelly.me/sno/docs/milestone1/design_doc.pdf
 * https://en.wikibooks.org/wiki/Super_NES_Programming/SNES_memory_map
 * http://assassin17.brinkster.net/thegun.htm
 * http://6502.org/tutorials/65c816opcodes.html
