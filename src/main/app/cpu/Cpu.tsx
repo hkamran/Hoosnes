@@ -56,8 +56,7 @@ export class Cpu {
         this.registers.sp.set(0x100);
         this.registers.e.set(0x1);
 
-
-        this.registers.pc.set(0x0);
+        this.registers.pc.set(this.console.cartridge.interrupts.emulation.RESET);
     }
 
     public load(cartridge: Cartridge) {

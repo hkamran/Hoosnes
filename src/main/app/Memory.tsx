@@ -56,6 +56,13 @@ export class WorkRam {
     }
 }
 
+class NotSupported extends Error {
+    constructor(message? : any) {
+        super(`Not supported! ${message}`);
+        this.name = 'NotSupported';
+    }
+}
+
 export class Memory {
 
     public log : Logger = LoggerManager.create('Memory');
@@ -84,19 +91,42 @@ export class Memory {
             if (NumberUtil.inRange(offset, 0x0000, 0x1FFF)) {
                 return this.wram.readByte(offset);
             } else if (NumberUtil.inRange(offset, 0x2000, 0x20FF)) {
-
+                throw new NotSupported();
+            } else if (NumberUtil.inRange(offset, 0x2100, 0x21FF)) {
+                // B-Bus 2100h-21FFh
+                // PPU1, APU, hardware registers
+                if (NumberUtil.inRange(offset, 0x2100, 0x213F)) {
+                    return this.console.ppu.readByte(offset);
+                } else if (NumberUtil.inRange(offset, 0x2140, 0x217F)) {
+                    // APU
+                } else if (NumberUtil.inRange(offset, 0x2180, 0x2183)) {
+                    // WRAM
+                } else {
+                    throw new NotSupported(offset);
+                }
             } else if (NumberUtil.inRange(offset, 0x2200, 0x2FFF)) {
-
+                throw new NotSupported();
             } else if (NumberUtil.inRange(offset, 0x3000, 0x3FFF)) {
-
-            } else if (NumberUtil.inRange(offset, 0x4000, 0x41FF)) {
-
+                // DSP, SuperFX, hardware registers
+            } else if (NumberUtil.inRange(offset, 0x4000, 0x40FF)) {
+                // Old Style Joypad Registers
+                if (NumberUtil.inRange(offset, 0x4000, 0x4015)) {
+                    throw new NotSupported(offset);
+                } else if (NumberUtil.inRange(offset, 0x4016, 0x4016)) {
+                    // Joy 2
+                } else if (NumberUtil.inRange(offset, 0x4017, 0x4017)) {
+                    // Joy 1
+                } else {
+                    throw new NotSupported(offset);
+                }
+            } else if (NumberUtil.inRange(offset, 0x4100, 0x41FF)) {
+                throw new NotSupported();
             } else if (NumberUtil.inRange(offset, 0x4200, 0x44FF)) {
-
+                // DMA, PPU2, hardware registers
             } else if (NumberUtil.inRange(offset, 0x4500, 0x5FFF)) {
-
+                throw new NotSupported();
             } else if (NumberUtil.inRange(offset, 0x6000, 0x7FFF)) {
-
+                throw new NotSupported();
             } else if (NumberUtil.inRange(offset, 0x8000, 0xFFFF)) {
                 // Hi-Rom more BANKS!
                 return this.console.cartridge.readByte(offset, bank);

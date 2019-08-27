@@ -7,4 +7,7 @@ export class Ppu {
     }
 
 
+    readByte(offset: number) {
+        return 0;
+    }
 }
