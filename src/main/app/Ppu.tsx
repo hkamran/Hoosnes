@@ -7,7 +7,7 @@ export class Ppu {
     }
 
 
-    readByte(offset: number) {
+    public readByte(offset: number) {
         return 0;
     }
 }

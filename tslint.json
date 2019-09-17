@@ -3,6 +3,7 @@
   "rules": {
 	"no-consecutive-blank-lines": false,
     "forin": false,
+    "object-literal-sort-keys": false,
     "max-classes-per-file": [false, 1],
     "prefer-for-of": false,
     "ordered-imports": false,
