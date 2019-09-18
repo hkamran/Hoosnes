@@ -1,60 +1,9 @@
 import {Objects} from "./util/Objects";
-import {Cartridge, CartridgeMap} from "./Cartridge";
-import {Cpu} from "./cpu/Cpu";
-import {Ppu} from "./Ppu";
 import Console from "./Console";
 import {NumberUtil} from "./util/NumberUtil";
 import {Logger, LoggerManager} from "typescript-logger";
-
-export class Stack {
-
-    public stack : number[] = [];
-
-    public pushByte(value : number) {
-        let byte = value & 0xFF;
-        value = value >> 8;
-        this.stack.push(byte);
-    }
-
-    public popByte() : number {
-        if (this.stack.length <= 0) {
-            return 0;
-        }
-        return this.stack.pop();
-    }
-}
-
-export class WorkRam {
-    // The SNES includes 128Kbytes of Work RAM, which can be accessed in several ways:
-
-    //    The whole 128K are at 7E0000h-7FFFFFh.
-    // The first 8K are also mirrored to xx0000h-xx1FFFh (xx=00h..3Fh and 80h..BFh)
-    // Moreover (mainly for DMA purposes) it can be accessed via Port 218xh.
-
-    public low: number[] = [];
-    public high: number[] = [];
-
-    public readByte(address: number, bank?: number): number {
-        Objects.requireNonNull(address);
-        if (address > 0xFFFF || address < 0) {
-            throw new Error("Invalid read on work ram!");
-        }
-        if (bank == null) {
-            bank = (address >> 16) & 0xFF;
-        }
-        let offset: number = (address & 0xFFFF);
-        console.log(`Reading work ram ${bank.toString(16)}:${offset.toString(16)}`);
-
-        if (NumberUtil.inRange(bank, 0x7F, 0x7F)) {
-            return this.high[offset];
-        } else {
-            return this.low[offset];
-        }
-    }
-
-    public writeByte(address: number, val: number, bank?: number): void {
-    }
-}
+import {Stack} from "./memory/Stack";
+import {WorkRam} from "./memory/Wram";
 
 class NotSupported extends Error {
     constructor(message? : any) {
@@ -63,9 +12,9 @@ class NotSupported extends Error {
     }
 }
 
-export class Memory {
+export class Bus {
 
-    public log : Logger = LoggerManager.create('Memory');
+    public log : Logger = LoggerManager.create('Bus');
 
     public stack: Stack;
     public console: Console;

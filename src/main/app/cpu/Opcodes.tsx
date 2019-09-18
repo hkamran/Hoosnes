@@ -1,6 +1,6 @@
 
 import {Cpu} from './Cpu';
-import {Memory} from "../Memory";
+import {Bus} from "../Bus";
 import {Mode} from "../Modes";
 import {Address, Addressing} from "./Addressing";
 import {Objects} from "../util/Objects";

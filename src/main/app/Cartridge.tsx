@@ -1,5 +1,5 @@
 import {Objects} from "./util/Objects";
-import {Memory} from "./Memory";
+import {Bus} from "./Bus";
 import {ByteReader} from "./util/ByteReader";
 
 export class InterruptAddresses {

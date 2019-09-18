@@ -8,13 +8,9 @@ import {Screen} from "./Screen";
 declare let window : any;
 window.snes = new Console();
 
-window.loader = function(e) {
-    console.log(e);
-};
-
 ReactDOM.render(
     <div style={{display: 'flex', flexDirection: 'column'}}>
-        <Screen />
+        <Screen snes={window.snes}/>
         <Loader snes={window.snes} />
     </div>,
     document.getElementById('main'),

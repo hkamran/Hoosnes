@@ -1,8 +1,8 @@
 import {Cpu} from "./cpu/Cpu";
 import {Cartridge} from "./Cartridge";
 import {Logger, LoggerManager} from 'typescript-logger';
-import {Memory} from "./Memory";
-import {Ppu} from "./Ppu";
+import {Bus} from "./Bus";
+import {Ppu} from "./ppu/Ppu";
 
 export default class Console {
 
@@ -10,13 +10,13 @@ export default class Console {
 
     public cpu : Cpu;
     public ppu: Ppu;
-    public memory: Memory;
+    public memory: Bus;
     public cartridge : Cartridge;
 
     constructor() {
         this.cpu = new Cpu(this);
         this.ppu = new Ppu(this);
-        this.memory = new Memory(this);
+        this.memory = new Bus(this);
     }
 
     public load(romBytes : number[]) : void {

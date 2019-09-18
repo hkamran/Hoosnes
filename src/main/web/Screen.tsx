@@ -82,7 +82,6 @@ export class Screen extends React.Component<any, any> {
     }
 
     public render() {
-        console.log();
         return (
             <div style={screenStyle}>
                 <div>

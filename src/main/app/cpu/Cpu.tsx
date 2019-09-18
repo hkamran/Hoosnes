@@ -3,7 +3,7 @@ import {Registers} from "./Registers";
 import {Opcode, Opcodes, OpContext} from "./Opcodes";
 import {InterruptHandler} from "./Interrupts";
 import {Cartridge} from "../Cartridge";
-import {Memory} from "../Memory";
+import {Bus} from "../Bus";
 import {Objects} from "../util/Objects";
 import {Logger, LoggerManager} from "typescript-logger";
 import Console from "../Console";
