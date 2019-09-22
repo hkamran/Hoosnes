@@ -2,6 +2,7 @@ import * as React from "react";
 import {CSSProperties} from "react";
 import {RefObject} from "react";
 import Stats from 'stats.js';
+import Console from "../../../app/Console";
 
 const screenStyle: CSSProperties = {
     padding: '0.5rem',
@@ -13,15 +14,31 @@ const screenStyle: CSSProperties = {
     alignSelf: "baseline",
 };
 
-export class Card extends React.Component<any, any> {
+const fieldSetStyle: CSSProperties = {
+    padding: "10px",
+    margin: "10px"
+};
 
-    constructor(props : any) {
+const legendSetStyle: CSSProperties = {
+    maxWidth: "100%",
+    border: "0"
+};
+
+interface ICardProps {
+    title: string;
+}
+
+
+export class Card extends React.Component<ICardProps, any> {
+
+    constructor(props : ICardProps) {
         super(props);
     }
 
     public render() {
         return (
             <div style={screenStyle}>
+                <div style={{marginBottom: "5px"}}>{this.props.title}</div>
                 {this.props.children}
             </div>
         );

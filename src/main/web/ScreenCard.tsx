@@ -84,7 +84,7 @@ export class ScreenCard extends React.Component<any, any> {
 
     public render() {
         return (
-            <Card>
+            <Card title="Screen">
                 <div>
                     <div>
                         <canvas ref={this.canvasRef}

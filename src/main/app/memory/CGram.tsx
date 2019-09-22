@@ -9,8 +9,11 @@ export class CGram {
 
     constructor() {
         for (let i = 0; i < this.length; i++) {
-            let value: number = 0x0000;
+            let red: number =  Math.floor(Math.random() * 31);
+            let green: number =  Math.floor(Math.random() * 31);
+            let blue: number =  Math.floor(Math.random() * 31);
 
+            let value: number = red << 10 | green << 5 | blue;
             this.data.push(value);
         }
     }
