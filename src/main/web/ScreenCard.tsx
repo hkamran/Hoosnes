@@ -2,6 +2,7 @@ import * as React from "react";
 import {CSSProperties} from "react";
 import {RefObject} from "react";
 import Stats from 'stats.js';
+import {Card} from "./core/layout/Card";
 
 const screenStyle: CSSProperties = {
     padding: '0.5rem',
@@ -15,7 +16,7 @@ const screenStyle: CSSProperties = {
 
 declare let window : any;
 
-export class Screen extends React.Component<any, any> {
+export class ScreenCard extends React.Component<any, any> {
 
     public state = {
         width: 256,
@@ -83,7 +84,7 @@ export class Screen extends React.Component<any, any> {
 
     public render() {
         return (
-            <div style={screenStyle}>
+            <Card>
                 <div>
                     <div>
                         <canvas ref={this.canvasRef}
@@ -98,13 +99,13 @@ export class Screen extends React.Component<any, any> {
                     </div>
                     <div>
                         <div ref={this.statsRef} />
+                        <div style={{paddingTop: '7px'}}>
+                            <button onClick={this.increaseZoom.bind(this)}>+</button>
+                            <button onClick={this.decreaseZoom.bind(this)}>-</button>
+                        </div>
                     </div>
                 </div>
-                <div style={{paddingTop: '7px'}}>
-                    <button onClick={this.increaseZoom.bind(this)}>+</button>
-                    <button onClick={this.decreaseZoom.bind(this)}>-</button>
-                </div>
-            </div>
+            </Card>
         );
     }
 

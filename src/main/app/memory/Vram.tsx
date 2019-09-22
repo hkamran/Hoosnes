@@ -1,7 +1,7 @@
 import {Objects} from "../util/Objects";
 import {NumberUtil} from "../util/NumberUtil";
 
-export class VideoRam {
+export class Vram {
 
     public readByte(address: number, bank?: number): number {
         return 0;
