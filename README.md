@@ -23,3 +23,4 @@
 * https://problemkaputt.de/fullsnes.htm#snesmemoryvramaccesstileandbgmap
 * https://megacatstudios.com/blogs/press/super-nintendo-graphic-guide
 * https://github.com/michielvoo/SNES/wiki/Background
+* https://megacatstudios.com/blogs/press/snes-sprite-engine-design-guidelines

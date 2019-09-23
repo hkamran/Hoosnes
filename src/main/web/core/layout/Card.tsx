@@ -12,16 +12,17 @@ const screenStyle: CSSProperties = {
     flexDirection: "column",
     display: "flex",
     alignSelf: "baseline",
+    border: "1px solid #53535387",
 };
 
 const fieldSetStyle: CSSProperties = {
     padding: "10px",
-    margin: "10px"
+    margin: "10px",
 };
 
 const legendSetStyle: CSSProperties = {
     maxWidth: "100%",
-    border: "0"
+    border: "0",
 };
 
 interface ICardProps {

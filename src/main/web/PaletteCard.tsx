@@ -15,7 +15,7 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
     public context: CanvasRenderingContext2D;
 
     public pixelSize: number = 10;
-    public borderSize: number = 2;
+    public borderSize: number = 1;
     public width: number = 16;
     public height: number = 16;
 
@@ -30,11 +30,14 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
     }
 
     public showPalette() {
-        let totalWidth = this.width * (this.pixelSize + this.borderSize);
-        let totalHeight = this.height * (this.pixelSize + this.borderSize);
+        let totalWidth = this.borderSize + (this.width * (this.pixelSize + this.borderSize));
+        let totalHeight = this.borderSize + (this.height * (this.pixelSize + this.borderSize));
 
         this.canvasRef.current.width = totalWidth;
         this.canvasRef.current.height = totalHeight;
+
+        this.context.fillStyle = "blue";
+        this.context.fillRect(0, 0, totalWidth, totalHeight);
 
         let colors: PaletteColor[] = this.props.snes.ppu.palette.getPalette(PaletteBppType.Eight, 0);
         let image: ImageData = window.context.createImageData(totalWidth, totalHeight);
@@ -42,8 +45,8 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
         for (let i = 0; i < colors.length; i++) {
             let color: PaletteColor = colors[i];
 
-            let yIndex: number = (Math.floor(i / this.width) * (totalWidth * (this.pixelSize + this.borderSize)));
-            let xIndex: number = Math.floor(i % this.height) * (this.pixelSize + this.borderSize);
+            let yIndex: number = (totalWidth * this.borderSize) + (Math.floor(i / this.width) * (totalWidth * (this.pixelSize + this.borderSize)));
+            let xIndex: number = this.borderSize + (Math.floor(i % this.height) * (this.pixelSize + this.borderSize));
 
             for (let yOffset = 0; yOffset < this.pixelSize; yOffset++) {
                 for (let xOffset = 0; xOffset < this.pixelSize; xOffset++) {
@@ -69,10 +72,8 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
                 <div>
                     <canvas ref={this.canvasRef}
                             style={{
-                                border: "1px solid #000",
-                                borderTop: "3px solid #000",
-                                borderLeft: "3px solid #000",
-                                borderRadius: "4px"
+                                border: "2px solid #000",
+                                borderRadius: "2px",
                             }}
                     />
                 </div>
