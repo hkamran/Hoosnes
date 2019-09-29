@@ -27,7 +27,7 @@ export class PaletteColor {
         let red: number = (data >> 10 & 0x1F) * 8;
         let green: number = (data >> 5 & 0x1F) * 8;
         let blue: number = (data >> 0 & 0x1F) * 8;
-        let opacity: number = (data >> 15 & 1) == 1 ? 0 : 100;
+        let opacity: number = (data >> 15 & 1) == 1 ? 0 : 255;
 
         return new PaletteColor(red, green, blue, opacity);
     }
@@ -36,7 +36,6 @@ export class PaletteColor {
 
 export class Palette {
 
-    public cache: Map<number, PaletteColor> = new Map();
     public cgram: CGram;
 
     constructor(cgram: CGram) {
@@ -67,15 +66,15 @@ export class Palette {
             throw new Error("Invalid palette " + startIndex + " " + endIndex);
         }
 
-        let slice: number[] = this.cgram.data.slice(startIndex, endIndex);
         let colors: PaletteColor[] = [];
-        for (let i = 0; i < slice.length; i++) {
-            let byte: number = slice[i];
-            let color: PaletteColor = this.cache.get(byte);
-            if (color == null) {
-                color = PaletteColor.parse(byte);
-                this.cache.set(byte, color);
-            }
+        let cramIndex: number = 0;
+        for (let i = startIndex; i < endIndex; i++) {
+            let lowHalf: number = this.cgram.readByte(cramIndex + 0) << 0;
+            let highHalf: number = this.cgram.readByte(cramIndex + 1) << 8;
+
+            let byte: number = lowHalf | highHalf;
+            let color: PaletteColor = PaletteColor.parse(byte);
+            cramIndex += 2;
             colors.push(color);
         }
         return colors;

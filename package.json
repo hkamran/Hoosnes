@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "http-server ./target -d -i -o",
+    "start": "http-server ./target -o",
     "build": "gulp build",
     "install": "npm install"
   },

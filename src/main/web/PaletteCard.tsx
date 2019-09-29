@@ -36,11 +36,15 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
         this.canvasRef.current.width = totalWidth;
         this.canvasRef.current.height = totalHeight;
 
-        this.context.fillStyle = "blue";
-        this.context.fillRect(0, 0, totalWidth, totalHeight);
-
         let colors: PaletteColor[] = this.props.snes.ppu.palette.getPalette(PaletteBppType.Eight, 0);
         let image: ImageData = window.context.createImageData(totalWidth, totalHeight);
+
+        for (let index = 0; index < image.data.length; index += 4) {
+            image.data[index + 0] = 0;
+            image.data[index + 1] = 0;
+            image.data[index + 2] = 0;
+            image.data[index + 3] = 255;
+        }
 
         for (let i = 0; i < colors.length; i++) {
             let color: PaletteColor = colors[i];
@@ -58,7 +62,7 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
                     image.data[index + 0] = color.red; // Red
                     image.data[index + 1] = color.green; // Green
                     image.data[index + 2] = color.blue; // Blue
-                    image.data[index + 3] = 255; // Blue
+                    image.data[index + 3] = color.opacity; // Opacity
                 }
             }
         }

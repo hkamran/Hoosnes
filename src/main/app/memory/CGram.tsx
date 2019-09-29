@@ -4,34 +4,46 @@
  */
 export class CGram {
 
-    public length: number = 256;
     public data: number[] = [];
 
     constructor() {
-        for (let i = 0; i < this.length; i++) {
+        this.initialize();
+    }
+
+    private initialize() {
+        let colors: number = 256;
+
+        let index = 0;
+        for (let i = 0; i < colors; i++) {
             let red: number =  Math.floor(Math.random() * 31);
             let green: number =  Math.floor(Math.random() * 31);
             let blue: number =  Math.floor(Math.random() * 31);
 
-            let value: number = red << 10 | green << 5 | blue;
-            this.data.push(value);
+            let value: number = 0 << 15 | red << 10 | green << 5 | blue;
+
+            let lowHalf = (value >> 0) & 0xFF;
+            let highHalf = (value >> 8) & 0xFF;
+
+            this.writeByte(index + 0, lowHalf);
+            this.writeByte(index + 1, highHalf);
+            index += 2;
         }
     }
 
     public readByte(address: number, bank?: number): number {
-        if (address == null || address < 0 || address > 256) {
-            throw new Error("Invalid read at " + address.toString(16));
+        if (address == null || address < 0 || address > 512) {
+            throw new Error("Invalid read at 0x" + address.toString(16));
         }
         return this.data[address];
     }
 
     public writeByte(address: number, val: number, bank?: number): void {
-        if (address == null || address < 0 || address > 256) {
-            throw new Error("Invalid write at " + address.toString(16));
+        if (address == null || address < 0 || address > 512) {
+            throw new Error("Invalid write at 0x" + address.toString(16));
         }
 
-        if (val == null || val < 0 || val > 0xFFFF) {
-            throw new Error("Invalid write at " + address.toString(16) + " with value " + val);
+        if (val == null || val < 0 || val > 0xFF) {
+            throw new Error("Invalid write at 0x" + address.toString(16) + " with value " + val);
         }
         this.data[address] = val;
     }
