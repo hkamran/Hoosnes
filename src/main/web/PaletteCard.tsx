@@ -76,7 +76,6 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
                 <div>
                     <canvas ref={this.canvasRef}
                             style={{
-                                border: "2px solid #000",
                                 borderRadius: "2px",
                             }}
                     />

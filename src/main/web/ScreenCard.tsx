@@ -84,7 +84,7 @@ export class ScreenCard extends React.Component<any, any> {
                                 style={{
                                     width: this.state.width * this.state.zoom + "px",
                                     borderRadius: "4px",
-                                    border: "2px solid #000",
+                                    border: "1px solid #000",
                                 }}
                                 />
                     </div>
