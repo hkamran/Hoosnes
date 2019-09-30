@@ -4,9 +4,12 @@
  */
 export class CGram {
 
-    public data: number[] = [];
+    public static size: number = 512;
+    public data: number[];
 
     constructor() {
+        this.data = new Array(CGram.size);
+        this.data.fill(0, 0, CGram.size);
         this.initialize();
     }
 

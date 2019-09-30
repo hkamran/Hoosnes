@@ -26,10 +26,10 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
 
     public componentDidMount(): void {
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
-        this.showPalette();
+        this._render();
     }
 
-    public showPalette() {
+    public _render() {
         let totalWidth = this.borderSize + (this.width * (this.pixelSize + this.borderSize));
         let totalHeight = this.borderSize + (this.height * (this.pixelSize + this.borderSize));
 
@@ -83,7 +83,7 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
                 </div>
                 <div>
                     <div style={{paddingTop: '7px'}}>
-                        <button onClick={this.showPalette.bind(this)}>Render</button>
+                        <button onClick={this._render.bind(this)}>Render</button>
                     </div>
                 </div>
             </Card>

@@ -6,6 +6,7 @@ import {Loader} from "./Loader";
 import {ScreenCard} from "./ScreenCard";
 import {PaletteCard} from "./PaletteCard";
 import {CartridgeCard} from "./CartridgeCard";
+import {SpriteCard} from "./SpriteCards";
 
 declare let window : any;
 window.snes = new Console();
@@ -14,6 +15,7 @@ ReactDOM.render(
     <div style={{display: 'flex', flexDirection: 'row'}}>
         <ScreenCard snes={window.snes}/>
         <PaletteCard snes={window.snes} />
+        <SpriteCard snes={window.snes} />
         <CartridgeCard snes={window.snes} />
     </div>,
     document.getElementById('main'),

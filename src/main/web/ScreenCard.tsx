@@ -4,15 +4,6 @@ import {RefObject} from "react";
 import Stats from 'stats.js';
 import {Card} from "./core/layout/Card";
 
-const screenStyle: CSSProperties = {
-    padding: '0.5rem',
-    boxShadow: '0 0 10px rgba(0, 0, 0, 0.3)',
-    margin: '20px',
-    borderRadius: '4px',
-    flexDirection: "column",
-    display: "flex",
-    alignSelf: "baseline",
-};
 
 declare let window : any;
 
