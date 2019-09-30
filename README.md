@@ -17,6 +17,7 @@
 
 ### PPU
 
+* https://snescentral.com/homebrew.php
 * https://problemkaputt.de/fullsnes.htm
 * http://black-ship.net/~tukuyomi/snesemu/misc/techdocs/snesdoc.html
 * https://github.com/Emu-Docs/Emu-Docs/tree/master/Super%20Nintendo%20Entertainment%20System
