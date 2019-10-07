@@ -114,8 +114,8 @@ export class Sprites {
 
     public static size: number = 128;
 
-    oam: Oam;
-    sprites: Sprite[] = [];
+    public oam: Oam;
+    public sprites: Sprite[] = [];
 
     constructor(oam: Oam) {
         this.oam = oam;
@@ -129,11 +129,11 @@ export class Sprites {
         }
     }
 
-    getSprites(): Sprite[] {
+    public getSprites(): Sprite[] {
         return this.sprites;
     }
 
-    getSprite(index: number) {
+    public getSprite(index: number) {
         if (index < 0 || index > Sprites.size) {
             return null;
         }

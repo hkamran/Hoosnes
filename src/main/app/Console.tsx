@@ -10,13 +10,13 @@ export default class Console {
 
     public cpu : Cpu;
     public ppu: Ppu;
-    public memory: Bus;
+    public bus: Bus;
     public cartridge : Cartridge;
 
     constructor() {
         this.cpu = new Cpu(this);
         this.ppu = new Ppu(this);
-        this.memory = new Bus(this);
+        this.bus = new Bus(this);
     }
 
     public load(romBytes : number[]) : void {

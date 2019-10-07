@@ -1,5 +1,5 @@
 // The second data area, the OAM, is used to store properties of the sprites. It includes information about position,
-// size, priority, etc. There can be 128 objects maximum, and the memory is 544 bytes: the first 512 bytes have four
+// size, priority, etc. There can be 128 objects maximum, and the bus is 544 bytes: the first 512 bytes have four
 // bytes of information per sprite, and the last 32 bytes have two more bits of information.  Two or more sprites can
 // share the same set of tiles.
 
@@ -14,18 +14,6 @@ export class Oam {
     constructor() {
         this.data = new Array(Oam.size);
         this.data.fill(0, 0, Oam.size);
-
-        this.data[0] = 0x4c;
-        this.data[1] = 0x4F;
-        this.data[2] = 0x02;
-        this.data[3] = 0x21;
-        this.data[4] = 0x4c;
-        this.data[5] = 0x47;
-        this.data[6] = 0x12;
-        this.data[7] = 0x20;
-        this.data[512] = 0x20;
-        this.data[513] = 0x28;
-        this.data[514] = 0x02;
     }
 
     public readByte(address: number, bank?: number): number {

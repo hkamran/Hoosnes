@@ -25,3 +25,4 @@
 * https://megacatstudios.com/blogs/press/super-nintendo-graphic-guide
 * https://github.com/michielvoo/SNES/wiki/Background
 * https://megacatstudios.com/blogs/press/snes-sprite-engine-design-guidelines
+* http://black-ship.net/~tukuyomi/snesemu/misc/techdocs/snesdoc.html

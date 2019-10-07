@@ -487,7 +487,7 @@ class DEC extends Opcode {
         this.setFlagN(context, output);
 
         // TODO
-        // context.cpu.memory.writeBytes(0x00, context.opaddr, result & context.mode.mask, 2);
+        // context.cpu.bus.writeBytes(0x00, context.opaddr, result & context.mode.mask, 2);
     }
 
 }
@@ -566,7 +566,7 @@ class INC extends Opcode {
         this.setFlagN(context, output);
 
         // TODO
-        // context.cpu.memory.writeBytes(0x00, context.opaddr, result & context.mode.mask, 2);
+        // context.cpu.bus.writeBytes(0x00, context.opaddr, result & context.mode.mask, 2);
     }
 
 }
@@ -791,7 +791,7 @@ class TRB extends Opcode {
 
         this.setFlagZ(context, output);
 
-        // TODO write to memory
+        // TODO write to bus
     }
 
 }
@@ -819,7 +819,7 @@ class TSB extends Opcode {
         let result = operand & a;
         let output: OpCalculation = new OpCalculation([operand, a], result);
 
-        // TODO write to memory
+        // TODO write to bus
     }
 
 }
@@ -848,9 +848,9 @@ class TSX extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let from: number = context.cpu.console.memory.stack.popByte();
+        let from: number = context.cpu.console.bus.stack.popByte();
         if (context.cpu.registers.p.getX() == 0) {
-            from = (from << 8) || context.cpu.console.memory.stack.popByte();
+            from = (from << 8) || context.cpu.console.bus.stack.popByte();
         }
         let to: number = context.cpu.registers.x.get();
 
@@ -889,9 +889,9 @@ class STZ extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        context.cpu.console.memory.writeByte(context.opaddr, 0x00);
+        context.cpu.console.bus.writeByte(context.opaddr, 0x00);
         if (context.cpu.registers.p.getM() == 0) {
-            context.cpu.console.memory.writeByte(context.opaddr, 0x00);
+            context.cpu.console.bus.writeByte(context.opaddr, 0x00);
         }
 
     }
@@ -1070,7 +1070,7 @@ class STA extends Opcode {
         console.log(this.name);
 
         let result : number = context.cpu.registers.a.get();
-        context.cpu.console.memory.writeByte(context.opaddr, result);
+        context.cpu.console.bus.writeByte(context.opaddr, result);
     }
 }
 
@@ -1098,7 +1098,7 @@ class STY extends Opcode {
         console.log(this.name);
 
         let result : number = context.cpu.registers.y.get();
-        context.cpu.console.memory.writeByte(context.opaddr, result);
+        context.cpu.console.bus.writeByte(context.opaddr, result);
     }
 }
 
@@ -1109,7 +1109,7 @@ class PHD extends Opcode {
         console.log(this.name);
 
         let result : number = context.cpu.registers.d.get();
-        context.cpu.console.memory.stack.pushByte(result);
+        context.cpu.console.bus.stack.pushByte(result);
     }
 
 }
@@ -1121,7 +1121,7 @@ class PHK extends Opcode {
         console.log(this.name);
 
         let result : number = context.cpu.registers.pb.get();
-        context.cpu.console.memory.stack.pushByte(result);
+        context.cpu.console.bus.stack.pushByte(result);
     }
 
 }
@@ -1133,7 +1133,7 @@ class PHP extends Opcode {
         console.log(this.name);
 
         let result : number = context.cpu.registers.p.get();
-        context.cpu.console.memory.stack.pushByte(result);
+        context.cpu.console.bus.stack.pushByte(result);
     }
 
 }
@@ -1144,7 +1144,7 @@ class PHX extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let result : number = context.cpu.console.memory.stack.popByte();
+        let result : number = context.cpu.console.bus.stack.popByte();
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
@@ -1161,7 +1161,7 @@ class PHY extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let result : number = context.cpu.console.memory.stack.popByte();
+        let result : number = context.cpu.console.bus.stack.popByte();
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
@@ -1178,7 +1178,7 @@ class PLA extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let result : number = context.cpu.console.memory.stack.popByte();
+        let result : number = context.cpu.console.bus.stack.popByte();
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
@@ -1195,7 +1195,7 @@ class PLB extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let result : number = context.cpu.console.memory.stack.popByte();
+        let result : number = context.cpu.console.bus.stack.popByte();
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
@@ -1256,7 +1256,7 @@ class STX extends Opcode {
         console.log(this.name);
 
         let result : number = context.cpu.registers.x.get();
-        context.cpu.console.memory.writeByte(context.opaddr, result);
+        context.cpu.console.bus.writeByte(context.opaddr, result);
 
         // TODO
     }
@@ -1287,10 +1287,10 @@ class RTL extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let lowByte : number = context.cpu.console.memory.stack.popByte();
-        let highByte : number = context.cpu.console.memory.stack.popByte();
+        let lowByte : number = context.cpu.console.bus.stack.popByte();
+        let highByte : number = context.cpu.console.bus.stack.popByte();
 
-        let pb : number = context.cpu.console.memory.stack.popByte();
+        let pb : number = context.cpu.console.bus.stack.popByte();
         let result : number = lowByte << 8 | highByte;
 
         context.cpu.registers.pc.set(result);
@@ -1305,8 +1305,8 @@ class RTS extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let lowByte : number = context.cpu.console.memory.stack.popByte();
-        let highByte : number = context.cpu.console.memory.stack.popByte();
+        let lowByte : number = context.cpu.console.bus.stack.popByte();
+        let highByte : number = context.cpu.console.bus.stack.popByte();
         let result : number = lowByte << 8 | highByte;
 
         context.cpu.registers.pc.set(result);
