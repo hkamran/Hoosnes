@@ -1,13 +1,14 @@
+import {Ppu} from "./Ppu";
 
-export class ScanlineState {
+export class ScreenStates {
 
-    public static HORT_PRELINE: ScanlineState = new ScanlineState(0, 21);
-    public static HORT_RENDERLINE: ScanlineState = new ScanlineState(22, 277);
-    public static HORT_BLANK: ScanlineState = new ScanlineState(278, 339);
+    public static HORT_PRELINE: ScreenStates = new ScreenStates(0, 21);
+    public static HORT_RENDERLINE: ScreenStates = new ScreenStates(22, 277);
+    public static HORT_BLANK: ScreenStates = new ScreenStates(278, 339);
 
-    public static VERT_PRELINE: ScanlineState = new ScanlineState(0, 0);
-    public static VERT_RENDERLINE: ScanlineState = new ScanlineState(1, 224);
-    public static VERT_BLANK: ScanlineState = new ScanlineState(225, 261);
+    public static VERT_PRELINE: ScreenStates = new ScreenStates(0, 1);
+    public static VERT_RENDERLINE: ScreenStates = new ScreenStates(2, 224);
+    public static VERT_BLANK: ScreenStates = new ScreenStates(225, 261);
 
     public start: number;
     public end: number;
@@ -26,7 +27,18 @@ export class ScanlineState {
 }
 
 export class Screen {
+
     public static WIDTH: number = 256;
     public static HEIGHT: number = 224;
+
+    public ppu: Ppu;
+
+    constructor(ppu: Ppu) {
+        this.ppu = ppu;
+    }
+
+    public tick(): void {
+
+    }
 
 }

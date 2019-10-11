@@ -582,6 +582,7 @@ export class Registers {
     public tmw: WindowMaskDestinationForMainRegister;
     public tsw: WindowMaskDestinationForSubRegister;
 
+    public scanlatch: SoftwareLatchRegister;
     public scanlochort: ScanlineLocationHorizontalRegister;
     public scanlocvert: ScanlineLocationVerticalRegister;
 

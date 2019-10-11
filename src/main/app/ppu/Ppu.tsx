@@ -7,7 +7,7 @@ import {Oam} from "../memory/Oam";
 import {TileMap} from "./TileMap";
 import {Vram} from "../memory/Vram";
 import {Registers} from "./Registers";
-import {ScanlineState, Screen} from "./Screen";
+import {ScreenStates, Screen} from "./Screen";
 
 export class Ppu {
 
@@ -20,6 +20,12 @@ export class Ppu {
     public tiles: TileMap;
     public registers: Registers;
 
+    public scanline: number = 0;
+    public cycle: number = 0;
+    public frame: number = 0;
+
+    public screen: Screen;
+
     constructor(console: Console) {
         this.cgram = new CGram();
         this.oam = new Oam();
@@ -29,34 +35,58 @@ export class Ppu {
         this.sprites = new Sprites(this.oam);
         this.tiles = new TileMap(this.vram);
         this.registers = new Registers(this);
-    }
 
-    public readByte(offset: number) {
-        return 0;
+        this.screen = new Screen(this);
     }
 
     public tick(): void {
 
-        //f-blank (forced)
-        for (let y = 0; y < Screen.HEIGHT; y++) {
-            if (ScanlineState.VERT_RENDERLINE.isInRange(y)) {
-                for (let x = 0; x < Screen.WIDTH; x++) {
+        let isScreenFinished: boolean =
+            ScreenStates.VERT_BLANK.end == this.scanline &&
+            ScreenStates.HORT_BLANK.end == this.cycle;
 
-                    if (ScanlineState.HORT_PRELINE.isInRange(x)) {
+        let isCycleFinished: boolean = 
+            ScreenStates.HORT_BLANK.end <= this.cycle;
 
-                    } else if (ScanlineState.HORT_RENDERLINE.isInRange(x)) {
+        let isScanlineFinished: boolean =
+            ScreenStates.VERT_BLANK.end <= this.scanline;
 
-                    } else if (ScanlineState.HORT_BLANK.isInRange(x)) {
-                        //hblank
-                    }
-                }
-            }
-            if (ScanlineState.VERT_BLANK.isInRange(y)) {
-                //nmi
-                //vblank
+        let isVBlankStart: boolean =
+            ScreenStates.HORT_PRELINE.start == this.cycle &&
+            ScreenStates.VERT_BLANK.start == this.scanline;
+
+        let isVBlankEnd: boolean =
+            ScreenStates.HORT_PRELINE.start == this.cycle &&
+            ScreenStates.VERT_BLANK.end == this.scanline;
+
+        let isRendering: boolean =
+            ScreenStates.VERT_RENDERLINE.isInRange(this.scanline) &&
+            ScreenStates.HORT_RENDERLINE.isInRange(this.cycle);
+
+        this.cycle++;
+        if (isCycleFinished) {
+            this.cycle = 0;
+            this.scanline++;
+            if (isScanlineFinished) {
+                this.scanline = 0;
             }
         }
 
+        if (isRendering) {
+            this.screen.tick();
+        }
+
+        if (isScreenFinished) {
+            this.frame++;
+        }
+
+        if (isVBlankStart) {
+            // vertical blank start
+        }
+
+        if (isVBlankEnd) {
+            // vertical blank end
+        }
     }
 
     public reset():  void {
