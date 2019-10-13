@@ -1,17 +1,22 @@
 import {Objects} from "../util/Objects";
 import {Bus} from "../bus/Bus";
 import {ByteReader} from "../util/ByteReader";
-import {Mapping} from "./Mapping";
-import {MappingMode0} from "./MappingMode0";
-import {MappingMode1} from "./MappingMode1";
-import {MappingMode5} from "./MappingMode5";
-import {MappingMode4} from "./MappingMode4";
-import {MappingMode3} from "./MappingMode3";
-import {MappingMode2} from "./MappingMode2";
+import {CartridgeMapping0} from "./CartridgeMapping0";
+import {CartridgeMapping1} from "./CartridgeMapping1";
+import {CartridgeMapping5} from "./CartridgeMapping5";
+import {CartridgeMapping4} from "./CartridgeMapping4";
+import {CartridgeMapping2} from "./CartridgeMapping2";
 import {Read} from "../bus/Read";
 import {Address} from "../bus/Address";
 import {Write} from "../bus/Write";
 import {Sram} from "../memory/Sram";
+import {CartridgeMapping3} from "./CartridgeMapping3";
+
+export interface ICartridgeMapping {
+    label: string;
+    read(address: Address): Read;
+    write(address: Address, value: number): Write;
+}
 
 export class InterruptAddresses {
     public COP: number;
@@ -122,7 +127,7 @@ export class Cartridge {
 
     public smc: SmcHeader; // header
     public title: string; // xFC0
-    public mapping: Mapping; // xFD5
+    public mapping: ICartridgeMapping; // xFD5
     public type: CartridgeType; // xFD6
     public size: number; // xFD7
     public sram: Sram; // xFD8
@@ -203,20 +208,20 @@ export class Cartridge {
         return this.mapping.write(address, value);
     }
 
-    private getMapping(mappingType: CartridgeMappingType): Mapping {
+    private getMapping(mappingType: CartridgeMappingType): ICartridgeMapping {
         if (mappingType.toString() == CartridgeMappingType[CartridgeMappingType.LOROM]) {
-            return new MappingMode0(this);
+            return new CartridgeMapping0(this);
         } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.HIROM]) {
-            return new MappingMode1(this);
+            return new CartridgeMapping1(this);
         } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.SUPER_MMC1] ||
             mappingType.toString() == CartridgeMappingType[CartridgeMappingType.SUPER_MMC2]) {
-            return new MappingMode2(this);
+            return new CartridgeMapping2(this);
         } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.SAS]) {
-            return new MappingMode3(this);
+            return new CartridgeMapping3(this);
         } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.SFX]) {
-            return new MappingMode4(this);
+            return new CartridgeMapping4(this);
         } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.EXHIROM]) {
-            return new MappingMode5(this);
+            return new CartridgeMapping5(this);
         } else {
             throw new Error("Unknown cartridge mapping type " + mappingType.valueOf());
         }

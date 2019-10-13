@@ -1,14 +1,13 @@
 import {Address} from "../bus/Address";
 import {Read} from "../bus/Read";
 import {Write} from "../bus/Write";
-import {Mapping} from "./Mapping";
-import {Cartridge} from "./Cartridge";
+import {Cartridge, ICartridgeMapping} from "./Cartridge";
 import {Sram} from "../memory/Sram";
 
-export class MappingMode3 implements Mapping {
+export class CartridgeMapping5 implements ICartridgeMapping {
 
-    public ids: number[] = [0x23];
-    public label: string = "SAS";
+    public ids: number[] = [0x25];
+    public label: string = "EXHIROM";
 
     private cartridge: Cartridge;
     private sram: Sram;
@@ -26,5 +25,4 @@ export class MappingMode3 implements Mapping {
     }
 
 }
-
 

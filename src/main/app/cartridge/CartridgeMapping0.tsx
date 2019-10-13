@@ -1,12 +1,11 @@
 import {Address} from "../bus/Address";
 import {Read} from "../bus/Read";
 import {Write} from "../bus/Write";
-import {Mapping} from "./Mapping";
-import {Cartridge} from "./Cartridge";
+import {Cartridge, ICartridgeMapping} from "./Cartridge";
 import {NotSupported} from "../bus/Bus";
 import {Sram} from "../memory/Sram";
 
-export class MappingMode0 implements Mapping {
+export class CartridgeMapping0 implements ICartridgeMapping {
 
     public ids: number[] = [0x20];
     public label: string = "LOROM";

@@ -1,11 +1,10 @@
 import {Address} from "../bus/Address";
 import {Read} from "../bus/Read";
 import {Write} from "../bus/Write";
-import {Mapping} from "./Mapping";
-import {Cartridge} from "./Cartridge";
+import {Cartridge, ICartridgeMapping} from "./Cartridge";
 import {Sram} from "../memory/Sram";
 
-export class MappingMode4 implements Mapping {
+export class CartridgeMapping4 implements ICartridgeMapping {
 
     public ids: number[] = [0x24];
     public label: string = "SFX";
