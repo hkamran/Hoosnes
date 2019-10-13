@@ -1,6 +1,6 @@
 
 import {Cpu} from './Cpu';
-import {Bus} from "../Bus";
+import {Bus} from "../bus/Bus";
 import {Mode} from "../Modes";
 import {Address, Addressing} from "./Addressing";
 import {Objects} from "../util/Objects";
@@ -889,10 +889,10 @@ class STZ extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        context.cpu.console.bus.writeByte(context.opaddr, 0x00);
-        if (context.cpu.registers.p.getM() == 0) {
-            context.cpu.console.bus.writeByte(context.opaddr, 0x00);
-        }
+        // context.cpu.console.bus.writeByte(context.opaddr, 0x00);
+        // if (context.cpu.registers.p.getM() == 0) {
+        //     context.cpu.console.bus.writeByte(context.opaddr, 0x00);
+        // }
 
     }
 
@@ -1070,7 +1070,7 @@ class STA extends Opcode {
         console.log(this.name);
 
         let result : number = context.cpu.registers.a.get();
-        context.cpu.console.bus.writeByte(context.opaddr, result);
+        // context.cpu.console.bus.writeByte(context.opaddr, result);
     }
 }
 
@@ -1098,7 +1098,7 @@ class STY extends Opcode {
         console.log(this.name);
 
         let result : number = context.cpu.registers.y.get();
-        context.cpu.console.bus.writeByte(context.opaddr, result);
+        // context.cpu.console.bus.writeByte(context.opaddr, result);
     }
 }
 
@@ -1256,7 +1256,7 @@ class STX extends Opcode {
         console.log(this.name);
 
         let result : number = context.cpu.registers.x.get();
-        context.cpu.console.bus.writeByte(context.opaddr, result);
+        // context.cpu.console.bus.writeByte(context.opaddr, result);
 
         // TODO
     }

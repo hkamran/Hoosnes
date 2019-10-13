@@ -13,7 +13,7 @@ export class Vram {
 
     public readByte(address: number, bank?: number): number {
         if (address == null || address < 0 || address > this.data.length) {
-            throw new Error("Invalid read at 0x" + address.toString(16));
+            throw new Error("Invalid readByte at 0x" + address.toString(16));
         }
         return this.data[address];
     }

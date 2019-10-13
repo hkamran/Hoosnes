@@ -1,4 +1,4 @@
-import {Bus} from "../Bus";
+import {Bus} from "../bus/Bus";
 import Console from "../Console";
 import {CGram} from "../memory/CGram";
 import {Palette} from "./Palette";
@@ -40,7 +40,6 @@ export class Ppu {
     }
 
     public tick(): void {
-
         let isScreenFinished: boolean =
             ScreenStates.VERT_BLANK.end == this.scanline &&
             ScreenStates.HORT_BLANK.end == this.cycle;

@@ -386,7 +386,7 @@ export class WindowMaskDestinationForSubRegister extends PpuByteRegister {
 
 }
 
-//Fixed color addition or screen addition register [CGWSEL]
+// Fixed color addition or screen addition register [CGWSEL]
 export class ColorMathSelectionRegister extends PpuByteRegister {
 
     public address: string = "2130";

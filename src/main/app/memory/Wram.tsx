@@ -14,7 +14,7 @@ export class WorkRam {
     public readByte(address: number, bank?: number): number {
         Objects.requireNonNull(address);
         if (address > 0xFFFF || address < 0) {
-            throw new Error("Invalid read on work ram!");
+            throw new Error("Invalid readByte on work ram!");
         }
         if (bank == null) {
             bank = (address >> 16) & 0xFF;

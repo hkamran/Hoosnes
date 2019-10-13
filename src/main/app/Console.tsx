@@ -1,7 +1,7 @@
 import {Cpu} from "./cpu/Cpu";
-import {Cartridge} from "./Cartridge";
+import {Cartridge} from "./cartridge/Cartridge";
 import {Logger, LoggerManager} from 'typescript-logger';
-import {Bus} from "./Bus";
+import {Bus} from "./bus/Bus";
 import {Ppu} from "./ppu/Ppu";
 
 export default class Console {
@@ -25,6 +25,7 @@ export default class Console {
     }
 
     public tick(): void {
-
+        this.cpu.tick();
+        this.ppu.tick();
     }
 }

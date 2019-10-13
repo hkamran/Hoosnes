@@ -1,6 +1,17 @@
-import {Objects} from "./util/Objects";
-import {Bus} from "./Bus";
-import {ByteReader} from "./util/ByteReader";
+import {Objects} from "../util/Objects";
+import {Bus} from "../bus/Bus";
+import {ByteReader} from "../util/ByteReader";
+import {Mapping} from "./Mapping";
+import {MappingMode0} from "./MappingMode0";
+import {MappingMode1} from "./MappingMode1";
+import {MappingMode5} from "./MappingMode5";
+import {MappingMode4} from "./MappingMode4";
+import {MappingMode3} from "./MappingMode3";
+import {MappingMode2} from "./MappingMode2";
+import {Read} from "../bus/Read";
+import {Address} from "../bus/Address";
+import {Write} from "../bus/Write";
+import {Sram} from "../memory/Sram";
 
 export class InterruptAddresses {
     public COP: number;
@@ -33,17 +44,7 @@ export class InterruptVectors {
     }
 }
 
-export class SramMemory {
 
-    public size: number;
-    public data: number[];
-
-    constructor(size: number) {
-        this.size = size;
-        this.data = Array.apply(null, Array(size)).map(function() { return 0; });
-    }
-
-}
 
 const SMC_HEADER_SIZE: number = 512;
 
@@ -88,10 +89,14 @@ export class SmcHeader {
     }
 }
 
-export enum CartridgeMap {
+export enum CartridgeMappingType {
     LOROM = 0x20,
     HIROM = 0x21,
-    FASTROM = 0x10,
+    SUPER_MMC1 = 0x22,
+    SUPER_MMC2 = 0x2A,
+    SAS = 0x23,
+    SFX = 0x24,
+    EXHIROM = 0x25,
 }
 
 export enum CartridgeType {
@@ -117,10 +122,10 @@ export class Cartridge {
 
     public smc: SmcHeader; // header
     public title: string; // xFC0
-    public map: CartridgeMap; // xFD5
+    public mapping: Mapping; // xFD5
     public type: CartridgeType; // xFD6
     public size: number; // xFD7
-    public sram: SramMemory; // xFD8
+    public sram: Sram; // xFD8
     public license: number; // xFD9
     public version: number; // xFDB
     public complement: number; // xFDC
@@ -135,15 +140,16 @@ export class Cartridge {
         // Determine the offset
 
         this.smc = SmcHeader.parse(this.rom);
-        this.map = this.getLayoutType();
-        let offset: number = this.getHeaderOffset(this.map);
+        let mappingType: CartridgeMappingType = this.getLayoutType();
+        let offset: number = this.getHeaderOffset(mappingType);
 
         // Begin extraction
 
+        this.mapping = this.getMapping(mappingType);
         this.title = this.getTitle(offset, offset + SNES_OFFSET_TITLE);
         this.type = this.getType(offset + SNES_OFFSET_ROM_TYPE);
         this.size = 400 << ByteReader.readByte(this.rom, offset + SNES_OFFSET_ROM_SIZE);
-        this.sram = new SramMemory(400 << ByteReader.readByte(this.rom, offset + SNES_OFFSET_SRAM_SIZE));
+        this.sram = new Sram(400 << ByteReader.readByte(this.rom, offset + SNES_OFFSET_SRAM_SIZE));
         this.license = ByteReader.readByte(this.rom, offset + SNES_OFFSET_LICENSE);
         this.version = ByteReader.readByte(this.rom, offset + SNES_OFFSET_VERSION);
         this.complement = ByteReader.readWord(this.rom, offset + SNES_OFFSET_COMPLEMENT_CHECK);
@@ -151,25 +157,25 @@ export class Cartridge {
         this.interrupts = new InterruptVectors(this.rom, offset);
     }
 
-    private getLayoutType(): CartridgeMap {
+    private getLayoutType(): CartridgeMappingType {
         let value: number;
-        let layout: CartridgeMap;
+        let layout: CartridgeMappingType;
 
         value = ByteReader.readByte(this.rom, SNES_OFFSET_LOROM + SNES_OFFSET_MAP_TYPE + this.smc.offset);
-        layout = CartridgeMap[value as unknown as keyof typeof CartridgeMap];
+        layout = CartridgeMappingType[value as unknown as keyof typeof CartridgeMappingType];
         if (layout == null) {
             value = ByteReader.readByte(this.rom, SNES_OFFSET_HIROM + SNES_OFFSET_MAP_TYPE + this.smc.offset);
-            layout = CartridgeMap[value as unknown as keyof typeof CartridgeMap];
+            layout = CartridgeMappingType[value as unknown as keyof typeof CartridgeMappingType];
         }
-        Objects.requireNonNull(layout, "Unable to parse map type from rom");
+        Objects.requireNonNull(layout, "Unable to parse mappingType type from rom");
         return layout;
     }
 
-    private getHeaderOffset(layout: CartridgeMap): number {
-        if (CartridgeMap[CartridgeMap.HIROM] === layout.toString()) {
+    private getHeaderOffset(layout: CartridgeMappingType): number {
+        if (CartridgeMappingType[CartridgeMappingType.HIROM] === layout.toString()) {
             return SNES_OFFSET_HIROM + this.smc.offset;
         }
-        if (CartridgeMap[CartridgeMap.LOROM] === layout.toString()) {
+        if (CartridgeMappingType[CartridgeMappingType.LOROM] === layout.toString()) {
             return SNES_OFFSET_LOROM + this.smc.offset;
         }
         throw Error("Unable to parse header offset from " + layout);
@@ -189,11 +195,30 @@ export class Cartridge {
         return type;
     }
 
-    public readByte(bank: number, offset: number): number {
-        return 0;
+    public readByte(address: Address): Read {
+        return this.mapping.read(address);
     }
 
-    public writeByte(bank: number, offset: number, byte: number): void {
+    public write(address: Address, value: number): Write {
+        return this.mapping.write(address, value);
     }
 
+    private getMapping(mappingType: CartridgeMappingType): Mapping {
+        if (mappingType.toString() == CartridgeMappingType[CartridgeMappingType.LOROM]) {
+            return new MappingMode0(this);
+        } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.HIROM]) {
+            return new MappingMode1(this);
+        } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.SUPER_MMC1] ||
+            mappingType.toString() == CartridgeMappingType[CartridgeMappingType.SUPER_MMC2]) {
+            return new MappingMode2(this);
+        } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.SAS]) {
+            return new MappingMode3(this);
+        } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.SFX]) {
+            return new MappingMode4(this);
+        } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.EXHIROM]) {
+            return new MappingMode5(this);
+        } else {
+            throw new Error("Unknown cartridge mapping type " + mappingType.valueOf());
+        }
+    }
 }

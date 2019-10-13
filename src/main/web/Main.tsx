@@ -2,7 +2,6 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import Core from './core/Core';
 import Console from './../app/Console';
-import {Loader} from "./Loader";
 import {ScreenCard} from "./ScreenCard";
 import {PaletteCard} from "./PaletteCard";
 import {CartridgeCard} from "./CartridgeCard";
@@ -16,7 +15,7 @@ ReactDOM.render(
         <ScreenCard snes={window.snes}/>
         <PaletteCard snes={window.snes} />
         <SpriteCard snes={window.snes} />
-        <CartridgeCard snes={window.snes} />
+        <CartridgeCard snes={window.snes} cartridge={window.snes.cartridge} />
     </div>,
     document.getElementById('main'),
 );

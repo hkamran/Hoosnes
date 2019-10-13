@@ -18,7 +18,7 @@ export class Oam {
 
     public readByte(address: number, bank?: number): number {
         if (address == null || address < 0 || address > Oam.size) {
-            throw new Error("Invalid read at 0x" + address.toString(16));
+            throw new Error("Invalid readByte at 0x" + address.toString(16));
         }
 
         return this.data[address];

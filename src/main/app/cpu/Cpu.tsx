@@ -2,11 +2,13 @@ import {Mode, Modes} from "../Modes";
 import {Registers} from "./Registers";
 import {Opcode, Opcodes, OpContext} from "./Opcodes";
 import {InterruptHandler} from "./Interrupts";
-import {Cartridge} from "../Cartridge";
-import {Bus} from "../Bus";
+import {Cartridge} from "../cartridge/Cartridge";
+import {Bus} from "../bus/Bus";
 import {Objects} from "../util/Objects";
 import {Logger, LoggerManager} from "typescript-logger";
 import Console from "../Console";
+import {Read} from "../bus/Read";
+import {Address} from "../bus/Address";
 
 
 export class Cpu {
@@ -32,12 +34,13 @@ export class Cpu {
         let pc = this.registers.pc.get();
         let cycles = this.cycles;
 
-        let opaddr: number = this.registers.pc.get();
-        let opcode: number = this.console.bus.readByte(opaddr);
+        let opaddr: Address = Address.create(this.registers.pc.get());
+        let read: Read = this.console.bus.readByte(opaddr);
+        let opcode: number = read.value;
         let operation: Opcode = this.opcodes.get(opcode);
-        let context = new OpContext(pc, opaddr, operation, this.registers.e.getMode(), this);
+        let context = new OpContext(pc, opaddr.source, operation, this.registers.e.getMode(), this);
 
-        this.registers.pc.set(opaddr + operation.getSize());
+        this.registers.pc.set(opaddr.source + operation.getSize());
 
         // Execute operation
         operation.execute(context);
