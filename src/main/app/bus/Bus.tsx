@@ -3,9 +3,9 @@ import Console from "../Console";
 import {NumberUtil} from "../util/NumberUtil";
 import {Logger, LoggerManager} from "typescript-logger";
 import {Stack} from "../memory/Stack";
-import {WorkRam} from "../memory/Wram";
+import {Wram} from "../memory/Wram";
 import {Address} from "./Address";
-import {Read} from "./Read";
+import {Result} from "./Result";
 import {Write} from "./Write";
 
 export class NotSupported extends Error {
@@ -15,20 +15,28 @@ export class NotSupported extends Error {
     }
 }
 
-
 export class Bus {
 
-    public log : Logger = LoggerManager.create('Bus');
-
-    public stack: Stack;
     public console: Console;
-    public wram: WorkRam = new WorkRam();
-    public mdr: Read = null;
+    public mdr: Result = null;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
 
         this.console = console;
+    }
+
+    public readWord(address: Address): Result {
+        let nextAddress = Address.create(address.source + 1);
+
+        let low: Result = this.readByte(address);
+        let high: Result = this.readByte(nextAddress);
+
+        let cycles: number = low.cycles + high.cycles;
+        let value: number = (high.value << 8 | low.value);
+
+        let result: Result = new Result(address, value, cycles);
+        return result;
     }
 
     // "Internal" cycles on the CPU, and reads from or writes to "Fast" memory regions,
@@ -41,12 +49,12 @@ export class Bus {
     // when fast memory is not enabled) take 8 master clock cycles.
     //
     // "slow" memory, which is only banks $00-$3F and $80-$BF, pages $40 and $41, take 12 master clock cycles.
-    public readByte(address: Address): Read {
+    public readByte(address: Address): Result {
         if (address == null) {
             throw new Error("Invalid readByte at " + address);
         }
 
-        let read: Read = null;
+        let read: Result = null;
 
         if (0x00 <= address.bank && address.bank < 0x3F) {
             if (0x0000 <= address.addr && address.addr <= 0x1FFF) {

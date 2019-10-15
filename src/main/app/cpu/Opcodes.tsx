@@ -1,24 +1,44 @@
 
-import {Cpu} from './Cpu';
-import {Bus} from "../bus/Bus";
 import {Mode} from "../Modes";
-import {Address, Addressing} from "./Addressing";
+import {Addressing, IAddressing} from "./IAddressing";
 import {Objects} from "../util/Objects";
+import {Result} from "../bus/Result";
+import Console from "../Console";
+import {Address} from "../bus/Address";
+import {Cpu} from "./Cpu";
+import {Bus} from "../bus/Bus";
+import {Registers} from "./Registers";
 
 export class OpContext {
 
-    public pc: number;
-    public opaddr: number;
-    public op: Opcode;
-    public mode: Mode;
-    public cpu: Cpu;
+    public opaddr: Result;
+    public opcode: Opcode;
 
-    constructor(pc: number, opaddr: number, op: Opcode, mode: Mode, cpu: Cpu) {
-        this.pc = pc;
+    public console: Console;
+    public cpu: Cpu;
+    public bus: Bus;
+    public registers: Registers;
+
+    constructor(opaddr: Result, opcode: Opcode, console: Console) {
         this.opaddr = opaddr;
-        this.op = op;
-        this.mode = mode;
-        this.cpu = cpu;
+        this.opcode = opcode;
+
+        this.console = console;
+        this.cpu = console.cpu;
+        this.bus = console.bus;
+        this.registers = console.cpu.registers;
+    }
+
+    public getOpAddress(): Address {
+        return this.opaddr.address;
+    }
+
+    // zero indexed
+    public getOperand(index: number): Address {
+        if (index < 0) {
+            throw new Error("Invalid operand request");
+        }
+        return Address.create(this.opaddr.address.source + index + 1);
     }
 }
 
@@ -44,18 +64,13 @@ export class OpCalculation {
 
 }
 
-export class OpCycle {
-
-
-}
-
 export class Opcode {
     public name: string;
     public cycle: number;
     public size: number[];
-    private mode: Address;
+    public mode: IAddressing;
 
-    constructor(cycle: number, cycleOptions: number[], size: number[], mode: Address) {
+    constructor(cycle: number, cycleOptions: number[], size: number[], mode: IAddressing) {
         Objects.requireNonNull(mode);
 
         this.cycle = cycle;
@@ -81,10 +96,6 @@ export class Opcode {
         return this.size[0];
     }
 
-    public getOperand(state: OpContext): number {
-        return this.mode.get(state.opaddr);
-    }
-
     // C carry
     // Z zero
     // V overflow
@@ -96,8 +107,8 @@ export class Opcode {
         }
 
         let val = output.getResult();
-        let isOverflow: boolean = val > context.mode.size;
-        context.cpu.registers.p.setC(isOverflow ? 1 : 0);
+        //let isOverflow: boolean = val > context.mode.size;
+        //context.cpu.registers.p.setC(isOverflow ? 1 : 0);
     }
 
 
@@ -107,8 +118,8 @@ export class Opcode {
         }
 
         let val = output.getResult();
-        let isZero: boolean = (val & context.mode.mask) == 0;
-        context.cpu.registers.p.setZ(isZero ? 1 : 0);
+        //let isZero: boolean = (val & context.mode.mask) == 0;
+        //context.cpu.registers.p.setZ(isZero ? 1 : 0);
     }
 
     protected setFlagV(context: OpContext, output: OpCalculation): void {
@@ -120,8 +131,8 @@ export class Opcode {
         let b = output.getOperand(1);
         let sum = output.getResult();
 
-        let isOverflow = (((a ^ b) >> context.mode.size) != 0) && (((a ^ sum) >> context.mode.size) != 0);
-        context.cpu.registers.p.setV(isOverflow ? 1 : 0);
+        //let isOverflow = (((a ^ b) >> context.mode.size) != 0) && (((a ^ sum) >> context.mode.size) != 0);
+        //context.cpu.registers.p.setV(isOverflow ? 1 : 0);
 
     }
 
@@ -131,8 +142,8 @@ export class Opcode {
         }
 
         let val = output.getResult();
-        let isNegative: boolean = ((val >> context.mode.size) & 1) == 1;
-        context.cpu.registers.p.setN(isNegative ? 1 : 0);
+        //let isNegative: boolean = ((val >> context.mode.size) & 1) == 1;
+        //context.cpu.registers.p.setN(isNegative ? 1 : 0);
     }
 
 }
@@ -144,7 +155,7 @@ export class ADC extends Opcode {
         console.log(this.name);
 
         let a: number = context.cpu.registers.a.get();
-        let b: number = this.getOperand(context);
+        let b: number = 0;
         let c: number = context.cpu.registers.p.getC();
 
         let result: number = a + b + c;
@@ -166,7 +177,7 @@ export class AND extends Opcode {
         console.log(this.name);
 
         let a: number = context.cpu.registers.a.get();
-        let b: number = this.getOperand(context);
+        let b: number = 0;
 
         let result: number = a & b;
         let output: OpCalculation = new OpCalculation([b], result);
@@ -199,7 +210,7 @@ export class ASL extends Opcode {
     }
 
     public getOperand(state: OpContext): number {
-        return super.getOperand(state);
+        return 0;
     }
 
 }
@@ -209,11 +220,6 @@ export class BCC extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-        let c: number = context.cpu.registers.p.getC();
-        let operand: number = this.getOperand(context);
-        if (c == 0) {
-            context.cpu.registers.pc.set(operand);
-        }
 
     }
 }
@@ -223,11 +229,6 @@ export class BCS extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-        let c: number = context.cpu.registers.p.getC();
-        let operand: number = this.getOperand(context);
-        if (c != 0) {
-            context.cpu.registers.pc.set(operand);
-        }
     }
 }
 
@@ -236,11 +237,6 @@ export class BEQ extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-        let z: number = context.cpu.registers.p.getZ();
-        let operand: number = this.getOperand(context);
-        if (z != 0) {
-            context.cpu.registers.pc.set(operand);
-        }
     }
 }
 
@@ -249,15 +245,6 @@ export class BIT extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-
-        let operand: number = this.getOperand(context);
-
-        context.cpu.registers.p.setN((operand >> 7) & 1);
-        context.cpu.registers.p.setN((operand >> 6) & 1);
-
-
-        let result: number = operand & context.cpu.registers.a.get();
-        context.cpu.registers.p.setZ((result & context.mode.mask) == 0 ? 1 : 0);
     }
 }
 
@@ -266,11 +253,6 @@ class BMI extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-        let n: number = context.cpu.registers.p.getN();
-        let operand: number = this.getOperand(context);
-        if (n == 1) {
-            context.cpu.registers.pc.set(operand);
-        }
     }
 
 }
@@ -280,11 +262,6 @@ class BNE extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-        let z: number = context.cpu.registers.p.getZ();
-        let operand: number = this.getOperand(context);
-        if (z == 0) {
-            context.cpu.registers.pc.set(operand);
-        }
     }
 }
 
@@ -293,11 +270,6 @@ class BPL extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-        let n: number = context.cpu.registers.p.getN();
-        let operand: number = this.getOperand(context);
-        if (n == 0) {
-            context.cpu.registers.pc.set(operand);
-        }
     }
 
 }
@@ -307,16 +279,6 @@ class CMP extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-
-        let a: number = context.cpu.registers.a.get();
-        let b: number = this.getOperand(context);
-        let result: number = a - b;
-
-        let output: OpCalculation = new OpCalculation([a, b], result);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
-        this.setFlagC(context, output);
     }
 
 }
@@ -337,16 +299,6 @@ class CPX extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-
-        let a: number = context.cpu.registers.x.get();
-        let b: number = this.getOperand(context);
-        let result: number = a - b;
-
-        let output: OpCalculation = new OpCalculation([a, b], result);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
-        this.setFlagC(context, output);
     }
 
 }
@@ -356,16 +308,6 @@ class CPY extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-
-        let a: number = context.cpu.registers.y.get();
-        let b: number = this.getOperand(context);
-        let result: number = a - b;
-
-        let output: OpCalculation = new OpCalculation([a, b], result);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
-        this.setFlagC(context, output);
     }
 }
 
@@ -414,8 +356,6 @@ class BRA extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-        let result: number = this.getOperand(context);
-        context.cpu.registers.pc.set(result);
     }
 }
 
@@ -435,11 +375,6 @@ class BVS extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-
-        let operand: number = this.getOperand(context);
-        if (context.cpu.registers.p.getV() == 1) {
-            context.cpu.registers.pc.set(operand);
-        }
     }
 
 }
@@ -449,11 +384,6 @@ class BVC extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-        let v: number = context.cpu.registers.p.getV();
-        let operand: number = this.getOperand(context);
-        if (v == 0) {
-            context.cpu.registers.pc.set(operand);
-        }
     }
 
 }
@@ -463,11 +393,6 @@ class BRL extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-        let v: number = context.cpu.registers.p.getV();
-        let operand: number = this.getOperand(context);
-        if (v == 1) {
-            context.cpu.registers.pc.set(operand);
-        }
     }
 
 }
@@ -478,13 +403,6 @@ class DEC extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let operand: number = this.getOperand(context);
-        let result = operand - 1;
-
-        let output: OpCalculation = new OpCalculation([operand], result);
-
-        this.setFlagZ(context, output);
-        this.setFlagN(context, output);
 
         // TODO
         // context.cpu.bus.writeBytes(0x00, context.opaddr, result & context.mode.mask, 2);
@@ -498,15 +416,6 @@ class DEX extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let operand: number = this.getOperand(context);
-        let result = operand - 1;
-
-        let output: OpCalculation = new OpCalculation([operand], result);
-
-        this.setFlagZ(context, output);
-        this.setFlagN(context, output);
-
-        context.cpu.registers.x.set(result);
     }
 
 }
@@ -517,15 +426,6 @@ class DEY extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let operand: number = this.getOperand(context);
-        let result = operand - 1;
-
-        let output: OpCalculation = new OpCalculation([operand], result);
-
-        this.setFlagZ(context, output);
-        this.setFlagN(context, output);
-
-        context.cpu.registers.y.set(result);
     }
 
 }
@@ -536,17 +436,8 @@ class EOR extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let a: number = this.getOperand(context);
-        let b: number = context.cpu.registers.a.get();
 
-        let result = b ^ a;
 
-        let output: OpCalculation = new OpCalculation([a, b], result);
-
-        this.setFlagZ(context, output);
-        this.setFlagN(context, output);
-
-        context.cpu.registers.a.set(result);
     }
 
 }
@@ -557,13 +448,7 @@ class INC extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let operand: number = this.getOperand(context);
-        let result = operand + 1;
 
-        let output: OpCalculation = new OpCalculation([operand], result);
-
-        this.setFlagZ(context, output);
-        this.setFlagN(context, output);
 
         // TODO
         // context.cpu.bus.writeBytes(0x00, context.opaddr, result & context.mode.mask, 2);
@@ -576,16 +461,6 @@ class INY extends Opcode {
 
     public execute(context: OpContext): void {
         console.log(this.name);
-
-        let operand: number = this.getOperand(context);
-        let result = operand + 1;
-
-        let output: OpCalculation = new OpCalculation([operand], result);
-
-        this.setFlagZ(context, output);
-        this.setFlagN(context, output);
-
-        context.cpu.registers.y.set(result);
     }
 
 }
@@ -780,11 +655,11 @@ class TRB extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let operand: number = this.getOperand(context);
+        let operand: number = 0;
         let a: number = context.cpu.registers.a.get();
 
-        let mask = Math.pow(2, context.mode.size) - 1;
-        let complementOfA = ~a & mask;
+        //let mask = Math.pow(2, context.mode.size) - 1;
+        let complementOfA = ~a & 0;
         let result = (a & operand) & complementOfA;
 
         let output: OpCalculation = new OpCalculation([operand, a], (a & operand));
@@ -813,7 +688,7 @@ class TSB extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let operand: number = this.getOperand(context);
+        let operand: number = 0;
         let a: number = context.cpu.registers.a.get();
 
         let result = operand & a;
@@ -848,9 +723,9 @@ class TSX extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let from: number = context.cpu.console.bus.stack.popByte();
+        let from: number = context.cpu.stack.popByte();
         if (context.cpu.registers.p.getX() == 0) {
-            from = (from << 8) || context.cpu.console.bus.stack.popByte();
+            from = (from << 8) || context.cpu.stack.popByte();
         }
         let to: number = context.cpu.registers.x.get();
 
@@ -922,7 +797,7 @@ class LDA extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let result: number = this.getOperand(context);
+        let result: number = 0;
         let output: OpCalculation = new OpCalculation([], result);
 
         this.setFlagN(context, output);
@@ -940,7 +815,7 @@ class LDX extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let result: number = this.getOperand(context);
+        let result: number = 0;
         let output: OpCalculation = new OpCalculation([], result);
 
         this.setFlagN(context, output);
@@ -958,7 +833,7 @@ class LDY extends Opcode {
     public execute(context: OpContext): void {
         console.log(this.name);
 
-        let result: number = this.getOperand(context);
+        let result: number = 0;
         let output: OpCalculation = new OpCalculation([], result);
 
         this.setFlagN(context, output);
@@ -1109,7 +984,7 @@ class PHD extends Opcode {
         console.log(this.name);
 
         let result : number = context.cpu.registers.d.get();
-        context.cpu.console.bus.stack.pushByte(result);
+        context.cpu.stack.pushByte(result);
     }
 
 }
@@ -1120,8 +995,8 @@ class PHK extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let result : number = context.cpu.registers.pb.get();
-        context.cpu.console.bus.stack.pushByte(result);
+        let result : number = context.cpu.registers.k.get();
+        context.cpu.stack.pushByte(result);
     }
 
 }
@@ -1133,7 +1008,7 @@ class PHP extends Opcode {
         console.log(this.name);
 
         let result : number = context.cpu.registers.p.get();
-        context.cpu.console.bus.stack.pushByte(result);
+        context.cpu.stack.pushByte(result);
     }
 
 }
@@ -1144,7 +1019,7 @@ class PHX extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let result : number = context.cpu.console.bus.stack.popByte();
+        let result : number = context.cpu.stack.popByte();
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
@@ -1161,7 +1036,7 @@ class PHY extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let result : number = context.cpu.console.bus.stack.popByte();
+        let result : number = context.cpu.stack.popByte();
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
@@ -1178,7 +1053,7 @@ class PLA extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let result : number = context.cpu.console.bus.stack.popByte();
+        let result : number = context.cpu.stack.popByte();
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
@@ -1195,13 +1070,13 @@ class PLB extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let result : number = context.cpu.console.bus.stack.popByte();
+        let result : number = context.cpu.stack.popByte();
 
         let output: OpCalculation = new OpCalculation([], result);
         this.setFlagN(context, output);
         this.setFlagZ(context, output);
 
-        context.cpu.registers.db.set(result);
+        context.cpu.registers.dbr.set(result);
     }
 
 }
@@ -1287,14 +1162,14 @@ class RTL extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let lowByte : number = context.cpu.console.bus.stack.popByte();
-        let highByte : number = context.cpu.console.bus.stack.popByte();
+        let lowByte : number = context.cpu.stack.popByte();
+        let highByte : number = context.cpu.stack.popByte();
 
-        let pb : number = context.cpu.console.bus.stack.popByte();
+        let pb : number = context.cpu.stack.popByte();
         let result : number = lowByte << 8 | highByte;
 
         context.cpu.registers.pc.set(result);
-        context.cpu.registers.pb.set(pb);
+        context.cpu.registers.k.set(pb);
     }
 
 }
@@ -1305,8 +1180,8 @@ class RTS extends Opcode {
     public execute(context : OpContext): void {
         console.log(this.name);
 
-        let lowByte : number = context.cpu.console.bus.stack.popByte();
-        let highByte : number = context.cpu.console.bus.stack.popByte();
+        let lowByte : number = context.cpu.stack.popByte();
+        let highByte : number = context.cpu.stack.popByte();
         let result : number = lowByte << 8 | highByte;
 
         context.cpu.registers.pc.set(result);

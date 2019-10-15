@@ -7,8 +7,10 @@ import {Bus} from "../bus/Bus";
 import {Objects} from "../util/Objects";
 import {Logger, LoggerManager} from "typescript-logger";
 import Console from "../Console";
-import {Read} from "../bus/Read";
+import {Result} from "../bus/Result";
 import {Address} from "../bus/Address";
+import {Stack} from "../memory/Stack";
+import {Wram} from "../memory/Wram";
 
 
 export class Cpu {
@@ -18,8 +20,12 @@ export class Cpu {
     public registers: Registers = new Registers();
     public opcodes: Opcodes = new Opcodes();
     public console: Console;
+    public interrupts: InterruptHandler;
+
+    public stack: Stack;
+    public wram: Wram;
+
     public cycles: number = 0;
-    public interrupts;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -31,23 +37,21 @@ export class Cpu {
     public tick(): number {
         this.interrupts.tick();
 
-        let pc = this.registers.pc.get();
+        let pc: Address = Address.create(this.registers.pc.get());
         let cycles = this.cycles;
 
-        let opaddr: Address = Address.create(this.registers.pc.get());
-        let read: Read = this.console.bus.readByte(opaddr);
-        let opcode: number = read.value;
-        let operation: Opcode = this.opcodes.get(opcode);
-        let context = new OpContext(pc, opaddr.source, operation, this.registers.e.getMode(), this);
+        let opaddr: Result = this.console.bus.readByte(pc);
+        let opcode: Opcode = this.opcodes.get(opaddr.value);
 
-        this.registers.pc.set(opaddr.source + operation.getSize());
+        this.registers.pc.set(opaddr.value + opcode.getSize());
 
-        // Execute operation
-        operation.execute(context);
+        let context: OpContext = new OpContext(opaddr, opcode, this.console);
+        opcode.execute(context);
 
-        this.cycles += operation.getCycle();
-        let cyclesTaken = this.cycles - cycles;
-        return cyclesTaken;
+        this.cycles += opcode.getCycle();
+        let duration = this.cycles - cycles;
+
+        return duration;
     }
 
     public reset(): void {
@@ -60,10 +64,6 @@ export class Cpu {
         this.registers.e.set(0x1);
 
         this.registers.pc.set(this.console.cartridge.interrupts.emulation.RESET);
-    }
-
-    public load(cartridge: Cartridge) {
-
     }
 }
 

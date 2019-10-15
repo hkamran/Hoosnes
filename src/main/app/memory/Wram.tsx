@@ -1,7 +1,7 @@
 import {Objects} from "../util/Objects";
 import {NumberUtil} from "../util/NumberUtil";
 
-export class WorkRam {
+export class Wram {
     // The SNES includes 128Kbytes of Work RAM, which can be accessed in several ways:
 
     // The whole 128K are at 7E0000h-7FFFFFh.

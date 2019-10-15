@@ -1,5 +1,5 @@
 import {Address} from "../bus/Address";
-import {Read} from "../bus/Read";
+import {Result} from "../bus/Result";
 import {Write} from "../bus/Write";
 import {Cartridge, ICartridgeMapping} from "./Cartridge";
 import {Sram} from "../memory/Sram";
@@ -16,7 +16,7 @@ export class CartridgeMapping5 implements ICartridgeMapping {
         this.cartridge = cartridge;
     }
 
-    public read(address: Address): Read {
+    public read(address: Address): Result {
         return null;
     }
 

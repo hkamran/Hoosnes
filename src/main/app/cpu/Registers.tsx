@@ -11,21 +11,21 @@ export class Register {
         this.label = label;
     }
 
-    public set(val : number) : void {
+    public set(val : number): void {
         this.val = val & this.mode.size;
     }
 
-    public get() : number {
+    public get(): number {
         return this.val & this.mode.size;
     }
 
-    public increment(val : number) : number {
+    public increment(val : number): number {
         let maskedVal = val & this.mode.size;
         this.val = (maskedVal + this.val) & this.mode.size;
         return this.val;
     }
 
-    public decrement(val : number) : number {
+    public decrement(val : number): number {
         return this.increment(-1 * val);
     }
 
@@ -34,8 +34,16 @@ export class Register {
         this.val = this.val & mode.size;
     }
 
-    public getMode() : Mode {
+    public getMode(): Mode {
         return this.mode;
+    }
+
+    public getLower(): number {
+        return (this.val >> 0) & 0xFFFF;
+    }
+
+    public getUpper(): number {
+        return (this.val >> 8) & 0xFFFF;
     }
 
 }
@@ -163,15 +171,16 @@ export class EmulationRegister extends Register {
 
 export class Registers {
 
-    public a : Register = new Register("Accumulator", Modes.bit16);                           // 8/16
-    public x : Register = new Register("Index Register X", Modes.bit16);                      // 8/16
-    public y : Register = new Register("Index Register Y", Modes.bit8);                       // 8/16
-    public pc : Register = new Register("Program Counter", Modes.bit16);                      // 16
-    public sp : Register = new Register("Stack Pointer", Modes.bit16);                        // 8/16
-    public p : StatusRegister = new StatusRegister("Processor Status Register ", Modes.bit8); // 8
-    public d : Register = new Register("Direct Page", Modes.bit16);                       // 16
-    public db : Register = new Register("Data Bank ", Modes.bit8);                            // 8
-    public pb : Register = new Register("Program Counter Bank", Modes.bit8);                  // 8
+    public a : Register = new Register("Accumulator", Modes.bit16);
+    public dbr : Register = new Register("Data Bank ", Modes.bit8);
+    public d : Register = new Register("Direct Page", Modes.bit16);
+    public k : Register = new Register("Program Bank", Modes.bit8);
+    public pc : Register = new Register("Program Counter", Modes.bit16);
+    public p : StatusRegister = new StatusRegister("Processor Status Register ", Modes.bit8);
+    public sp : Register = new Register("Stack Pointer", Modes.bit16);
+    public x : Register = new Register("Index Register X", Modes.bit16);
+    public y : Register = new Register("Index Register Y", Modes.bit8);
+                  // 8
     public e: Register = new EmulationRegister("Emulation Mode", Modes.bit16);
 
     public setMode(mode : Mode) {
