@@ -4,6 +4,10 @@ import {Address} from "../bus/Address";
 
 /**
  *  Fetches the address of the first data that will be used by the instruction.
+ *
+ *  https://wiki.superfamicom.org/65816-reference
+ *  https://github.com/michielvoo/SNES/wiki/CPU
+ *  http://6502.org/tutorials/65c816opcodes.html#5.7
  */
 export interface IAddressing  {
     getValue(context: OpContext) : Result;
