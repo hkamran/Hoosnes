@@ -1,6 +1,5 @@
 
 import {Mode} from "../Modes";
-import {Addressing, IAddressing} from "./IAddressing";
 import {Objects} from "../util/Objects";
 import {Result} from "../bus/Result";
 import Console from "../Console";
@@ -8,10 +7,11 @@ import {Address} from "../bus/Address";
 import {Cpu} from "./Cpu";
 import {Bus} from "../bus/Bus";
 import {Registers} from "./Registers";
+import {Addressing, IAddressing} from "./Addressing";
 
 export class OpContext {
 
-    public opaddr: Result;
+    public opaddr: Address;
     public opcode: Opcode;
 
     public console: Console;
@@ -19,7 +19,7 @@ export class OpContext {
     public bus: Bus;
     public registers: Registers;
 
-    constructor(opaddr: Result, opcode: Opcode, console: Console) {
+    constructor(opaddr: Address, opcode: Opcode, console: Console) {
         this.opaddr = opaddr;
         this.opcode = opcode;
 
@@ -29,16 +29,13 @@ export class OpContext {
         this.registers = console.cpu.registers;
     }
 
-    public getOpAddress(): Address {
-        return this.opaddr.address;
-    }
-
     // zero indexed
-    public getOperand(index: number): Address {
+    public getOperand(index: number): Result {
         if (index < 0) {
             throw new Error("Invalid operand request");
         }
-        return Address.create(this.opaddr.address.source + index + 1);
+        let address: Address = Address.create(this.opaddr.toValue() + index + 1);
+        return this.bus.readByte(address);
     }
 }
 
@@ -49,7 +46,7 @@ export class OpCalculation {
     public cycle: number = 0;
 
     constructor(operands: number[], result: number) {
-        this.operands = this.operands;
+        this.operands = operands;
         this.result = result;
     }
 

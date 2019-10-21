@@ -27,15 +27,14 @@ export class Bus {
     }
 
     public readWord(address: Address): Result {
-        let nextAddress = Address.create(address.source + 1);
+        let nextAddress = Address.create(address.toValue() + 1);
 
         let low: Result = this.readByte(address);
         let high: Result = this.readByte(nextAddress);
 
-        let cycles: number = low.cycles + high.cycles;
-        let value: number = (high.value << 8 | low.value);
+        let cycles: number = low.getCycles() + high.getCycles();
 
-        let result: Result = new Result(address, value, cycles);
+        let result: Result = new Result([low.getValue(), high.getValue()], cycles);
         return result;
     }
 
@@ -57,20 +56,20 @@ export class Bus {
         let read: Result = null;
 
         if (0x00 <= address.bank && address.bank < 0x3F) {
-            if (0x0000 <= address.addr && address.addr <= 0x1FFF) {
+            if (0x0000 <= address.toValue() && address.toValue() <= 0x1FFF) {
                 // mirror wram
                 // readByte.cycles = 6;
-            } else if (0x2100 <= address.addr && address.addr <= 0x21FF) {
+            } else if (0x2100 <= address.toValue() && address.toValue() <= 0x21FF) {
                 // ppu registers
-            } else if (0x2200 <= address.addr && address.addr <= 0x41FF) {
+            } else if (0x2200 <= address.toValue() && address.toValue() <= 0x41FF) {
                 read = this.console.cartridge.readByte(address);
                 // readByte.cycles = 12;
-            } else if (0x4200 <= address.addr && address.addr <= 0x43FF) {
+            } else if (0x4200 <= address.toValue() && address.toValue() <= 0x43FF) {
                 // ppu registers
-            } else if (0x4400 <= address.addr && address.addr <= 0x7FFF) {
+            } else if (0x4400 <= address.toValue() && address.toValue() <= 0x7FFF) {
                 read = this.console.cartridge.readByte(address);
                 // aux
-            } else if (0x8000 <= address.addr && address.addr <= 0xFFFF) {
+            } else if (0x8000 <= address.toValue() && address.toValue() <= 0xFFFF) {
                 read = this.console.cartridge.readByte(address);
                 read.cycles = 6;
             }
@@ -83,21 +82,21 @@ export class Bus {
                 read.cycles = 6;
             }
         } else if (0x80 <= address.bank && address.bank <= 0xBF) {
-            if (0x0000 <= address.addr && address.addr <= 0x1FFF) {
+            if (0x0000 <= address.toValue() && address.toValue() <= 0x1FFF) {
                 // mirror wram
                 // readByte.cycles = 6;
-            } else if (0x2100 <= address.addr && address.addr <= 0x21FF) {
+            } else if (0x2100 <= address.toValue() && address.toValue() <= 0x21FF) {
                 // ppu registers
-            } else if (0x2200 <= address.addr && address.addr <= 0x41FF) {
+            } else if (0x2200 <= address.toValue() && address.toValue() <= 0x41FF) {
                 // aux
                 read = this.console.cartridge.readByte(address);
                 // readByte.cycles = 12;
-            } else if (0x4200 <= address.addr && address.addr <= 0x43FF) {
+            } else if (0x4200 <= address.toValue() && address.toValue() <= 0x43FF) {
                 // ppu registers
-            } else if (0x4400 <= address.addr && address.addr <= 0x7FFF) {
+            } else if (0x4400 <= address.toValue() && address.toValue() <= 0x7FFF) {
                 read = this.console.cartridge.readByte(address);
                 read.cycles = 6;
-            } else if (0x8000 <= address.addr && address.addr <= 0xFFFF) {
+            } else if (0x8000 <= address.toValue() && address.toValue() <= 0xFFFF) {
                 read = this.console.cartridge.readByte(address);
                 read.cycles = 7;
             }

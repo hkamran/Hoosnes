@@ -37,18 +37,19 @@ export class Cpu {
     public tick(): number {
         this.interrupts.tick();
 
-        let pc: Address = Address.create(this.registers.pc.get());
+        let pc: number = this.registers.pc.get();
+        let bank: number = this.registers.k.get();
         let cycles = this.cycles;
 
-        let opaddr: Result = this.console.bus.readByte(pc);
-        let opcode: Opcode = this.opcodes.get(opaddr.value);
+        let opaddr: Address = Address.create(pc, bank);
+        let opcode: Result = this.console.bus.readByte(opaddr);
+        let op: Opcode = this.opcodes.get(opcode.getValue());
 
-        this.registers.pc.set(opaddr.value + opcode.getSize());
+        let context: OpContext = new OpContext(opaddr, op, this.console);
+        op.execute(context);
 
-        let context: OpContext = new OpContext(opaddr, opcode, this.console);
-        opcode.execute(context);
-
-        this.cycles += opcode.getCycle();
+        this.registers.pc.set(opaddr.toValue() + op.getSize());
+        this.cycles += op.getCycle();
         let duration = this.cycles - cycles;
 
         return duration;

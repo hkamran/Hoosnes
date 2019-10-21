@@ -1,6 +1,7 @@
 import {Opcode, OpContext} from "./Opcodes";
 import {Result} from "../bus/Result";
 import {Address} from "../bus/Address";
+import {Bit} from "../util/Bit";
 
 /**
  *  Fetches the address of the first data that will be used by the instruction.
@@ -14,269 +15,225 @@ export interface IAddressing  {
     getAddress(context: OpContext) : Result;
 }
 
+// Note that although the 65C816 has a 24-bit address space,
+// the Program Counter is only a 16-bit register and
+// the Program Bank Register is a separate (8-bit) register.
+// This means that instruction execution wraps at bank boundaries.
+// This is true even if the bank boundary occurs in the middle of the instruction.
+
+export class AbsoluteJump implements IAddressing {
+
+    public label: string = "Absolute Jump";
+
+    public getValue(context: OpContext): Result {
+        let result: Result = this.getAddress(context);
+
+        let loAddr: Address = Address.create(result.getValue());
+        let loByte: Result = context.bus.readByte(loAddr);
+
+        let cycles: number = result.getCycles() + loByte.getCycles();
+
+        return new Result([loByte.getValue()], cycles);
+    }
+
+    getAddress(context: OpContext): Result {
+        let HH: number = context.registers.k.get();
+        let MM: Result = context.getOperand(0);
+        let LL: Result = context.getOperand(1);
+
+        let data: number = Bit.toUint24(HH, MM.getValue(), LL.getValue());
+        let cycles: number = MM.getCycles() + LL.getCycles();
+
+        return new Result([data], cycles);
+    }
+}
+
 export class Absolute implements IAddressing {
 
     public label: string = "Absolute";
-    //  16 bit
 
     public getValue(context: OpContext): Result {
-        let addr: Result = this.getAddress(context);
+        let result: Result = this.getAddress(context);
 
-        let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-        let high: Result = context.console.bus.readByte(Address.create(addr.address.source + 1));
+        let loAddr: Address = Address.create(result.getValue(0));
+        let hiAddr: Address = Address.create(result.getValue(1));
 
-        let cycles: number = addr.cycles + low.cycles + high.cycles;
-        let value: number = (high.value << 8 | low.value);
+        let loByte: Result = context.bus.readByte(loAddr);
+        let hiByte: Result = context.bus.readByte(hiAddr);
 
-        return new Result(context.opaddr.address, value, cycles);
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return new Result([loByte.getValue(), hiByte.getValue()], cycles);
     }
 
     public getAddress(context: OpContext): Result {
-        let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-        let secondOperand: Result = context.console.bus.readByte(context.getOperand(1));
+        let LL: Result = context.getOperand(0);
+        let MM: Result = context.getOperand(1);
+        let HH: number = context.cpu.registers.dbr.get();
 
-        let high: number = context.console.cpu.registers.dbr.get();
-        let mid: number = firstOperand.value;
-        let low: number = secondOperand.value;
+        let cycles: number = LL.getCycles() + MM.getCycles();
 
-        let cycles: number = firstOperand.cycles + secondOperand.cycles;
-        let address: number = (high << 16 | mid << 8 | low);
+        let dataLow: number = Bit.toUint24(HH, MM.getValue(), LL.getValue());
+        let dataHigh: number = dataLow + 1;
 
-        return new Result(context.opaddr.address, address, cycles);
+        return new Result([dataLow, dataHigh], cycles);
+    }
+}
+
+export class AbsoluteX implements IAddressing {
+
+    public label: string = "Absolute X";
+
+    public getValue(context: OpContext): Result {
+        let result: Result = this.getAddress(context);
+
+        let loAddr: Address = Address.create(result.getValue(0));
+        let hiAddr: Address = Address.create(result.getValue(1));
+
+        let loByte: Result = context.bus.readByte(loAddr);
+        let hiByte: Result = context.bus.readByte(hiAddr);
+
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return new Result([loByte.getValue(), hiByte.getValue()], cycles);
     }
 
+    public getAddress(context: OpContext): Result {
+        let LL: Result = context.getOperand(0);
+        let MM: Result = context.getOperand(1);
+        let HH: number = context.cpu.registers.dbr.get();
+
+        let cycles: number = LL.getCycles() + MM.getCycles();
+
+        let address: number = Bit.toUint24(HH, MM.getValue(), LL.getValue());
+        let low: number = address + context.registers.x.get();
+        let high: number = low + 1;
+
+        return new Result([low, high], cycles);
+    }
+}
+
+export class AbsoluteY implements IAddressing {
+
+    public label: string = "Absolute Y";
+
+    public getValue(context: OpContext): Result {
+        let result: Result = this.getAddress(context);
+
+        let loAddr: Address = Address.create(result.getValue(0));
+        let hiAddr: Address = Address.create(result.getValue(1));
+
+        let loByte: Result = context.bus.readByte(loAddr);
+        let hiByte: Result = context.bus.readByte(hiAddr);
+
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return new Result([loByte.getValue(), hiByte.getValue()], cycles);
+    }
+
+    public getAddress(context: OpContext): Result {
+        let LL: Result = context.getOperand(0);
+        let MM: Result = context.getOperand(1);
+        let HH: number = context.cpu.registers.dbr.get();
+
+        let cycles: number = LL.getCycles() + MM.getCycles();
+
+        let address: number = Bit.toUint24(HH, MM.getValue(), LL.getValue());
+        let low: number = address + context.registers.y.get();
+        let high: number = low + 1;
+
+        return new Result([low, high], cycles);
+    }
 }
 
 export class AbsoluteLong implements IAddressing {
 
-    public label: string = "Absolute";
-    //  16 bit
+    public label: string = "(Absolute)";
 
     public getValue(context: OpContext): Result {
-        let addr: Result = this.getAddress(context);
+        let result: Result = this.getAddress(context);
 
-        let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-        let mid: Result = context.console.bus.readByte(Address.create(addr.address.source + 1));
-        let high: Result = context.console.bus.readByte(Address.create(addr.address.source + 2));
+        let addr: Address = Address.create(result.getValue());
+        let data: Result = context.bus.readByte(addr);
 
-        let cycles: number = addr.cycles + low.cycles + high.cycles;
-        let value: number = (high.value << 16 | mid.value << 8 | low.value);
+        let cycles: number = result.getCycles();
 
-        return new Result(context.opaddr.address, value, cycles);
+        return new Result([data.getValue()], cycles);
     }
 
     public getAddress(context: OpContext): Result {
-        let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-        let secondOperand: Result = context.console.bus.readByte(context.getOperand(1));
-        let thirdOperand: Result = context.console.bus.readByte(context.getOperand(2));
+        let low: Result = context.getOperand(0);
+        let high: Result = context.getOperand(1);
 
-        let high: number = thirdOperand.value;
-        let mid: number = firstOperand.value;
-        let low: number = secondOperand.value;
+        let laddr: Address = Address.create(Bit.toUint16(high.getValue(), low.getValue()));
+        let haddr: Address = Address.create(Bit.toUint16(high.getValue(), low.getValue()));
 
-        let cycles: number = firstOperand.cycles + secondOperand.cycles + thirdOperand.value;
-        let address: number = (high << 16 | mid << 8 | low);
+        let LL: Result = context.bus.readByte(laddr);
+        let MM: Result = context.bus.readByte(haddr);
+        let HH: number = context.registers.k.get();
 
-        return new Result(context.opaddr.address, address, cycles);
+        let cycles: number = LL.getCycles() + MM.getCycles();
+        let address: number = Bit.toUint24(HH, MM.getValue(), LL.getValue());
+
+        return new Result([address], cycles);
     }
-
 }
 
 export class AbsoluteLongIndexed implements IAddressing {
 
-    public label: string = "Absolute";
-    //  16 bit
+    public label: string = "[absolute]";
 
     public getValue(context: OpContext): Result {
-        let addr: Result = this.getAddress(context);
+        let result: Result = this.getAddress(context);
 
-        let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-        let mid: Result = context.console.bus.readByte(Address.create(addr.address.source + 1));
-        let high: Result = context.console.bus.readByte(Address.create(addr.address.source + 2));
+        let addr: Address = Address.create(result.getValue());
+        let data: Result = context.bus.readByte(addr);
 
-        let cycles: number = addr.cycles + low.cycles + high.cycles;
-        let value: number = (high.value << 16 | mid.value << 8 | low.value);
+        let cycles: number = result.getCycles();
 
-        return new Result(context.opaddr.address, value, cycles);
+        return new Result([data.getValue()], cycles);
     }
 
     public getAddress(context: OpContext): Result {
-        let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-        let secondOperand: Result = context.console.bus.readByte(context.getOperand(1));
-        let thirdOperand: Result = context.console.bus.readByte(context.getOperand(2));
+        let LL: Result = context.getOperand(0);
+        let HH: Result = context.getOperand(1);
 
-        let high: number = thirdOperand.value;
-        let mid: number = firstOperand.value;
-        let low: number = secondOperand.value;
+        let lowAddr: number = Bit.toUint16(LL.getValue(), HH.getValue()) + 0;
+        let midAddr: number = Bit.toUint16(LL.getValue(), HH.getValue()) + 1;
+        let highAddr: number =Bit.toUint16(LL.getValue(), HH.getValue()) + 2;
 
-        let cycles: number = firstOperand.cycles + secondOperand.cycles + thirdOperand.value;
-        let address: number = (high << 16 | mid << 8 | low);
+        let low: Result = context.bus.readByte(Address.create(lowAddr));
+        let mid: Result = context.bus.readByte(Address.create(midAddr));
+        let high: Result = context.bus.readByte(Address.create(highAddr));
 
-        return new Result(context.opaddr.address, address, cycles);
+        let value: number = Bit.toUint24(high.getValue(), mid.getValue(), low.getValue());
+        let cycles: number = LL.getCycles() +
+            HH.getCycles() +
+            low.getCycles() +
+            mid.getCycles() +
+            high.getCycles();
+
+        return new Result([value], cycles);
     }
 
 }
 
-export class AbsoluteIndexedWithXAddressing implements IAddressing {
+export class Accumulator implements  IAddressing {
 
-    public label: string = "Absolute";
+    public label: string = "ACCUMULATOR";
 
-    public getValue(context: OpContext): Result {
-        let addr: Result = this.getAddress(context);
+    getAddress(context: OpContext): Result {
+        let low: number = context.registers.a.getLower();
+        let high: number = context.registers.a.getUpper();
 
-        let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-        let high: Result = context.console.bus.readByte(Address.create(addr.address.source + 1));
-
-        let cycles: number = addr.cycles + low.cycles + high.cycles;
-        let value: number = (high.value << 8 | low.value);
-
-        return new Result(context.opaddr.address, value, cycles);
+        return new Result([low, high], 0);
     }
 
-    public getAddress(context: OpContext): Result {
-        let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-        let secondOperand: Result = context.console.bus.readByte(context.getOperand(1));
+    getValue(context: OpContext): Result {
+        let low: number = context.registers.a.getLower();
+        let high: number = context.registers.a.getUpper();
 
-        let high: number = context.console.cpu.registers.dbr.get();
-        let mid: number = secondOperand.value + context.console.cpu.registers.x.get();
-        let low: number = firstOperand.value + context.console.cpu.registers.x.get();
-
-        let cycles: number = firstOperand.cycles + secondOperand.cycles;
-
-        let address: number = (high << 16 | mid << 8 | low);
-        let result: Result = new Result(context.opaddr.address, address, cycles);
-        return result;
-    }
-}
-
-export class AbsoluteIndexedWithYAddressing implements IAddressing {
-
-    public label: string = "Absolute";
-
-    public getValue(context: OpContext): Result {
-        let addr: Result = this.getAddress(context);
-
-        let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-        let high: Result = context.console.bus.readByte(Address.create(addr.address.source + 1));
-
-        let cycles: number = addr.cycles + low.cycles + high.cycles;
-        let value: number = (high.value << 8 | low.value);
-
-        return new Result(context.opaddr.address, value, cycles);
-    }
-
-    public getAddress(context: OpContext): Result {
-        let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-        let secondOperand: Result = context.console.bus.readByte(context.getOperand(1));
-
-        let low: number = firstOperand.value + context.console.cpu.registers.y.get();
-        let mid: number = secondOperand.value + context.console.cpu.registers.y.get();
-        let high: number = context.console.cpu.registers.dbr.get();
-
-        let cycles: number = firstOperand.cycles + secondOperand.cycles;
-
-        let address: number = (high << 16 | mid << 8 | low);
-        let result: Result = new Result(context.opaddr.address, address, cycles);
-        return result;
-    }
-}
-
-export class AbsoluteIndexedIndirect implements IAddressing {
-
-    public label: string = "Absolute";
-
-    public getValue(context: OpContext): Result {
-        let addr: Result = this.getAddress(context);
-
-        let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-        let mid: Result = context.console.bus.readByte(Address.create(addr.address.source + 1));
-        let high: number = context.console.cpu.registers.k.get();
-
-        let cycles: number = addr.cycles + low.cycles + mid.cycles;
-        let value: number = (high << 16 | mid.value << 8 | low.value);
-
-        return new Result(context.opaddr.address, value, cycles);
-    }
-
-    public getAddress(context: OpContext): Result {
-        let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-        let secondOperand: Result = context.console.bus.readByte(context.getOperand(1));
-
-        let low: number = firstOperand.value;
-        let mid: number = secondOperand.value;
-        let high: number = context.console.cpu.registers.k.get();
-
-        let cycles: number = firstOperand.cycles + secondOperand.cycles;
-
-        let address: number = (high << 16 | mid << 8 | low) + context.console.cpu.registers.x.get();
-        let result: Result = new Result(context.opaddr.address, address, cycles);
-        return result;
-    }
-}
-
-export class AbsoluteIndirect implements IAddressing {
-
-    public label: string = "Absolute";
-
-    public getValue(context: OpContext): Result {
-        let addr: Result = this.getAddress(context);
-
-        let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-        let mid: Result = context.console.bus.readByte(Address.create(addr.address.source + 1));
-        let high: number = context.console.cpu.registers.k.get();
-
-        let cycles: number = addr.cycles + low.cycles + mid.cycles;
-        let value: number = (high << 16 | mid.value << 8 | low.value);
-
-        return new Result(context.opaddr.address, value, cycles);
-    }
-
-    public getAddress(context: OpContext): Result {
-        let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-        let secondOperand: Result = context.console.bus.readByte(context.getOperand(1));
-
-        let low: number = firstOperand.value;
-        let mid: number = secondOperand.value;
-        let high: number = 0;
-
-        let cycles: number = firstOperand.cycles + secondOperand.cycles;
-
-        let address: number = (high << 16 | mid << 8 | low);
-        let result: Result = new Result(context.opaddr.address, address, cycles);
-        return result;
-    }
-}
-
-export class AbsoluteIndirectLong implements IAddressing {
-
-    public label: string = "Absolute";
-
-    public getValue(context: OpContext): Result {
-        let addr: Result = this.getAddress(context);
-
-        let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-        let mid: Result = context.console.bus.readByte(Address.create(addr.address.source + 1));
-        let high: Result = context.console.bus.readByte(Address.create(addr.address.source + 2));
-
-        let cycles: number = addr.cycles + low.cycles + mid.cycles;
-        let value: number = (high.value << 16 | mid.value << 8 | low.value);
-
-        return new Result(context.opaddr.address, value, cycles);
-    }
-
-    public getAddress(context: OpContext): Result {
-        let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-        let secondOperand: Result = context.console.bus.readByte(context.getOperand(1));
-
-        let low: number = firstOperand.value;
-        let mid: number = secondOperand.value;
-        let high: number = 0;
-
-        let cycles: number = firstOperand.cycles + secondOperand.cycles;
-
-        let address: number = (high << 16 | mid << 8 | low);
-        let result: Result = new Result(context.opaddr.address, address, cycles);
-        return result;
+        return new Result([low, high], 0);
     }
 }
 
@@ -285,55 +242,29 @@ export class Direct implements IAddressing {
     public label: string = "Absolute";
 
     public getValue(context: OpContext): Result {
-        if (context.console.cpu.registers.e.get() == 1) {
-            let addr: Result = this.getAddress(context);
+        let result: Result = this.getAddress(context);
 
-            let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-            let mid: number = 0;
-            let high: number = 0;
+        let low: Result = context.bus.readByte(Address.create(result.getValue(0)));
+        let high: Result = context.bus.readByte(Address.create(result.getValue(1)));
 
-            let cycles: number = addr.cycles + low.cycles;
-            let value: number = (0 << 16 | 0 << 8 | low.value);
-
-            return new Result(context.opaddr.address, value, cycles);
-        } else {
-            let addr: Result = this.getAddress(context);
-
-            let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-            let mid: Result = context.console.bus.readByte(Address.create(addr.address.source + 1));
-            let high: number = 0;
-
-            let cycles: number = addr.cycles + low.cycles + mid.value;
-            let value: number = (0 << 16 | mid.value << 8 | low.value);
-
-            return new Result(context.opaddr.address, value, cycles);
-        }
+        let cycles: number = result.getCycles() + low.getCycles() + high.getCycles();
+        return new Result([low.getValue(), high.getValue()], cycles);
     }
 
     public getAddress(context: OpContext): Result {
-        if (context.console.cpu.registers.e.get() == 1) {
-            let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
+        let low: Result = context.getOperand(0);
 
-            let low: number = firstOperand.value;
-            let mid: number = context.console.cpu.registers.d.getUpper();
-            let high: number = 0;
+        if (context.registers.e.get() == 1 && context.registers.d.getLower() == 0x00) {
+            let loaddr: number = low.getValue();
+            let hiaddr: number = context.registers.d.getUpper();
 
-            let cycles: number = firstOperand.cycles;
-
-            let address: number = (high << 16 | mid << 8 | low);
-            return new Result(context.opaddr.address, address, cycles);
-        } else {
-            let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-
-            let low: number = firstOperand.value;
-            let mid: number = context.console.cpu.registers.d.get();
-            let high: number = 0;
-
-            let cycles: number = firstOperand.cycles;
-
-            let address: number = (high << 16 | ((mid + low)) & 0xFFFF);
-            return new Result(context.opaddr.address, address, cycles);
+            return new Result([loaddr, hiaddr], low.getCycles());
         }
+
+        let loaddr: number = context.registers.d.get() + low.getValue();
+        let hiaddr: number = loaddr + 1;
+
+        return new Result([loaddr, hiaddr], low.getCycles());
     }
 }
 
@@ -342,59 +273,40 @@ export class DirectX implements IAddressing {
     public label: string = "Absolute";
 
     public getValue(context: OpContext): Result {
-        if (context.console.cpu.registers.e.get() == 1) {
-            let addr: Result = this.getAddress(context);
+        let result: Result = this.getAddress(context);
 
-            let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-            let mid: number = 0;
-            let high: number = 0;
+        if (result.getSize() == 1) {
+            let low: Result = context.bus.readByte(Address.create(result.getValue(0)));
 
-            let cycles: number = addr.cycles + low.cycles;
-            let value: number = (0 << 16 | 0 << 8 | low.value);
-
-            return new Result(context.opaddr.address, value, cycles);
-        } else {
-            let addr: Result = this.getAddress(context);
-
-            let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-            let mid: Result = context.console.bus.readByte(Address.create(addr.address.source + 1));
-            let high: number = 0;
-
-            let cycles: number = addr.cycles + low.cycles + mid.value;
-            let value: number = (0 << 16 | mid.value << 8 | low.value);
-
-            return new Result(context.opaddr.address, value, cycles);
+            let cycles: number = result.getCycles() + low.getCycles();
+            return new Result([low.getValue()], cycles);
         }
+
+        let low: Result = context.bus.readByte(Address.create(result.getValue(0)));
+        let high: Result = context.bus.readByte(Address.create(result.getValue(1)));
+
+        let cycles: number = result.getCycles() + low.getCycles() + high.getCycles();
+        return new Result([low.getValue(), high.getValue()], cycles);
     }
 
     public getAddress(context: OpContext): Result {
-        if (context.console.cpu.registers.e.get() == 1) {
-            let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
+        let LL: Result = context.getOperand(0);
 
-            let x: number = context.console.cpu.registers.x.get();
+        if (context.registers.e.get() == 1 && context.registers.d.getLower() == 0x00) {
+            let loaddr: number = LL.getValue() + context.registers.x.get();
+            let hiaddr: number = context.registers.d.getUpper();
 
-            let low: number = firstOperand.value + x;
-            let mid: number = context.console.cpu.registers.d.getUpper();
-            let high: number = 0;
-
-            let cycles: number = firstOperand.cycles;
-
-            let address: number = (high << 16 | mid << 8 | low);
-            return new Result(context.opaddr.address, address, cycles);
-        } else {
-            let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-
-            let x: number = context.console.cpu.registers.x.get();
-
-            let low: number = firstOperand.value;
-            let mid: number = context.console.cpu.registers.d.get();
-            let high: number = 0;
-
-            let cycles: number = firstOperand.cycles;
-
-            let address: number = (high << 16 | ((mid + low) + x) & 0xFFFF);
-            return new Result(context.opaddr.address, address, cycles);
+            let addr = Bit.toUint16(hiaddr, loaddr);
+            return new Result([addr], LL.getCycles());
         }
+
+        let loaddr: number = context.registers.d.getUpper() +
+            LL.getValue() +
+            context.registers.x.get();
+
+        let hiaddr: number = loaddr + 1;
+
+        return new Result([loaddr, hiaddr], LL.getCycles());
     }
 }
 
@@ -403,59 +315,11 @@ export class DirectY implements IAddressing {
     public label: string = "Absolute";
 
     public getValue(context: OpContext): Result {
-        if (context.console.cpu.registers.e.get() == 1) {
-            let addr: Result = this.getAddress(context);
-
-            let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-            let mid: number = 0;
-            let high: number = 0;
-
-            let cycles: number = addr.cycles + low.cycles;
-            let value: number = (0 << 16 | 0 << 8 | low.value);
-
-            return new Result(context.opaddr.address, value, cycles);
-        } else {
-            let addr: Result = this.getAddress(context);
-
-            let low: Result = context.console.bus.readByte(Address.create(addr.address.source + 0));
-            let mid: Result = context.console.bus.readByte(Address.create(addr.address.source + 1));
-            let high: number = 0;
-
-            let cycles: number = addr.cycles + low.cycles + mid.value;
-            let value: number = (0 << 16 | mid.value << 8 | low.value);
-
-            return new Result(context.opaddr.address, value, cycles);
-        }
+        return null;
     }
 
     public getAddress(context: OpContext): Result {
-        if (context.console.cpu.registers.e.get() == 1) {
-            let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-
-            let y: number = context.console.cpu.registers.x.get();
-
-            let low: number = firstOperand.value + y;
-            let mid: number = context.console.cpu.registers.d.getUpper();
-            let high: number = 0;
-
-            let cycles: number = firstOperand.cycles;
-
-            let address: number = (high << 16 | mid << 8 | low);
-            return new Result(context.opaddr.address, address, cycles);
-        } else {
-            let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-
-            let y: number = context.console.cpu.registers.y.get();
-
-            let low: number = firstOperand.value;
-            let mid: number = context.console.cpu.registers.d.get();
-            let high: number = 0;
-
-            let cycles: number = firstOperand.cycles;
-
-            let address: number = (high << 16 | ((mid + low) + y) & 0xFFFF);
-            return new Result(context.opaddr.address, address, cycles);
-        }
+        return null;
     }
 }
 
@@ -468,33 +332,7 @@ export class DirectIndirect implements IAddressing {
     }
 
     public getAddress(context: OpContext): Result {
-        if (context.console.cpu.registers.e.get() == 1) {
-            let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-
-            let y: number = context.console.cpu.registers.x.get();
-
-            let low: number = firstOperand.value + y;
-            let mid: number = context.console.cpu.registers.d.getUpper();
-            let high: number = 0;
-
-            let cycles: number = firstOperand.cycles;
-
-            let address: number = (high << 16 | mid << 8 | low);
-            return new Result(context.opaddr.address, address, cycles);
-        } else {
-            let firstOperand: Result = context.console.bus.readByte(context.getOperand(0));
-
-            let y: number = context.console.cpu.registers.y.get();
-
-            let low: number = firstOperand.value;
-            let mid: number = context.console.cpu.registers.d.get();
-            let high: number = 0;
-
-            let cycles: number = firstOperand.cycles;
-
-            let address: number = (high << 16 | ((mid + low) + y) & 0xFFFF);
-            return new Result(context.opaddr.address, address, cycles);
-        }
+        return null;
     }
 }
 
@@ -572,13 +410,11 @@ export class Immediate implements IAddressing {
 export class Implied implements IAddressing {
 
     public getValue(context: OpContext): Result {
-        let opaddr: Address = context.getOpAddress();
-        let operand: Result = context.bus.readByte(opaddr);
-        return operand;
+        return null;
     }
 
     public getAddress(context: OpContext): Result {
-        return context.opaddr;
+        return null;
     }
 }
 
@@ -643,9 +479,4 @@ export class Addressing {
     public static absolute : IAddressing = new Absolute();
     public static absoluteLong : IAddressing = new AbsoluteLong();
     public static absoluteLongIndex : IAddressing = new AbsoluteLongIndexed();
-    public static absoluteIndexedWithX : IAddressing = new AbsoluteIndexedWithXAddressing();
-    public static absoluteIndexedWithY : IAddressing = new AbsoluteIndexedWithYAddressing();
-    public static absoluteIndexedIndirect : IAddressing = new AbsoluteIndexedIndirect();
-    public static absoluteIndirect : IAddressing = new AbsoluteIndirect();
-    public static absoluteIndirectLong : IAddressing = new AbsoluteIndirectLong();
 }
