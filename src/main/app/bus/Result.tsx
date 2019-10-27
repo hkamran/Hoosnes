@@ -14,7 +14,11 @@ export class Result {
     }
 
     public getValue(index?: number) {
-        return this.values[index | 0];
+        index = index | 0;
+        if (index > this.values.length) {
+            throw new Error("Invalid value index " + index);
+        }
+        return this.values[index];
     }
 
     public getCycles(): number {

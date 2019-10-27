@@ -11,16 +11,26 @@ export class Bit {
         return (a << 8 | b);
     }
 
-    public static toUint24(a: number, b: number, c: number): number {
-        if (a == null || b == null || c == null) {
+    public static toUint24(a: number, b?: number, c?: number): number {
+        if (a == null) {
             return null;
         }
 
-        a = a * 0xFF;
-        b = b * 0xFF;
-        c = c * 0xFF;
+        let result = 0;
 
-        return (a << 16) | (b << 8) | (c << 0);
+        if (a) {
+            result = (a << 16) | result;
+        }
+
+        if (b) {
+            result = (b << 8) | result;
+        }
+
+        if (c) {
+            result = (c << 0) | result
+        }
+
+        return result;
     }
 
     public static getUint16Upper(a: number) {
