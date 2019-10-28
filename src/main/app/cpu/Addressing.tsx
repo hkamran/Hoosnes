@@ -37,7 +37,7 @@ export class AbsoluteJump implements IAddressing {
         return new Result([loByte.getValue()], cycles);
     }
 
-    getAddress(context: OpContext): Result {
+    public getAddress(context: OpContext): Result {
         let HH: number = context.registers.k.get();
         let MM: Result = context.getOperand(0);
         let LL: Result = context.getOperand(1);
