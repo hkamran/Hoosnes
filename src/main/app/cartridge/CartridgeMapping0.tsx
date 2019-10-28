@@ -42,11 +42,14 @@ export class CartridgeMapping0 implements ICartridgeMapping {
             }
         } else if (0x8000 <= address.toValue() && address.toValue() <= 0xFFFF) {
             if (0x80 <= address.bank && address.bank <= 0xFF) {
-                let index = ((address.bank - 0x80) * 0xFFFF) + address.toValue();
+                let index = ((address.bank - 0x80) * 0xFFFF) + (address.toValue() - 0x8000);
                 let value = this.cartridge.rom[index];
+
+                return new Result([value], 0);
             } else if (0x00 <= address.bank && address.bank <= 0x7F) {
-                let index = ((address.bank - 0x80) * 0xFFFF) + address.toValue();
+                let index = ((address.bank - 0x00) * 0xFFFF) + (address.toValue() - 0x8000);
                 let value = this.cartridge.rom[index];
+                return new Result([value], 0);
             }
         }
         throw new NotSupported();

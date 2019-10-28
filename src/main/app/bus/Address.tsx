@@ -31,11 +31,16 @@ export class Address {
     }
 
     public static create(val: number, bank?: number): Address {
-        if (val == null || bank == null)
+        if (val == null || val < 0)
             throw new Error("Invalid Address");
 
-        bank = bank | (val >> 16);
-        return new Address(bank, val);
+        if (bank == null) {
+            bank = (val >> 16) & 0xFF;
+            val = val & 0xFFFF;
+            return new Address(bank, val);
+        } else {
+            return new Address(bank, val);
+        }
     }
 
 }

@@ -1,14 +1,25 @@
 export class Bit {
 
-    public static toUint16(a: number, b: number): number {
+    public static toUint16(a: number, b?: number): number {
         if (a == null || b == null) {
             return null;
         }
 
-        a = a * 0xFF;
-        b = b * 0xFF;
+        let result = 0;
 
-        return (a << 8 | b);
+        if (a) {
+            result = (a << 8) | result;
+        }
+
+        if (b) {
+            result = (b << 0) | result;
+        }
+
+        if (result == null || result > 0xFFFF || result < 0) {
+            throw new Error("Invalid arguments");
+        }
+
+        return result;
     }
 
     public static toUint24(a: number, b?: number, c?: number): number {
@@ -27,7 +38,11 @@ export class Bit {
         }
 
         if (c) {
-            result = (c << 0) | result
+            result = (c << 0) | result;
+        }
+
+        if (result == null || result > 0xFFFFFF || result < 0) {
+            throw new Error("Invalid arguments");
         }
 
         return result;

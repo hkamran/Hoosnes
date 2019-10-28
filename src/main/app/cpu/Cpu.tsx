@@ -12,7 +12,6 @@ import {Address} from "../bus/Address";
 import {Stack} from "../memory/Stack";
 import {Wram} from "../memory/Wram";
 
-
 export class Cpu {
 
     public log : Logger = LoggerManager.create('Cpu');
@@ -20,10 +19,11 @@ export class Cpu {
     public registers: Registers = new Registers();
     public opcodes: Opcodes = new Opcodes();
     public console: Console;
+    public bus: Bus;
     public interrupts: InterruptHandler;
 
-    public stack: Stack;
-    public wram: Wram;
+    public stack: Stack = new Stack();
+    public wram: Wram = new Wram();
 
     public cycles: number = 0;
 
@@ -31,10 +31,12 @@ export class Cpu {
         Objects.requireNonNull(console);
 
         this.console = console;
+        this.bus = console.bus;
         this.interrupts = new InterruptHandler(this);
     }
 
     public tick(): number {
+        debugger;
         this.interrupts.tick();
 
         let pc: number = this.registers.pc.get();
@@ -56,15 +58,30 @@ export class Cpu {
     }
 
     public reset(): void {
-        this.registers.p.set(0x0);
-        this.registers.p.setI(0x1);
-        this.registers.p.setX(0x1);
-        this.registers.p.setM(0x1);
-
-        this.registers.sp.set(0x100);
         this.registers.e.set(0x1);
 
-        this.registers.pc.set(this.console.cartridge.interrupts.emulation.RESET);
+        this.registers.p.set(0x0);
+        this.registers.p.setI(0x1);
+        this.registers.p.setZ(0x1);
+        this.registers.p.setX(0x1);
+        this.registers.p.setM(0x1);
+        this.registers.p.setD(0x0);
+
+        this.registers.sp.set(0x1FF);
+        this.registers.d.set(0x0000);
+        this.registers.dbr.set(0x00);
+        this.registers.k.set(0x00);
+
+        this.registers.pc.set(0x0000);
+    }
+
+    load(cartridge: Cartridge): void {
+        Objects.requireNonNull(cartridge);
+
+        if (cartridge.interrupts != null) {
+            let reset: number = cartridge.interrupts.emulation.RESET;
+            this.registers.pc.set(reset);
+        }
     }
 }
 

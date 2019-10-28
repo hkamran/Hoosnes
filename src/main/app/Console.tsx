@@ -14,14 +14,22 @@ export default class Console {
     public cartridge : Cartridge;
 
     constructor() {
+        this.bus = new Bus(this);
         this.cpu = new Cpu(this);
         this.ppu = new Ppu(this);
-        this.bus = new Bus(this);
     }
 
     public load(romBytes : number[]) : void {
+        this.reset();
+
         this.cartridge = new Cartridge(romBytes);
         this.log.info("Cartridge is Loaded!", this.cartridge);
+        this.cpu.load(this.cartridge);
+    }
+
+    public reset(): void {
+        this.cpu.reset();
+        this.ppu.reset();
     }
 
     public tick(): void {

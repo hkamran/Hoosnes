@@ -240,7 +240,7 @@ export class Accumulator implements  IAddressing {
 
 export class Direct implements IAddressing {
 
-    public label: string = "Absolute";
+    public label: string = "DIRECT";
 
     public getValue(context: OpContext): Result {
         let result: Result = this.getAddress(context);
@@ -271,7 +271,7 @@ export class Direct implements IAddressing {
 
 export class DirectX implements IAddressing {
 
-    public label: string = "Absolute";
+    public label: string = "DIRECT,X";
 
     public getValue(context: OpContext): Result {
         let result: Result = this.getAddress(context);
@@ -313,7 +313,7 @@ export class DirectX implements IAddressing {
 
 export class DirectY implements IAddressing {
 
-    public label: string = "Direct Y";
+    public label: string = "DIRECT,Y";
 
     public getValue(context: OpContext): Result {
         let result: Result = this.getAddress(context);
@@ -357,7 +357,7 @@ export class DirectY implements IAddressing {
 
 export class DirectIndirect implements IAddressing {
 
-    public label: string = "(Direct)";
+    public label: string = "(DIRECT)";
 
     public getValue(context: OpContext): Result {
         let result: Result = this.getAddress(context);
@@ -418,7 +418,7 @@ export class DirectIndirect implements IAddressing {
 
 export class DirectIndexedIndirect implements IAddressing {
 
-    public label: string = "[Direct]";
+    public label: string = "[DIRECT]";
 
     public getValue(context: OpContext): Result {
         let result: Result = this.getAddress(context);
@@ -903,6 +903,7 @@ export class StackY implements IAddressing {
         return new Result([loaddr, hiaddr], cycles);
     }
 }
+
 //
 // Name           Native   Nocash
 // Implied        -        A,X,Y,S,P
@@ -917,26 +918,41 @@ export class StackY implements IAddressing {
 // (Indirect),Y   (nn),Y   [[nn]+Y]
 
 export class Addressing {
-    public static implied : IAddressing = new Implied();
-    public static immediate : IAddressing = new Immediate16();
-    public static relative : IAddressing = new Long();
-    public static relativeLong : IAddressing = new LongX();
+    public static accumulator: IAddressing = new Accumulator();
 
-    public static stackRelative : IAddressing;
-    public static stackRelativeIndirectIndexed : IAddressing;
-    public static impliedAccumulator : IAddressing;
-    public static blockMove : IAddressing;
+    public static absoluteJump: IAddressing = new AbsoluteJump();
+    public static absolute: IAddressing = new Absolute();
+    public static absoluteX: IAddressing = new AbsoluteX();
+    public static absoluteY: IAddressing = new AbsoluteY();
+    public static absoluteLong: IAddressing = new AbsoluteLong();
+    public static absoluteLongIndexed: IAddressing = new AbsoluteLongIndexed();
 
-    public static direct : IAddressing = new Direct();
-    public static directIndexedWithX : IAddressing = new DirectX();
-    public static directIndexedWithY : IAddressing = new DirectY();
-    public static directIndirect : IAddressing = new DirectIndirect();
-    public static directIndexedIndirect : IAddressing = new DirectIndirect();
-    public static directIndirectIndexed : IAddressing = new DirectIndirectIndexed();
-    public static directIndirectLong : IAddressing = new DirectIndirectLong();
-    public static directIndirectIndexedLong : IAddressing = new DirectIndirectIndexedLong();
+    public static direct: IAddressing = new Direct();
+    public static directX: IAddressing = new DirectX();
+    public static directY: IAddressing = new DirectY();
+    public static directIndexedIndirect: IAddressing = new DirectIndexedIndirect();
+    public static directIndirect: IAddressing = new DirectIndirect();
+    public static directIndirectIndexed: IAddressing = new DirectIndirectIndexed();
+    public static directIndirectIndexedLong: IAddressing = new DirectIndirectIndexedLong();
+    public static directIndirectLong: IAddressing = new DirectIndirectLong();
 
-    public static absolute : IAddressing = new Absolute();
-    public static absoluteLong : IAddressing = new AbsoluteLong();
-    public static absoluteLongIndex : IAddressing = new AbsoluteLongIndexed();
+
+    public static immediateX: IAddressing = new ImmediateX();
+    public static immediateM: IAddressing = new ImmediateM();
+    public static immediate8: IAddressing = new Immediate8();
+    public static immediate16: IAddressing = new Immediate16();
+
+    public static implied: IAddressing = new Implied();
+
+    public static long: IAddressing = new Long();
+    public static longX: IAddressing = new LongX();
+
+    public static relative8: IAddressing = new Relative8();
+    public static relative16: IAddressing = new Relative16();
+
+    public static sourceDestination: IAddressing = new SourceDestination();
+
+    public static stack: IAddressing = new Stack();
+    public static stackY: IAddressing = new StackY();
+
 }

@@ -2,7 +2,7 @@ import {Mode, Modes} from "../Modes";
 
 export class Register {
 
-    protected val : number;
+    protected val : number = 0;
     protected mode : Mode = Modes.bit8;
     protected label : string;
 
@@ -12,16 +12,16 @@ export class Register {
     }
 
     public set(val : number): void {
-        this.val = val & this.mode.size;
+        this.val = val;
     }
 
     public get(): number {
-        return this.val & this.mode.size;
+        return this.val;
     }
 
     public increment(val : number): number {
-        let maskedVal = val & this.mode.size;
-        this.val = (maskedVal + this.val) & this.mode.size;
+        let maskedVal = val;
+        this.val = (maskedVal + this.val);
         return this.val;
     }
 
@@ -31,7 +31,7 @@ export class Register {
 
     public setMode(mode : Mode) {
         this.mode = mode;
-        this.val = this.val & mode.size;
+        // this.val = this.val & mode.size;
     }
 
     public getMode(): Mode {
