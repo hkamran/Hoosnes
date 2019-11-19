@@ -2,7 +2,7 @@
 export class Result {
 
     private values: number[] = [];
-    cycles: number = 0;
+    public cycles: number = 0;
 
     constructor(values: number[], cycles?: number) {
         if (values == null) {

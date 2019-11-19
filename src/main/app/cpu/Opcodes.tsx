@@ -41,28 +41,6 @@ export class OpContext {
     }
 }
 
-export class OpCalculation {
-
-    public operands: number[] = [];
-    public result: number = 0;
-    public cycle: number = 0;
-
-    constructor(operands: number[], result: number) {
-        this.operands = operands;
-        this.result = result;
-    }
-
-    public getOperand(index: number): number {
-        if (this.operands == null || index > this.operands.length) return 0;
-        if (index < 0) return 0;
-    }
-
-    public getResult(): number {
-        return this.result;
-    }
-
-}
-
 export class Opcode {
     public name: string;
     public cycle: number;
@@ -77,7 +55,8 @@ export class Opcode {
         this.size = size;
     }
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
+        return null;
     }
 
     public getCycle(): number {
@@ -100,49 +79,51 @@ export class Opcode {
     // V overflow
     // N negative
 
-    protected setFlagC(context: OpContext, output: OpCalculation): void {
-        if (output == null || context) {
+    protected setFlagC(context: OpContext, val: number): void {
+        if (val == null || val  < 0 || context == null) {
             throw new Error("Invalid flag calculation!");
         }
 
-        let val = output.getResult();
         //let isOverflow: boolean = val > context.mode.size;
-        //context.cpu.registers.p.setC(isOverflow ? 1 : 0);
+        if (val > 0xFF) {
+            context.registers.p.setC(1);
+        } else {
+            context.registers.p.setC(0);
+        }
     }
 
 
-    protected setFlagZ(context: OpContext, output: OpCalculation): void {
-        if (output == null || context) {
+    protected setFlagZ(context: OpContext, val: number): void {
+        if (val == null || val < 0 || context == null) {
             throw new Error("Invalid flag calculation!");
         }
 
-        let val = output.getResult();
-        //let isZero: boolean = (val & context.mode.mask) == 0;
-        //context.cpu.registers.p.setZ(isZero ? 1 : 0);
+        if (val == 0) {
+            context.cpu.registers.p.setZ(1);
+        } else {
+            context.cpu.registers.p.setZ(0);
+        }
     }
 
-    protected setFlagV(context: OpContext, output: OpCalculation): void {
-        if (output == null || context) {
+    protected setFlagV(context: OpContext, a: number, b: number): void {
+        if (a == null || b == null || a < 0 || b < 0 || context) {
             throw new Error("Invalid flag calculation!");
         }
 
-        let a = output.getOperand(0);
-        let b = output.getOperand(1);
-        let sum = output.getResult();
+        let sum = a + b;
 
         //let isOverflow = (((a ^ b) >> context.mode.size) != 0) && (((a ^ sum) >> context.mode.size) != 0);
         //context.cpu.registers.p.setV(isOverflow ? 1 : 0);
 
     }
 
-    protected setFlagN(context: OpContext, output: OpCalculation): void {
-        if (output == null || context) {
+    protected setFlagN(context: OpContext, val: number): void {
+        if (val == null || context) {
             throw new Error("Invalid flag calculation!");
         }
 
-        let val = output.getResult();
-        //let isNegative: boolean = ((val >> context.mode.size) & 1) == 1;
-        //context.cpu.registers.p.setN(isNegative ? 1 : 0);
+        let isNegative: boolean = ((val >> 7) & 1) == 1;
+        context.cpu.registers.p.setN(isNegative ? 1 : 0);
     }
 
 }
@@ -150,7 +131,7 @@ export class Opcode {
 export class ADC extends Opcode {
     public name: string = "ADC";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let a: number = context.cpu.registers.a.get();
@@ -158,58 +139,58 @@ export class ADC extends Opcode {
         let c: number = context.cpu.registers.p.getC();
 
         let result: number = a + b + c;
-        let output: OpCalculation = new OpCalculation([a, b], result);
 
-        this.setFlagN(context, output);
-        this.setFlagV(context, output);
-        this.setFlagZ(context, output);
-        this.setFlagC(context, output);
+        this.setFlagN(context, result);
+        this.setFlagV(context, a, c)
+        this.setFlagZ(context, result);
+        this.setFlagC(context, result);
 
         context.cpu.registers.a.set(result);
+        return null;
     }
 }
 
 export class AND extends Opcode {
     public name: string = "AND";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let a: number = context.cpu.registers.a.get();
         let b: number = 0;
 
         let result: number = a & b;
-        let output: OpCalculation = new OpCalculation([b], result);
 
-        this.setFlagZ(context, output);
-        this.setFlagN(context, output);
+        this.setFlagZ(context, result);
+        this.setFlagN(context, result);
 
         context.cpu.registers.a.set(result);
+
+        return null;
     }
 }
 
 export class ASL extends Opcode {
     public name: string = "ASL";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let mode: Mode = context.cpu.registers.e.getMode();
-        let a: number = this.getOperand(context);
+        let result: Result = this.mode.getValue(context);
+
+        let a: number = result.getValue();
         let c: number = (a >> mode.size) & 1;
 
         a = (a << 1) % mode.size;
-        let output: OpCalculation = new OpCalculation([c, a], c);
 
-        this.setFlagN(context, output);
-        this.setFlagN(context, output);
-        this.setFlagC(context, output);
+        this.setFlagN(context, a);
+        this.setFlagN(context, a);
+        this.setFlagC(context, a);
 
         context.cpu.registers.a.set(a);
-    }
 
-    public getOperand(state: OpContext): number {
-        return 0;
+        return null;
     }
 
 }
@@ -217,8 +198,10 @@ export class ASL extends Opcode {
 export class BCC extends Opcode {
     public name: string = "BCC";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+
+        return null;
 
     }
 }
@@ -226,32 +209,37 @@ export class BCC extends Opcode {
 export class BCS extends Opcode {
     public name: string = "BCS";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+
+        return null;
     }
 }
 
 export class BEQ extends Opcode {
     public name: string = "BEQ";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 export class BIT extends Opcode {
     public name: string = "BIT";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class BMI extends Opcode {
     public name: string = "BMI";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -259,16 +247,18 @@ class BMI extends Opcode {
 class BNE extends Opcode {
     public name: string = "BNE";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class BPL extends Opcode {
     public name: string = "BPL";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -276,8 +266,9 @@ class BPL extends Opcode {
 class CMP extends Opcode {
     public name: string = "CMP";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -285,8 +276,9 @@ class CMP extends Opcode {
 class COP extends Opcode {
     public name: string = "COP";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
 
         // Useless
     }
@@ -296,8 +288,9 @@ class COP extends Opcode {
 class CPX extends Opcode {
     public name: string = "CPX";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -305,26 +298,29 @@ class CPX extends Opcode {
 class CPY extends Opcode {
     public name: string = "CPY";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class CLC extends Opcode {
     public name: string = "CLC";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
         context.cpu.registers.p.setC(0);
+        return null;
     }
 }
 
 class CLD extends Opcode {
     public name: string = "CLD";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
         context.cpu.registers.p.setD(0);
+        return null;
     }
 
 }
@@ -332,9 +328,10 @@ class CLD extends Opcode {
 class CLI extends Opcode {
     public name: string = "CLI";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
         context.cpu.registers.p.setI(0);
+        return null;
     }
 
 }
@@ -342,9 +339,10 @@ class CLI extends Opcode {
 class CLV extends Opcode {
     public name: string = "CLV";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
         context.cpu.registers.p.setV(0);
+        return null;
     }
 
 
@@ -353,16 +351,18 @@ class CLV extends Opcode {
 class BRA extends Opcode {
     public name: string = "BRA";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class BRK extends Opcode {
     public name: string = "BRK";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
 
         // Useless
     }
@@ -372,8 +372,9 @@ class BRK extends Opcode {
 class BVS extends Opcode {
     public name: string = "BVS";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -381,8 +382,9 @@ class BVS extends Opcode {
 class BVC extends Opcode {
     public name: string = "BVC";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -390,8 +392,9 @@ class BVC extends Opcode {
 class BRL extends Opcode {
     public name: string = "BRL";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -399,8 +402,9 @@ class BRL extends Opcode {
 class DEC extends Opcode {
     public name: string = "DEC";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
 
 
         // TODO
@@ -412,8 +416,9 @@ class DEC extends Opcode {
 class DEX extends Opcode {
     public name: string = "DEX";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
 
     }
 
@@ -422,8 +427,9 @@ class DEX extends Opcode {
 class DEY extends Opcode {
     public name: string = "DEY";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
 
     }
 
@@ -432,8 +438,9 @@ class DEY extends Opcode {
 class EOR extends Opcode {
     public name: string = "EOR";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
 
 
 
@@ -444,10 +451,11 @@ class EOR extends Opcode {
 class INC extends Opcode {
     public name: string = "INC";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
 
+        return null;
 
         // TODO
         // context.cpu.bus.writeBytes(0x00, context.opaddr, result & context.mode.mask, 2);
@@ -458,8 +466,9 @@ class INC extends Opcode {
 class INY extends Opcode {
     public name: string = "INY";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -467,8 +476,9 @@ class INY extends Opcode {
 class XCE extends Opcode {
     public name: string = "XCE";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -476,16 +486,18 @@ class XCE extends Opcode {
 class XBA extends Opcode {
     public name: string = "XBA";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class WDM extends Opcode {
     public name: string = "WDM";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -493,8 +505,9 @@ class WDM extends Opcode {
 class WAI extends Opcode {
     public name: string = "WAI";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -502,54 +515,51 @@ class WAI extends Opcode {
 class TYX extends Opcode {
     public name: string = "TYX";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.registers.y.get();
         let to: number = context.cpu.registers.x.get();
 
-        let output: OpCalculation = new OpCalculation([from, to], from);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, from);
+        this.setFlagZ(context, from);
 
         context.cpu.registers.x.set(from);
+        return null;
     }
 }
 
 class TYA extends Opcode {
     public name: string = "TYA";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.registers.y.get();
         let to: number = context.cpu.registers.a.get();
 
-        let output: OpCalculation = new OpCalculation([from, to], from);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, from);
+        this.setFlagZ(context, from);
 
         context.cpu.registers.a.set(from);
+        return null;
     }
 }
 
 class TXY extends Opcode {
     public name: string = "TXY";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.registers.x.get();
         let to: number = context.cpu.registers.y.get();
 
-        let output: OpCalculation = new OpCalculation([from, to], from);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, from);
+        this.setFlagZ(context, from);
 
         context.cpu.registers.y.set(from);
+        return null;
     }
 
 }
@@ -557,18 +567,18 @@ class TXY extends Opcode {
 class TAX extends Opcode {
     public name: string = "TAX";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.registers.a.get();
         let to: number = context.cpu.registers.x.get();
 
-        let output: OpCalculation = new OpCalculation([from, to], from);
 
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, from);
+        this.setFlagZ(context, from);
 
         context.cpu.registers.x.set(from);
+        return null;
     }
 
 }
@@ -576,36 +586,34 @@ class TAX extends Opcode {
 class TAY extends Opcode {
     public name: string = "TAY";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.registers.a.get();
         let to: number = context.cpu.registers.y.get();
 
-        let output: OpCalculation = new OpCalculation([from, to], from);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, from);
+        this.setFlagZ(context, from);
 
         context.cpu.registers.y.set(from);
+        return null;
     }
 }
 
 class TCD extends Opcode {
     public name: string = "TCD";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.registers.a.get();
         let to: number = context.cpu.registers.d.get();
 
-        let output: OpCalculation = new OpCalculation([from, to], from);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, from);
+        this.setFlagZ(context, from);
 
         context.cpu.registers.d.set(from);
+        return null;
     }
 
 }
@@ -613,18 +621,17 @@ class TCD extends Opcode {
 class TCS extends Opcode {
     public name: string = "TCS";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.registers.a.get();
         let to: number = context.cpu.registers.sp.get();
 
-        let output: OpCalculation = new OpCalculation([from, to], from);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, from);
+        this.setFlagZ(context, from);
 
         context.cpu.registers.sp.set(from);
+        return null;
     }
 
 }
@@ -632,18 +639,17 @@ class TCS extends Opcode {
 class TDC extends Opcode {
     public name: string = "TDC";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.registers.d.get();
         let to: number = context.cpu.registers.a.get();
 
-        let output: OpCalculation = new OpCalculation([from, to], from);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, from);
+        this.setFlagZ(context, from);
 
         context.cpu.registers.a.set(from);
+        return null;
     }
 
 }
@@ -651,7 +657,7 @@ class TDC extends Opcode {
 class TRB extends Opcode {
     public name: string = "TRB";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let operand: number = 0;
@@ -661,11 +667,10 @@ class TRB extends Opcode {
         let complementOfA = ~a & 0;
         let result = (a & operand) & complementOfA;
 
-        let output: OpCalculation = new OpCalculation([operand, a], (a & operand));
-
-        this.setFlagZ(context, output);
+        this.setFlagZ(context, result);
 
         // TODO write to bus
+        return null;
     }
 
 }
@@ -673,27 +678,28 @@ class TRB extends Opcode {
 class TXS extends Opcode {
     public name: string = "TXS";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.registers.x.get();
         context.cpu.registers.sp.set(from);
+        return null;
     }
 }
 
 class TSB extends Opcode {
     public name: string = "TSB";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let operand: number = 0;
         let a: number = context.cpu.registers.a.get();
 
         let result = operand & a;
-        let output: OpCalculation = new OpCalculation([operand, a], result);
 
         // TODO write to bus
+        return null;
     }
 
 }
@@ -701,25 +707,24 @@ class TSB extends Opcode {
 class TXA extends Opcode {
     public name: string = "TXA";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.registers.x.get();
         let to: number = context.cpu.registers.a.get();
 
-        let output: OpCalculation = new OpCalculation([from, to], from);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, from);
+        this.setFlagZ(context, from);
 
         context.cpu.registers.a.set(from);
+        return null;
     }
 }
 
 class TSX extends Opcode {
     public name: string = "TSX";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.stack.popByte();
@@ -728,12 +733,11 @@ class TSX extends Opcode {
         }
         let to: number = context.cpu.registers.x.get();
 
-        let output: OpCalculation = new OpCalculation([from, to], from);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, from);
+        this.setFlagZ(context, from);
 
         context.cpu.registers.x.set(from);
+        return null;
     }
 
 }
@@ -741,18 +745,17 @@ class TSX extends Opcode {
 class TSC extends Opcode {
     public name: string = "TSC";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let from: number = context.cpu.registers.sp.get();
         let to: number = context.cpu.registers.a.get();
 
-        let output: OpCalculation = new OpCalculation([from, to], from);
-
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, from);
+        this.setFlagZ(context, from);
 
         context.cpu.registers.a.set(from);
+        return null;
     }
 
 }
@@ -760,13 +763,14 @@ class TSC extends Opcode {
 class STZ extends Opcode {
     public name: string = "STZ";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         // context.cpu.console.bus.writeByte(context.opaddr, 0x00);
         // if (context.cpu.registers.p.getM() == 0) {
         //     context.cpu.console.bus.writeByte(context.opaddr, 0x00);
         // }
+        return null;
 
     }
 
@@ -775,8 +779,9 @@ class STZ extends Opcode {
 class JMP extends Opcode {
     public name: string = "JMP";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -784,8 +789,9 @@ class JMP extends Opcode {
 class JSR extends Opcode {
     public name: string = "JSR";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -793,17 +799,17 @@ class JSR extends Opcode {
 class LDA extends Opcode {
     public name: string = "LDA";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let result: number = 0;
-        let output: OpCalculation = new OpCalculation([], result);
 
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, result);
+        this.setFlagZ(context, result);
 
         // TODO
         context.cpu.registers.a.set(result);
+        return null;
     }
 
 }
@@ -811,17 +817,17 @@ class LDA extends Opcode {
 class LDX extends Opcode {
     public name: string = "LDX";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let result: number = 0;
-        let output: OpCalculation = new OpCalculation([], result);
 
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, result);
+        this.setFlagZ(context, result);
 
         // TODO
         context.cpu.registers.x.set(result);
+        return null;
     }
 
 }
@@ -829,25 +835,26 @@ class LDX extends Opcode {
 class LDY extends Opcode {
     public name: string = "LDY";
 
-    public execute(context: OpContext): void {
+    public execute(context: OpContext): Result {
         console.log(this.name);
 
         let result: number = 0;
-        let output: OpCalculation = new OpCalculation([], result);
 
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, result);
+        this.setFlagZ(context, result);
 
         // TODO
         context.cpu.registers.y.set(result);
+        return null;
     }
 }
 
 class LSR extends Opcode {
     public name: string = "LSR";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -855,24 +862,27 @@ class LSR extends Opcode {
 class MVN extends Opcode {
     public name: string = "MVN";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class MVP extends Opcode {
     public name: string = "MVP";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class NOP extends Opcode {
     public name: string = "NOP";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -880,8 +890,9 @@ class NOP extends Opcode {
 class ORA extends Opcode {
     public name: string = "ORA";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -889,16 +900,18 @@ class ORA extends Opcode {
 class PEA extends Opcode {
     public name: string = "PEA";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class PEI extends Opcode {
     public name: string = "PEI";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -906,24 +919,27 @@ class PEI extends Opcode {
 class PER extends Opcode {
     public name: string = "PER";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class PHA extends Opcode {
     public name: string = "PHA";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class PHB extends Opcode {
     public name: string = "PHB";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -931,8 +947,9 @@ class PHB extends Opcode {
 class SBC extends Opcode {
     public name: string = "SBC";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -940,19 +957,21 @@ class SBC extends Opcode {
 class STA extends Opcode {
     public name: string = "STA";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let result : number = context.cpu.registers.a.get();
         // context.cpu.console.bus.writeByte(context.opaddr, result);
+        return null;
     }
 }
 
 class ROL extends Opcode {
     public name: string = "ROL";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -960,30 +979,33 @@ class ROL extends Opcode {
 class ROR extends Opcode {
     public name: string = "ROR";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class STY extends Opcode {
     public name: string = "STY";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let result : number = context.cpu.registers.y.get();
         // context.cpu.console.bus.writeByte(context.opaddr, result);
+        return null;
     }
 }
 
 class PHD extends Opcode {
     public name: string = "PHD";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let result : number = context.cpu.registers.d.get();
         context.cpu.stack.pushByte(result);
+        return null;
     }
 
 }
@@ -991,11 +1013,12 @@ class PHD extends Opcode {
 class PHK extends Opcode {
     public name: string = "PHK";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let result : number = context.cpu.registers.k.get();
         context.cpu.stack.pushByte(result);
+        return null;
     }
 
 }
@@ -1003,11 +1026,12 @@ class PHK extends Opcode {
 class PHP extends Opcode {
     public name: string = "PHP";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let result : number = context.cpu.registers.p.get();
         context.cpu.stack.pushByte(result);
+        return null;
     }
 
 }
@@ -1015,16 +1039,16 @@ class PHP extends Opcode {
 class PHX extends Opcode {
     public name: string = "PHX";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let result : number = context.cpu.stack.popByte();
 
-        let output: OpCalculation = new OpCalculation([], result);
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, result);
+        this.setFlagZ(context, result);
 
         context.cpu.registers.x.set(result);
+        return null;
     }
 
 }
@@ -1032,16 +1056,16 @@ class PHX extends Opcode {
 class PHY extends Opcode {
     public name: string = "PHY";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let result : number = context.cpu.stack.popByte();
 
-        let output: OpCalculation = new OpCalculation([], result);
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, result);
+        this.setFlagZ(context, result);
 
         context.cpu.registers.y.set(result);
+        return null;
     }
 
 }
@@ -1049,16 +1073,16 @@ class PHY extends Opcode {
 class PLA extends Opcode {
     public name: string = "PLA";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let result : number = context.cpu.stack.popByte();
 
-        let output: OpCalculation = new OpCalculation([], result);
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, result);
+        this.setFlagZ(context, result);
 
         context.cpu.registers.a.set(result);
+        return null;
     }
 
 }
@@ -1066,16 +1090,16 @@ class PLA extends Opcode {
 class PLB extends Opcode {
     public name: string = "PLB";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let result : number = context.cpu.stack.popByte();
 
-        let output: OpCalculation = new OpCalculation([], result);
-        this.setFlagN(context, output);
-        this.setFlagZ(context, output);
+        this.setFlagN(context, result);
+        this.setFlagZ(context, result);
 
         context.cpu.registers.dbr.set(result);
+        return null;
     }
 
 }
@@ -1083,16 +1107,18 @@ class PLB extends Opcode {
 class PLD extends Opcode {
     public name: string = "PLD";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class PLP extends Opcode {
     public name: string = "PLP";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -1100,8 +1126,9 @@ class PLP extends Opcode {
 class PLX extends Opcode {
     public name: string = "PLX";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -1109,16 +1136,18 @@ class PLX extends Opcode {
 class PLY extends Opcode {
     public name: string = "PLY";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class REP extends Opcode {
     public name: string = "REP";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 
 }
@@ -1126,13 +1155,14 @@ class REP extends Opcode {
 class STX extends Opcode {
     public name: string = "STX";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let result : number = context.cpu.registers.x.get();
         // context.cpu.console.bus.writeByte(context.opaddr, result);
 
         // TODO
+        return null;
     }
 
 }
@@ -1140,8 +1170,9 @@ class STX extends Opcode {
 class STP extends Opcode {
     public name: string = "STP";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
 
         // Useless
     }
@@ -1150,15 +1181,16 @@ class STP extends Opcode {
 class RTI extends Opcode {
     public name: string = "RTI";
 
-    public execute(state: OpContext): void {
+    public execute(state: OpContext): Result {
         console.log(this.name);
+        return null;
     }
 }
 
 class RTL extends Opcode {
     public name: string = "RTL";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let lowByte : number = context.cpu.stack.popByte();
@@ -1169,6 +1201,7 @@ class RTL extends Opcode {
 
         context.cpu.registers.pc.set(result);
         context.cpu.registers.k.set(pb);
+        return null;
     }
 
 }
@@ -1176,7 +1209,7 @@ class RTL extends Opcode {
 class RTS extends Opcode {
     public name: string = "RTS";
 
-    public execute(context : OpContext): void {
+    public execute(context : OpContext): Result {
         console.log(this.name);
 
         let lowByte : number = context.cpu.stack.popByte();
@@ -1184,6 +1217,7 @@ class RTS extends Opcode {
         let result : number = lowByte << 8 | highByte;
 
         context.cpu.registers.pc.set(result);
+        return null;
     }
 
 }
@@ -1191,10 +1225,9 @@ class RTS extends Opcode {
 class SEC extends Opcode {
     public name: string = "SEC";
 
-    public execute(context : OpContext): void {
-        console.log(this.name);
-
-        context.cpu.registers.p.setC(1);
+    public execute(context : OpContext): Result {
+        context.registers.p.setC(1);
+        return null;
     }
 
 }
@@ -1202,10 +1235,9 @@ class SEC extends Opcode {
 class SED extends Opcode {
     public name: string = "SED";
 
-    public execute(context : OpContext): void {
-        console.log(this.name);
-
-        context.cpu.registers.p.setD(1);
+    public execute(context : OpContext): Result {
+        context.registers.p.setD(1);
+        return null;
     }
 
 }
@@ -1213,10 +1245,9 @@ class SED extends Opcode {
 class SEI extends Opcode {
     public name: string = "SEI";
 
-    public execute(context : OpContext): void {
-        console.log(this.name);
-
-        context.cpu.registers.p.setI(1);
+    public execute(context : OpContext): Result {
+        context.registers.p.setI(1);
+        return null;
     }
 
 }
@@ -1224,8 +1255,8 @@ class SEI extends Opcode {
 class SEP extends Opcode {
     public name: string = "SEP";
 
-    public execute(state: OpContext): void {
-        console.log(this.name);
+    public execute(state: OpContext): Result {
+        return null;
     }
 }
 
