@@ -27,6 +27,10 @@ export class Cpu {
 
     public cycles: number = 0;
 
+    public op: Opcode;
+    public opCode: number;
+    public opCycle: number;
+
     constructor(console: Console) {
         Objects.requireNonNull(console);
 
@@ -36,7 +40,6 @@ export class Cpu {
     }
 
     public tick(): number {
-        debugger;
         this.interrupts.tick();
 
         let pc: number = this.registers.pc.get();
@@ -46,6 +49,10 @@ export class Cpu {
         let opaddr: Address = Address.create(pc, bank);
         let opcode: Result = this.console.bus.readByte(opaddr);
         let op: Opcode = this.opcodes.get(opcode.getValue());
+
+        this.op = op;
+        this.opCode = opcode.getValue();
+        this.opCycle = opcode.getCycles();
 
         let context: OpContext = new OpContext(opaddr, op, this.console);
         op.execute(context);

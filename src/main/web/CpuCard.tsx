@@ -3,9 +3,12 @@ import {Card} from "./core/layout/Card";
 import Console from "../app/Console";
 import {Modes} from "../app/Modes";
 import {EmulationRegister, Register, StatusRegister} from "../app/cpu/Registers";
+import {CSSProperties} from "react";
+import {Opcode} from "../app/cpu/Opcodes";
 
 interface ICpuCardProps {
     snes: Console;
+    addFetchFunction: (renderer) => void;
 }
 
 interface ICpuCardState {
@@ -27,6 +30,12 @@ interface ICpuCardState {
     decimal: number;
     accumulator: number;
     overflow: number;
+
+    opCode: number;
+    op: Opcode;
+    opCycle: number;
+
+    cycles: number;
 }
 
 
@@ -55,11 +64,17 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
             decimal: 0,
             accumulator: 0,
             overflow: 0,
+
+            opCode: 0,
+            op: null,
+            opCycle: 0,
+
+            cycles: 0,
         };
     }
 
     public componentDidMount(): void {
-
+        this.props.addFetchFunction(this.fetch.bind(this));
     }
 
     public fetch() {
@@ -82,6 +97,12 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
             decimal: this.props.snes.cpu.registers.p.getD(),
             accumulator: this.props.snes.cpu.registers.p.getM(),
             overflow: this.props.snes.cpu.registers.p.getV(),
+
+            opCode: this.props.snes.cpu.opCode,
+            opCycle: this.props.snes.cpu.opCycle,
+            op: this.props.snes.cpu.op,
+
+            cycles: this.props.snes.cpu.cycles,
         });
     }
 
@@ -89,10 +110,23 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
 
         return (
             <Card title="CPU">
+                <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
+                    <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
+                        <legend>Information</legend>
+                        <div style={{display: "flex"}}>
+                            <ul style={{listStyle: "none", flexGrow: 1, padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Cycles:</span>
+                                    <span>{this.state.cycles}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </fieldset>
+                </div>
                 <div style={{display: "flex", flexDirection: "row"}}>
                     <fieldset style={{border: "1px solid rgb(100, 100, 100)"}}>
                         <legend>Registers</legend>
-                        <div style={{display: "flex"}}>
+                        <div style={{display: "flex", flexGrow: 1}}>
                             <ul style={{listStyle: "none", width: "130px", padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">PC:</span>
@@ -132,7 +166,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                     <fieldset style={{border: "1px solid rgb(100, 100, 100)"}}>
                         <legend>Flags</legend>
                         <div style={{display: "flex"}}>
-                            <ul style={{listStyle: "none", width: "120px", padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
+                            <ul style={{listStyle: "none", flexGrow: 1, width: "120px", padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Emulation:</span>
                                     <span>{this.state.emulation.toString(16).toUpperCase()}</span>
@@ -168,6 +202,27 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Overflow:</span>
                                     <span>{this.state.overflow.toString(16).toUpperCase()}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </fieldset>
+                </div>
+                <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
+                    <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
+                        <legend>Operation</legend>
+                        <div style={{display: "flex"}}>
+                            <ul style={{listStyle: "none", flexGrow: 1, padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Code:</span>
+                                    <span>{this.state.op ? "0x" + this.state.opCode.toString(16) : ""}</span>
+                                </li>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Name:</span>
+                                    <span>{this.state.op ? this.state.op.name.toUpperCase() : ""}</span>
+                                </li>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Cycles:</span>
+                                    <span>{this.state.opCycle}</span>
                                 </li>
                             </ul>
                         </div>

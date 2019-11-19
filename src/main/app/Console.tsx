@@ -34,6 +34,6 @@ export default class Console {
 
     public tick(): void {
         this.cpu.tick();
-        this.ppu.tick();
+        // this.ppu.tick();
     }
 }
