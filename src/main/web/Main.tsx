@@ -9,6 +9,7 @@ import {SpriteCard} from "./SpriteCards";
 import {CpuCard} from "./CpuCard";
 import {DebuggerCard} from "./DebuggerCard";
 import {Card} from "./core/layout/Card";
+import {Register, Registers} from "../app/cpu/Registers";
 
 declare let window : any;
 window.snes = new Console();
@@ -21,11 +22,16 @@ export class TickEvent {
     public opcode: number;
     public cycle: number;
     public opname: string;
+    public registerK: number;
+    public registerPC: number;
 
-    constructor(opcode: number, cycle: number, opname: string) {
-        this.opcode = opcode;
-        this.cycle = cycle;
-        this.opname = opname;
+    constructor(snes: Console) {
+        this.opcode = snes.cpu.opCode;
+        this.cycle = snes.cpu.cycles;
+        this.opname = snes.cpu.op ? snes.cpu.op.name : "NULL";
+
+        this.registerK = snes.cpu.registers.k.get();
+        this.registerPC = snes.cpu.registers.pc.get();
     }
 }
 
@@ -46,11 +52,7 @@ export class Main extends React.Component<IMainProps, any> {
     public tick() {
         this.props.snes.tick();
 
-        this.state.logs.push(
-            new TickEvent(
-                this.props.snes.cpu.opCode,
-                this.props.snes.cpu.cycles,
-                this.props.snes.cpu.op ? this.props.snes.cpu.op.name: "NULL"));
+        this.state.logs.push(new TickEvent(this.props.snes));
 
         for (let fetch of this.state.fetches) {
             fetch();

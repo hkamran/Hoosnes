@@ -67,19 +67,18 @@ export class CartridgeCard extends React.Component<ICartridgeCardProps, any> {
                 <div>
                     <input type="file" id="file" onChange={this.handleChange} />
                 </div>
-                <div>
-                    <fieldset style={{border: "1px solid rgb(100, 100, 100)", marginTop: "10px"}}>
+                <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
+                    <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
                         <legend>Details</legend>
-
                         <div style={{display: "flex"}}>
-                            <ul style={{listStyle: "none", padding: "0px", margin: "0px", paddingRight: "80px", fontSize: "12px"}}>
-                                <li>
-                                    <span className="header">Title:</span>
-                                    <span style={{whiteSpace: "nowrap"}}>{this.state.title}</span>
+                            <ul style={{listStyle: "none", flexGrow: 1, padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Title:</span>
+                                    <span>{this.state.title}</span>
                                 </li>
-                                <li>
-                                    <span className="header">Mapping:</span>
-                                    <span style={{whiteSpace: "nowrap"}}>{this.state.mapping}</span>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Mapping:</span>
+                                    <span>{this.state.mapping}</span>
                                 </li>
                             </ul>
                         </div>

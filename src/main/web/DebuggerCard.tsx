@@ -32,7 +32,7 @@ export class DebuggerCard extends React.Component<IDebuggerCardProps, any> {
                         <div style={{display: "flex", flexDirection: "column", fontSize: "12px"}}>
                             {this.props.logs.map((value, index) => {
                                 return (<div key={index}>
-                                    Cycle:{value.cycle} Opcode:{"0x" + value.opcode} Opname:{value.opname}
+                                    Cycle:{value.cycle} Opcode:{"0x" + value.opcode} Opname:{value.opname}, K:0x{value.registerK.toString(16)}, PC:0x{value.registerPC.toString(16)}
                                 </div>);
                             })}
                         </div>
