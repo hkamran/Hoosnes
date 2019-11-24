@@ -104,7 +104,6 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
     }
 
     public render() {
-
         return (
             <Card title="CPU">
                 <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
@@ -215,15 +214,15 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                             <ul style={{listStyle: "none", flexGrow: 1, padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Code:</span>
-                                    <span>{this.state.op ? "0x" + this.state.op.code.toString(16).toUpperCase() : ""}</span>
+                                    <span>{this.state.op != null ? "0x" + this.state.op.code.toString(16).toUpperCase() : ""}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Name:</span>
-                                    <span>{this.state.op ? this.state.op.name.toUpperCase() : ""}</span>
+                                    <span>{this.state.op != null ? this.state.op.name.toUpperCase() : ""}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Cycles:</span>
-                                    <span>{this.state.op ? this.state.op.getCycle() : ""}</span>
+                                    <span>{this.state.op != null ? this.state.op.getCycle() : ""}</span>
                                 </li>
                             </ul>
                         </div>

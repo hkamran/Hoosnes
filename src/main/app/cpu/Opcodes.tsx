@@ -51,6 +51,7 @@ export class Operation {
     constructor(code: number, cycle: number, cycleOptions: number[], size: number[], mode: IAddressing) {
         Objects.requireNonNull(mode);
 
+        this.code = code;
         this.cycle = cycle;
         this.mode = mode;
         this.size = size;
