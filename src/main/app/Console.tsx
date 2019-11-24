@@ -33,7 +33,10 @@ export default class Console {
     }
 
     public tick(): void {
-        this.cpu.tick();
-        // this.ppu.tick();
+        let cycles: number = this.cpu.tick();
+
+        for (let i = 0; i < cycles; i++) {
+            this.ppu.tick();
+        }
     }
 }

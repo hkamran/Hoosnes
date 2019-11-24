@@ -21,8 +21,11 @@ export class Ppu {
     public registers: Registers;
 
     public scanline: number = 0;
-    public cycle: number = 0;
-    public frame: number = 0;
+
+    public hcounter: number = 0;
+    public vcounter: number = 0;
+
+    public frames: number = 0;
 
     public screen: Screen;
 
@@ -42,29 +45,29 @@ export class Ppu {
     public tick(): void {
         let isScreenFinished: boolean =
             ScreenStates.VERT_BLANK.end == this.scanline &&
-            ScreenStates.HORT_BLANK.end == this.cycle;
+            ScreenStates.HORT_BLANK.end == this.hcounter;
 
         let isCycleFinished: boolean = 
-            ScreenStates.HORT_BLANK.end <= this.cycle;
+            ScreenStates.HORT_BLANK.end <= this.hcounter;
 
         let isScanlineFinished: boolean =
             ScreenStates.VERT_BLANK.end <= this.scanline;
 
         let isVBlankStart: boolean =
-            ScreenStates.HORT_PRELINE.start == this.cycle &&
+            ScreenStates.HORT_PRELINE.start == this.hcounter &&
             ScreenStates.VERT_BLANK.start == this.scanline;
 
         let isVBlankEnd: boolean =
-            ScreenStates.HORT_PRELINE.start == this.cycle &&
+            ScreenStates.HORT_PRELINE.start == this.hcounter &&
             ScreenStates.VERT_BLANK.end == this.scanline;
 
         let isRendering: boolean =
             ScreenStates.VERT_RENDERLINE.isInRange(this.scanline) &&
-            ScreenStates.HORT_RENDERLINE.isInRange(this.cycle);
+            ScreenStates.HORT_RENDERLINE.isInRange(this.hcounter);
 
-        this.cycle++;
+        this.hcounter++;
         if (isCycleFinished) {
-            this.cycle = 0;
+            this.hcounter = 0;
             this.scanline++;
             if (isScanlineFinished) {
                 this.scanline = 0;
@@ -76,7 +79,7 @@ export class Ppu {
         }
 
         if (isScreenFinished) {
-            this.frame++;
+            this.vcounter++;
         }
 
         if (isVBlankStart) {

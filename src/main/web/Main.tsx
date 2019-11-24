@@ -10,6 +10,7 @@ import {CpuCard} from "./CpuCard";
 import {DebuggerCard} from "./DebuggerCard";
 import {Card} from "./core/layout/Card";
 import {Register, Registers} from "../app/cpu/Registers";
+import {Operation} from "../app/cpu/Opcodes";
 
 declare let window : any;
 window.snes = new Console();
@@ -19,16 +20,14 @@ interface IMainProps {
 }
 
 export class TickEvent {
-    public opcode: number;
+    public op: Operation;
     public cycle: number;
-    public opname: string;
     public registerK: number;
     public registerPC: number;
 
     constructor(snes: Console) {
-        this.opcode = snes.cpu.opCode;
         this.cycle = snes.cpu.cycles;
-        this.opname = snes.cpu.op ? snes.cpu.op.name : "NULL";
+        this.op = snes.cpu.operation;
 
         this.registerK = snes.cpu.registers.k.get();
         this.registerPC = snes.cpu.registers.pc.get();

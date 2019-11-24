@@ -4,7 +4,7 @@ import Console from "../app/Console";
 import {Modes} from "../app/Modes";
 import {EmulationRegister, Register, StatusRegister} from "../app/cpu/Registers";
 import {CSSProperties} from "react";
-import {Opcode} from "../app/cpu/Opcodes";
+import {Operation} from "../app/cpu/Opcodes";
 
 interface ICpuCardProps {
     snes: Console;
@@ -14,6 +14,7 @@ interface ICpuCardProps {
 interface ICpuCardState {
     pc: number;
     k: number;
+    a: number;
     x: number;
     y: number;
     sp: number;
@@ -31,9 +32,7 @@ interface ICpuCardState {
     accumulator: number;
     overflow: number;
 
-    opCode: number;
-    op: Opcode;
-    opCycle: number;
+    op: Operation;
 
     cycles: number;
 }
@@ -47,6 +46,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
         super(props);
         this.state = {
             pc: 0,
+            a: 0,
             k: 0,
             x: 0,
             y: 0,
@@ -65,9 +65,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
             accumulator: 0,
             overflow: 0,
 
-            opCode: 0,
             op: null,
-            opCycle: 0,
 
             cycles: 0,
         };
@@ -79,6 +77,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
 
     public fetch() {
         this.setState({
+            a: this.props.snes.cpu.registers.a.get(),
             pc: this.props.snes.cpu.registers.pc.get(),
             k: this.props.snes.cpu.registers.k.get(),
             x: this.props.snes.cpu.registers.x.get(),
@@ -98,9 +97,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
             accumulator: this.props.snes.cpu.registers.p.getM(),
             overflow: this.props.snes.cpu.registers.p.getV(),
 
-            opCode: this.props.snes.cpu.opCode,
-            opCycle: this.props.snes.cpu.opCycle,
-            op: this.props.snes.cpu.op,
+            op: this.props.snes.cpu.operation,
 
             cycles: this.props.snes.cpu.cycles,
         });
@@ -135,6 +132,10 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">K:</span>
                                     <span>0x{this.state.k.toString(16).toUpperCase()}</span>
+                                </li>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">A:</span>
+                                    <span>0x{this.state.a.toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">X:</span>
@@ -214,7 +215,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                             <ul style={{listStyle: "none", flexGrow: 1, padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Code:</span>
-                                    <span>{this.state.op ? "0x" + this.state.opCode.toString(16) : ""}</span>
+                                    <span>{this.state.op ? "0x" + this.state.op.code.toString(16).toUpperCase() : ""}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Name:</span>
@@ -222,7 +223,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Cycles:</span>
-                                    <span>{this.state.opCycle}</span>
+                                    <span>{this.state.op ? this.state.op.getCycle() : ""}</span>
                                 </li>
                             </ul>
                         </div>

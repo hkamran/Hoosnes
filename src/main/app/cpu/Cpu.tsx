@@ -1,6 +1,6 @@
 import {Mode, Modes} from "../Modes";
 import {Registers} from "./Registers";
-import {Opcode, Opcodes, OpContext} from "./Opcodes";
+import {Operation, Opcodes, OpContext} from "./Opcodes";
 import {InterruptHandler} from "./Interrupts";
 import {Cartridge} from "../cartridge/Cartridge";
 import {Bus} from "../bus/Bus";
@@ -27,9 +27,7 @@ export class Cpu {
 
     public cycles: number = 0;
 
-    public op: Opcode;
-    public opCode: number;
-    public opCycle: number;
+    public operation: Operation;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -48,19 +46,15 @@ export class Cpu {
 
         let opaddr: Address = Address.create(pc, bank);
         let opcode: Result = this.console.bus.readByte(opaddr);
-        let op: Opcode = this.opcodes.get(opcode.getValue());
+        let operation: Operation = this.opcodes.get(opcode.getValue());
 
-        this.op = op;
-        this.opCode = opcode.getValue();
-        this.opCycle = opcode.getCycles();
+        this.operation = operation;
 
-        let context: OpContext = new OpContext(opaddr, op, this.console);
-        op.execute(context);
+        let context: OpContext = new OpContext(opaddr, operation, this.console);
+        this.cycles += operation.execute(context) + operation.getCycle();
 
-        this.registers.pc.set(opaddr.toValue() + op.getSize());
-        this.cycles += op.getCycle();
+        this.registers.pc.set(opaddr.toValue() + operation.getSize());
         let duration = this.cycles - cycles;
-
         return duration;
     }
 
@@ -69,11 +63,14 @@ export class Cpu {
 
         this.registers.p.set(0x0);
         this.registers.p.setI(0x1);
-        this.registers.p.setZ(0x1);
+        this.registers.p.setZ(0x0);
         this.registers.p.setX(0x1);
         this.registers.p.setM(0x1);
         this.registers.p.setD(0x0);
 
+        this.registers.a.set(0x0220);
+        this.registers.x.set(0x000A);
+        this.registers.y.set(0x0001);
         this.registers.sp.set(0x1FF);
         this.registers.d.set(0x0000);
         this.registers.dbr.set(0x00);

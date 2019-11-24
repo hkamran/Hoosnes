@@ -1,4 +1,4 @@
-import {Opcode, OpContext} from "./Opcodes";
+import {Operation, OpContext} from "./Opcodes";
 import {Result} from "../bus/Result";
 import {Address} from "../bus/Address";
 import {Bit} from "../util/Bit";
