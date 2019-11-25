@@ -16,8 +16,8 @@ export class Cpu {
 
     public log : Logger = LoggerManager.create('Cpu');
 
-    public registers: Registers = new Registers();
-    public opcodes: Opcodes = new Opcodes();
+    public registers: Registers;
+    public opcodes: Opcodes;
     public console: Console;
     public bus: Bus;
     public interrupts: InterruptHandler;
@@ -26,7 +26,6 @@ export class Cpu {
     public wram: Wram = new Wram();
 
     public cycles: number = 0;
-
     public operation: Operation;
 
     constructor(console: Console) {
@@ -34,6 +33,8 @@ export class Cpu {
 
         this.console = console;
         this.bus = console.bus;
+        this.registers = new Registers();
+        this.opcodes = new Opcodes();
         this.interrupts = new InterruptHandler(this);
     }
 
@@ -59,7 +60,7 @@ export class Cpu {
     }
 
     public reset(): void {
-        this.registers.e.set(0x1);
+        this.registers.p.setE(0x1);
 
         this.registers.p.set(0x0);
         this.registers.p.setI(0x1);
@@ -79,7 +80,7 @@ export class Cpu {
         this.registers.pc.set(0x0000);
     }
 
-    load(cartridge: Cartridge): void {
+    public load(cartridge: Cartridge): void {
         Objects.requireNonNull(cartridge);
 
         if (cartridge.interrupts != null) {

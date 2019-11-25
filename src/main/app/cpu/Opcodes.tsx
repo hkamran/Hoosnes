@@ -8,6 +8,7 @@ import {Cpu} from "./Cpu";
 import {Bus} from "../bus/Bus";
 import {Registers} from "./Registers";
 import {Addressing, DirectX, IAddressing} from "./Addressing";
+import {Bit} from "../util/Bit";
 
 export class OpContext {
 
@@ -29,15 +30,54 @@ export class OpContext {
         this.registers = console.cpu.registers;
     }
 
-    // zero indexed
     public getOperand(index: number): Result {
         if (index < 0) {
             throw new Error("Invalid operand request");
         }
 
-
         let address: Address = Address.create(this.opaddr.toValue() + index + 1);
         return this.bus.readByte(address);
+    }
+
+    public setFlagC(val: number, is8Bit?: boolean): void {
+        if (val == null || val  < 0) {
+            throw new Error("Invalid flag calculation!");
+        }
+
+        let max = (is8Bit || false) ? 0xFF : 0xFFFF;
+        let isCarry = val > max;
+
+        this.registers.p.setC(isCarry ? 1 : 0);
+    }
+
+    public setFlagZ(val: number, is8Bit?: boolean): void {
+        if (val == null || val < 0) {
+            throw new Error("Invalid flag calculation!");
+        }
+
+        let mask: number = (is8Bit || false) ? 0xFF : 0xFFFF;
+        this.registers.p.setZ((val & mask) == 0 ? 1 : 0);
+    }
+
+    public setFlagV(a: number, b: number, is8Bit?: boolean): void {
+        if (a == null || b == null || a < 0 || b < 0) {
+            throw new Error("Invalid flag calculation!");
+        }
+
+        let mask: number = (is8Bit || false) ? 0x80 : 0x8000;
+        let sum = a + b;
+        let isOverflow = ((!(((a ^ b) & mask) != 0) && (((a ^ sum) & mask)) !=0)? 1:0);
+        this.registers.p.setV(isOverflow ? 1 : 0);
+    }
+
+    public setFlagN(val: number, is8Bit?: boolean): void {
+        if (val == null) {
+            throw new Error("Invalid flag calculation!");
+        }
+
+        let mask: number = (is8Bit || false) ? 0x80 : 0x8000;
+        let isNegative: boolean = (mask & val) != 0;
+        this.registers.p.setN(isNegative ? 1 : 0);
     }
 }
 
@@ -69,108 +109,62 @@ export class Operation {
 
     public getSize(): number {
         if (this.size == null || this.size.length == 0) {
-            throw new Error("Invalid hcounter set");
+            throw new Error("Invalid size!");
         }
 
-        // TODO
         return this.size[0];
     }
-
-    // C carry
-    // Z zero
-    // V overflow
-    // N negative
-
-    protected setFlagC(context: OpContext, val: number): void {
-        if (val == null || val  < 0 || context == null) {
-            throw new Error("Invalid flag calculation!");
-        }
-
-        //let isOverflow: boolean = val > context.mode.size;
-        if (val > 0xFF) {
-            context.registers.p.setC(1);
-        } else {
-            context.registers.p.setC(0);
-        }
-    }
-
-
-    protected setFlagZ(context: OpContext, val: number): void {
-        if (val == null || val < 0 || context == null) {
-            throw new Error("Invalid flag calculation!");
-        }
-
-        if (val == 0) {
-            context.cpu.registers.p.setZ(1);
-        } else {
-            context.cpu.registers.p.setZ(0);
-        }
-    }
-
-    protected setFlagV(context: OpContext, a: number, b: number): void {
-        if (a == null || b == null || a < 0 || b < 0 || context) {
-            throw new Error("Invalid flag calculation!");
-        }
-
-        let sum = a + b;
-
-        //let isOverflow = (((a ^ b) >> context.mode.size) != 0) && (((a ^ sum) >> context.mode.size) != 0);
-        //context.cpu.registers.p.setV(isOverflow ? 1 : 0);
-
-    }
-
-    protected setFlagN(context: OpContext, val: number): void {
-        if (val == null || context) {
-            throw new Error("Invalid flag calculation!");
-        }
-
-        let isNegative: boolean = ((val >> 7) & 1) == 1;
-        context.cpu.registers.p.setN(isNegative ? 1 : 0);
-    }
-
 }
 
 export class ADC extends Operation {
     public name: string = "ADC";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-
         let a: number = context.cpu.registers.a.get();
-        let b: number = 0;
+        let b: Result = this.mode.getValue(context);
         let c: number = context.cpu.registers.p.getC();
 
-        let result: number = a + b + c;
+        let result: number = 0;
 
-        this.setFlagN(context, result);
-        this.setFlagV(context, a, c)
-        this.setFlagZ(context, result);
-        this.setFlagC(context, result);
+        if (context.registers.p.getD() == 1) {
+            //TODO
+            throw new Error("Not implemented!");
+        } else {
+            result = a + b.getValue() + c;
+        }
 
-        context.cpu.registers.a.set(result);
-        return null;
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+
+        context.registers.a.set(result & mask);
+
+        context.setFlagV(a, c, is8Bit);
+        context.setFlagN(result, is8Bit);
+        context.setFlagZ(result, is8Bit);
+        context.setFlagC(result, is8Bit);
+
+        return this.getCycle();
     }
+
 }
 
 export class AND extends Operation {
     public name: string = "AND";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-
         let a: number = context.cpu.registers.a.get();
-        let b: number = 0;
+        let b: Result = this.mode.getValue(context);
 
-        let result: number = a & b;
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let result: number = a & b.getValue();
 
-        this.setFlagZ(context, result);
-        this.setFlagN(context, result);
+        context.cpu.registers.a.set(result & mask);
 
-        context.cpu.registers.a.set(result);
+        context.setFlagZ(result, is8Bit);
+        context.setFlagN(result, is8Bit);
 
-        return null;
+        return this.getCycle();
     }
 }
 
@@ -178,24 +172,33 @@ export class ASL extends Operation {
     public name: string = "ASL";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
+        let b: Result = this.mode.getValue(context);
 
-        let mode: Mode = context.cpu.registers.e.getMode();
-        let result: Result = this.mode.getValue(context);
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let result: number = b.getValue() << 1;
 
-        let a: number = result.getValue();
-        let c: number = (a >> mode.size) & 1;
+        if (this.mode == Addressing.accumulator) {
+            context.registers.a.set(result & mask);
+        } else {
+            let address: Result = this.mode.getAddress(context);
 
-        a = (a << 1) % mode.size;
+            if (is8Bit) {
+                context.bus.writeByte(Address.create(address.getValue(0)), result & mask);
+            } else {
+                let lowByte: number = Bit.getUint16Lower(result & mask);
+                let highByte: number = Bit.getUint16Upper(result & mask);
 
-        this.setFlagN(context, a);
-        this.setFlagN(context, a);
-        this.setFlagC(context, a);
+                context.bus.writeByte(Address.create(address.getValue(0)), lowByte);
+                context.bus.writeByte(Address.create(address.getValue(1)), highByte);
+            }
+        }
 
-        context.cpu.registers.a.set(a);
+        context.setFlagZ(result, is8Bit);
+        context.setFlagN(result, is8Bit);
+        context.setFlagC(result, is8Bit);
 
-        return null;
+        return this.getSize();
     }
 
 }
@@ -210,9 +213,7 @@ export class BCC extends Operation {
             let current: number = context.registers.pc.get();
             let next: number = current + result.getValue();
 
-            context.registers.pc.set(next & 0xFF);
-
-            return this.getCycle() + (next > 0xFF ? 1: 0);
+            context.registers.pc.set(next & 0xFFFF);
         }
         return this.getCycle();
     }
@@ -228,9 +229,7 @@ export class BCS extends Operation {
             let current: number = context.registers.pc.get();
             let next: number = current + result.getValue();
 
-            context.registers.pc.set(next & 0xFF);
-
-            return this.getCycle() + (next > 0xFF ? 1: 0);
+            context.registers.pc.set(next & 0xFFFF);
         }
         return this.getCycle();
     }
@@ -240,15 +239,13 @@ export class BEQ extends Operation {
     public name: string = "BEQ";
 
     public execute(context: OpContext): number {
-        if (context.registers.p.getZ() == 0) {
+        if (context.registers.p.getZ() == 1) {
             let result: Result = this.mode.getValue(context);
 
             let current: number = context.registers.pc.get();
             let next: number = current + result.getValue();
 
-            context.registers.pc.set(next & 0xFF);
-
-            return this.getCycle() + (next > 0xFF ? 1: 0);
+            context.registers.pc.set(next & 0xFFFF);
         }
         return this.getCycle();
     }
@@ -258,9 +255,19 @@ export class BIT extends Operation {
     public name: string = "BIT";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+
+        let a: number = is8Bit ? context.registers.a.getLower() : context.registers.a.get();
+        let b: Result = this.mode.getValue(context);
+
+        let result = a & b.getValue();
+
+        context.setFlagZ(result, is8Bit);
+
+        // TODO
+
+        return this.getCycle();
     }
 }
 
@@ -268,15 +275,13 @@ class BMI extends Operation {
     public name: string = "BMI";
 
     public execute(context: OpContext): number {
-        if (context.registers.p.getN() == 0) {
+        if (context.registers.p.getN() == 1) {
             let result: Result = this.mode.getValue(context);
 
             let current: number = context.registers.pc.get();
             let next: number = current + result.getValue();
 
-            context.registers.pc.set(next & 0xFF);
-
-            return this.getCycle() + (next > 0xFF ? 1: 0);
+            context.registers.pc.set(next & 0xFFFF);
         }
 
         return this.getCycle();
@@ -327,9 +332,20 @@ class CMP extends Operation {
     public name: string = "CMP";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let size: number = is8Bit ? 7 : 15;
+
+        let a: number = is8Bit ? context.registers.a.getLower(): context.registers.a.get();
+        let b: Result = this.mode.getValue(context);
+
+        let value: number = (a & mask) - (b.getValue() & mask);
+
+        context.registers.p.setC((value >= 0 ? 1 : 0));
+        context.registers.p.setN((value >> size) & 1);
+        context.registers.p.setZ(((value & mask) == 0) ? 1 : 0);
+
+        return this.getCycle();
     }
 
 }
@@ -351,9 +367,20 @@ class CPX extends Operation {
     public name: string = "CPX";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let size: number = is8Bit ? 7 : 15;
+
+        let a: number = is8Bit ? context.registers.x.getLower(): context.registers.x.get();
+        let b: Result = this.mode.getValue(context);
+
+        let value: number = (a & mask) - (b.getValue() & mask);
+
+        context.registers.p.setC((value >= 0 ? 1 : 0));
+        context.registers.p.setN((value >> size) & 1);
+        context.registers.p.setZ(((value & mask) == 0) ? 1 : 0);
+
+        return this.getCycle();
     }
 
 }
@@ -362,9 +389,20 @@ class CPY extends Operation {
     public name: string = "CPY";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let size: number = is8Bit ? 7 : 15;
+
+        let a: number = is8Bit ? context.registers.y.getLower(): context.registers.y.get();
+        let b: Result = this.mode.getValue(context);
+
+        let value: number = (a & mask) - (b.getValue() & mask);
+
+        context.registers.p.setC((value >= 0 ? 1 : 0));
+        context.registers.p.setN((value >> size) & 1);
+        context.registers.p.setZ(((value & mask) == 0) ? 1 : 0);
+
+        return this.getCycle();
     }
 }
 
@@ -372,10 +410,8 @@ class CLC extends Operation {
     public name: string = "CLC";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
         context.cpu.registers.p.setC(0);
-        return null;
+        return this.getCycle();
     }
 }
 
@@ -383,10 +419,8 @@ class CLD extends Operation {
     public name: string = "CLD";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
         context.cpu.registers.p.setD(0);
-        return null;
+        return this.getCycle();
     }
 
 }
@@ -395,10 +429,8 @@ class CLI extends Operation {
     public name: string = "CLI";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        context.cpu.registers.p.setI(0);
-        return null;
+        context.cpu.registers.p.setD(0);
+        return this.getCycle();
     }
 
 }
@@ -407,10 +439,8 @@ class CLV extends Operation {
     public name: string = "CLV";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
         context.cpu.registers.p.setV(0);
-        return null;
+        return this.getCycle();
     }
 
 
@@ -626,8 +656,8 @@ class TYX extends Operation {
         let from: number = context.cpu.registers.y.get();
         let to: number = context.cpu.registers.x.get();
 
-        this.setFlagN(context, from);
-        this.setFlagZ(context, from);
+        context.setFlagN(from);
+        context.setFlagZ(from);
 
         context.cpu.registers.x.set(from);
         return null;
@@ -644,8 +674,6 @@ class TYA extends Operation {
         let from: number = context.cpu.registers.y.get();
         let to: number = context.cpu.registers.a.get();
 
-        this.setFlagN(context, from);
-        this.setFlagZ(context, from);
 
         context.cpu.registers.a.set(from);
         return null;
@@ -661,8 +689,6 @@ class TXY extends Operation {
         let from: number = context.cpu.registers.x.get();
         let to: number = context.cpu.registers.y.get();
 
-        this.setFlagN(context, from);
-        this.setFlagZ(context, from);
 
         context.cpu.registers.y.set(from);
         return null;
@@ -681,8 +707,6 @@ class TAX extends Operation {
         let to: number = context.cpu.registers.x.get();
 
 
-        this.setFlagN(context, from);
-        this.setFlagZ(context, from);
 
         context.cpu.registers.x.set(from);
         return null;
@@ -700,8 +724,6 @@ class TAY extends Operation {
         let from: number = context.cpu.registers.a.get();
         let to: number = context.cpu.registers.y.get();
 
-        this.setFlagN(context, from);
-        this.setFlagZ(context, from);
 
         context.cpu.registers.y.set(from);
         return null;
@@ -717,9 +739,6 @@ class TCD extends Operation {
 
         let from: number = context.cpu.registers.a.get();
         let to: number = context.cpu.registers.d.get();
-
-        this.setFlagN(context, from);
-        this.setFlagZ(context, from);
 
         context.cpu.registers.d.set(from);
         return null;
@@ -737,9 +756,6 @@ class TCS extends Operation {
         let from: number = context.cpu.registers.a.get();
         let to: number = context.cpu.registers.sp.get();
 
-        this.setFlagN(context, from);
-        this.setFlagZ(context, from);
-
         context.cpu.registers.sp.set(from);
         return null;
     }
@@ -755,9 +771,6 @@ class TDC extends Operation {
 
         let from: number = context.cpu.registers.d.get();
         let to: number = context.cpu.registers.a.get();
-
-        this.setFlagN(context, from);
-        this.setFlagZ(context, from);
 
         context.cpu.registers.a.set(from);
         return null;
@@ -779,7 +792,6 @@ class TRB extends Operation {
         let complementOfA = ~a & 0;
         let result = (a & operand) & complementOfA;
 
-        this.setFlagZ(context, result);
 
         // TODO write to bus
         return null;
@@ -828,9 +840,6 @@ class TXA extends Operation {
         let from: number = context.cpu.registers.x.get();
         let to: number = context.cpu.registers.a.get();
 
-        this.setFlagN(context, from);
-        this.setFlagZ(context, from);
-
         context.cpu.registers.a.set(from);
         return null;
     }
@@ -849,9 +858,6 @@ class TSX extends Operation {
         }
         let to: number = context.cpu.registers.x.get();
 
-        this.setFlagN(context, from);
-        this.setFlagZ(context, from);
-
         context.cpu.registers.x.set(from);
         return null;
     }
@@ -867,9 +873,6 @@ class TSC extends Operation {
 
         let from: number = context.cpu.registers.sp.get();
         let to: number = context.cpu.registers.a.get();
-
-        this.setFlagN(context, from);
-        this.setFlagZ(context, from);
 
         context.cpu.registers.a.set(from);
         return null;
@@ -922,9 +925,6 @@ class LDA extends Operation {
 
         let result: number = 0;
 
-        this.setFlagN(context, result);
-        this.setFlagZ(context, result);
-
         // TODO
         context.cpu.registers.a.set(result);
         return null;
@@ -941,9 +941,6 @@ class LDX extends Operation {
 
         let result: number = 0;
 
-        this.setFlagN(context, result);
-        this.setFlagZ(context, result);
-
         // TODO
         context.cpu.registers.x.set(result);
         return null;
@@ -959,9 +956,6 @@ class LDY extends Operation {
         console.log(this.name);
 
         let result: number = 0;
-
-        this.setFlagN(context, result);
-        this.setFlagZ(context, result);
 
         // TODO
         context.cpu.registers.y.set(result);
@@ -1057,9 +1051,15 @@ class PHA extends Operation {
     public name: string = "PHA";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        if (context.registers.p.getM()) {
+            let result : number = context.cpu.registers.a.getLower();
+            context.cpu.stack.pushByte(result);
+        } else {
+            let result : number = context.cpu.registers.a.get();
+            context.cpu.stack.pushWord(result);
+        }
+
+        return this.getCycle();
     }
 }
 
@@ -1067,9 +1067,10 @@ class PHB extends Operation {
     public name: string = "PHB";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let result : number = context.cpu.registers.dbr.get();
+        context.cpu.stack.pushByte(result);
+
+        return this.getCycle();
     }
 
 }
@@ -1088,13 +1089,22 @@ class SBC extends Operation {
 class STA extends Operation {
     public name: string = "STA";
 
-    public execute(context: OpContext): number{
-        //TODO
-        console.log(this.name);
+    public execute(context: OpContext): number {
+        let loData : number = context.cpu.registers.a.getLower();
+        let hiData : number = context.cpu.registers.a.getUpper();
 
-        let result : number = context.cpu.registers.a.get();
-        // context.cpu.console.bus.writeByte(context.opaddr, result);
-        return null;
+        let addresses: Result = this.mode.getAddress(context);
+        let loAddr: Address = Address.create(addresses.getValue(0));
+        let hiAddr: Address = addresses.getSize() == 2 ? Address.create(addresses.getValue(1)) : null;
+
+        if (context.registers.p.getX() == 1) {
+            context.bus.writeByte(loAddr, loData);
+        } else {
+            context.bus.writeByte(loAddr, loData);
+            context.bus.writeByte(hiAddr, hiData);
+        }
+
+        return this.getCycle();
     }
 }
 
@@ -1122,13 +1132,22 @@ class ROR extends Operation {
 class STY extends Operation {
     public name: string = "STY";
 
-    public execute(context: OpContext): number{
-        //TODO
-        console.log(this.name);
+    public execute(context: OpContext): number {
+        let loData : number = context.cpu.registers.y.getLower();
+        let hiData : number = context.cpu.registers.y.getUpper();
 
-        let result : number = context.cpu.registers.y.get();
-        // context.cpu.console.bus.writeByte(context.opaddr, result);
-        return null;
+        let addresses: Result = this.mode.getAddress(context);
+        let loAddr: Address = Address.create(addresses.getValue(0));
+        let hiAddr: Address = addresses.getSize() == 2 ? Address.create(addresses.getValue(1)) : null;
+
+        if (context.registers.p.getX() == 1) {
+            context.bus.writeByte(loAddr, loData);
+        } else {
+            context.bus.writeByte(loAddr, loData);
+            context.bus.writeByte(hiAddr, hiData);
+        }
+
+        return this.getCycle();
     }
 }
 
@@ -1137,7 +1156,6 @@ class PHD extends Operation {
     public name: string = "PHD";
 
     public execute(context: OpContext): number {
-        //TODO
         let result : number = context.cpu.registers.d.get();
         context.cpu.stack.pushWord(result);
 
@@ -1151,7 +1169,6 @@ class PHK extends Operation {
     public name: string = "PHK";
 
     public execute(context: OpContext): number {
-        //TODO
         let result : number = context.cpu.registers.k.get();
         context.cpu.stack.pushByte(result);
 
@@ -1164,12 +1181,10 @@ class PHP extends Operation {
     public name: string = "PHP";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
+        let p : number = context.registers.p.get();
+        context.cpu.stack.pushByte(p & 0xFF);
 
-        let result : number = context.cpu.registers.p.get();
-        context.cpu.stack.pushByte(result);
-        return null;
+        return this.getCycle();
     }
 
 }
@@ -1178,16 +1193,19 @@ class PHX extends Operation {
     public name: string = "PHX";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
+        let is8Bit: boolean = context.registers.p.getX() == 1;
 
-        let result : number = context.cpu.stack.popByte();
+        let loData: number = context.registers.x.getLower();
+        let hiData: number = context.registers.x.getUpper();
 
-        this.setFlagN(context, result);
-        this.setFlagZ(context, result);
+        if (is8Bit) {
+            context.cpu.stack.pushByte(loData);
+        } else {
+            context.cpu.stack.pushByte(loData);
+            context.cpu.stack.pushByte(hiData);
+        }
 
-        context.cpu.registers.x.set(result);
-        return null;
+        return this.getCycle();
     }
 
 }
@@ -1196,16 +1214,19 @@ class PHY extends Operation {
     public name: string = "PHY";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
+        let is8Bit: boolean = context.registers.p.getX() == 1;
 
-        let result : number = context.cpu.stack.popByte();
+        let loData: number = context.registers.y.getLower();
+        let hiData: number = context.registers.y.getUpper();
 
-        this.setFlagN(context, result);
-        this.setFlagZ(context, result);
+        if (is8Bit) {
+            context.cpu.stack.pushByte(loData);
+        } else {
+            context.cpu.stack.pushByte(loData);
+            context.cpu.stack.pushByte(hiData);
+        }
 
-        context.cpu.registers.y.set(result);
-        return null;
+        return this.getCycle();
     }
 
 }
@@ -1214,16 +1235,15 @@ class PLA extends Operation {
     public name: string = "PLA";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let data : number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
 
-        let result : number = context.cpu.stack.popByte();
+        context.setFlagN(data, is8Bit);
+        context.setFlagZ(data, is8Bit);
 
-        this.setFlagN(context, result);
-        this.setFlagZ(context, result);
+        context.registers.a.set(data);
 
-        context.cpu.registers.a.set(result);
-        return null;
+        return this.getCycle();
     }
 
 }
@@ -1232,16 +1252,10 @@ class PLB extends Operation {
     public name: string = "PLB";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
+        let value: number = context.cpu.stack.popByte();
+        context.registers.k.set(value);
 
-        let result : number = context.cpu.stack.popByte();
-
-        this.setFlagN(context, result);
-        this.setFlagZ(context, result);
-
-        context.cpu.registers.dbr.set(result);
-        return null;
+        return this.getCycle();
     }
 
 }
@@ -1250,7 +1264,6 @@ class PLD extends Operation {
     public name: string = "PLD";
 
     public execute(context: OpContext): number {
-        //TODO
         let value: number = context.cpu.stack.popWord();
         context.registers.d.set(value);
 
@@ -1262,9 +1275,10 @@ class PLP extends Operation {
     public name: string = "PLP";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let p : number = context.cpu.stack.popByte();
+        context.registers.p.set(p);
+
+        return this.getCycle();
     }
 
 }
@@ -1273,9 +1287,15 @@ class PLX extends Operation {
     public name: string = "PLX";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let is8Bit: boolean = context.registers.p.getX() == 1;
+        let data : number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
+
+        context.setFlagN(data, is8Bit);
+        context.setFlagZ(data, is8Bit);
+
+        context.registers.x.set(data);
+
+        return this.getCycle();
     }
 
 }
@@ -1284,9 +1304,15 @@ class PLY extends Operation {
     public name: string = "PLY";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let is8Bit: boolean = context.registers.p.getX() == 1;
+        let data : number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
+
+        context.setFlagN(data, is8Bit);
+        context.setFlagZ(data, is8Bit);
+
+        context.registers.y.set(data);
+
+        return this.getCycle();
     }
 }
 
@@ -1294,9 +1320,13 @@ class REP extends Operation {
     public name: string = "REP";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let p: number = context.registers.p.get();
+        let data: Result = this.mode.getValue(context);
+
+        let result: number = p & -data;
+        context.registers.p.set(result);
+
+        return this.getCycle();
     }
 
 }
@@ -1305,14 +1335,21 @@ class STX extends Operation {
     public name: string = "STX";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
+        let loData : number = context.cpu.registers.x.getLower();
+        let hiData : number = context.cpu.registers.x.getUpper();
 
-        let result : number = context.cpu.registers.x.get();
-        // context.cpu.console.bus.writeByte(context.opaddr, result);
+        let addresses: Result = this.mode.getAddress(context);
+        let loAddr: Address = Address.create(addresses.getValue(0));
+        let hiAddr: Address = addresses.getSize() == 2 ? Address.create(addresses.getValue(1)) : null;
 
-        // TODO
-        return null;
+        if (context.registers.p.getX() == 1) {
+            context.bus.writeByte(loAddr, loData);
+        } else {
+            context.bus.writeByte(loAddr, loData);
+            context.bus.writeByte(hiAddr, hiData);
+        }
+
+        return this.getCycle();
     }
 
 }
@@ -1321,11 +1358,7 @@ class STP extends Operation {
     public name: string = "STP";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
-
-        // Useless
+        throw new Error("Stop the clock!");
     }
 }
 
@@ -1333,9 +1366,18 @@ class RTI extends Operation {
     public name: string = "RTI";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let p : number = context.cpu.stack.popByte();
+        let pc : number = context.cpu.stack.popWord();
+
+        context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
+        context.cpu.registers.p.set(p & 0xFF);
+
+        if (context.registers.p.getE() == 0) {
+            let pbc : number = context.cpu.stack.popByte();
+            context.registers.k.set(pbc);
+        }
+
+        return this.getCycle();
     }
 }
 
@@ -1343,18 +1385,13 @@ class RTL extends Operation {
     public name: string = "RTL";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
+        let pc : number = context.cpu.stack.popWord();
+        let pbc : number = context.cpu.stack.popByte();
 
-        let lowByte : number = context.cpu.stack.popByte();
-        let highByte : number = context.cpu.stack.popByte();
+        context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
+        context.cpu.registers.k.set(pbc & 0xFF);
 
-        let pb : number = context.cpu.stack.popByte();
-        let result : number = lowByte << 8 | highByte;
-
-        context.cpu.registers.pc.set(result);
-        context.cpu.registers.k.set(pb);
-        return null;
+        return this.getCycle();
     }
 
 }
@@ -1363,15 +1400,11 @@ class RTS extends Operation {
     public name: string = "RTS";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
+        let pc : number = context.cpu.stack.popWord();
 
-        let lowByte : number = context.cpu.stack.popByte();
-        let highByte : number = context.cpu.stack.popByte();
-        let result : number = lowByte << 8 | highByte;
+        context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
 
-        context.cpu.registers.pc.set(result);
-        return null;
+        return this.getCycle();
     }
 
 }
@@ -1380,9 +1413,8 @@ class SEC extends Operation {
     public name: string = "SEC";
 
     public execute(context: OpContext): number {
-        //TODO
         context.registers.p.setC(1);
-        return null;
+        return this.getCycle();
     }
 
 }
@@ -1391,9 +1423,8 @@ class SED extends Operation {
     public name: string = "SED";
 
     public execute(context: OpContext): number {
-        //TODO
         context.registers.p.setD(1);
-        return null;
+        return this.getCycle();
     }
 
 }
@@ -1402,9 +1433,8 @@ class SEI extends Operation {
     public name: string = "SEI";
 
     public execute(context: OpContext): number {
-        //TODO
         context.registers.p.setI(1);
-        return null;
+        return this.getCycle();
     }
 
 }
@@ -1413,8 +1443,10 @@ class SEP extends Operation {
     public name: string = "SEP";
 
     public execute(context: OpContext): number {
-        //TODO
-        return null;
+        let value : Result = this.mode.getValue(context);
+        context.registers.p.set(value.getValue() & 0xFF);
+
+        return this.getCycle();
     }
 }
 
@@ -1430,6 +1462,7 @@ export class Opcodes {
         this.opcodes[0x67] = new ADC(0x67,6, [1, 2], [2], Addressing.directIndexedIndirect);
         this.opcodes[0x69] = new ADC(0x69,2, [1], [2, 12], Addressing.immediateM);
         this.opcodes[0x6D] = new ADC(0x6D,4, [1], [3], Addressing.absolute);
+        this.opcodes[0x6F] = new ADC(0x6F,4, [5], [4], Addressing.absoluteLong);
         this.opcodes[0x71] = new ADC(0x71,5, [1, 2, 3], [2], Addressing.directY);
         this.opcodes[0x72] = new ADC(0x72,7, [1], [2], Addressing.direct);
         this.opcodes[0x73] = new ADC(0x73,7, [1], [2], Addressing.stackY);

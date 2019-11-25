@@ -1,7 +1,7 @@
 
 export class Result {
 
-    private values: number[] = [];
+    private readonly values: number[] = [];
     public cycles: number = 0;
 
     constructor(values: number[], cycles?: number) {

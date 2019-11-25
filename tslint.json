@@ -16,6 +16,8 @@
     "no-bitwise": false,
     "no-empty": false,
     "curly": false,
+    "comment-format": false,
+    "whitespace": false,
     "triple-equals": false,
     "only-arrow-functions": false,
 	"typedef-whitespace": [

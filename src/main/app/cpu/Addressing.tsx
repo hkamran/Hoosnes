@@ -62,9 +62,10 @@ export class Absolute implements IAddressing {
         let loByte: Result = context.bus.readByte(loAddr);
         let hiByte: Result = context.bus.readByte(hiAddr);
 
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
         let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
 
-        return new Result([loByte.getValue(), hiByte.getValue()], cycles);
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -94,9 +95,10 @@ export class AbsoluteX implements IAddressing {
         let loByte: Result = context.bus.readByte(loAddr);
         let hiByte: Result = context.bus.readByte(hiAddr);
 
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
         let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
 
-        return new Result([loByte.getValue(), hiByte.getValue()], cycles);
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -127,9 +129,10 @@ export class AbsoluteY implements IAddressing {
         let loByte: Result = context.bus.readByte(loAddr);
         let hiByte: Result = context.bus.readByte(hiAddr);
 
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
         let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
 
-        return new Result([loByte.getValue(), hiByte.getValue()], cycles);
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -155,11 +158,11 @@ export class AbsoluteLong implements IAddressing {
         let result: Result = this.getAddress(context);
 
         let addr: Address = Address.create(result.getValue());
-        let data: Result = context.bus.readByte(addr);
+        let value: Result = context.bus.readByte(addr);
 
         let cycles: number = result.getCycles();
 
-        return new Result([data.getValue()], cycles);
+        return new Result([value.getValue()], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -188,11 +191,11 @@ export class AbsoluteLongIndexed implements IAddressing {
         let result: Result = this.getAddress(context);
 
         let addr: Address = Address.create(result.getValue());
-        let data: Result = context.bus.readByte(addr);
+        let value: Result = context.bus.readByte(addr);
 
         let cycles: number = result.getCycles();
 
-        return new Result([data.getValue()], cycles);
+        return new Result([value.getValue()], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -223,14 +226,14 @@ export class Accumulator implements  IAddressing {
 
     public label: string = "ACCUMULATOR";
 
-    getAddress(context: OpContext): Result {
+    public getAddress(context: OpContext): Result {
         let low: number = context.registers.a.getLower();
         let high: number = context.registers.a.getUpper();
 
         return new Result([low, high], 0);
     }
 
-    getValue(context: OpContext): Result {
+    public getValue(context: OpContext): Result {
         let low: number = context.registers.a.getLower();
         let high: number = context.registers.a.getUpper();
 
@@ -245,27 +248,29 @@ export class Direct implements IAddressing {
     public getValue(context: OpContext): Result {
         let result: Result = this.getAddress(context);
 
-        let low: Result = context.bus.readByte(Address.create(result.getValue(0)));
-        let high: Result = context.bus.readByte(Address.create(result.getValue(1)));
+        let loByte: Result = context.bus.readByte(Address.create(result.getValue(0)));
+        let hiByte: Result = context.bus.readByte(Address.create(result.getValue(1)));
 
-        let cycles: number = result.getCycles() + low.getCycles() + high.getCycles();
-        return new Result([low.getValue(), high.getValue()], cycles);
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
         let low: Result = context.getOperand(0);
 
-        if (context.registers.e.get() == 1 && context.registers.d.getLower() == 0x00) {
-            let loaddr: number = low.getValue();
-            let hiaddr: number = context.registers.d.getUpper();
+        if (context.registers.p.get() == 1 && context.registers.d.getLower() == 0x00) {
+            let loAddr: number = low.getValue();
+            let hiAddr: number = context.registers.d.getUpper();
 
-            return new Result([loaddr, hiaddr], low.getCycles());
+            return new Result([loAddr, hiAddr], low.getCycles());
+        } else {
+            let loAddr: number = context.registers.d.get() + low.getValue();
+            let hiAddr: number = loAddr + 1;
+
+            return new Result([loAddr, hiAddr], low.getCycles());
         }
-
-        let loaddr: number = context.registers.d.get() + low.getValue();
-        let hiaddr: number = loaddr + 1;
-
-        return new Result([loaddr, hiaddr], low.getCycles());
     }
 }
 
@@ -281,33 +286,36 @@ export class DirectX implements IAddressing {
 
             let cycles: number = result.getCycles() + low.getCycles();
             return new Result([low.getValue()], cycles);
+
+        } else {
+            let loByte: Result = context.bus.readByte(Address.create(result.getValue(0)));
+            let hiByte: Result = context.bus.readByte(Address.create(result.getValue(1)));
+
+            let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+            let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+            return new Result([value], cycles);
         }
-
-        let low: Result = context.bus.readByte(Address.create(result.getValue(0)));
-        let high: Result = context.bus.readByte(Address.create(result.getValue(1)));
-
-        let cycles: number = result.getCycles() + low.getCycles() + high.getCycles();
-        return new Result([low.getValue(), high.getValue()], cycles);
     }
 
     public getAddress(context: OpContext): Result {
         let LL: Result = context.getOperand(0);
 
-        if (context.registers.e.get() == 1 && context.registers.d.getLower() == 0x00) {
+        if (context.registers.p.get() == 1 && context.registers.d.getLower() == 0x00) {
             let loaddr: number = LL.getValue() + context.registers.x.get();
             let hiaddr: number = context.registers.d.getUpper();
 
             let addr = Bit.toUint16(hiaddr, loaddr);
             return new Result([addr], LL.getCycles());
+        } else {
+            let loaddr: number = context.registers.d.getUpper() +
+                LL.getValue() +
+                context.registers.x.get();
+
+            let hiaddr: number = loaddr + 1;
+
+            return new Result([loaddr, hiaddr], LL.getCycles());
         }
-
-        let loaddr: number = context.registers.d.getUpper() +
-            LL.getValue() +
-            context.registers.x.get();
-
-        let hiaddr: number = loaddr + 1;
-
-        return new Result([loaddr, hiaddr], LL.getCycles());
     }
 }
 
@@ -325,13 +333,15 @@ export class DirectY implements IAddressing {
 
             let cycles: number = result.getCycles() + low.getCycles();
             return new Result([low.getValue()], cycles);
+        } else {
+            let loByte: Result = context.bus.readByte(loaddr);
+            let hiByte: Result = context.bus.readByte(hiaddr);
+
+            let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+            let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+            return new Result([value], cycles);
         }
-
-        let low: Result = context.bus.readByte(loaddr);
-        let high: Result = context.bus.readByte(hiaddr);
-
-        let cycles: number = result.getCycles() + low.getCycles() + high.getCycles();
-        return new Result([low.getValue(), high.getValue()], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -339,19 +349,19 @@ export class DirectY implements IAddressing {
         let LL: Result = context.getOperand(0);
         let y = context.registers.y.get();
 
-        if (context.registers.e.get() == 1 && context.registers.d.getLower() == 0x00) {
+        if (context.registers.p.getE() == 1 && context.registers.d.getLower() == 0x00) {
             let dh: number = context.registers.d.getUpper();
             let loaddr: number = Bit.toUint16(dh, LL.getValue() + y);
             let cycles: number = LL.getCycles();
 
             return new Result([loaddr], cycles);
+        } else {
+            let loaddr: number = d + LL.getValue() + y;
+            let hiaddr: number = loaddr + 1;
+            let cycles: number = LL.getCycles();
+
+            return new Result([loaddr, hiaddr], cycles);
         }
-
-        let loaddr: number = d + LL.getValue() + y;
-        let hiaddr: number = loaddr + 1;
-        let cycles: number = LL.getCycles();
-
-        return new Result([loaddr, hiaddr], cycles);
     }
 }
 
@@ -364,12 +374,13 @@ export class DirectIndirect implements IAddressing {
         let loaddr: Address = Address.create(result.getValue(0));
         let hiaddr: Address = Address.create(result.getValue(1));
 
-        let lodata: Result = context.bus.readByte(loaddr);
-        let hidata: Result = context.bus.readByte(hiaddr);
+        let loByte: Result = context.bus.readByte(loaddr);
+        let hiByte: Result = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles() + hidata.getCycles();
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
 
-        return new Result([lodata.getValue(), hidata.getValue()], cycles);
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -380,7 +391,7 @@ export class DirectIndirect implements IAddressing {
         let hiPointer: number;
         let cycles: number = 0;
 
-        if (registers.e.get() == 1 && registers.d.getLower() == 0x00) {
+        if (registers.p.getE() == 1 && registers.d.getLower() == 0x00) {
             let dh: number = registers.d.getUpper();
 
             loPointer = Bit.toUint16(dh, LL.getValue());
@@ -411,7 +422,7 @@ export class DirectIndirect implements IAddressing {
             let hiaddr = loaddr + 1;
 
             cycles += ll.getCycles() + hh.getCycles();
-            new Result([loaddr, hiaddr], cycles);
+            return new Result([loaddr, hiaddr], cycles);
         }
     }
 }
@@ -425,11 +436,13 @@ export class DirectIndexedIndirect implements IAddressing {
         let loaddr: Address = Address.create(result.getValue(0));
         let hiaddr: Address = Address.create(result.getValue(1));
 
-        let lodata: Result = context.bus.readByte(loaddr);
-        let hidata: Result = context.bus.readByte(hiaddr);
+        let loByte: Result = context.bus.readByte(loaddr);
+        let hiByte: Result = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles() + hidata.getCycles();
-        return new Result([lodata.getValue(), hidata.getValue()], cycles);
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -461,17 +474,19 @@ export class DirectIndirectIndexed implements IAddressing {
         let loaddr: Address = Address.create(result.getValue(0));
         let hiaddr: Address = Address.create(result.getValue(1));
 
-        let lodata: Result = context.bus.readByte(loaddr);
-        let hidata: Result = context.bus.readByte(hiaddr);
+        let loByte: Result = context.bus.readByte(loaddr);
+        let hiByte: Result = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles() + hidata.getCycles();
-        return new Result([lodata.getValue(), hidata.getValue()], cycles);
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
         let LL: Result = context.getOperand(0);
 
-        if (context.registers.e.get() == 1 && context.registers.d.getLower() == 0x00) {
+        if (context.registers.p.getE() == 1 && context.registers.d.getLower() == 0x00) {
             let dh: number = context.registers.d.getUpper();
             let x: number = context.registers.x.get();
 
@@ -507,11 +522,13 @@ export class DirectIndirectLong implements IAddressing {
         let loaddr: Address = Address.create(result.getValue(0));
         let hiaddr: Address = Address.create(result.getValue(1));
 
-        let lodata: Result = context.bus.readByte(loaddr);
-        let hidata: Result = context.bus.readByte(hiaddr);
+        let loByte: Result = context.bus.readByte(loaddr);
+        let hiByte: Result = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles() + hidata.getCycles();
-        return new Result([lodata.getValue(), hidata.getValue()], cycles);
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -521,7 +538,7 @@ export class DirectIndirectLong implements IAddressing {
         let hiPointer: number;
         let cycles: number = LL.getCycles();
 
-        if (context.registers.e.get() == 1 && context.registers.d.getLower() == 0x00) {
+        if (context.registers.p.getE() == 1 && context.registers.d.getLower() == 0x00) {
             let dh: number = context.registers.d.getUpper();
 
             let lo: number = LL.getValue();
@@ -563,11 +580,13 @@ export class DirectIndirectIndexedLong implements IAddressing {
         let loaddr: Address = Address.create(result.getValue(0));
         let hiaddr: Address = Address.create(result.getValue(1));
 
-        let lodata: Result = context.bus.readByte(loaddr);
-        let hidata: Result = context.bus.readByte(hiaddr);
+        let loByte: Result = context.bus.readByte(loaddr);
+        let hiByte: Result = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles() + hidata.getCycles();
-        return new Result([lodata.getValue(), hidata.getValue()], cycles);
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -666,11 +685,12 @@ export class Immediate16 implements IAddressing {
         let loaddr: Address = Address.create(result.getValue(0));
         let hiaddr: Address = Address.create(result.getValue(1));
 
-        let lodata: Result = context.bus.readByte(loaddr);
-        let hidata: Result = context.bus.readByte(hiaddr);
+        let loByte: Result = context.bus.readByte(loaddr);
+        let hiByte: Result = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles() + hidata.getCycles();
-        return new Result([lodata.getValue(), hidata.getValue()], cycles);
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + hiByte.getCycles() + loByte.getCycles();
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -704,11 +724,12 @@ export class Long implements IAddressing {
         let loaddr: Address = Address.create(result.getValue(0));
         let hiaddr: Address = Address.create(result.getValue(1));
 
-        let lodata: Result = context.bus.readByte(loaddr);
-        let hidata: Result = context.bus.readByte(hiaddr);
+        let loByte: Result = context.bus.readByte(loaddr);
+        let hiByte: Result = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles() + hidata.getCycles();
-        return new Result([lodata.getValue(), hidata.getValue()], cycles);
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -735,11 +756,13 @@ export class LongX implements IAddressing {
         let loaddr: Address = Address.create(result.getValue(0));
         let hiaddr: Address = Address.create(result.getValue(1));
 
-        let lodata: Result = context.bus.readByte(loaddr);
-        let hidata: Result = context.bus.readByte(hiaddr);
+        let loByte: Result = context.bus.readByte(loaddr);
+        let hiByte: Result = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles() + hidata.getCycles();
-        return new Result([lodata.getValue(), hidata.getValue()], cycles);
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + hiByte.getCycles() + loByte.getCycles();
+
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -772,10 +795,10 @@ export class Relative8 implements IAddressing {
         if (LL.getValue() < 0x80) {
             let cycles: number = LL.getCycles();
             return new Result([LL.getValue()], cycles);
+        } else {
+            let cycles: number = LL.getCycles();
+            return new Result([LL.getValue() - 0x100], cycles);
         }
-
-        let cycles: number = LL.getCycles();
-        return new Result([LL.getValue() - 0x100], cycles);
     }
 }
 
@@ -813,16 +836,18 @@ export class SourceDestination implements IAddressing {
         let loaddr: Address = Address.create(result.getValue(0));
         let hiaddr: Address = Address.create(result.getValue(1));
 
-        let lodata: Result = context.bus.readByte(loaddr);
-        let hidata: Result = context.bus.readByte(hiaddr);
+        let loByte: Result = context.bus.readByte(loaddr);
+        let hiByte: Result = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles() + hidata.getCycles();
-        return new Result([lodata.getValue(), hidata.getValue()], cycles);
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
         let sBank: Result = context.getOperand(0);
-        let dBank: Result = context.getOperand(1)
+        let dBank: Result = context.getOperand(1);
 
         let sOffset: number;
         let dOffset: number;
@@ -851,11 +876,13 @@ export class Stack implements IAddressing {
         let loaddr: Address = Address.create(result.getValue(0));
         let hiaddr: Address = Address.create(result.getValue(1));
 
-        let lodata: Result = context.bus.readByte(loaddr);
-        let hidata: Result = context.bus.readByte(hiaddr);
+        let loByte: Result = context.bus.readByte(loaddr);
+        let hiByte: Result = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles() + hidata.getCycles();
-        return new Result([lodata.getValue(), hidata.getValue()], cycles);
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {
@@ -878,11 +905,13 @@ export class StackY implements IAddressing {
         let loaddr: Address = Address.create(result.getValue(0));
         let hiaddr: Address = Address.create(result.getValue(1));
 
-        let lodata: Result = context.bus.readByte(loaddr);
-        let hidata: Result = context.bus.readByte(hiaddr);
+        let loByte: Result = context.bus.readByte(loaddr);
+        let hiByte: Result = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles() + hidata.getCycles();
-        return new Result([lodata.getValue(), hidata.getValue()], cycles);
+        let value: number = Bit.toUint16(hiByte.getValue(), loByte.getValue());
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return new Result([value], cycles);
     }
 
     public getAddress(context: OpContext): Result {

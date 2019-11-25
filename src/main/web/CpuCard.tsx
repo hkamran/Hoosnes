@@ -87,8 +87,8 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
             dbr: this.props.snes.cpu.registers.dbr.get(),
             p: this.props.snes.cpu.registers.p.get(),
 
-            emulation: this.props.snes.cpu.registers.e.get(),
-            break: this.props.snes.cpu.registers.p.getB(),
+            emulation: this.props.snes.cpu.registers.p.getE(),
+            break: this.props.snes.cpu.registers.p.getX(),
             carry: this.props.snes.cpu.registers.p.getC(),
             zero: this.props.snes.cpu.registers.p.getZ(),
             negative: this.props.snes.cpu.registers.p.getN(),
