@@ -5,8 +5,9 @@ import {Address} from "../bus/Address";
 import {Cpu} from "./Cpu";
 import {Bus} from "../bus/Bus";
 import {Registers} from "./Registers";
-import {Addressing, AddressingModes, AddressingType, IAddressingMode} from "./Addressing";
+import {Addressing, AddressingModes, IAddressingMode} from "./Addressing";
 import {Bit} from "../util/Bit";
+import {InterruptType} from "./Interrupts";
 
 export class OpContext {
 
@@ -352,18 +353,8 @@ class COP extends Operation {
     public name: string = "COP";
 
     public execute(context: OpContext): number {
-        if (context.registers.p.getE() == 1) {
-            let value: number =
-                context.console.cartridge.interrupts.emulation.COP;
+        context.cpu.interrupts.set(InterruptType.COP);
 
-            context.registers.pc.set(value);
-        } else {
-            let value: number =
-                context.console.cartridge.interrupts.native.COP;
-
-            context.registers.pc.set(value & 0xFFFF);
-            context.registers.k.set((value >> 16) & 0xFF);
-        }
         return this.getCycle();
     }
 
@@ -471,18 +462,8 @@ class BRK extends Operation {
     public name: string = "BRK";
 
     public execute(context: OpContext): number {
-        if (context.registers.p.getE() == 1) {
-            let value: number =
-                context.console.cartridge.interrupts.emulation.BRK;
+        context.cpu.interrupts.set(InterruptType.BRK);
 
-            context.registers.pc.set(value);
-        } else {
-            let value: number =
-                context.console.cartridge.interrupts.native.BRK;
-
-            context.registers.pc.set(value & 0xFFFF);
-            context.registers.k.set((value >> 16) & 0xFF);
-        }
         return this.getCycle();
     }
 
@@ -709,7 +690,7 @@ class WAI extends Operation {
     public name: string = "WAI";
 
     public execute(context: OpContext): number {
-        context.cpu.wait = true;
+        context.cpu.interrupts.wait = true;
 
         return this.getCycle();
     }

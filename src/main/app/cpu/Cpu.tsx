@@ -28,8 +28,6 @@ export class Cpu {
     public cycles: number = 0;
     public operation: Operation;
 
-    public wait: boolean = false;
-
     constructor(console: Console) {
         Objects.requireNonNull(console);
 
@@ -37,11 +35,12 @@ export class Cpu {
         this.bus = console.bus;
         this.registers = new Registers();
         this.opcodes = new Opcodes();
-        this.interrupts = new InterruptHandler(this);
+        this.interrupts = new InterruptHandler(console);
     }
 
     public tick(): number {
-        this.interrupts.tick();
+        if (this.interrupts.wait) return 0;
+        let interrupts: number = this.interrupts.tick();
 
         let pc: number = this.registers.pc.get();
         let bank: number = this.registers.k.get();
@@ -60,6 +59,7 @@ export class Cpu {
 
         this.registers.pc.set(opaddr.toValue() + operation.getSize());
         let duration = this.cycles - cycles;
+
         return duration;
     }
 

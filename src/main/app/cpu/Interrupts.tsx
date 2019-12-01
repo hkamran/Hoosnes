@@ -1,104 +1,207 @@
 import {Cpu} from "./Cpu";
+import {Registers} from "./Registers";
+import Console from "../Console";
 
-export class Interrupt {
-
-    public id : number;
-    public label : string;
-    public bank : number;
-    public addr8 : number;
-    public addr16 : number;
-    public size : number;
-
-    constructor(id : number, bank: number, addr8: number, addr16: number, size: number, label: string) {
-        this.id = id;
-        this.bank = bank;
-        this.addr8 = addr8;
-        this.addr16 = addr16;
-        this.size = size;
-        this.label = label;
-    }
+export enum InterruptType {
+    NONE,
+    COP,
+    BRK,
+    ABT,
+    NMI,
+    RST,
+    IRQ,
 }
 
 export class InterruptHandler {
 
-    public NONE: Interrupt = new Interrupt(0, 0x00, 0x0000, 0x0000, 4, "NONE");
-    public COP : Interrupt = new Interrupt(1, 0x00, 0xFFE4, 0xFFF4, 2, "COP");
-    public BRK : Interrupt = new Interrupt(2, 0x00, 0xFFE6, 0xFFF6, 2, "BREAK");
-    public ABT : Interrupt = new Interrupt(3, 0x00, 0xFFE8, 0xFFF8, 2, "ABORT");
-    public NMI : Interrupt = new Interrupt(4, 0x00, 0xFFEA, 0xFFAA, 2, "NMI");
-    public RST : Interrupt = new Interrupt(5, 0x00, 0xFFEC, 0xFFFC, 2, "RESET");
-    public IRQ : Interrupt = new Interrupt(6, 0x00, 0xFFEE, 0xFFFE, 2, "IRQ");
+    public interrupt : InterruptType = InterruptType.NONE;
 
-    public interrupt : Interrupt = this.NONE;
+    private console : Console;
+    private registers: Registers;
+    private cpu: Cpu;
 
-    private cpu : Cpu;
+    public wait: boolean = false;
 
-    constructor(cpu : Cpu) {
-        this.cpu = cpu;
+    constructor(console : Console) {
+        this.console = console;
+        this.registers = console.cpu.registers;
+        this.cpu = console.cpu;
     }
 
-    public tick() : void {
+    public tick() : number {
         switch (this.interrupt) {
-            case this.NONE: {
+            case InterruptType.RST: {
+                return this.doRST();
+            }
+            case InterruptType.ABT: {
+                return this.doABT();
+            }
+            case InterruptType.IRQ: {
+                return this.doIRQ();
+            }
+            case InterruptType.NMI: {
+                return this.doNMI();
+            }
+            case InterruptType.COP: {
+                return this.doCOP();
+            }
+            case InterruptType.BRK: {
+                return this.doBRK();
+            }
+            default:
                 this.doNone();
-                break;
-            }
-            case this.COP: {
-                this.doCOP();
-                break;
-            }
-            case this.BRK: {
-                this.doBRK();
-                break;
-            }
-            case this.ABT: {
-                this.doABT();
-                break;
-            }
-            case this.NMI: {
-                this.doNMI();
-                break;
-            }
-            case this.RST: {
-                this.doRST();
-                break;
-            }
-            case this.IRQ: {
-                this.doIRQ();
-                break;
-            }
         }
     }
 
-    public set(interrupt : Interrupt) : void {
+    public set(interrupt : InterruptType) : void {
         this.interrupt = interrupt;
     }
 
-    private doNone() {
+    private doNone(): number {
+        this.interrupt = InterruptType.NONE;
 
+        return 0;
     }
 
-    private doCOP() {
+    private doCOP(): number {
+        let isNative = this.registers.p.getE() == 0;
 
+        let pb: number = this.registers.k.get();
+        let pc: number = this.registers.pc.get();
+        let p: number = this.registers.p.get();
+
+        if (isNative) this.cpu.stack.pushByte(pb);
+        this.cpu.stack.pushWord(pc);
+        this.cpu.stack.pushByte(p);
+
+        this.registers.p.setI(1);
+        this.registers.p.setD(0);
+
+        if (isNative) {
+            let value: number = this.console.cartridge.interrupts.native.COP;
+            let bank = 0;
+            let offset = value;
+
+            this.registers.pc.set(offset);
+            this.registers.k.set(bank);
+        } else {
+            let value: number = this.console.cartridge.interrupts.native.COP;
+            let bank = (value >> 16) & 0xFF;
+            let offset = value & 0xFFFF;
+
+            this.registers.pc.set(offset);
+            this.registers.k.set(bank);
+        }
+        return 0;
     }
 
-    private doBRK() {
+    private doBRK(): number {
+        let isNative = this.registers.p.getE() == 0;
 
+        let pb: number = this.registers.k.get();
+        let pc: number = this.registers.pc.get();
+        let p: number = this.registers.p.get();
+
+        if (isNative) this.cpu.stack.pushByte(pb);
+        this.cpu.stack.pushWord(pc);
+        this.cpu.stack.pushByte(p);
+
+        this.registers.p.setI(1);
+        this.registers.p.setD(0);
+
+        if (isNative) {
+            let value: number = this.console.cartridge.interrupts.native.BRK;
+            let bank = 0;
+            let offset = value;
+
+            this.registers.pc.set(offset);
+            this.registers.k.set(bank);
+        } else {
+            let value: number = this.console.cartridge.interrupts.native.BRK;
+            let bank = (value >> 16) & 0xFF;
+            let offset = value & 0xFFFF;
+
+            this.registers.pc.set(offset);
+            this.registers.k.set(bank);
+        }
+        return 0;
     }
 
-    private doABT() {
+    private doNMI(): number {
+        let isNative = this.registers.p.getE() == 0;
 
+        let pb: number = this.registers.k.get();
+        let pc: number = this.registers.pc.get();
+        let p: number = this.registers.p.get();
+
+        if (isNative) this.cpu.stack.pushByte(pb);
+        this.cpu.stack.pushWord(pc);
+        this.cpu.stack.pushByte(p);
+
+        this.registers.p.setI(1);
+        this.registers.p.setD(0);
+
+        if (isNative) {
+            let value: number = this.console.cartridge.interrupts.native.COP;
+            let bank = 0;
+            let offset = value;
+
+            this.registers.pc.set(offset);
+            this.registers.k.set(bank);
+        } else {
+            let value: number = this.console.cartridge.interrupts.native.COP;
+            let bank = (value >> 16) & 0xFF;
+            let offset = value & 0xFFFF;
+
+            this.registers.pc.set(offset);
+            this.registers.k.set(bank);
+        }
+        return 0;
     }
 
-    private doNMI() {
+    private doIRQ(): number {
+        if (this.registers.p.getI() == 1) {
+            return;
+        }
 
+        this.cpu.wait = false;
+
+        let isNative = this.registers.p.getE() == 0;
+
+        let pb: number = this.registers.k.get();
+        let pc: number = this.registers.pc.get();
+        let p: number = this.registers.p.get();
+
+        if (isNative) this.cpu.stack.pushByte(pb);
+        this.cpu.stack.pushWord(pc);
+        this.cpu.stack.pushByte(p);
+
+        this.registers.p.setI(1);
+        this.registers.p.setD(0);
+
+        if (isNative) {
+            let value: number = this.console.cartridge.interrupts.native.IRQ;
+            let bank = 0;
+            let offset = value;
+
+            this.registers.pc.set(offset);
+            this.registers.k.set(bank);
+        } else {
+            let value: number = this.console.cartridge.interrupts.native.IRQ;
+            let bank = (value >> 16) & 0xFF;
+            let offset = value & 0xFFFF;
+
+            this.registers.pc.set(offset);
+            this.registers.k.set(bank);
+        }
+        return 0;
     }
 
-    private doRST() {
-
+    private doABT(): number {
+        throw new Error("Invalid interrupt ABORT");
     }
 
-    private doIRQ() {
-
+    private doRST(): number {
+        throw new Error("Invalid interrupt RESET");
     }
 }
