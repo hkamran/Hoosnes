@@ -28,6 +28,8 @@ export class Cpu {
     public cycles: number = 0;
     public operation: Operation;
 
+    public wait: boolean = false;
+
     constructor(console: Console) {
         Objects.requireNonNull(console);
 
@@ -48,6 +50,8 @@ export class Cpu {
         let opaddr: Address = Address.create(pc, bank);
         let opcode: Result = this.console.bus.readByte(opaddr);
         let operation: Operation = this.opcodes.get(opcode.getValue());
+
+        console.log(opcode.getValue().toString(16) + " " + operation.name);
 
         this.operation = operation;
 
