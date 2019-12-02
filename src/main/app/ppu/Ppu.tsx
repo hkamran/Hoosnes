@@ -1,4 +1,3 @@
-import {Bus} from "../bus/Bus";
 import Console from "../Console";
 import {CGram} from "../memory/CGram";
 import {Palette} from "./Palette";
@@ -7,9 +6,12 @@ import {Oam} from "../memory/Oam";
 import {TileMap} from "./TileMap";
 import {Vram} from "../memory/Vram";
 import {Registers} from "./Registers";
-import {ScreenStates, Screen} from "./Screen";
+import {Screen, ScreenStates} from "./Screen";
+import {InterruptType} from "../cpu/Interrupts";
 
 export class Ppu {
+
+    public console: Console;
 
     public cgram: CGram;
     public oam: Oam;
@@ -83,7 +85,7 @@ export class Ppu {
         }
 
         if (isVBlankStart) {
-            // vertical blank start
+            this.console.cpu.interrupts.set(InterruptType.NMI);
         }
 
         if (isVBlankEnd) {

@@ -55,52 +55,55 @@ export class Bus {
 
         let read: Result = null;
 
-        if (0x00 <= address.bank && address.bank < 0x3F) {
-            if (0x0000 <= address.toValue() && address.toValue() <= 0x1FFF) {
+        let bank = address.getBank();
+        let page = address.getPage();
+
+        if (0x00 <= bank && bank < 0x3F) {
+            if (0x0000 <= page && page <= 0x1FFF) {
                 // mirror wram
                 // readByte.cycles = 6;
-            } else if (0x2100 <= address.toValue() && address.toValue() <= 0x21FF) {
+            } else if (0x2100 <= page && page <= 0x21FF) {
                 // ppu registers
-            } else if (0x2200 <= address.toValue() && address.toValue() <= 0x41FF) {
+            } else if (0x2200 <= page && page <= 0x41FF) {
                 read = this.console.cartridge.readByte(address);
                 // readByte.cycles = 12;
-            } else if (0x4200 <= address.toValue() && address.toValue() <= 0x43FF) {
+            } else if (0x4200 <= page && page <= 0x43FF) {
                 // ppu registers
-            } else if (0x4400 <= address.toValue() && address.toValue() <= 0x7FFF) {
+            } else if (0x4400 <= page && page <= 0x7FFF) {
                 read = this.console.cartridge.readByte(address);
                 // aux
-            } else if (0x8000 <= address.toValue() && address.toValue() <= 0xFFFF) {
+            } else if (0x8000 <= page && page <= 0xFFFF) {
                 read = this.console.cartridge.readByte(address);
                 read.cycles = 6;
             }
-        } else if (0x40 <= address.bank && address.bank <= 0x7F) {
-            if (0x7E <= address.bank && address.bank >= 0x7F) {
+        } else if (0x40 <= bank && bank <= 0x7F) {
+            if (0x7E <= bank && bank >= 0x7F) {
                 // wram
                 // readByte.cycles = 6;
             } else {
                 read = this.console.cartridge.readByte(address);
                 read.cycles = 6;
             }
-        } else if (0x80 <= address.bank && address.bank <= 0xBF) {
-            if (0x0000 <= address.toValue() && address.toValue() <= 0x1FFF) {
+        } else if (0x80 <= bank && bank <= 0xBF) {
+            if (0x0000 <= page && page <= 0x1FFF) {
                 // mirror wram
                 // readByte.cycles = 6;
-            } else if (0x2100 <= address.toValue() && address.toValue() <= 0x21FF) {
+            } else if (0x2100 <= page && page <= 0x21FF) {
                 // ppu registers
-            } else if (0x2200 <= address.toValue() && address.toValue() <= 0x41FF) {
+            } else if (0x2200 <= page && page <= 0x41FF) {
                 // aux
                 read = this.console.cartridge.readByte(address);
                 // readByte.cycles = 12;
-            } else if (0x4200 <= address.toValue() && address.toValue() <= 0x43FF) {
+            } else if (0x4200 <= page && page <= 0x43FF) {
                 // ppu registers
-            } else if (0x4400 <= address.toValue() && address.toValue() <= 0x7FFF) {
+            } else if (0x4400 <= page && page <= 0x7FFF) {
                 read = this.console.cartridge.readByte(address);
                 read.cycles = 6;
-            } else if (0x8000 <= address.toValue() && address.toValue() <= 0xFFFF) {
+            } else if (0x8000 <= page && page <= 0xFFFF) {
                 read = this.console.cartridge.readByte(address);
                 read.cycles = 7;
             }
-        } else if (0xC0 <= address.bank && address.bank <= 0xFF) {
+        } else if (0xC0 <= bank && bank <= 0xFF) {
             read = this.console.cartridge.readByte(address);
         }
 

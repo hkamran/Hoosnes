@@ -66,16 +66,11 @@ export class ScreenDisplayRegister extends PpuByteRegister {
 
     public val: number = 0x8F;
 
-    public isScreenOn(): boolean {
-        return ((this.val >> 7) & 0x1) == 1;
-    }
-
-    public isScreenOff(): boolean {
-        return !this.isScreenOff();
+    public getDisplayOff(): boolean {
+        return ((this.val >> 7) & 0x1) == 0;
     }
 
     public getBrightness(): number {
-        // 255 is the max
         let val: number = this.val & 0xF;
         return val * 17;
     }
@@ -277,6 +272,55 @@ export class VRAMDataWriteLowRegister extends PpuByteRegister {
 export class VRAMDataWriteHighRegister extends PpuByteRegister {
 
     public address: string = "2119";
+    public name: string = "VMDATAH";
+
+}
+
+export class Mode7Register extends PpuByteRegister {
+
+    public address: string = "211A";
+    public name: string = "VMDATAH";
+
+}
+
+export class CosXRegister extends PpuByteRegister {
+
+    public address: string = "211B";
+    public name: string = "VMDATAH";
+
+}
+
+export class SinXRegister extends PpuByteRegister {
+
+    public address: string = "211C";
+    public name: string = "VMDATAH";
+
+}
+
+export class SinYRegister extends PpuByteRegister {
+
+    public address: string = "211D";
+    public name: string = "VMDATAH";
+
+}
+
+export class CosYRegister extends PpuByteRegister {
+
+    public address: string = "211E";
+    public name: string = "VMDATAH";
+
+}
+
+export class CenterPositionXRegister extends PpuByteRegister {
+
+    public address: string = "211F";
+    public name: string = "VMDATAH";
+
+}
+
+export class CenterPositionYRegister extends PpuByteRegister {
+
+    public address: string = "2120";
     public name: string = "VMDATAH";
 
 }
@@ -531,6 +575,15 @@ export class WRAMAddressHighRegister extends PpuByteRegister {
 
 export class Registers {
 
+    public mosaic: MosaicRegister;
+    public m7sel: Mode7Register;
+    public m7a: CosXRegister;
+    public m7b: SinXRegister;
+    public m7c: SinYRegister;
+    public m7d: CosYRegister;
+    public m7x: CenterPositionXRegister;
+    public m7y: CenterPositionYRegister;
+
     public oamselect: OamSizeAndDataAreaRegister;
     public oamaddrl: OamAddressLowRegister;
     public oamaddrh: OamAddressHighRegister;
@@ -540,6 +593,15 @@ export class Registers {
     public cgramaddr: CGRAMAddressRegister;
     public cgdataw: CGRAMDataWriteRegister;
     public cgdatar: CGRAMDataReadRegister;
+    public cgwsel: ColorMathSelectionRegister;
+    public cgadsub: ColorMathAddSubAffectRegister;
+    public coldata: ColorMathDataRegister;
+
+    public setini: ScreenModeSelectRegister;
+    public mpyl: MultiplicationResultLowRegister;
+    public mpym: MultiplicationResultMiddleRegister;
+    public mpyh: MultiplicationResultHighRegister;
+    public slhv: SoftwareLatchRegister;
 
     public vtilebg1: TileAddressForBG1Register;
     public vtilebg2: TileAddressForBG2Register;
@@ -582,9 +644,11 @@ export class Registers {
     public tmw: WindowMaskDestinationForMainRegister;
     public tsw: WindowMaskDestinationForSubRegister;
 
-    public scanlatch: SoftwareLatchRegister;
     public scanlochort: ScanlineLocationHorizontalRegister;
     public scanlocvert: ScanlineLocationVerticalRegister;
+
+    public stat77: PPUStatus77Register;
+    public stat78: PPUStatus78Register;
 
     constructor(ppu: Ppu) {
 
