@@ -12,11 +12,6 @@ export class PpuByteRegister {
     public name: string = "";
 
     public val: number = 0x0;
-    public ppu: Ppu;
-
-    constructor(ppu: Ppu) {
-        this.ppu = ppu;
-    }
 
     public get(): number {
         return this.val;
@@ -575,84 +570,79 @@ export class WRAMAddressHighRegister extends PpuByteRegister {
 
 export class Registers {
 
-    public mosaic: MosaicRegister;
-    public m7sel: Mode7Register;
-    public m7a: CosXRegister;
-    public m7b: SinXRegister;
-    public m7c: SinYRegister;
-    public m7d: CosYRegister;
-    public m7x: CenterPositionXRegister;
-    public m7y: CenterPositionYRegister;
+    public mosaic: MosaicRegister = new MosaicRegister();
+    public m7sel: Mode7Register = new Mode7Register();
+    public m7a: CosXRegister = new CosXRegister();
+    public m7b: SinXRegister = new SinXRegister();
+    public m7c: SinYRegister = new SinYRegister();
+    public m7d: CosYRegister = new CosYRegister();
+    public m7x: CenterPositionXRegister = new CenterPositionXRegister();
+    public m7y: CenterPositionYRegister = new CenterPositionYRegister();
 
-    public oamselect: OamSizeAndDataAreaRegister;
-    public oamaddrl: OamAddressLowRegister;
-    public oamaddrh: OamAddressHighRegister;
-    public oamdataw: OamDataWriteRegister;
-    public oamdatar: OAMDataReadRegister;
+    public oamselect: OamSizeAndDataAreaRegister = new OamSizeAndDataAreaRegister();
+    public oamaddrl: OamAddressLowRegister = new OamAddressLowRegister();
+    public oamaddrh: OamAddressHighRegister = new OamAddressHighRegister();
+    public oamdataw: OamDataWriteRegister = new OamDataWriteRegister();
+    public oamdatar: OAMDataReadRegister = new OAMDataReadRegister();
 
-    public cgramaddr: CGRAMAddressRegister;
-    public cgdataw: CGRAMDataWriteRegister;
-    public cgdatar: CGRAMDataReadRegister;
-    public cgwsel: ColorMathSelectionRegister;
-    public cgadsub: ColorMathAddSubAffectRegister;
-    public coldata: ColorMathDataRegister;
+    public cgramaddr: CGRAMAddressRegister = new CGRAMAddressRegister();
+    public cgdataw: CGRAMDataWriteRegister = new CGRAMDataWriteRegister();
+    public cgdatar: CGRAMDataReadRegister = new CGRAMDataReadRegister();
+    public cgwsel: ColorMathSelectionRegister = new ColorMathSelectionRegister();
+    public cgadsub: ColorMathAddSubAffectRegister = new ColorMathAddSubAffectRegister();
+    public coldata: ColorMathDataRegister = new ColorMathDataRegister();
 
-    public setini: ScreenModeSelectRegister;
-    public mpyl: MultiplicationResultLowRegister;
-    public mpym: MultiplicationResultMiddleRegister;
-    public mpyh: MultiplicationResultHighRegister;
-    public slhv: SoftwareLatchRegister;
+    public setini: ScreenModeSelectRegister = new ScreenModeSelectRegister();
+    public mpyl: MultiplicationResultLowRegister = new MultiplicationResultLowRegister();
+    public mpym: MultiplicationResultMiddleRegister = new MultiplicationResultMiddleRegister();
+    public mpyh: MultiplicationResultHighRegister = new MultiplicationResultHighRegister();
+    public slhv: SoftwareLatchRegister = new SoftwareLatchRegister();
 
-    public vtilebg1: TileAddressForBG1Register;
-    public vtilebg2: TileAddressForBG2Register;
-    public vtilebg3: TileAddressForBG3Register;
-    public vtilebg4: TileAddressForBG4Register;
-    public vcharlocbg12: CharacterAddressForBG1And2Register;
-    public vcharlocbg34: CharacterAddressForBG3And4Register;
-    public vportcntrl: VideoPortControlRegister;
-    public vaddrl: VRAMAddressLowRegister;
-    public vaddrh: VRAMAddressHighRegister;
-    public vdatawl: VRAMDataWriteLowRegister;
-    public vdatawh: VRAMDataWriteHighRegister;
-    public vdatarl: VRAMDataReadLowRegister;
-    public vdatarw: VRAMDataReadHighRegister;
+    public vtilebg1: TileAddressForBG1Register = new TileAddressForBG1Register();
+    public vtilebg2: TileAddressForBG2Register = new TileAddressForBG2Register();
+    public vtilebg3: TileAddressForBG3Register = new TileAddressForBG3Register();
+    public vtilebg4: TileAddressForBG4Register = new TileAddressForBG4Register();
+    public vcharlocbg12: CharacterAddressForBG1And2Register = new CharacterAddressForBG1And2Register();
+    public vcharlocbg34: CharacterAddressForBG3And4Register = new CharacterAddressForBG3And4Register();
+    public vportcntrl: VideoPortControlRegister = new VideoPortControlRegister();
+    public vaddrl: VRAMAddressLowRegister = new VRAMAddressLowRegister();
+    public vaddrh: VRAMAddressHighRegister = new VRAMAddressHighRegister();
+    public vdatawl: VRAMDataWriteLowRegister = new VRAMDataWriteLowRegister();
+    public vdatawh: VRAMDataWriteHighRegister = new VRAMDataWriteHighRegister();
+    public vdatarl: VRAMDataReadLowRegister = new VRAMDataReadLowRegister();
+    public vdatarw: VRAMDataReadHighRegister = new VRAMDataReadHighRegister();
 
-    public inidisp: ScreenDisplayRegister;
-    public bgmode: BhModeAndCharacterSizeRegister;
+    public inidisp: ScreenDisplayRegister = new ScreenDisplayRegister();
+    public bgmode: BhModeAndCharacterSizeRegister = new BhModeAndCharacterSizeRegister();
 
-    public bg1hofs: HorizontalScrollForBG1Register;
-    public bg1vofs: VerticalScrollForBG1Register;
-    public bg2hofs: HorizontalScrollForBG2Register;
-    public bg2vofs: VerticalScrollForBG2Register;
-    public bg3hofs: HorizontalScrollForBG3Register;
-    public bg3vofs: VerticalScrollForBG3Register;
-    public bg4hofs: HorizontalScrollForBG4Register;
-    public bg4vofs: VerticalScrollForBG4Register;
+    public bg1hofs: HorizontalScrollForBG1Register = new HorizontalScrollForBG1Register();
+    public bg1vofs: VerticalScrollForBG1Register = new VerticalScrollForBG1Register();
+    public bg2hofs: HorizontalScrollForBG2Register = new HorizontalScrollForBG2Register();
+    public bg2vofs: VerticalScrollForBG2Register = new VerticalScrollForBG2Register();
+    public bg3hofs: HorizontalScrollForBG3Register = new HorizontalScrollForBG3Register();
+    public bg3vofs: VerticalScrollForBG3Register = new VerticalScrollForBG3Register();
+    public bg4hofs: HorizontalScrollForBG4Register = new HorizontalScrollForBG4Register();
+    public bg4vofs: VerticalScrollForBG4Register = new VerticalScrollForBG4Register();
 
-    public tm: ScreenDestinationForMainRegister;
-    public ts: ScreenDestinationForSubRegister;
+    public tm: ScreenDestinationForMainRegister = new ScreenDestinationForMainRegister();
+    public ts: ScreenDestinationForSubRegister = new ScreenDestinationForSubRegister();
 
-    public w12sel: WindowMaskSettingsForBG1And2Register;
-    public w34sel: WindowMaskSettingsForBG3And4Register;
-    public wobjsel: WindowMaskSettingsForObjRegister;
-    public wh0: WindowPositionForBG0Register;
-    public wh1: WindowPositionForBG1Register;
-    public wh2: WindowPositionForBG2Register;
-    public wh3: WindowPositionForBG3Register;
-    public wbglog: WindowMaskLogicForBgRegister;
-    public wobjlog: WindowMaskLogicForObjRegister;
-    public tmw: WindowMaskDestinationForMainRegister;
-    public tsw: WindowMaskDestinationForSubRegister;
+    public w12sel: WindowMaskSettingsForBG1And2Register = new WindowMaskSettingsForBG1And2Register();
+    public w34sel: WindowMaskSettingsForBG3And4Register = new WindowMaskSettingsForBG3And4Register();
+    public wobjsel: WindowMaskSettingsForObjRegister = new WindowMaskSettingsForObjRegister();
+    public wh0: WindowPositionForBG0Register = new WindowPositionForBG0Register();
+    public wh1: WindowPositionForBG1Register = new WindowPositionForBG1Register();
+    public wh2: WindowPositionForBG2Register = new WindowPositionForBG2Register();
+    public wh3: WindowPositionForBG3Register = new WindowPositionForBG3Register();
+    public wbglog: WindowMaskLogicForBgRegister = new WindowMaskLogicForBgRegister();
+    public wobjlog: WindowMaskLogicForObjRegister = new WindowMaskLogicForObjRegister();
+    public tmw: WindowMaskDestinationForMainRegister = new WindowMaskDestinationForMainRegister();
+    public tsw: WindowMaskDestinationForSubRegister = new WindowMaskDestinationForSubRegister();
 
-    public scanlochort: ScanlineLocationHorizontalRegister;
-    public scanlocvert: ScanlineLocationVerticalRegister;
+    public scanlochort: ScanlineLocationHorizontalRegister = new ScanlineLocationHorizontalRegister();
+    public scanlocvert: ScanlineLocationVerticalRegister = new ScanlineLocationVerticalRegister();
 
-    public stat77: PPUStatus77Register;
-    public stat78: PPUStatus78Register;
-
-    constructor(ppu: Ppu) {
-
-    }
-
+    public stat77: PPUStatus77Register = new PPUStatus77Register();
+    public stat78: PPUStatus78Register = new PPUStatus78Register();
 
 }

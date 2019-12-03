@@ -168,6 +168,147 @@ export class BusB {
 
 
     public writeByte(address: Address, val: number): Write {
+        if (address == null || val == null || val < 0 || val > 0xFF) {
+            throw new Error("Invalid writeByte at " + address + " with " + val);
+        }
+
+        let bank = address.getBank();
+        let page = address.getPage();
+
+        if (page < 0x2100 || page > 0x2183) {
+            throw new Error("Invalid writeByte at " + address);
+        }
+
+        if (page == 0x2100) {
+            this.registers.inidisp.set(val);
+        } else if (page == 0x2101) {
+            this.registers.oamselect.set(val);
+        } else if (page == 0x2102) {
+            this.registers.oamaddrl.set(val);
+        } else if (page == 0x2103) {
+            this.registers.oamaddrh.set(val);
+        } else if (page == 0x2104) {
+            this.registers.oamdataw.set(val);
+        } else if (page == 0x2105) {
+            this.registers.bgmode.set(val);
+        } else if (page == 0x2106) {
+            this.registers.mosaic.set(val);
+        } else if (page == 0x2107) {
+            this.registers.vtilebg1.set(val);
+        } else if (page == 0x2108) {
+            this.registers.vtilebg2.set(val);
+        } else if (page == 0x2109) {
+            this.registers.vtilebg3.set(val);
+        } else if (page == 0x210A) {
+            this.registers.vtilebg4.set(val);
+        } else if (page == 0x210B) {
+            this.registers.vcharlocbg12.set(val);
+        } else if (page == 0x210C) {
+            this.registers.vcharlocbg34.set(val);
+        } else if (page == 0x210D) {
+            this.registers.bg1hofs.set(val);
+        } else if (page == 0x210E) {
+            this.registers.bg1vofs.set(val);
+        } else if (page == 0x210F) {
+            this.registers.bg2hofs.set(val);
+        } else if (page == 0x2110) {
+            this.registers.bg2vofs.set(val);
+        } else if (page == 0x2111) {
+            this.registers.bg3hofs.set(val);
+        } else if (page == 0x2112) {
+            this.registers.bg3vofs.set(val);
+        } else if (page == 0x2113) {
+            this.registers.bg4hofs.set(val);
+        } else if (page == 0x2114) {
+            this.registers.bg4vofs.set(val);
+        } else if (page == 0x2115) {
+            this.registers.vportcntrl.set(val);
+        } else if (page == 0x2116) {
+            this.registers.vaddrl.set(val);
+        } else if (page == 0x2117) {
+            this.registers.vaddrh.set(val);
+        } else if (page == 0x2118) {
+            this.registers.vdatawl.set(val);
+        } else if (page == 0x2119) {
+            this.registers.vdatawh.set(val);
+        } else if (page == 0x211A) {
+            this.registers.m7sel.set(val);
+        } else if (page == 0x211B) {
+            this.registers.m7a.set(val);
+        } else if (page == 0x211C) {
+            this.registers.m7b.set(val);
+        } else if (page == 0x211D) {
+            this.registers.m7c.set(val);
+        } else if (page == 0x211E) {
+            this.registers.m7d.set(val);
+        } else if (page == 0x211F) {
+            this.registers.m7x.set(val);
+        } else if (page == 0x2120) {
+            this.registers.m7y.set(val);
+        } else if (page == 0x2121) {
+            this.registers.cgramaddr.set(val);
+        } else if (page == 0x2122) {
+            this.registers.cgdataw.set(val);
+        } else if (page == 0x2123) {
+            this.registers.w12sel.set(val);
+        } else if (page == 0x2124) {
+            this.registers.w34sel.set(val);
+        } else if (page == 0x2125) {
+            this.registers.wobjsel.set(val);
+        } else if (page == 0x2126) {
+            this.registers.wh0.set(val);
+        } else if (page == 0x2127) {
+            this.registers.wh1.set(val);
+        } else if (page == 0x2128) {
+            this.registers.wh2.set(val);
+        } else if (page == 0x2129) {
+            this.registers.wh3.set(val);
+        } else if (page == 0x212A) {
+            this.registers.wbglog.set(val);
+        } else if (page == 0x212B) {
+            this.registers.wobjlog.set(val);
+        } else if (page == 0x212C) {
+            this.registers.tm.set(val);
+        } else if (page == 0x212D) {
+            this.registers.ts.set(val);
+        } else if (page == 0x212E) {
+            this.registers.tmw.set(val);
+        } else if (page == 0x212F) {
+            this.registers.tsw.set(val);
+        } else if (page == 0x2130) {
+            this.registers.cgwsel.set(val);
+        } else if (page == 0x2131) {
+            this.registers.cgadsub.set(val);
+        } else if (page == 0x2132) {
+            this.registers.coldata.set(val);
+        } else if (page == 0x2133) {
+            this.registers.setini.set(val);
+        } else if (page == 0x2134) {
+            this.registers.mpyl.set(val);
+        } else if (page == 0x2135) {
+            this.registers.mpym.set(val);
+        } else if (page == 0x2136) {
+            this.registers.mpyh.set(val);
+        } else if (page == 0x2137) {
+            this.registers.slhv.set(val);
+        } else if (page == 0x2138) {
+            this.registers.oamdatar.set(val);
+        } else if (page == 0x2139) {
+            this.registers.vdatarl.set(val);
+        } else if (page == 0x213A) {
+            this.registers.vdatarw.set(val);
+        } else if (page == 0x213B) {
+            this.registers.cgdatar.set(val);
+        } else if (page == 0x213C) {
+            this.registers.scanlochort.set(val);
+        } else if (page == 0x213D) {
+            this.registers.scanlocvert.set(val);
+        } else if (page == 0x213E) {
+            this.registers.stat77.set(val);
+        } else if (page == 0x213F) {
+            this.registers.stat78.set(val);
+        }
+
         return null;
     }
 }

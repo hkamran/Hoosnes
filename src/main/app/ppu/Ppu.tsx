@@ -39,7 +39,7 @@ export class Ppu {
         this.palette = new Palette(this.cgram);
         this.sprites = new Sprites(this.oam);
         this.tiles = new TileMap(this.vram);
-        this.registers = new Registers(this);
+        this.registers = new Registers();
 
         this.screen = new Screen(this);
     }
