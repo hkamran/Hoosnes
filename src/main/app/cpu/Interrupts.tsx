@@ -164,7 +164,7 @@ export class InterruptHandler {
             return;
         }
 
-        this.cpu.wait = false;
+        this.wait = false;
 
         let isNative = this.registers.p.getE() == 0;
 
