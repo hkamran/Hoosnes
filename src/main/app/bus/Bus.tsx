@@ -27,6 +27,7 @@ export class Bus {
 
         this.console = console;
         this.busA = new BusA(console);
+        this.busB = new BusB(console);
     }
 
     public readWord(address: Address): Read {
