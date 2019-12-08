@@ -10,8 +10,7 @@ export class Wram {
     // The first 8K are also mirrored to xx0000h-xx1FFFh (xx=00h..3Fh and 80h..BFh)
     // Moreover (mainly for DMA purposes) it can be accessed via Port 218xh.
 
-    public low: number[] = [];
-    public high: number[] = [];
+    private data: number[] = new Array(2000);
 
     public readByte(address: Address): Read {
         Objects.requireNonNull(address);
@@ -23,13 +22,14 @@ export class Wram {
             throw new Error("Invalid readByte on work ram!");
         }
 
-        if (NumberUtil.inRange(bank, 0x7F, 0x7F)) {
-            return Read.byte(this.high[page]);
+        if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
+            let multiplier: number = (page / 0x2000) * 0x2000;
+            let remainder: number = page % 0x2000;
+            return Read.byte(this.data[multiplier + remainder]);
         } else {
-            return Read.byte(this.low[page]);
+            return Read.byte(this.data[page]);
         }
     }
-
-    public writeByte(address: number, val: number, bank?: number): void {
-    }
 }
+
+

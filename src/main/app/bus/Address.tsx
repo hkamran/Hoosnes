@@ -1,7 +1,7 @@
 export class Address {
 
-    private readonly bank: number = 0;
-    private readonly offset: number = 0;
+    private bank: number = 0;
+    private offset: number = 0;
 
     // public page: number = 0; // 256 bytes makes a page
     // public bank: number = 0; // 256 page makes a bank
@@ -27,6 +27,14 @@ export class Address {
 
     public toValue(): number {
         return (this.bank << 16) | (this.offset);
+    }
+
+    public setPage(page: number): void {
+        this.offset = page & 0xFFFF;
+    }
+
+    public setBank(bank: number): void {
+        this.bank = bank & 0xFFFF;
     }
 
     public static create(val: number, bank?: number): Address {
