@@ -1,5 +1,7 @@
 import {Objects} from "../util/Objects";
 import {NumberUtil} from "../util/NumberUtil";
+import {Address} from "../bus/Address";
+import {Read} from "../bus/Read";
 
 export class Wram {
     // The SNES includes 128Kbytes of Work RAM, which can be accessed in several ways:
@@ -11,21 +13,20 @@ export class Wram {
     public low: number[] = [];
     public high: number[] = [];
 
-    public readByte(address: number, bank?: number): number {
+    public readByte(address: Address): Read {
         Objects.requireNonNull(address);
-        if (address > 0xFFFF || address < 0) {
+
+        let bank = address.getBank();
+        let page = address.getPage();
+
+        if (page > 0xFFFF || page < 0) {
             throw new Error("Invalid readByte on work ram!");
         }
-        if (bank == null) {
-            bank = (address >> 16) & 0xFF;
-        }
-        let offset: number = (address & 0xFFFF);
-        console.log(`Reading work ram ${bank.toString(16)}:${offset.toString(16)}`);
 
         if (NumberUtil.inRange(bank, 0x7F, 0x7F)) {
-            return this.high[offset];
+            return Read.byte(this.high[page]);
         } else {
-            return this.low[offset];
+            return Read.byte(this.low[page]);
         }
     }
 

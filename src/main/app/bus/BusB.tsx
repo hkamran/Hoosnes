@@ -164,7 +164,10 @@ export class BusB {
             read = Read.byte(this.registers.stat77.get());
         } else if (page == 0x213F) {
             read = Read.byte(this.registers.stat78.get());
+        } else {
+            throw new Error("Invalid read on BusB at " + address.toValue());
         }
+
 
         return read;
     }
@@ -310,7 +313,10 @@ export class BusB {
             this.registers.stat77.set(val);
         } else if (page == 0x213F) {
             this.registers.stat78.set(val);
+        } else {
+            throw new Error("Invalid write on BusB at " + address.toValue());
         }
+
 
         return null;
     }

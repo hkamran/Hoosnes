@@ -1,12 +1,10 @@
 import {Objects} from "../util/Objects";
 import Console from "../Console";
-import {NumberUtil} from "../util/NumberUtil";
-import {Logger, LoggerManager} from "typescript-logger";
-import {Stack} from "../memory/Stack";
-import {Wram} from "../memory/Wram";
 import {Address} from "./Address";
 import {Write} from "./Write";
 import {Read} from "./Read";
+import {BusA} from "./BusA";
+import {BusB} from "./BusB";
 
 export class NotSupported extends Error {
     constructor(message? : any) {
@@ -17,6 +15,10 @@ export class NotSupported extends Error {
 
 export class Bus {
 
+
+    public busA: BusA;
+    public busB: BusB;
+
     public console: Console;
     public mdr: Read = null;
 
@@ -24,6 +26,7 @@ export class Bus {
         Objects.requireNonNull(console);
 
         this.console = console;
+        this.busA = new BusA(console);
     }
 
     public readWord(address: Address): Read {
@@ -60,40 +63,33 @@ export class Bus {
 
         if (0x00 <= bank && bank < 0x3F) {
             if (0x0000 <= page && page <= 0x1FFF) {
-                // mirror wram
-                // readByte.cycles = 6;
+                read = this.console.cpu.wram.readByte(address);
             } else if (0x2100 <= page && page <= 0x21FF) {
-                // ppu registers
+                read = this.busB.readByte(address);
             } else if (0x2200 <= page && page <= 0x41FF) {
                 read = this.console.cartridge.readByte(address);
-                // readByte.cycles = 12;
             } else if (0x4200 <= page && page <= 0x43FF) {
-                // ppu registers
+                read = this.busA.readByte(address);
             } else if (0x4400 <= page && page <= 0x7FFF) {
                 read = this.console.cartridge.readByte(address);
-                // aux
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 read = this.console.cartridge.readByte(address);
             }
         } else if (0x40 <= bank && bank <= 0x7F) {
             if (0x7E <= bank && bank >= 0x7F) {
-                // wram
-                // readByte.cycles = 6;
+                read = this.console.cpu.wram.readByte(address);
             } else {
                 read = this.console.cartridge.readByte(address);
             }
         } else if (0x80 <= bank && bank <= 0xBF) {
             if (0x0000 <= page && page <= 0x1FFF) {
-                // mirror wram
-                // readByte.cycles = 6;
+                read = this.console.cpu.wram.readByte(address);
             } else if (0x2100 <= page && page <= 0x21FF) {
-                // ppu registers
+                read = this.busB.readByte(address);
             } else if (0x2200 <= page && page <= 0x41FF) {
-                // aux
                 read = this.console.cartridge.readByte(address);
-                // readByte.cycles = 12;
             } else if (0x4200 <= page && page <= 0x43FF) {
-                // ppu registers
+                read = this.busA.readByte(address);
             } else if (0x4400 <= page && page <= 0x7FFF) {
                 read = this.console.cartridge.readByte(address);
             } else if (0x8000 <= page && page <= 0xFFFF) {
@@ -101,6 +97,8 @@ export class Bus {
             }
         } else if (0xC0 <= bank && bank <= 0xFF) {
             read = this.console.cartridge.readByte(address);
+        } else {
+            throw new Error("Invalid bus read at " + address.toValue());
         }
 
         if (read == null) {

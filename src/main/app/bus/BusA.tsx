@@ -10,8 +10,8 @@ import {Registers} from "../cpu/Registers";
  */
 export class BusA {
 
-    public console: Console;
-    public registers: Registers;
+    private console: Console;
+    private registers: Registers;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -96,6 +96,8 @@ export class BusA {
             read = Read.byte(this.registers.joy4l.get());
         } else if (page == 0x421F) {
             read = Read.byte(this.registers.joy4h.get());
+        } else {
+            throw new Error("Invalid read on BusA at " + address.toValue());
         }
 
         return read;
@@ -174,6 +176,8 @@ export class BusA {
             this.registers.joy4l.set(val);
         } else if (page == 0x421F) {
             this.registers.joy4h.set(val);
+        } else {
+            throw new Error("Invalid write on BusA at " + address.toValue());
         }
 
         return null;
