@@ -7,7 +7,7 @@ import {Bus} from "../bus/Bus";
 import {Objects} from "../util/Objects";
 import {Logger, LoggerManager} from "typescript-logger";
 import Console from "../Console";
-import {Result} from "../bus/Result";
+import {Read} from "../bus/Read";
 import {Address} from "../bus/Address";
 import {Stack} from "../memory/Stack";
 import {Wram} from "../memory/Wram";
@@ -35,7 +35,7 @@ export class Cpu {
         this.bus = console.bus;
         this.registers = new Registers();
         this.opcodes = new Opcodes();
-        this.interrupts = new InterruptHandler(console);
+        this.interrupts = new InterruptHandler(this);
     }
 
     public tick(): number {
@@ -47,10 +47,10 @@ export class Cpu {
         let cycles = this.cycles;
 
         let opaddr: Address = Address.create(pc, bank);
-        let opcode: Result = this.console.bus.readByte(opaddr);
-        let operation: Operation = this.opcodes.get(opcode.getValue());
+        let opcode: Read = this.console.bus.readByte(opaddr);
+        let operation: Operation = this.opcodes.get(opcode.get());
 
-        console.log(opcode.getValue().toString(16) + " " + operation.name);
+        console.log(opcode.get().toString(16) + " " + operation.name);
 
         this.operation = operation;
 

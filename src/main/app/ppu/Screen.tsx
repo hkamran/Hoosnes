@@ -1,4 +1,5 @@
 import {Ppu} from "./Ppu";
+import {Color} from "./Palette";
 
 export class ScreenStates {
 
@@ -19,26 +20,47 @@ export class ScreenStates {
     }
 
     public isInRange(val: number): boolean {
-        if (val < this.start || val > this.end) {
-            return false;
-        }
-        return true;
+        return !(val < this.start || val > this.end);
     }
 }
 
+/**
+ * R = 255 / 8 = 31
+ * G = 255 / 8 = 31
+ * B = 255 / 8 = 31
+ * ================
+ * Color = 31 x 1024 + 31 x 32 + 31 = 32767 (0x7FFF)
+ */
 export class Screen {
 
-    public static WIDTH: number = 256;
-    public static HEIGHT: number = 224;
+    public context: CanvasRenderingContext2D;
 
-    public ppu: Ppu;
+    public static readonly WIDTH: number = 256;
+    public static readonly HEIGHT: number = 224;
 
-    constructor(ppu: Ppu) {
-        this.ppu = ppu;
+    public buffer: ImageData;
+
+    public setContext(context: CanvasRenderingContext2D): void {
+        this.context = context;
+        this.buffer = this.context.createImageData(Screen.WIDTH, Screen.HEIGHT);
     }
 
-    public tick(): void {
+    public setColor(x: number, y: number, color: Color) {
+        if (color == null) {
+            throw Error("Invalid coloring");
+        }
 
+        let index: number = (x + y * this.buffer.width) * 4;
+
+        this.buffer.data[index+0] = color.red;
+        this.buffer.data[index+1] = color.green;
+        this.buffer.data[index+2] = color.blue;
+        this.buffer.data[index+3] = color.opacity;
+    }
+
+    public render(): void {
+        this.context.putImageData(this.buffer, 0, 0);
+        this.buffer = this.context.createImageData(Screen.WIDTH, Screen.HEIGHT);
     }
 
 }

@@ -6,15 +6,15 @@ import {CartridgeMapping1} from "./CartridgeMapping1";
 import {CartridgeMapping5} from "./CartridgeMapping5";
 import {CartridgeMapping4} from "./CartridgeMapping4";
 import {CartridgeMapping2} from "./CartridgeMapping2";
-import {Result} from "../bus/Result";
 import {Address} from "../bus/Address";
 import {Write} from "../bus/Write";
 import {Sram} from "../memory/Sram";
 import {CartridgeMapping3} from "./CartridgeMapping3";
+import {Read} from "../bus/Read";
 
 export interface ICartridgeMapping {
     label: string;
-    read(address: Address): Result;
+    read(address: Address): Read;
     write(address: Address, value: number): Write;
 }
 
@@ -200,7 +200,7 @@ export class Cartridge {
         return type;
     }
 
-    public readByte(address: Address): Result {
+    public readByte(address: Address): Read {
         return this.mapping.read(address);
     }
 

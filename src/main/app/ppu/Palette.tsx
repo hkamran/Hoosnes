@@ -6,7 +6,7 @@ export enum PaletteBppType {
     Two,
 }
 
-export class PaletteColor {
+export class Color {
     public red: number;
     public green: number;
     public blue: number;
@@ -29,7 +29,7 @@ export class PaletteColor {
         let blue: number = (data >> 0 & 0x1F) * 8;
         let opacity: number = (data >> 15 & 1) == 1 ? 0 : 255;
 
-        return new PaletteColor(red, green, blue, opacity);
+        return new Color(red, green, blue, opacity);
     }
 
 }
@@ -42,7 +42,7 @@ export class Palette {
         this.cgram = cgram;
     }
 
-    public getPalette(type: PaletteBppType, index: number): PaletteColor[] {
+    public getPalette(type: PaletteBppType, index: number): Color[] {
         if (type == PaletteBppType.Eight) {
             return this.fetchRange(0, 256);
         } else if (type == PaletteBppType.Four) {
@@ -60,20 +60,20 @@ export class Palette {
         }
     }
 
-    private fetchRange(startIndex: number, endIndex: number): PaletteColor[] {
+    private fetchRange(startIndex: number, endIndex: number): Color[] {
         if (startIndex == null || startIndex < 0 || startIndex > 256 ||
             endIndex == null || endIndex < 0 || endIndex > 256 || startIndex > endIndex) {
             throw new Error("Invalid palette " + startIndex + " " + endIndex);
         }
 
-        let colors: PaletteColor[] = [];
+        let colors: Color[] = [];
         let cramIndex: number = 0;
         for (let i = startIndex; i < endIndex; i++) {
             let lowHalf: number = this.cgram.readByte(cramIndex + 0) << 0;
             let highHalf: number = this.cgram.readByte(cramIndex + 1) << 8;
 
             let byte: number = lowHalf | highHalf;
-            let color: PaletteColor = PaletteColor.parse(byte);
+            let color: Color = Color.parse(byte);
             cramIndex += 2;
             colors.push(color);
         }

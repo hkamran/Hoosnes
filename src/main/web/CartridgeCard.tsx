@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Card} from "./core/layout/Card";
-import {PaletteBppType, PaletteColor} from "../app/ppu/Palette";
+import {PaletteBppType, Color} from "../app/ppu/Palette";
 import Console from "../app/Console";
 import {Cartridge} from "../app/cartridge/Cartridge";
 

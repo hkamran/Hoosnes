@@ -2,7 +2,7 @@ import * as React from "react";
 import {Card} from "./core/layout/Card";
 import Console from "../app/Console";
 import {Modes} from "../app/Modes";
-import {EmulationRegister, Register, StatusRegister} from "../app/cpu/Registers";
+import {Register, StatusRegister} from "../app/cpu/Registers";
 import {CSSProperties} from "react";
 import {Operation} from "../app/cpu/Opcodes";
 

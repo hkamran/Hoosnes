@@ -41,7 +41,7 @@ export class Ppu {
         this.tiles = new TileMap(this.vram);
         this.registers = new Registers();
 
-        this.screen = new Screen(this);
+        this.screen = new Screen();
     }
 
     public tick(): void {
@@ -77,7 +77,7 @@ export class Ppu {
         }
 
         if (isRendering) {
-            this.screen.tick();
+
         }
 
         if (isScreenFinished) {

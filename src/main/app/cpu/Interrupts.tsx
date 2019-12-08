@@ -22,10 +22,9 @@ export class InterruptHandler {
 
     public wait: boolean = false;
 
-    constructor(console : Console) {
-        this.console = console;
-        this.registers = console.cpu.registers;
-        this.cpu = console.cpu;
+    constructor(cpu : Cpu) {
+        this.registers = cpu.registers;
+        this.cpu = cpu;
     }
 
     public tick() : number {

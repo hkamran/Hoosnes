@@ -5,8 +5,8 @@ import {Logger, LoggerManager} from "typescript-logger";
 import {Stack} from "../memory/Stack";
 import {Wram} from "../memory/Wram";
 import {Address} from "./Address";
-import {Result} from "./Result";
 import {Write} from "./Write";
+import {Read} from "./Read";
 
 export class NotSupported extends Error {
     constructor(message? : any) {
@@ -18,7 +18,7 @@ export class NotSupported extends Error {
 export class Bus {
 
     public console: Console;
-    public mdr: Result = null;
+    public mdr: Read = null;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -26,15 +26,15 @@ export class Bus {
         this.console = console;
     }
 
-    public readWord(address: Address): Result {
+    public readWord(address: Address): Read {
         let nextAddress = Address.create(address.toValue() + 1);
 
-        let low: Result = this.readByte(address);
-        let high: Result = this.readByte(nextAddress);
+        let low: Read = this.readByte(address);
+        let high: Read = this.readByte(nextAddress);
 
         let cycles: number = low.getCycles() + high.getCycles();
 
-        let result: Result = new Result([low.getValue(), high.getValue()], cycles);
+        let result: Read = Read.word(low.get(), high.get(), cycles);
         return result;
     }
 
@@ -48,12 +48,12 @@ export class Bus {
     // when fast memory is not enabled) take 8 master clock cycles.
     //
     // "slow" memory, which is only banks $00-$3F and $80-$BF, pages $40 and $41, take 12 master clock cycles.
-    public readByte(address: Address): Result {
+    public readByte(address: Address): Read {
         if (address == null) {
             throw new Error("Invalid readByte at " + address);
         }
 
-        let read: Result = null;
+        let read: Read = null;
 
         let bank = address.getBank();
         let page = address.getPage();
@@ -74,7 +74,6 @@ export class Bus {
                 // aux
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 read = this.console.cartridge.readByte(address);
-                read.cycles = 6;
             }
         } else if (0x40 <= bank && bank <= 0x7F) {
             if (0x7E <= bank && bank >= 0x7F) {
@@ -82,7 +81,6 @@ export class Bus {
                 // readByte.cycles = 6;
             } else {
                 read = this.console.cartridge.readByte(address);
-                read.cycles = 6;
             }
         } else if (0x80 <= bank && bank <= 0xBF) {
             if (0x0000 <= page && page <= 0x1FFF) {
@@ -98,10 +96,8 @@ export class Bus {
                 // ppu registers
             } else if (0x4400 <= page && page <= 0x7FFF) {
                 read = this.console.cartridge.readByte(address);
-                read.cycles = 6;
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 read = this.console.cartridge.readByte(address);
-                read.cycles = 7;
             }
         } else if (0xC0 <= bank && bank <= 0xFF) {
             read = this.console.cartridge.readByte(address);

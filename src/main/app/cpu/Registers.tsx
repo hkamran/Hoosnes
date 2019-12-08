@@ -49,11 +49,8 @@ export class Register {
 
     protected val : number = 0;
     protected mode : Mode = Modes.bit8;
-    protected label : string;
 
-    constructor(label : string, mode: Mode) {
-        this.mode = mode;
-        this.label = label;
+    constructor() {
     }
 
     public set(val : number): void {
@@ -65,25 +62,6 @@ export class Register {
 
     public get(): number {
         return this.val;
-    }
-
-    public increment(val : number): number {
-        let maskedVal = val;
-        this.val = (maskedVal + this.val);
-        return this.val;
-    }
-
-    public decrement(val : number): number {
-        return this.increment(-1 * val);
-    }
-
-    public setMode(mode : Mode) {
-        this.mode = mode;
-        // this.val = this.val & mode.size;
-    }
-
-    public getMode(): Mode {
-        return this.mode;
     }
 
     public getLower(): number {
@@ -99,7 +77,15 @@ export class Register {
 // NVMXDIZC
 export class StatusRegister extends Register {
 
+    public address: string = "212D";
+    public name: string = "TS";
+
     protected e : number = 0;
+
+    constructor() {
+        super();
+        this.mode = Modes.bit8;
+    }
 
     // Emulation Mode
     public getE() : number {
@@ -207,33 +193,131 @@ export class StatusRegister extends Register {
 
 }
 
+export class InterruptEnableRegister extends Register {
 
-export class EmulationRegister extends Register {
-    
-    public set(value: number) {
-        if (value == null || (value != 0 && value != 1)) {
-            throw new Error("Invalid value set!");
-        }
-        if (value == 1) {
-            this.mode = Modes.bit16;
-        } else if (value == 0) {
-            this.mode = Modes.bit8;
-        }
+
+}
+
+export class AccumulatorRegister extends Register {
+
+    constructor() {
+        super();
+        this.mode = Modes.bit16;
+    }
+
+
+}
+
+
+export class DataBankRegister extends Register {
+
+    constructor() {
+        super();
+        this.mode = Modes.bit16;
+    }
+
+}
+
+export class DirectPageRegister extends Register {
+
+    constructor() {
+        super();
+        this.mode = Modes.bit16;
+    }
+
+}
+
+export class ProgramBankRegister extends Register {
+
+    // PBR
+
+    constructor() {
+        super();
+        this.mode = Modes.bit8;
+    }
+
+}
+
+export class ProgramCounterRegister extends Register {
+
+    constructor() {
+        super();
+        this.mode = Modes.bit16;
+    }
+
+}
+
+export class StackPointerRegister extends Register {
+
+    constructor() {
+        super();
+        this.mode = Modes.bit16;
     }
 
 }
 
 
+export class IndirectYRegister extends Register {
+
+    constructor() {
+        super();
+        this.mode = Modes.bit16;
+    }
+
+}
+
+export class IndirectXRegister extends Register {
+
+    constructor() {
+        super();
+        this.mode = Modes.bit16;
+    }
+
+}
+
 export class Registers {
 
-    public a : Register = new Register("Accumulator", Modes.bit16);
-    public dbr : Register = new Register("Data Bank ", Modes.bit8);
-    public d : Register = new Register("Direct Page", Modes.bit16);
-    public k : Register = new Register("Program Bank", Modes.bit8); // PBR
-    public pc : Register = new Register("Program Counter", Modes.bit16);
-    public p : StatusRegister = new StatusRegister("Processor Status Register ", Modes.bit8);
-    public sp : Register = new Register("Stack Pointer", Modes.bit16);
-    public x : Register = new Register("Index Register X", Modes.bit16);
-    public y : Register = new Register("Index Register Y", Modes.bit8);
+    public a : Register = new AccumulatorRegister();
+    public dbr : Register = new DataBankRegister();
+    public d : Register = new DirectPageRegister();
+    public k : Register = new ProgramBankRegister();
+    public pc : Register = new ProgramCounterRegister();
+    public p : StatusRegister = new StatusRegister();
+    public sp : Register = new StackPointerRegister();
+    public x : Register = new IndirectYRegister();
+    public y : Register = new IndirectXRegister();
+
+    // IO Registers
+
+    public nmitimen : Register = new Register();
+    public wrio : Register = new Register();
+    public wrmpya : Register = new Register();
+    public wrmpyb : Register = new Register();
+    public wrdivl : Register = new Register();
+    public wrdivh : Register = new Register();
+    public wrdivb : Register = new Register();
+    public htimel : Register = new Register();
+    public htimeh : Register = new Register();
+    public vtimel : Register = new Register();
+    public vtimeh : Register = new Register();
+    public mdmaen : Register = new Register();
+    public hdmaen : Register = new Register();
+    public memsel : Register = new Register();
+    public rdnmi : Register = new Register();
+    public timeup : Register = new Register();
+    public hvbjoy : Register = new Register();
+    public rdio : Register = new Register();
+    public rddivl : Register = new Register();
+    public rddivh : Register = new Register();
+    public rdmpyl : Register = new Register();
+    public rdmpyh : Register = new Register();
+    public joy1l : Register = new Register();
+    public joy1h : Register = new Register();
+    public joy2l : Register = new Register();
+    public joy2h : Register = new Register();
+    public joy3l : Register = new Register();
+    public joy3h : Register = new Register();
+    public joy4l : Register = new Register();
+    public joy4h : Register = new Register();
 
 }

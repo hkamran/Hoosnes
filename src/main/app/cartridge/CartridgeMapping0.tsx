@@ -1,9 +1,9 @@
 import {Address} from "../bus/Address";
-import {Result} from "../bus/Result";
 import {Write} from "../bus/Write";
 import {Cartridge, ICartridgeMapping} from "./Cartridge";
 import {NotSupported} from "../bus/Bus";
 import {Sram} from "../memory/Sram";
+import {Read} from "../bus/Read";
 
 export class CartridgeMapping0 implements ICartridgeMapping {
 
@@ -17,7 +17,7 @@ export class CartridgeMapping0 implements ICartridgeMapping {
         this.cartridge = cartridge;
     }
 
-    public read(address: Address): Result {
+    public read(address: Address): Read {
 
         let bank = address.getBank();
         let page = address.getPage();
@@ -27,33 +27,33 @@ export class CartridgeMapping0 implements ICartridgeMapping {
                 let index = ((bank - 0x00) * 0xFFFF) + page;
                 let value = this.cartridge.rom[index];
 
-                return new Result([value], 0);
+                return Read.byte(value, 0);
             } else if (0xC0 <= bank && bank <= 0xEF) {
                 let index = ((bank - 0x80) * 0xFFFF) + page;
                 let value = this.cartridge.rom[index];
 
-                return new Result([value], 0);
+                return Read.byte(value, 0);
             } else if (0x70 <= bank && bank <= 0x7F) {
                 let index = ((bank - 0x70) * 0xFFFF) + page;
                 let value = this.sram.data[index];
 
-                return new Result([value], 0);
+                return Read.byte(value, 0);
             } else if (0xF0 <= bank && bank <= 0xFF) {
                 let index = (((bank - 0xF0) % 0xD) * 0xFFFF) + page;
                 let value = this.sram.data[index];
 
-                return new Result([value], 0);
+                return Read.byte(value, 0);
             }
         } else if (0x8000 <= address.toValue() && address.toValue() <= 0xFFFF) {
             if (0x80 <= bank && bank <= 0xFF) {
                 let index = ((bank - 0x80) * 0xFFFF) + (page - 0x8000);
                 let value = this.cartridge.rom[index];
 
-                return new Result([value], 0);
+                return Read.byte(value, 0);
             } else if (0x00 <= bank && bank <= 0x7F) {
                 let index = ((bank - 0x00) * 0xFFFF) + (page - 0x8000);
                 let value = this.cartridge.rom[index];
-                return new Result([value], 0);
+                return Read.byte(value, 0);
             }
         }
         throw new NotSupported();

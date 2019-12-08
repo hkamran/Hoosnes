@@ -3,11 +3,16 @@ import {CSSProperties} from "react";
 import {RefObject} from "react";
 import Stats from 'stats.js';
 import {Card} from "./core/layout/Card";
+import Console from "../app/Console";
 
 
 declare let window : any;
 
-export class ScreenCard extends React.Component<any, any> {
+interface IScreenCardProps {
+    snes: Console;
+}
+
+export class ScreenCard extends React.Component<IScreenCardProps, any> {
 
     public state = {
         width: 256,
@@ -38,7 +43,8 @@ export class ScreenCard extends React.Component<any, any> {
             window.canvas = this.canvasRef;
             window.context = this.context;
         }
-        this.drawStatic();
+        // this.drawStatic();
+        this.props.snes.ppu.screen.setContext(this.context);
     }
 
     private drawStatic(): void {
