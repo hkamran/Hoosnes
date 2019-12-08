@@ -73,9 +73,9 @@ export class Cpu {
         this.registers.p.setM(0x1);
         this.registers.p.setD(0x0);
 
-        this.registers.a.set(0x0220);
-        this.registers.x.set(0x000A);
-        this.registers.y.set(0x0001);
+        this.registers.a.set(0xF);
+        this.registers.x.set(0x0000);
+        this.registers.y.set(0x0000);
         this.registers.sp.set(0x1FF);
         this.registers.d.set(0x0000);
         this.registers.dbr.set(0x00);

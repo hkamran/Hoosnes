@@ -38,8 +38,14 @@ export class DebuggerCard extends React.Component<IDebuggerCardProps, any> {
                         <legend>Logs</legend>
                         <div ref={this.divLog} style={{display: "flex", flexDirection: "column", fontSize: "12px", height: "273px", overflowY: "auto"}}>
                             {this.props.logs.map((value, index) => {
+                                let pc: string = value.registerK.toString(16).padStart(2, "0") + "" + value.registerPC.toString(16).toUpperCase();
+                                let opname: string = value.op.name;
+                                let opcode: string = "0x" + value.op.code.toString(16).toUpperCase();
+
                                 return (<div key={index}>
-                                    Cycle:{value.cycle} Opcode:{"0x" + value.op.code.toString(16).toUpperCase()} Opname:{value.op.name}, K:0x{value.registerK.toString(16)}, PC:0x{value.registerPC.toString(16)}
+                                    {pc + "  "}
+                                    {opname + "  "}
+                                    ({opcode})
                                 </div>);
                             })}
                         </div>

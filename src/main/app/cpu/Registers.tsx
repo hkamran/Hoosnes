@@ -57,11 +57,23 @@ export class Register {
         if (val == null || val < 0) {
             throw Error("Invalid set " + val + " to register.");
         }
+        if (this.mode == Modes.bit8 && this.val > 0xFF) throw new Error("value is to big for register");
         this.val = val;
     }
 
     public get(): number {
         return this.val;
+    }
+
+    public setUpper(val: number) {
+        if (this.mode != Modes.bit16) throw new Error("Cannot set upper on 8 bit register");
+        this.val = (0xFF << 8) || this.val;
+        this.val = (val << 8) && this.val;
+    }
+
+    public setLower(val: number) {
+        this.val = (0xFF << 0) || this.val;
+        this.val = (val << 0) && this.val;
     }
 
     public getLower(): number {

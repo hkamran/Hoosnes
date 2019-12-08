@@ -39,7 +39,8 @@ export class OpContext {
     }
 
     public setFlagC(val: number, is8Bit?: boolean): void {
-        if (val == null || val  < 0) {
+        is8Bit = is8Bit || true;
+        if (val == null || val < 0 || (is8Bit && val > 0xFF)) {
             throw new Error("Invalid flag calculation!");
         }
 
@@ -50,7 +51,8 @@ export class OpContext {
     }
 
     public setFlagZ(val: number, is8Bit?: boolean): void {
-        if (val == null || val < 0) {
+        is8Bit = is8Bit || true;
+        if (val == null || val < 0 || (is8Bit && val > 0xFF)) {
             throw new Error("Invalid flag calculation!");
         }
 
@@ -70,7 +72,8 @@ export class OpContext {
     }
 
     public setFlagN(val: number, is8Bit?: boolean): void {
-        if (val == null) {
+        is8Bit = is8Bit || true;
+        if (val == null || val < 0 || (is8Bit && val > 0xFF)) {
             throw new Error("Invalid flag calculation!");
         }
 
@@ -890,18 +893,23 @@ class TXA extends Operation {
     public name: string = "TXA";
 
     public execute(context: OpContext): number {
+        let sp: number = context.registers.sp.get();
         let is8Bit: boolean = context.cpu.registers.p.getM() == 1;
+
         if (is8Bit) {
             let lowData: number = context.cpu.stack.popByte();
-
             let value: number = lowData;
+
+            context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
             context.cpu.registers.a.set(value);
         } else {
             let lowData: number = context.cpu.stack.popByte();
             let highData: number = context.cpu.stack.popByte();
 
             let value: number = Bit.toUint16(highData, lowData);
+
             context.cpu.registers.a.set(value);
+            context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
         }
 
         return this.getCycle();
@@ -912,17 +920,23 @@ class TSX extends Operation {
     public name: string = "TSX";
 
     public execute(context: OpContext): number {
+        let sp: number = context.registers.sp.get();
         let is8Bit: boolean = context.cpu.registers.p.getX() == 0;
+
         if (is8Bit) {
             let lowData: number = context.cpu.stack.popByte();
             let value: number = lowData;
+
             context.cpu.registers.x.set(value);
+            context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
         } else {
             let lowData: number = context.cpu.stack.popByte();
             let highData: number = context.cpu.stack.popByte();
 
             let value: number = Bit.toUint16(highData, lowData);
+
             context.cpu.registers.x.set(value);
+            context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
         return this.getCycle();
@@ -986,9 +1000,11 @@ class JSR extends Operation {
         let pc: number = (context.registers.pc.get() - 1) & 0xFFFF;
         let addressing: Addressing = this.mode.getAddressing(context);
         let address: Address = addressing.getAddr();
+        let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(pc);
         context.registers.pc.set(address.toValue());
+        context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
         return this.getCycle();
     }
@@ -1153,8 +1169,11 @@ class PEA extends Operation {
     public execute(context: OpContext): number {
         let addressing: Addressing = this.mode.getAddressing(context);
         let value = addressing.getAddr().toValue();
+        let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(value);
+        context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
+
         return this.getCycle();
     }
 }
@@ -1165,8 +1184,11 @@ class PEI extends Operation {
     public execute(context: OpContext): number {
         let addressing: Addressing = this.mode.getAddressing(context);
         let value = addressing.getAddr().toValue();
+        let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(value);
+        context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
+
         return this.getCycle();
     }
 
@@ -1178,8 +1200,11 @@ class PER extends Operation {
     public execute(context: OpContext): number {
         let addressing: Addressing = this.mode.getAddressing(context);
         let value = addressing.getAddr().toValue();
+        let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(value);
+        context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
+
         return this.getCycle();
     }
 }
@@ -1188,12 +1213,18 @@ class PHA extends Operation {
     public name: string = "PHA";
 
     public execute(context: OpContext): number {
+        let sp: number = context.registers.sp.get();
+
         if (context.registers.p.getM()) {
             let result : number = context.cpu.registers.a.getLower();
+
             context.cpu.stack.pushByte(result);
+            context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
         } else {
             let result : number = context.cpu.registers.a.get();
+
             context.cpu.stack.pushWord(result);
+            context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
         return this.getCycle();
@@ -1205,7 +1236,10 @@ class PHB extends Operation {
 
     public execute(context: OpContext): number {
         let result : number = context.cpu.registers.dbr.get();
+        let sp: number = context.registers.sp.get();
+
         context.cpu.stack.pushByte(result);
+        context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
 
         return this.getCycle();
     }
@@ -1347,7 +1381,10 @@ class PHD extends Operation {
 
     public execute(context: OpContext): number {
         let result : number = context.cpu.registers.d.get();
+        let sp: number = context.registers.sp.get();
+
         context.cpu.stack.pushWord(result);
+        context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
         return this.getCycle();
     }
@@ -1360,7 +1397,10 @@ class PHK extends Operation {
 
     public execute(context: OpContext): number {
         let result : number = context.cpu.registers.k.get();
+        let sp: number = context.registers.sp.get();
+
         context.cpu.stack.pushByte(result);
+        context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
 
         return this.getCycle();
     }
@@ -1372,7 +1412,10 @@ class PHP extends Operation {
 
     public execute(context: OpContext): number {
         let p : number = context.registers.p.get();
+        let sp: number = context.registers.sp.get();
+
         context.cpu.stack.pushByte(p & 0xFF);
+        context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
 
         return this.getCycle();
     }
@@ -1384,15 +1427,18 @@ class PHX extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
+        let sp: number = context.registers.sp.get();
 
         let loData: number = context.registers.x.getLower();
         let hiData: number = context.registers.x.getUpper();
 
         if (is8Bit) {
             context.cpu.stack.pushByte(loData);
+            context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
         } else {
             context.cpu.stack.pushByte(loData);
             context.cpu.stack.pushByte(hiData);
+            context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
         return this.getCycle();
@@ -1405,15 +1451,18 @@ class PHY extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
+        let sp: number = context.registers.sp.get();
 
         let loData: number = context.registers.y.getLower();
         let hiData: number = context.registers.y.getUpper();
 
         if (is8Bit) {
             context.cpu.stack.pushByte(loData);
+            context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
         } else {
             context.cpu.stack.pushByte(loData);
             context.cpu.stack.pushByte(hiData);
+            context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
         return this.getCycle();
@@ -1427,6 +1476,13 @@ class PLA extends Operation {
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let data : number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
+        let sp: number = context.registers.sp.get();
+
+        if (is8Bit) {
+            context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
+        } else {
+            context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
+        }
 
         context.setFlagN(data, is8Bit);
         context.setFlagZ(data, is8Bit);
@@ -1443,8 +1499,12 @@ class PLB extends Operation {
 
     public execute(context: OpContext): number {
         let value: number = context.cpu.stack.popByte();
-        context.registers.k.set(value);
+        let sp: number = context.registers.sp.get();
 
+        context.registers.k.set(value);
+        context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
+        context.setFlagN(value, true);
+        context.setFlagZ(value, true);
         return this.getCycle();
     }
 
@@ -1455,8 +1515,10 @@ class PLD extends Operation {
 
     public execute(context: OpContext): number {
         let value: number = context.cpu.stack.popWord();
-        context.registers.d.set(value);
+        let sp: number = context.registers.sp.get();
 
+        context.registers.d.set(value);
+        context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
         return this.getCycle();
     }
 }
@@ -1466,7 +1528,10 @@ class PLP extends Operation {
 
     public execute(context: OpContext): number {
         let p : number = context.cpu.stack.popByte();
+        let sp: number = context.registers.sp.get();
+
         context.registers.p.set(p);
+        context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
 
         return this.getCycle();
     }
@@ -1479,6 +1544,13 @@ class PLX extends Operation {
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
         let data : number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
+        let sp: number = context.registers.sp.get();
+
+        if (is8Bit) {
+            context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
+        } else {
+            context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
+        }
 
         context.setFlagN(data, is8Bit);
         context.setFlagZ(data, is8Bit);
@@ -1496,6 +1568,13 @@ class PLY extends Operation {
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
         let data : number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
+        let sp: number = context.registers.sp.get();
+
+        if (is8Bit) {
+            context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
+        } else {
+            context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
+        }
 
         context.setFlagN(data, is8Bit);
         context.setFlagZ(data, is8Bit);
@@ -1561,9 +1640,11 @@ class RTI extends Operation {
     public execute(context: OpContext): number {
         let p : number = context.cpu.stack.popByte();
         let pc : number = context.cpu.stack.popWord();
+        let sp: number = context.registers.sp.get();
 
         context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
         context.cpu.registers.p.set(p & 0xFF);
+        context.cpu.registers.sp.set((sp + 3) & 0xFFFF);
 
         if (context.registers.p.getE() == 0) {
             let pbc : number = context.cpu.stack.popByte();
@@ -1580,9 +1661,11 @@ class RTL extends Operation {
     public execute(context: OpContext): number {
         let pc : number = context.cpu.stack.popWord();
         let pbc : number = context.cpu.stack.popByte();
+        let sp: number = context.registers.sp.get();
 
         context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
         context.cpu.registers.k.set(pbc & 0xFF);
+        context.cpu.registers.sp.set((sp + 3) & 0xFFFF);
 
         return this.getCycle();
     }
@@ -1594,8 +1677,10 @@ class RTS extends Operation {
 
     public execute(context: OpContext): number {
         let pc : number = context.cpu.stack.popWord();
+        let sp: number = context.registers.sp.get();
 
         context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
+        context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
 
         return this.getCycle();
     }

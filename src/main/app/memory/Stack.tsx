@@ -21,7 +21,6 @@ export class Stack {
 
     public pushByte(value : number) {
         let byte = value & 0xFF;
-        value = value >> 8;
         this.stack.push(byte);
     }
 
