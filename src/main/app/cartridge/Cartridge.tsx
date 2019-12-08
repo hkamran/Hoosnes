@@ -168,7 +168,6 @@ export class Cartridge {
         let value: number;
         let layout: CartridgeMappingType;
 
-        debugger;
         value = ByteReader.readByte(this.rom, SNES_OFFSET_LOROM + SNES_OFFSET_MAP_TYPE + this.smc.offset);
         layout = CartridgeMappingType[value as unknown as keyof typeof CartridgeMappingType];
         if (layout == null) {

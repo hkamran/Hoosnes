@@ -47,7 +47,7 @@ export class CartridgeCard extends React.Component<ICartridgeCardProps, ICartrid
                 mapping: this.props.snes.cartridge.mapping.label,
                 checksum: this.props.snes.cartridge.checksum,
                 compliment: this.props.snes.cartridge.complement,
-                version: this.props.snes.cartridge.version
+                version: this.props.snes.cartridge.version,
             });
         });
     }
