@@ -109,7 +109,56 @@ export class Bus {
     }
 
 
-    public writeByte(address: Address, val: number): Write {
+    public writeByte(address: Address, value: number): Write {
+        if (address == null) {
+            throw new Error("Invalid readByte at " + address);
+        }
+
+        let write: Write = new Write(address, value, 0);
+
+        let bank = address.getBank();
+        let page = address.getPage();
+
+        if (0x00 <= bank && bank < 0x3F) {
+            if (0x0000 <= page && page <= 0x1FFF) {
+                this.console.cpu.wram.writeByte(address, value);
+            } else if (0x2100 <= page && page <= 0x21FF) {
+                this.busB.writeByte(address, value);
+            } else if (0x2200 <= page && page <= 0x41FF) {
+                this.console.cartridge.writeByte(address, value);
+            } else if (0x4200 <= page && page <= 0x43FF) {
+                this.busA.writeByte(address, value);
+            } else if (0x4400 <= page && page <= 0x7FFF) {
+                this.console.cartridge.writeByte(address, value);
+            } else if (0x8000 <= page && page <= 0xFFFF) {
+                this.console.cartridge.writeByte(address, value);
+            }
+        } else if (0x40 <= bank && bank <= 0x7F) {
+            if (0x7E <= bank && bank >= 0x7F) {
+                this.console.cpu.wram.writeByte(address, value);
+            } else {
+                this.console.cartridge.writeByte(address, value);
+            }
+        } else if (0x80 <= bank && bank <= 0xBF) {
+            if (0x0000 <= page && page <= 0x1FFF) {
+                this.console.cpu.wram.writeByte(address, value);
+            } else if (0x2100 <= page && page <= 0x21FF) {
+                this.busB.writeByte(address, value);
+            } else if (0x2200 <= page && page <= 0x41FF) {
+                this.console.cartridge.writeByte(address, value);
+            } else if (0x4200 <= page && page <= 0x43FF) {
+                this.busA.writeByte(address, value);
+            } else if (0x4400 <= page && page <= 0x7FFF) {
+                this.console.cartridge.writeByte(address, value);
+            } else if (0x8000 <= page && page <= 0xFFFF) {
+                this.console.cartridge.writeByte(address, value);
+            }
+        } else if (0xC0 <= bank && bank <= 0xFF) {
+            this.console.cartridge.writeByte(address, value);
+        } else {
+            throw new Error("Invalid bus read at " + address.toValue());
+        }
+
         return null;
     }
 

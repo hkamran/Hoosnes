@@ -2,6 +2,7 @@ import {Objects} from "../util/Objects";
 import {NumberUtil} from "../util/NumberUtil";
 import {Address} from "../bus/Address";
 import {Read} from "../bus/Read";
+import {Write} from "../bus/Write";
 
 export class Wram {
     // The SNES includes 128Kbytes of Work RAM, which can be accessed in several ways:
@@ -29,6 +30,10 @@ export class Wram {
         } else {
             return Read.byte(this.data[page]);
         }
+    }
+
+    public writeByte(address: Address, value: number): Write {
+        return null;
     }
 }
 

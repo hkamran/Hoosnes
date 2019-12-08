@@ -204,7 +204,7 @@ export class Cartridge {
         return this.mapping.read(address);
     }
 
-    public write(address: Address, value: number): Write {
+    public writeByte(address: Address, value: number): Write {
         return this.mapping.write(address, value);
     }
 
