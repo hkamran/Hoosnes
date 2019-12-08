@@ -65,11 +65,11 @@ export class Register {
     }
 
     public getLower(): number {
-        return (this.val >> 0) & 0xFFFF;
+        return (this.val >> 0) & 0xFF;
     }
 
     public getUpper(): number {
-        return (this.val >> 8) & 0xFFFF;
+        return (this.val >> 8) & 0xFF;
     }
 
 }

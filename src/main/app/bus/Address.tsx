@@ -50,4 +50,8 @@ export class Address {
         }
     }
 
+    public toString(): string {
+        return `Address[bank=` + this.bank + ", offset=" + this.offset + "]";
+    }
+
 }
