@@ -11,7 +11,16 @@ interface ICartridgeCardProps {
     cartridge: Cartridge;
 }
 
-export class CartridgeCard extends React.Component<ICartridgeCardProps, any> {
+interface ICartridgeCardState {
+    title: string;
+    mapping: string;
+    checksum: number;
+    compliment: number;
+    version: number;
+}
+
+
+export class CartridgeCard extends React.Component<ICartridgeCardProps, ICartridgeCardState> {
 
     constructor(props : ICartridgeCardProps) {
         super(props);
@@ -19,6 +28,9 @@ export class CartridgeCard extends React.Component<ICartridgeCardProps, any> {
         this.state = {
             title: "",
             mapping: "",
+            checksum: 0,
+            compliment: 0,
+            version: 0,
         };
     }
 
@@ -33,6 +45,9 @@ export class CartridgeCard extends React.Component<ICartridgeCardProps, any> {
             this.setState({
                 title: this.props.snes.cartridge.title,
                 mapping: this.props.snes.cartridge.mapping.label,
+                checksum: this.props.snes.cartridge.checksum,
+                compliment: this.props.snes.cartridge.complement,
+                version: this.props.snes.cartridge.version
             });
         });
     }
@@ -79,6 +94,18 @@ export class CartridgeCard extends React.Component<ICartridgeCardProps, any> {
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Mapping:</span>
                                     <span>{this.state.mapping}</span>
+                                </li>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Checksum:</span>
+                                    <span>{"0x" + this.state.checksum.toString(16)}</span>
+                                </li>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Compliment:</span>
+                                    <span>{"0x" + this.state.compliment.toString(16)}</span>
+                                </li>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Version:</span>
+                                    <span>{"0x" + this.state.version.toString(16)}</span>
                                 </li>
                             </ul>
                         </div>

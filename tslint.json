@@ -17,6 +17,7 @@
     "no-empty": false,
     "curly": false,
     "comment-format": false,
+    "eofline": false,
     "whitespace": false,
     "triple-equals": false,
     "only-arrow-functions": false,

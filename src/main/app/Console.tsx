@@ -14,9 +14,9 @@ export default class Console {
     public cartridge : Cartridge;
 
     constructor() {
-        this.bus = new Bus(this);
         this.cpu = new Cpu(this);
         this.ppu = new Ppu(this);
+        this.bus = new Bus(this);
     }
 
     public load(romBytes : number[]) : void {

@@ -99,6 +99,8 @@ export enum CartridgeMappingType {
     HIROM = 0x21,
     SUPER_MMC1 = 0x22,
     SUPER_MMC2 = 0x2A,
+    LOROM_FASTROM = 0X30,
+    HIROM_FASTROM = 0X31,
     SAS = 0x23,
     SFX = 0x24,
     EXHIROM = 0x25,
@@ -166,13 +168,14 @@ export class Cartridge {
         let value: number;
         let layout: CartridgeMappingType;
 
+        debugger;
         value = ByteReader.readByte(this.rom, SNES_OFFSET_LOROM + SNES_OFFSET_MAP_TYPE + this.smc.offset);
         layout = CartridgeMappingType[value as unknown as keyof typeof CartridgeMappingType];
         if (layout == null) {
             value = ByteReader.readByte(this.rom, SNES_OFFSET_HIROM + SNES_OFFSET_MAP_TYPE + this.smc.offset);
             layout = CartridgeMappingType[value as unknown as keyof typeof CartridgeMappingType];
         }
-        Objects.requireNonNull(layout, "Unable to parse mappingType type from rom");
+        Objects.requireNonNull(layout, "Unable to parse mappingType type: 0x" + value.toString(16));
         return layout;
     }
 
@@ -183,11 +186,14 @@ export class Cartridge {
         if (CartridgeMappingType[CartridgeMappingType.LOROM] === layout.toString()) {
             return SNES_OFFSET_LOROM + this.smc.offset;
         }
+        if (CartridgeMappingType[CartridgeMappingType.LOROM_FASTROM] === layout.toString()) {
+            return SNES_OFFSET_LOROM + this.smc.offset;
+        }
         throw Error("Unable to parse header offset from " + layout);
     }
 
     private getTitle(start: number, end: number): string {
-        return this.rom.slice(start, end)
+        return this.rom.slice(start, end + 1)
             .map((c) => String.fromCharCode(c))
             .join('').toUpperCase().trim();
     }
@@ -209,7 +215,8 @@ export class Cartridge {
     }
 
     private getMapping(mappingType: CartridgeMappingType): ICartridgeMapping {
-        if (mappingType.toString() == CartridgeMappingType[CartridgeMappingType.LOROM]) {
+        if (mappingType.toString() == CartridgeMappingType[CartridgeMappingType.LOROM] ||
+            mappingType.toString() == CartridgeMappingType[CartridgeMappingType.LOROM_FASTROM]) {
             return new CartridgeMapping0(this);
         } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.HIROM]) {
             return new CartridgeMapping1(this);
