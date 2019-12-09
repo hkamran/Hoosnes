@@ -29,8 +29,8 @@ export class TickEvent {
         this.cycle = snes.cpu.cycles;
         this.op = snes.cpu.operation;
 
-        this.registerK = snes.cpu.registers.k.get();
-        this.registerPC = snes.cpu.registers.pc.get();
+        this.registerK = snes.cpu.context.opaddr.getBank();
+        this.registerPC = snes.cpu.context.opaddr.getPage();
     }
 }
 

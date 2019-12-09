@@ -115,7 +115,7 @@ export class Bus {
             throw new Error("Invalid readByte at " + address);
         }
 
-        console.log("writing " + address.toValue().toString(16) + " " + value.toString(16));
+        console.log("writing " + address + " 0x" + value.toString(16));
 
         let write: Write = new Write(address, value, 0);
 
@@ -137,7 +137,7 @@ export class Bus {
                 this.console.cartridge.writeByte(address, value);
             }
         } else if (0x40 <= bank && bank <= 0x7F) {
-            if (0x7E <= bank && bank >= 0x7F) {
+            if (0x7E <= bank && bank <= 0x7F) {
                 this.console.cpu.wram.writeByte(address, value);
             } else {
                 this.console.cartridge.writeByte(address, value);

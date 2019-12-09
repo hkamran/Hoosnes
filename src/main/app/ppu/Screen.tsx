@@ -38,6 +38,8 @@ export class Screen {
     public static readonly WIDTH: number = 256;
     public static readonly HEIGHT: number = 224;
 
+    // Note PAL is 256x240
+
     public buffer: ImageData;
 
     public setContext(context: CanvasRenderingContext2D): void {

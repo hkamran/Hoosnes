@@ -27,6 +27,7 @@ export class Cpu {
 
     public cycles: number = 0;
     public operation: Operation;
+    public context: OpContext;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -52,14 +53,13 @@ export class Cpu {
 
         console.log(opcode.get().toString(16) + " " + operation.name);
 
+        this.registers.pc.set(opaddr.toValue() + operation.getSize());
         this.operation = operation;
 
-        let context: OpContext = new OpContext(opaddr, operation, this.console);
-        this.cycles += operation.execute(context) + operation.getCycle();
+        this.context = new OpContext(opaddr, operation, this.console);
+        this.cycles += operation.execute(this.context) + operation.getCycle();
 
-        this.registers.pc.set(opaddr.toValue() + operation.getSize());
         let duration = this.cycles - cycles;
-
         return duration;
     }
 

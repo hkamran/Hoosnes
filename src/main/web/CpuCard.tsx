@@ -78,8 +78,8 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
     public fetch() {
         this.setState({
             a: this.props.snes.cpu.registers.a.get(),
-            pc: this.props.snes.cpu.registers.pc.get(),
-            k: this.props.snes.cpu.registers.k.get(),
+            pc: this.props.snes.cpu.context.opaddr.getPage(),
+            k: this.props.snes.cpu.context.opaddr.getBank(),
             x: this.props.snes.cpu.registers.x.get(),
             y: this.props.snes.cpu.registers.y.get(),
             sp: this.props.snes.cpu.registers.sp.get(),

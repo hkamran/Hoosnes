@@ -11,7 +11,14 @@ export class Wram {
     // The first 8K are also mirrored to xx0000h-xx1FFFh (xx=00h..3Fh and 80h..BFh)
     // Moreover (mainly for DMA purposes) it can be accessed via Port 218xh.
 
-    private data: number[] = new Array(2000);
+    public static readonly SIZE = 0x2000;
+
+    private data: number[];
+
+    constructor() {
+        this.data = new Array(Wram.SIZE);
+        this.data.fill(0, 0, Wram.SIZE);
+    }
 
     public readByte(address: Address): Read {
         Objects.requireNonNull(address);

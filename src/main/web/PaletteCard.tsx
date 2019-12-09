@@ -25,11 +25,12 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
     }
 
     public componentDidMount(): void {
-        this.context = this.canvasRef.current.getContext("2d", {alpha: false});
-        this._render();
+        this.refresh();
     }
 
-    public _render() {
+    public refresh(): void {
+        this.context = this.canvasRef.current.getContext("2d", {alpha: false});
+
         let totalWidth = this.borderSize + (this.width * (this.pixelSize + this.borderSize));
         let totalHeight = this.borderSize + (this.height * (this.pixelSize + this.borderSize));
 
@@ -37,7 +38,7 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
         this.canvasRef.current.height = totalHeight;
 
         let colors: Color[] = this.props.snes.ppu.palette.getPalette(PaletteBppType.Eight, 0);
-        let image: ImageData = window.context.createImageData(totalWidth, totalHeight);
+        let image: ImageData = this.context.createImageData(totalWidth, totalHeight);
 
         for (let index = 0; index < image.data.length; index += 4) {
             image.data[index + 0] = 0;
@@ -82,7 +83,7 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
                 </div>
                 <div>
                     <div style={{paddingTop: '7px'}}>
-                        <button onClick={this._render.bind(this)}>Render</button>
+                        <button onClick={this.refresh.bind(this)}>Render</button>
                     </div>
                 </div>
             </Card>

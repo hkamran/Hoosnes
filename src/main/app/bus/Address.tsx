@@ -51,7 +51,8 @@ export class Address {
     }
 
     public toString(): string {
-        return `Address[bank=` + this.bank + ", offset=" + this.offset + "]";
+        return `Address[bank=0x` + this.bank.toString(16).toUpperCase()
+            + ", offset=0x" + this.offset.toString(16).toUpperCase() + "]";
     }
 
 }
