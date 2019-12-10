@@ -1,5 +1,6 @@
 import {Ppu} from "./Ppu";
-import {Register} from "../cpu/Registers";
+import {Mode, Modes} from "../Modes";
+import Console from "../Console";
 
 const INVALID_SET: string = "Invalid value set";
 
@@ -7,6 +8,48 @@ const INVALID_SET: string = "Invalid value set";
 // https://en.wikibooks.org/wiki/Super_NES_Programming/SNES_Hardware_Registers
 // https://wiki.superfamicom.org/registers
 
+export class Register {
+
+    protected val : number = 0;
+    protected mode : Mode = Modes.bit8;
+    public console: Console;
+
+    constructor(console: Console) {
+        this.console = console;
+    }
+
+    public set(val : number): void {
+        if (val == null || val < 0) {
+            throw Error("Invalid set " + val + " to register.");
+        }
+        if (this.mode == Modes.bit8 && this.val > 0xFF) throw new Error("value is to big for register");
+        this.val = val;
+    }
+
+    public get(): number {
+        return this.val;
+    }
+
+    public setUpper(val: number) {
+        if (this.mode != Modes.bit16) throw new Error("Cannot set upper on 8 bit register");
+        this.val = (0xFF << 8) || this.val;
+        this.val = (val << 8) && this.val;
+    }
+
+    public setLower(val: number) {
+        this.val = (0xFF << 0) || this.val;
+        this.val = (val << 0) && this.val;
+    }
+
+    public getLower(): number {
+        return (this.val >> 0) & 0xFF;
+    }
+
+    public getUpper(): number {
+        return (this.val >> 8) & 0xFF;
+    }
+
+}
 
 export class ScreenDisplayRegister extends Register {
 
@@ -524,79 +567,156 @@ export class WRAMAddressHighRegister extends Register {
 
 export class Registers {
 
-    public mosaic: MosaicRegister = new MosaicRegister();
-    public m7sel: Mode7Register = new Mode7Register();
-    public m7a: CosXRegister = new CosXRegister();
-    public m7b: SinXRegister = new SinXRegister();
-    public m7c: SinYRegister = new SinYRegister();
-    public m7d: CosYRegister = new CosYRegister();
-    public m7x: CenterPositionXRegister = new CenterPositionXRegister();
-    public m7y: CenterPositionYRegister = new CenterPositionYRegister();
+    public mosaic: MosaicRegister;
+    public m7sel: Mode7Register;
+    public m7a: CosXRegister;
+    public m7b: SinXRegister;
+    public m7c: SinYRegister;
+    public m7d: CosYRegister;
+    public m7x: CenterPositionXRegister;
+    public m7y: CenterPositionYRegister;
 
-    public oamselect: OamSizeAndDataAreaRegister = new OamSizeAndDataAreaRegister();
-    public oamaddrl: OamAddressLowRegister = new OamAddressLowRegister();
-    public oamaddrh: OamAddressHighRegister = new OamAddressHighRegister();
-    public oamdataw: OamDataWriteRegister = new OamDataWriteRegister();
-    public oamdatar: OAMDataReadRegister = new OAMDataReadRegister();
+    public oamselect: OamSizeAndDataAreaRegister;
+    public oamaddrl: OamAddressLowRegister;
+    public oamaddrh: OamAddressHighRegister;
+    public oamdataw: OamDataWriteRegister;
+    public oamdatar: OAMDataReadRegister;
 
-    public cgramaddr: CGRAMAddressRegister = new CGRAMAddressRegister();
-    public cgdataw: CGRAMDataWriteRegister = new CGRAMDataWriteRegister();
-    public cgdatar: CGRAMDataReadRegister = new CGRAMDataReadRegister();
-    public cgwsel: ColorMathSelectionRegister = new ColorMathSelectionRegister();
-    public cgadsub: ColorMathAddSubAffectRegister = new ColorMathAddSubAffectRegister();
-    public coldata: ColorMathDataRegister = new ColorMathDataRegister();
+    public cgramaddr: CGRAMAddressRegister;
+    public cgdataw: CGRAMDataWriteRegister;
+    public cgdatar: CGRAMDataReadRegister;
+    public cgwsel: ColorMathSelectionRegister;
+    public cgadsub: ColorMathAddSubAffectRegister;
+    public coldata: ColorMathDataRegister;
 
-    public setini: ScreenModeSelectRegister = new ScreenModeSelectRegister();
-    public mpyl: MultiplicationResultLowRegister = new MultiplicationResultLowRegister();
-    public mpym: MultiplicationResultMiddleRegister = new MultiplicationResultMiddleRegister();
-    public mpyh: MultiplicationResultHighRegister = new MultiplicationResultHighRegister();
-    public slhv: SoftwareLatchRegister = new SoftwareLatchRegister();
+    public setini: ScreenModeSelectRegister;
+    public mpyl: MultiplicationResultLowRegister;
+    public mpym: MultiplicationResultMiddleRegister;
+    public mpyh: MultiplicationResultHighRegister;
+    public slhv: SoftwareLatchRegister;
 
-    public vtilebg1: TileAddressForBG1Register = new TileAddressForBG1Register();
-    public vtilebg2: TileAddressForBG2Register = new TileAddressForBG2Register();
-    public vtilebg3: TileAddressForBG3Register = new TileAddressForBG3Register();
-    public vtilebg4: TileAddressForBG4Register = new TileAddressForBG4Register();
-    public vcharlocbg12: CharacterAddressForBG1And2Register = new CharacterAddressForBG1And2Register();
-    public vcharlocbg34: CharacterAddressForBG3And4Register = new CharacterAddressForBG3And4Register();
-    public vportcntrl: VideoPortControlRegister = new VideoPortControlRegister();
-    public vaddrl: VRAMAddressLowRegister = new VRAMAddressLowRegister();
-    public vaddrh: VRAMAddressHighRegister = new VRAMAddressHighRegister();
-    public vdatawl: VRAMDataWriteLowRegister = new VRAMDataWriteLowRegister();
-    public vdatawh: VRAMDataWriteHighRegister = new VRAMDataWriteHighRegister();
-    public vdatarl: VRAMDataReadLowRegister = new VRAMDataReadLowRegister();
-    public vdatarw: VRAMDataReadHighRegister = new VRAMDataReadHighRegister();
+    public vtilebg1: TileAddressForBG1Register;
+    public vtilebg2: TileAddressForBG2Register;
+    public vtilebg3: TileAddressForBG3Register;
+    public vtilebg4: TileAddressForBG4Register;
+    public vcharlocbg12: CharacterAddressForBG1And2Register;
+    public vcharlocbg34: CharacterAddressForBG3And4Register;
+    public vportcntrl: VideoPortControlRegister;
+    public vaddrl: VRAMAddressLowRegister;
+    public vaddrh: VRAMAddressHighRegister;
+    public vdatawl: VRAMDataWriteLowRegister;
+    public vdatawh: VRAMDataWriteHighRegister;
+    public vdatarl: VRAMDataReadLowRegister;
+    public vdatarw: VRAMDataReadHighRegister;
 
-    public inidisp: ScreenDisplayRegister = new ScreenDisplayRegister();
-    public bgmode: BhModeAndCharacterSizeRegister = new BhModeAndCharacterSizeRegister();
+    public inidisp: ScreenDisplayRegister;
+    public bgmode: BhModeAndCharacterSizeRegister;
 
-    public bg1hofs: HorizontalScrollForBG1Register = new HorizontalScrollForBG1Register();
-    public bg1vofs: VerticalScrollForBG1Register = new VerticalScrollForBG1Register();
-    public bg2hofs: HorizontalScrollForBG2Register = new HorizontalScrollForBG2Register();
-    public bg2vofs: VerticalScrollForBG2Register = new VerticalScrollForBG2Register();
-    public bg3hofs: HorizontalScrollForBG3Register = new HorizontalScrollForBG3Register();
-    public bg3vofs: VerticalScrollForBG3Register = new VerticalScrollForBG3Register();
-    public bg4hofs: HorizontalScrollForBG4Register = new HorizontalScrollForBG4Register();
-    public bg4vofs: VerticalScrollForBG4Register = new VerticalScrollForBG4Register();
+    public bg1hofs: HorizontalScrollForBG1Register;
+    public bg1vofs: VerticalScrollForBG1Register;
+    public bg2hofs: HorizontalScrollForBG2Register;
+    public bg2vofs: VerticalScrollForBG2Register;
+    public bg3hofs: HorizontalScrollForBG3Register;
+    public bg3vofs: VerticalScrollForBG3Register;
+    public bg4hofs: HorizontalScrollForBG4Register;
+    public bg4vofs: VerticalScrollForBG4Register;
 
-    public tm: ScreenDestinationForMainRegister = new ScreenDestinationForMainRegister();
-    public ts: ScreenDestinationForSubRegister = new ScreenDestinationForSubRegister();
+    public tm: ScreenDestinationForMainRegister;
+    public ts: ScreenDestinationForSubRegister;
 
-    public w12sel: WindowMaskSettingsForBG1And2Register = new WindowMaskSettingsForBG1And2Register();
-    public w34sel: WindowMaskSettingsForBG3And4Register = new WindowMaskSettingsForBG3And4Register();
-    public wobjsel: WindowMaskSettingsForObjRegister = new WindowMaskSettingsForObjRegister();
-    public wh0: WindowPositionForBG0Register = new WindowPositionForBG0Register();
-    public wh1: WindowPositionForBG1Register = new WindowPositionForBG1Register();
-    public wh2: WindowPositionForBG2Register = new WindowPositionForBG2Register();
-    public wh3: WindowPositionForBG3Register = new WindowPositionForBG3Register();
-    public wbglog: WindowMaskLogicForBgRegister = new WindowMaskLogicForBgRegister();
-    public wobjlog: WindowMaskLogicForObjRegister = new WindowMaskLogicForObjRegister();
-    public tmw: WindowMaskDestinationForMainRegister = new WindowMaskDestinationForMainRegister();
-    public tsw: WindowMaskDestinationForSubRegister = new WindowMaskDestinationForSubRegister();
+    public w12sel: WindowMaskSettingsForBG1And2Register;
+    public w34sel: WindowMaskSettingsForBG3And4Register;
+    public wobjsel: WindowMaskSettingsForObjRegister;
+    public wh0: WindowPositionForBG0Register;
+    public wh1: WindowPositionForBG1Register;
+    public wh2: WindowPositionForBG2Register;
+    public wh3: WindowPositionForBG3Register;
+    public wbglog: WindowMaskLogicForBgRegister;
+    public wobjlog: WindowMaskLogicForObjRegister;
+    public tmw: WindowMaskDestinationForMainRegister;
+    public tsw: WindowMaskDestinationForSubRegister;
 
-    public scanlochort: ScanlineLocationHorizontalRegister = new ScanlineLocationHorizontalRegister();
-    public scanlocvert: ScanlineLocationVerticalRegister = new ScanlineLocationVerticalRegister();
+    public scanlochort: ScanlineLocationHorizontalRegister;
+    public scanlocvert: ScanlineLocationVerticalRegister;
 
-    public stat77: PPUStatus77Register = new PPUStatus77Register();
-    public stat78: PPUStatus78Register = new PPUStatus78Register();
+    public stat77: PPUStatus77Register;
+    public stat78: PPUStatus78Register;
+
+    constructor(console: Console) {
+        this.mosaic = new MosaicRegister(console);
+        this.m7sel = new Mode7Register(console);
+        this.m7a = new CosXRegister(console);
+        this.m7b = new SinXRegister(console);
+        this.m7c = new SinYRegister(console);
+        this.m7d = new CosYRegister(console);
+        this.m7x = new CenterPositionXRegister(console);
+        this.m7y = new CenterPositionYRegister(console);
+
+        this.oamselect = new OamSizeAndDataAreaRegister(console);
+        this.oamaddrl = new OamAddressLowRegister(console);
+        this.oamaddrh = new OamAddressHighRegister(console);
+        this.oamdataw = new OamDataWriteRegister(console);
+        this.oamdatar = new OAMDataReadRegister(console);
+
+        this.cgramaddr = new CGRAMAddressRegister(console);
+        this.cgdataw = new CGRAMDataWriteRegister(console);
+        this.cgdatar = new CGRAMDataReadRegister(console);
+        this.cgwsel = new ColorMathSelectionRegister(console);
+        this.cgadsub = new ColorMathAddSubAffectRegister(console);
+        this.coldata = new ColorMathDataRegister(console);
+
+        this.setini = new ScreenModeSelectRegister(console);
+        this.mpyl = new MultiplicationResultLowRegister(console);
+        this.mpym = new MultiplicationResultMiddleRegister(console);
+        this.mpyh = new MultiplicationResultHighRegister(console);
+        this.slhv = new SoftwareLatchRegister(console);
+
+        this.vtilebg1 = new TileAddressForBG1Register(console);
+        this.vtilebg2 = new TileAddressForBG2Register(console);
+        this.vtilebg3 = new TileAddressForBG3Register(console);
+        this.vtilebg4 = new TileAddressForBG4Register(console);
+        this.vcharlocbg12 = new CharacterAddressForBG1And2Register(console);
+        this.vcharlocbg34 = new CharacterAddressForBG3And4Register(console);
+        this.vportcntrl = new VideoPortControlRegister(console);
+        this.vaddrl = new VRAMAddressLowRegister(console);
+        this.vaddrh = new VRAMAddressHighRegister(console);
+        this.vdatawl = new VRAMDataWriteLowRegister(console);
+        this.vdatawh = new VRAMDataWriteHighRegister(console);
+        this.vdatarl = new VRAMDataReadLowRegister(console);
+        this.vdatarw = new VRAMDataReadHighRegister(console);
+
+        this.inidisp = new ScreenDisplayRegister(console);
+        this.bgmode = new BhModeAndCharacterSizeRegister(console);
+
+        this.bg1hofs = new HorizontalScrollForBG1Register(console);
+        this.bg1vofs = new VerticalScrollForBG1Register(console);
+        this.bg2hofs = new HorizontalScrollForBG2Register(console);
+        this.bg2vofs = new VerticalScrollForBG2Register(console);
+        this.bg3hofs = new HorizontalScrollForBG3Register(console);
+        this.bg3vofs = new VerticalScrollForBG3Register(console);
+        this.bg4hofs = new HorizontalScrollForBG4Register(console);
+        this.bg4vofs = new VerticalScrollForBG4Register(console);
+
+        this.tm = new ScreenDestinationForMainRegister(console);
+        this.ts = new ScreenDestinationForSubRegister(console);
+
+        this.w12sel = new WindowMaskSettingsForBG1And2Register(console);
+        this.w34sel = new WindowMaskSettingsForBG3And4Register(console);
+        this.wobjsel = new WindowMaskSettingsForObjRegister(console);
+        this.wh0 = new WindowPositionForBG0Register(console);
+        this.wh1 = new WindowPositionForBG1Register(console);
+        this.wh2 = new WindowPositionForBG2Register(console);
+        this.wh3 = new WindowPositionForBG3Register(console);
+        this.wbglog = new WindowMaskLogicForBgRegister(console);
+        this.wobjlog = new WindowMaskLogicForObjRegister(console);
+        this.tmw = new WindowMaskDestinationForMainRegister(console);
+        this.tsw = new WindowMaskDestinationForSubRegister(console);
+
+        this.scanlochort = new ScanlineLocationHorizontalRegister(console);
+        this.scanlocvert = new ScanlineLocationVerticalRegister(console);
+
+        this.stat77 = new PPUStatus77Register(console);
+        this.stat78 = new PPUStatus78Register(console);
+    }
 
 }
