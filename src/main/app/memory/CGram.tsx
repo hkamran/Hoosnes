@@ -16,21 +16,21 @@ export class CGram {
     private initialize() {
         let colors: number = 256;
 
-        let index = 0;
-        for (let i = 0; i < colors; i++) {
-            let red: number =  Math.floor(Math.random() * 31);
-            let green: number =  Math.floor(Math.random() * 31);
-            let blue: number =  Math.floor(Math.random() * 31);
-
-            let value: number = 0 << 15 | red << 10 | green << 5 | blue;
-
-            let lowHalf = (value >> 0) & 0xFF;
-            let highHalf = (value >> 8) & 0xFF;
-
-            this.writeByte(index + 0, lowHalf);
-            this.writeByte(index + 1, highHalf);
-            index += 2;
-        }
+        // let index = 0;
+        // for (let i = 0; i < colors; i++) {
+        //     let red: number =  Math.floor(Math.random() * 31);
+        //     let green: number =  Math.floor(Math.random() * 31);
+        //     let blue: number =  Math.floor(Math.random() * 31);
+        //
+        //     let value: number = 0 << 15 | red << 10 | green << 5 | blue;
+        //
+        //     let lowHalf = (value >> 0) & 0xFF;
+        //     let highHalf = (value >> 8) & 0xFF;
+        //
+        //     this.writeByte(index + 0, lowHalf);
+        //     this.writeByte(index + 1, highHalf);
+        //     index += 2;
+        // }
     }
 
     public readByte(address: number, bank?: number): number {

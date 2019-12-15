@@ -1,6 +1,8 @@
 import {Ppu} from "./Ppu";
 import {Mode, Modes} from "../Modes";
 import Console from "../Console";
+import {CGram} from "../memory/CGram";
+import {Bit} from "../util/Bit";
 
 const INVALID_SET: string = "Invalid value set";
 
@@ -13,6 +15,7 @@ export class Register {
     protected val : number = 0;
     protected mode : Mode = Modes.bit8;
     public console: Console;
+    public label: string;
 
     constructor(console: Console) {
         this.console = console;
@@ -53,8 +56,8 @@ export class Register {
 
 export class ScreenDisplayRegister extends Register {
 
-    public address: string = "2100";
-    public name: string = "INIDISP";
+    public address: string = "0x2100";
+    public label: string = "INIDISP";
 
     public val: number = 0x8F;
 
@@ -72,353 +75,640 @@ export class ScreenDisplayRegister extends Register {
 
 export class OamSizeAndDataAreaRegister extends Register {
 
-    public address: string = "2101";
-    public name: string = "OBSEL";
+    public address: string = "0x2101";
+    public label: string = "OBSEL";
 
     public getOamSize(): number {
         return (this.val >> 5) & 0x7;
     }
 
     public getNameSelection(): number {
-        return (this.val >> 3) & 0x2;
+        return ((this.val >> 3) & 0x2);
     }
 
     public getBaseSelection(): number {
-        return (this.val >> 0) & 0x3;
+        return ((this.val >> 0) & 0x3) << 13;
     }
+}
+
+export class OamAddressRegister extends Register {
+
+    public address: string = "0x2102-0x2103";
+    public label: string = "OAMADD";
+
+    public oamlow: OamAddressLowRegister;
+    public oamhigh: OamAddressHighRegister;
+
+    constructor(console: Console) {
+        super(console);
+        this.oamlow = new OamAddressLowRegister(console);
+        this.oamhigh = new OamAddressHighRegister(console);
+    }
+
+    public getPriority() {
+        return (this.oamhigh.get() >> 7) & 0x1;
+    }
+
+    public getBaseAddress() {
+        let high: number = this.oamhigh.get();
+        let low: number = this.oamlow.get();
+
+        return ((high & 1) << 9) | low;
+    }
+
 }
 
 export class OamAddressLowRegister extends Register {
 
-    public address: string = "2102";
-    public name: string = "OAMADDL";
-
-    public getOamAddress(): number {
-        return this.val;
-    }
+    public address: string = "0x2102";
+    public label: string = "OAMADDL";
 
 }
 
 export class OamAddressHighRegister extends Register {
 
-    public address: string = "2103";
-    public name: string = "OAMADDH";
-
-    public getOamPriorityRotation() : number {
-        return (this.val >> 7) & 0x1;
-    }
-
-    public getOamMsb() : number {
-        return (this.val >> 0) & 0x1;
-    }
+    public address: string = "0x2103";
+    public label: string = "OAMADDH";
 
 }
 
 export class OamDataWriteRegister extends Register {
 
-    public address: string = "2104";
-    public name: string = "OAMDATA";
+    public address: string = "0x2104";
+    public label: string = "OAMDATA";
 
 }
 
 export class BhModeAndCharacterSizeRegister extends Register {
 
-    public address: string = "2105";
-    public name: string = "BGMODE";
+    public address: string = "0x2105";
+    public label: string = "BGMODE";
+
+    public getBG4TileSize(): number {
+        let is8by8 = ((this.val >> 7) & 1) == 0;
+        return is8by8 ? 8: 16;
+    }
+
+    public getBG3TileSize(): number {
+        let is8by8 = ((this.val >> 6) & 1) == 0;
+        return is8by8 ? 8: 16;
+    }
+
+    public getBG2TileSize(): number {
+        let is8by8 = ((this.val >> 5) & 1) == 0;
+        return is8by8 ? 8: 16;
+    }
+
+    public getBG1TileSize(): number {
+        let is8by8 = ((this.val >> 4) & 1) == 0;
+        return is8by8 ? 8: 16;
+    }
+
+    public getBG3Priority(): boolean {
+        return ((this.val >> 3) & 1) == 1;
+    }
+
+    public getMode(): number {
+        return ((this.val >> 0) & 3);
+    }
 
 }
 
 export class MosaicRegister extends Register {
 
-    public address: string = "2106";
-    public name: string = "MOSAIC";
+    public address: string = "0x2106";
+    public label: string = "MOSAIC";
+
+    public getMosaicSize(): number {
+        return (this.val >> 4) & 0xFF;
+    }
+
+    public getBG4MosaicEnable(): boolean {
+        return ((this.val >> 0) & 0x1) == 1;
+    }
+
+    public getBG3MosaicEnable(): boolean {
+        return ((this.val >> 1) & 0x1) == 1;
+    }
+
+    public getBG2MosaicEnable(): boolean {
+        return ((this.val >> 1) & 0x1) == 1;
+    }
+
+    public getBG1MosaicEnable(): boolean {
+        return ((this.val >> 0) & 0x1) == 1;
+    }
 
 }
 
 export class TileAddressForBG1Register extends Register {
 
-    public address: string = "2107";
-    public name: string = "BG1SC";
+    public address: string = "0x2107";
+    public label: string = "BG1SC";
 
+    public getTileAddress(): number {
+        return (this.val >> 2) & 0x3F;
+    }
+
+    // 00=32x32 01=64x32
+    // 10=32x64 11=64x64
+    public getScreenSize(): number {
+        let val: number = this.val & 0x2;
+        if (val == 0x00) {
+            return 32;
+        } else if (val == 0x01) {
+            return 32;
+        } else if (val == 0x02) {
+            return 64;
+        } else if (val == 0x03) {
+            return 64;
+        }
+    }
 }
 
 export class TileAddressForBG2Register extends Register {
 
-    public address: string = "2108";
-    public name: string = "BG2SC";
+    public address: string = "0x2108";
+    public label: string = "BG2SC";
 
+    public getTileAddress(): number {
+        return (this.val >> 2) & 0x3F;
+    }
+
+    // 00=32x32 01=64x32
+    // 10=32x64 11=64x64
+    public getScreenSize(): number {
+        let val: number = this.val & 0x2;
+        if (val == 0x00) {
+            return 32;
+        } else if (val == 0x01) {
+            return 32;
+        } else if (val == 0x02) {
+            return 64;
+        } else if (val == 0x03) {
+            return 64;
+        }
+    }
 }
 
 export class TileAddressForBG3Register extends Register {
 
-    public address: string = "2109";
-    public name: string = "BG3SC";
+    public address: string = "0x2109";
+    public label: string = "BG3SC";
 
+    public getTileAddress(): number {
+        return (this.val >> 2) & 0x3F;
+    }
+
+    // 00=32x32 01=64x32
+    // 10=32x64 11=64x64
+    public getScreenSize(): number {
+        let val: number = this.val & 0x2;
+        if (val == 0x00) {
+            return 32;
+        } else if (val == 0x01) {
+            return 32;
+        } else if (val == 0x02) {
+            return 64;
+        } else if (val == 0x03) {
+            return 64;
+        }
+    }
 }
 
 export class TileAddressForBG4Register extends Register {
 
-    public address: string = "210A";
-    public name: string = "BG4SC";
+    public address: string = "0x210A";
+    public label: string = "BG4SC";
 
+    public getTileAddress(): number {
+        return (this.val >> 2) & 0x3F;
+    }
+
+    // 00=32x32 01=64x32
+    // 10=32x64 11=64x64
+    public getScreenSize(): number {
+        let val: number = this.val & 0x2;
+        if (val == 0x00) {
+            return 32;
+        } else if (val == 0x01) {
+            return 32;
+        } else if (val == 0x02) {
+            return 64;
+        } else if (val == 0x03) {
+            return 64;
+        }
+    }
 }
 
 export class CharacterAddressForBG1And2Register extends Register {
 
-    public address: string = "210B";
-    public name: string = "BG12NBA";
+    public address: string = "0x210B";
+    public label: string = "BG12NBA";
+
+    public getBaseAddressForBG1(): number {
+       return ((this.val >> 4) & 0xF) << 12;
+    }
+
+    public getBaseAddressForBG2(): number {
+        return ((this.val >> 0) & 0xF) << 12;
+    }
 
 }
 
 export class CharacterAddressForBG3And4Register extends Register {
 
-    public address: string = "210C";
-    public name: string = "BG34NBA";
+    public address: string = "0x210C";
+    public label: string = "BG34NBA";
 
+    public getBaseAddressForBG3(): number {
+        return ((this.val >> 4) & 0xF) << 12;
+    }
+
+    public getBaseAddressForBG4(): number {
+        return ((this.val >> 0) & 0xF) << 12;
+    }
 }
 
 export class HorizontalScrollForBG1Register extends Register {
 
-    public address: string = "210D";
-    public name: string = "BG1HOFS";
+    public address: string = "0x210D";
+    public label: string = "BG1HOFS";
+    public prev: number = 0;
 
+    public getBG1HortOffset(): number {
+        let result = (this.val << 8) | this.prev;
+        this.prev = this.val;
+        return result;
+    }
+
+    public getBG1Mode7HortOffset(): number {
+        return 0;
+    }
 }
 
 export class VerticalScrollForBG1Register extends Register {
 
-    public address: string = "210E";
-    public name: string = "BG1VOFS";
+    public address: string = "0x210E";
+    public label: string = "BG1VOFS";
+    public prev: number = 0;
+
+    public getBG1VertOffset(): number {
+        let result = (this.val << 8) | this.prev;
+        this.prev = this.val;
+        return result;
+    }
+
+    public getBG1Mode7VertOffset(): number {
+        return 0;
+    }
 
 }
 
 export class HorizontalScrollForBG2Register extends Register {
 
-    public address: string = "210F";
-    public name: string = "BG2HOFS";
+    public address: string = "0x210F";
+    public label: string = "BG2HOFS";
+    public prev: number = 0;
+
+    public getBG2HortOffset(): number {
+        let result = (this.val << 8) | this.prev;
+        this.prev = this.val;
+        return result;
+    }
 
 }
 
 export class VerticalScrollForBG2Register extends Register {
 
-    public address: string = "2110";
-    public name: string = "BG2VOFS";
+    public address: string = "0x2110";
+    public label: string = "BG2VOFS";
+    public prev: number = 0;
 
+    public getBG2VertOffset(): number {
+        let result = (this.val << 8) | this.prev;
+        this.prev = this.val;
+        return result;
+    }
 }
 
 export class HorizontalScrollForBG3Register extends Register {
 
-    public address: string = "2111";
-    public name: string = "BG3HOFS";
+    public address: string = "0x2111";
+    public label: string = "BG3HOFS";
+    public prev: number = 0;
 
+    public getBG3HortOffset(): number {
+        let result = (this.val << 8) | this.prev;
+        this.prev = this.val;
+        return result;
+    }
 }
 
 export class VerticalScrollForBG3Register extends Register {
 
-    public address: string = "2112";
-    public name: string = "BG3VOFS";
+    public address: string = "0x2112";
+    public label: string = "BG3VOFS";
+    public prev: number = 0;
 
+    public getBG3VertOffset(): number {
+        let result = (this.val << 8) | this.prev;
+        this.prev = this.val;
+        return result;
+    }
 }
 
 export class HorizontalScrollForBG4Register extends Register {
 
-    public address: string = "2113";
-    public name: string = "BG4HOFS";
+    public address: string = "0x2113";
+    public label: string = "BG4HOFS";
+    public prev: number = 0;
 
+    public getBG4HortOffset(): number {
+        let result = (this.val << 8) | this.prev;
+        this.prev = this.val;
+        return result;
+    }
 }
 
 export class VerticalScrollForBG4Register extends Register {
 
-    public address: string = "2114";
-    public name: string = "BG4VOFS";
+    public address: string = "0x2114";
+    public label: string = "BG4VOFS";
+    public prev: number = 0;
 
+    public getBG4VertOffset(): number {
+        let result = (this.val << 8) | this.prev;
+        this.prev = this.val;
+        return result;
+    }
 }
 
 export class VideoPortControlRegister extends Register {
 
-    public address: string = "2115";
-    public name: string = "VMAIN";
+    public address: string = "0x2115";
+    public label: string = "VMAIN";
+
+    public getAddressIncrementMode(): number {
+        return (this.val >> 7) & 0x1;
+    }
+
+    public getAddressIncrementAmount(): number {
+        let result: number = (this.val & 0x3);
+        if (result == 0x00) {
+            return 1;
+        } else if (result == 0x01) {
+            return 32;
+        } else if (result == 0x02) {
+            return 128;
+        } else if (result == 0x03) {
+            return 128;
+        }
+    }
+
+    public getAddressFormation(): number {
+        return (this.val >> 2) & 0x3;
+    }
+
+}
+
+export class VRAMAddressRegister extends Register {
+
+    public address: string = "0x2115-0x2116";
+    public label: string = "VMADD";
+
+    public vraml: VRAMAddressLowRegister;
+    public vramh: VRAMAddressHighRegister;
+
+    constructor(console: Console) {
+        super(console);
+        this.vraml = new VRAMAddressLowRegister(console);
+        this.vramh = new VRAMAddressHighRegister(console);
+    }
+
+    public get(): number {
+        return Bit.toUint16(this.vramh.get(), this.vraml.get());
+    }
 
 }
 
 export class VRAMAddressLowRegister extends Register {
 
-    public address: string = "2116";
-    public name: string = "VMADDL";
+    public address: string = "0x2116";
+    public label: string = "VMADDL";
 
 }
 
 export class VRAMAddressHighRegister extends Register {
 
-    public address: string = "2117";
-    public name: string = "VMADDH";
+    public address: string = "0x2117";
+    public label: string = "VMADDH";
 
 }
 
 export class VRAMDataWriteLowRegister extends Register {
 
     public address: string = "2118";
-    public name: string = "VMDATAL";
+    public label: string = "VMDATAL";
 
 }
 
 export class VRAMDataWriteHighRegister extends Register {
 
     public address: string = "2119";
-    public name: string = "VMDATAH";
+    public label: string = "VMDATAH";
 
 }
 
 export class Mode7Register extends Register {
 
     public address: string = "211A";
-    public name: string = "VMDATAH";
+    public label: string = "VMDATAH";
 
 }
 
 export class CosXRegister extends Register {
 
     public address: string = "211B";
-    public name: string = "VMDATAH";
+    public label: string = "VMDATAH";
 
 }
 
 export class SinXRegister extends Register {
 
     public address: string = "211C";
-    public name: string = "VMDATAH";
+    public label: string = "VMDATAH";
 
 }
 
 export class SinYRegister extends Register {
 
     public address: string = "211D";
-    public name: string = "VMDATAH";
+    public label: string = "VMDATAH";
 
 }
 
 export class CosYRegister extends Register {
 
     public address: string = "211E";
-    public name: string = "VMDATAH";
+    public label: string = "VMDATAH";
 
 }
 
 export class CenterPositionXRegister extends Register {
 
     public address: string = "211F";
-    public name: string = "VMDATAH";
+    public label: string = "VMDATAH";
 
 }
 
 export class CenterPositionYRegister extends Register {
 
     public address: string = "2120";
-    public name: string = "VMDATAH";
+    public label: string = "VMDATAH";
 
 }
 
 export class CGRAMAddressRegister extends Register {
 
-    public address: string = "2121";
-    public name: string = "CGADD";
+    public address: string = "0x2121";
+    public label: string = "CGADD";
+
+    public set(val: number): void {
+        super.set((val * 2) & 0xFFFF);
+    }
+
+    public increment(): void {
+        this.val = (this.val + 1) % CGram.size;
+    }
 
 }
 
 export class CGRAMDataWriteRegister extends Register {
 
     public address: string = "2122";
-    public name: string = "CGDATA";
+    public label: string = "CGDATA";
+
+    public counter: number = 0;
+    public low: number = 0;
+    public high: number = 0;
+
+    public set(val: number): void {
+        super.set(val);
+        this.counter++;
+        if (this.counter == 1) {
+            this.low = val;
+        } else if (this.counter == 2) {
+            this.high = val;
+        }
+        let doWrite: boolean = this.counter % 2 == 0;
+
+        if (doWrite) {
+            let lowAddr: number = this.console.ppu.registers.cgramaddr.get();
+            this.console.ppu.cgram.writeByte(lowAddr, this.low);
+
+            this.console.ppu.registers.cgramaddr.increment();
+
+            let highAddr: number = this.console.ppu.registers.cgramaddr.get();
+            this.console.ppu.cgram.writeByte(highAddr, this.high);
+
+            this.console.ppu.registers.cgramaddr.increment();
+
+            this.counter = 0;
+        }
+
+    }
 
 }
 
 export class WindowMaskSettingsForBG1And2Register extends Register {
 
     public address: string = "2123";
-    public name: string = "W12SEL";
+    public label: string = "W12SEL";
 
 }
 
 export class WindowMaskSettingsForBG3And4Register extends Register {
 
     public address: string = "2124";
-    public name: string = "W34SEL";
+    public label: string = "W34SEL";
 
 }
 
 export class WindowMaskSettingsForObjRegister extends Register {
 
     public address: string = "2125";
-    public name: string = "WOBJSEL";
+    public label: string = "WOBJSEL";
 
 }
 
 export class WindowPositionForBG0Register extends Register {
 
     public address: string = "2126";
-    public name: string = "WH0";
+    public label: string = "WH0";
 
 }
 
 export class WindowPositionForBG1Register extends Register {
 
     public address: string = "2127";
-    public name: string = "WH1";
+    public label: string = "WH1";
 
 }
 
 export class WindowPositionForBG2Register extends Register {
 
     public address: string = "2128";
-    public name: string = "WH2";
+    public label: string = "WH2";
 
 }
 
 export class WindowPositionForBG3Register extends Register {
 
     public address: string = "2129";
-    public name: string = "WH3";
+    public label: string = "WH3";
 
 }
 
 export class WindowMaskLogicForBgRegister extends Register {
 
     public address: string = "212A";
-    public name: string = "WBGLOG";
+    public label: string = "WBGLOG";
 
 }
 
 export class WindowMaskLogicForObjRegister extends Register {
 
     public address: string = "212B";
-    public name: string = "WOBJLOG";
+    public label: string = "WOBJLOG";
 
 }
 
 export class ScreenDestinationForMainRegister extends Register {
 
     public address: string = "212C";
-    public name: string = "TM";
+    public label: string = "TM";
 
 }
 
 export class ScreenDestinationForSubRegister extends Register {
 
     public address: string = "212D";
-    public name: string = "TS";
+    public label: string = "TS";
 
 }
 
 export class WindowMaskDestinationForMainRegister extends Register {
 
     public address: string = "212E";
-    public name: string = "TMW";
+    public label: string = "TMW";
 
 }
 
 export class WindowMaskDestinationForSubRegister extends Register {
 
     public address: string = "212F";
-    public name: string = "TSW";
+    public label: string = "TSW";
 
 }
 
@@ -426,7 +716,7 @@ export class WindowMaskDestinationForSubRegister extends Register {
 export class ColorMathSelectionRegister extends Register {
 
     public address: string = "2130";
-    public name: string = "CGWSEL";
+    public label: string = "CGWSEL";
 
 }
 
@@ -434,7 +724,7 @@ export class ColorMathSelectionRegister extends Register {
 export class ColorMathAddSubAffectRegister extends Register {
 
     public address: string = "2131";
-    public name: string = "CGADSUB";
+    public label: string = "CGADSUB";
 
 }
 
@@ -442,126 +732,157 @@ export class ColorMathAddSubAffectRegister extends Register {
 export class ColorMathDataRegister extends Register {
 
     public address: string = "2132";
-    public name: string = "COLDATA";
+    public label: string = "COLDATA";
 
 }
 
 export class ScreenModeSelectRegister extends Register {
 
     public address: string = "2133";
-    public name: string = "SETINI";
+    public label: string = "SETINI";
 
 }
 
 export class MultiplicationResultLowRegister extends Register {
 
     public address: string = "2134";
-    public name: string = "MPYL";
+    public label: string = "MPYL";
 
 }
 
 export class MultiplicationResultMiddleRegister extends Register {
 
     public address: string = "2135";
-    public name: string = "MPYM";
+    public label: string = "MPYM";
 
 }
 
 export class MultiplicationResultHighRegister extends Register {
 
     public address: string = "2136";
-    public name: string = "MPYH";
+    public label: string = "MPYH";
 
 }
 
 export class SoftwareLatchRegister extends Register {
 
-    public address: string = "2137";
-    public name: string = "SLHV";
+    public address: string = "0x2137";
+    public label: string = "SLHV";
 
 }
 
 export class OAMDataReadRegister extends Register {
 
     public address: string = "2138";
-    public name: string = "OAMDATAREAD";
+    public label: string = "OAMDATAREAD";
 
 }
 
 export class VRAMDataReadLowRegister extends Register {
 
     public address: string = "2139";
-    public name: string = "VMDATALREAD";
+    public label: string = "VMDATALREAD";
 
 }
 
 export class VRAMDataReadHighRegister extends Register {
 
     public address: string = "213A";
-    public name: string = "VMDATAHREAD";
+    public label: string = "VMDATAHREAD";
 
 }
 
 export class CGRAMDataReadRegister extends Register {
 
     public address: string = "213B";
-    public name: string = "CGDATAREAD";
+    public label: string = "CGDATAREAD";
 
 }
 
 export class ScanlineLocationHorizontalRegister extends Register {
 
-    public address: string = "213C";
-    public name: string = "OPHCT";
+    public address: string = "0x213C";
+    public label: string = "OPHCT";
 
 }
 
 export class ScanlineLocationVerticalRegister extends Register {
 
-    public address: string = "213D";
-    public name: string = "OPVCT";
+    public address: string = "0x213D";
+    public label: string = "OPVCT";
 
 }
 
 export class PPUStatus77Register extends Register {
 
     public address: string = "213E";
-    public name: string = "STAT77";
+    public label: string = "STAT77";
+
+    public getRangeOver(): boolean {
+        return ((this.val >> 7) & 0x1) == 1;
+    }
+
+    public getTimeOver(): boolean {
+        return ((this.val >> 6) & 0x1) == 1;
+    }
+
+    public getVersion(): number {
+        return ((this.val >> 0) & 0xF);
+    }
 
 }
 
 export class PPUStatus78Register extends Register {
 
     public address: string = "213F";
-    public name: string = "STAT78";
+    public label: string = "STAT78";
+
+    public getField(): boolean {
+        return ((this.val >> 7) & 0x1) == 1;
+
+    }
+
+    public getCountersLatched(): boolean {
+        return ((this.val >> 6) & 0x1) == 1;
+
+    }
+
+    public getRegion(): number {
+        return ((this.val >> 4) & 0x1);
+
+    }
+
+    public getVersion(): number {
+        return ((this.val >> 4) & 0xF);
+    }
 
 }
 
 export class WRAMDataRegister extends Register {
 
     public address: string = "2180";
-    public name: string = "WMDATA";
+    public label: string = "WMDATA";
 
 }
 
 export class WRAMAddressLowRegister extends Register {
 
     public address: string = "2181";
-    public name: string = "WMADDL";
+    public label: string = "WMADDL";
 
 }
 
 export class WRAMAddressMidRegister extends Register {
 
     public address: string = "2182";
-    public name: string = "WMADDM";
+    public label: string = "WMADDM";
 
 }
 
 export class WRAMAddressHighRegister extends Register {
 
     public address: string = "2183";
-    public name: string = "WMADDH";
+    public label: string = "WMADDH";
 
 }
 
@@ -577,8 +898,7 @@ export class Registers {
     public m7y: CenterPositionYRegister;
 
     public oamselect: OamSizeAndDataAreaRegister;
-    public oamaddrl: OamAddressLowRegister;
-    public oamaddrh: OamAddressHighRegister;
+    public oamaddr: OamAddressRegister;
     public oamdataw: OamDataWriteRegister;
     public oamdatar: OAMDataReadRegister;
 
@@ -602,8 +922,7 @@ export class Registers {
     public vcharlocbg12: CharacterAddressForBG1And2Register;
     public vcharlocbg34: CharacterAddressForBG3And4Register;
     public vportcntrl: VideoPortControlRegister;
-    public vaddrl: VRAMAddressLowRegister;
-    public vaddrh: VRAMAddressHighRegister;
+    public vaddr: VRAMAddressRegister;
     public vdatawl: VRAMDataWriteLowRegister;
     public vdatawh: VRAMDataWriteHighRegister;
     public vdatarl: VRAMDataReadLowRegister;
@@ -653,8 +972,7 @@ export class Registers {
         this.m7y = new CenterPositionYRegister(console);
 
         this.oamselect = new OamSizeAndDataAreaRegister(console);
-        this.oamaddrl = new OamAddressLowRegister(console);
-        this.oamaddrh = new OamAddressHighRegister(console);
+        this.oamaddr = new OamAddressRegister(console);
         this.oamdataw = new OamDataWriteRegister(console);
         this.oamdatar = new OAMDataReadRegister(console);
 
@@ -678,8 +996,7 @@ export class Registers {
         this.vcharlocbg12 = new CharacterAddressForBG1And2Register(console);
         this.vcharlocbg34 = new CharacterAddressForBG3And4Register(console);
         this.vportcntrl = new VideoPortControlRegister(console);
-        this.vaddrl = new VRAMAddressLowRegister(console);
-        this.vaddrh = new VRAMAddressHighRegister(console);
+        this.vaddr = new VRAMAddressRegister(console);
         this.vdatawl = new VRAMDataWriteLowRegister(console);
         this.vdatawh = new VRAMDataWriteHighRegister(console);
         this.vdatarl = new VRAMDataReadLowRegister(console);

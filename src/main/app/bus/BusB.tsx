@@ -41,9 +41,9 @@ export class BusB {
         } else if (page == 0x2101) {
             read = Read.byte(this.registers.oamselect.get());
         } else if (page == 0x2102) {
-            read = Read.byte(this.registers.oamaddrl.get());
+            read = Read.byte(this.registers.oamaddr.oamlow.get());
         } else if (page == 0x2103) {
-            read = Read.byte(this.registers.oamaddrh.get());
+            read = Read.byte(this.registers.oamaddr.oamlow.get());
         } else if (page == 0x2104) {
             read = Read.byte(this.registers.oamdataw.get());
         } else if (page == 0x2105) {
@@ -81,9 +81,9 @@ export class BusB {
         } else if (page == 0x2115) {
             read = Read.byte(this.registers.vportcntrl.get());
         } else if (page == 0x2116) {
-            read = Read.byte(this.registers.vaddrl.get());
+            read = Read.byte(this.registers.vaddr.vraml.get());
         } else if (page == 0x2117) {
-            read = Read.byte(this.registers.vaddrh.get());
+            read = Read.byte(this.registers.vaddr.vramh.get());
         } else if (page == 0x2118) {
             read = Read.byte(this.registers.vdatawl.get());
         } else if (page == 0x2119) {
@@ -190,9 +190,9 @@ export class BusB {
         } else if (page == 0x2101) {
             this.registers.oamselect.set(val);
         } else if (page == 0x2102) {
-            this.registers.oamaddrl.set(val);
+            this.registers.oamaddr.oamlow.set(val);
         } else if (page == 0x2103) {
-            this.registers.oamaddrh.set(val);
+            this.registers.oamaddr.oamhigh.set(val);
         } else if (page == 0x2104) {
             this.registers.oamdataw.set(val);
         } else if (page == 0x2105) {
@@ -230,9 +230,9 @@ export class BusB {
         } else if (page == 0x2115) {
             this.registers.vportcntrl.set(val);
         } else if (page == 0x2116) {
-            this.registers.vaddrl.set(val);
+            this.registers.vaddr.vraml.set(val);
         } else if (page == 0x2117) {
-            this.registers.vaddrh.set(val);
+            this.registers.vaddr.vramh.set(val);
         } else if (page == 0x2118) {
             this.registers.vdatawl.set(val);
         } else if (page == 0x2119) {

@@ -64,4 +64,22 @@ export class Bit {
         return (a) & 0xFF;
     }
 
+    public static setUint16Lower(num: number, a: number) {
+        let val: number = num;
+
+        val = val & 0x00;
+        val = val | a;
+
+        return val;
+    }
+
+    public static setUint16Upper(num: number, a: number) {
+        let val: number = num;
+
+        val = val & (0x00 << 8);
+        val = val | ((a << 8) | 0x00);
+
+        return val;
+    }
+
 }
