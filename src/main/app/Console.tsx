@@ -39,4 +39,10 @@ export default class Console {
             this.ppu.tick();
         }
     }
+
+    public ticks(count: number) {
+        for (let i = 0; i < (count || 0); i++) {
+            this.tick();
+        }
+    }
 }

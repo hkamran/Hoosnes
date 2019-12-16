@@ -56,7 +56,7 @@ export class CartridgeMapping0 implements ICartridgeMapping {
                 return Read.byte(value, 0);
             }
         }
-        throw new NotSupported();
+        throw new Error("Invalid read at " + address.toString());
     }
 
     public write(address: Address, value: number): Write {

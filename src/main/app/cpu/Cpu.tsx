@@ -36,7 +36,7 @@ export class Cpu {
         this.bus = console.bus;
         this.registers = new Registers();
         this.opcodes = new Opcodes();
-        this.interrupts = new InterruptHandler(this);
+        this.interrupts = new InterruptHandler(console, this);
     }
 
     public tick(): number {

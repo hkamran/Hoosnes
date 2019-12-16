@@ -6,6 +6,7 @@ import {Register, StatusRegister} from "../app/cpu/Registers";
 import {CSSProperties} from "react";
 import {Operation} from "../app/cpu/Opcodes";
 import {Registers} from "../app/ppu/Registers";
+import {Ppu, ScreenType} from "../app/ppu/Ppu";
 
 interface IPpuCardProps {
     snes: Console;
@@ -14,6 +15,7 @@ interface IPpuCardProps {
 
 interface IPpuCardState {
     registers: Registers;
+    ppu: Ppu;
 }
 
 
@@ -25,6 +27,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
         super(props);
         this.state = {
             registers: props.snes.ppu.registers,
+            ppu: props.snes.ppu,
         };
     }
 
@@ -35,6 +38,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
     public fetch() {
         this.setState({
             registers: this.props.snes.ppu.registers,
+            ppu: this.props.snes.ppu,
         });
     }
 
@@ -45,22 +49,22 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                     <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
                         <legend>Information</legend>
                         <div style={{display: "flex"}}>
-                            <ul style={{listStyle: "none", width: "130px", padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
+                            <ul style={{listStyle: "none", width: "100%", padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
                                 <li style={{display: "flex"}}>
-                                    <span style={{flexGrow: 1}} className="header">V-Counter:</span>
-                                    <span>{}</span>
+                                    <span style={{flexGrow: 1}} className="header">Scanline:</span>
+                                    <span>{this.state.ppu.scanline}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
-                                    <span style={{flexGrow: 1}} className="header">H-Counter:</span>
-                                    <span>{}</span>
+                                    <span style={{flexGrow: 1}} className="header">Cycle:</span>
+                                    <span>{this.state.ppu.cycle}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Screen State:</span>
-                                    <span>{}</span>
+                                    <span>{ScreenType[this.state.ppu.state]}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Frames:</span>
-                                    <span>{}</span>
+                                    <span>{this.state.ppu.frames}</span>
                                 </li>
                             </ul>
                         </div>

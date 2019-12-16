@@ -47,7 +47,7 @@ export class Screen {
         this.buffer = this.context.createImageData(Screen.WIDTH, Screen.HEIGHT);
     }
 
-    public setColor(x: number, y: number, color: Color) {
+    public setPixel(x: number, y: number, color: Color) {
         if (color == null) {
             throw Error("Invalid coloring");
         }

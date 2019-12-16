@@ -13,8 +13,8 @@ export class Stack {
     }
 
     public popWord(): number {
-        let lowByte: number = this.popByte();
         let highByte: number = this.popByte();
+        let lowByte: number = this.popByte();
 
         return Bit.toUint16(highByte, lowByte);
     }

@@ -1661,13 +1661,13 @@ class RTI extends Operation {
         let pc : number = context.cpu.stack.popWord();
         let sp: number = context.registers.sp.get();
 
-        context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
+        context.cpu.registers.pc.set(pc & 0xFFFF);
         context.cpu.registers.p.set(p & 0xFF);
         context.cpu.registers.sp.set((sp + 3) & 0xFFFF);
 
         if (context.registers.p.getE() == 0) {
-            let pbc : number = context.cpu.stack.popByte();
-            context.registers.k.set(pbc);
+            let pb : number = context.cpu.stack.popByte();
+            context.registers.k.set(pb);
         }
 
         return this.getCycle();

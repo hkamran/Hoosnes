@@ -22,9 +22,10 @@ export class InterruptHandler {
 
     public wait: boolean = false;
 
-    constructor(cpu : Cpu) {
-        this.registers = cpu.registers;
+    constructor(console: Console, cpu: Cpu) {
+        this.console = console;
         this.cpu = cpu;
+        this.registers = cpu.registers;
     }
 
     public tick() : number {
@@ -91,6 +92,7 @@ export class InterruptHandler {
             this.registers.pc.set(offset);
             this.registers.k.set(bank);
         }
+        this.interrupt = InterruptType.NONE;
         return 0;
     }
 
@@ -123,6 +125,7 @@ export class InterruptHandler {
             this.registers.pc.set(offset);
             this.registers.k.set(bank);
         }
+        this.interrupt = InterruptType.NONE;
         return 0;
     }
 
@@ -141,20 +144,21 @@ export class InterruptHandler {
         this.registers.p.setD(0);
 
         if (isNative) {
-            let value: number = this.console.cartridge.interrupts.native.COP;
+            let value: number = this.console.cartridge.interrupts.native.NMI;
             let bank = 0;
             let offset = value;
 
             this.registers.pc.set(offset);
             this.registers.k.set(bank);
         } else {
-            let value: number = this.console.cartridge.interrupts.native.COP;
+            let value: number = this.console.cartridge.interrupts.emulation.NMI;
             let bank = (value >> 16) & 0xFF;
             let offset = value & 0xFFFF;
 
             this.registers.pc.set(offset);
             this.registers.k.set(bank);
         }
+        this.interrupt = InterruptType.NONE;
         return 0;
     }
 
@@ -193,6 +197,7 @@ export class InterruptHandler {
             this.registers.pc.set(offset);
             this.registers.k.set(bank);
         }
+        this.interrupt = InterruptType.NONE;
         return 0;
     }
 

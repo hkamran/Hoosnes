@@ -5,6 +5,7 @@ import {Modes} from "../app/Modes";
 import {Register, StatusRegister} from "../app/cpu/Registers";
 import {CSSProperties} from "react";
 import {Operation} from "../app/cpu/Opcodes";
+import {InterruptType} from "../app/cpu/Interrupts";
 
 interface ICpuCardProps {
     snes: Console;
@@ -35,6 +36,7 @@ interface ICpuCardState {
     op: Operation;
 
     cycles: number;
+    interrupts: InterruptType;
 }
 
 
@@ -68,6 +70,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
             op: null,
 
             cycles: 0,
+            interrupts: InterruptType.NONE,
         };
     }
 
@@ -100,6 +103,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
             op: this.props.snes.cpu.operation,
 
             cycles: this.props.snes.cpu.cycles,
+            interrupts: this.props.snes.cpu.interrupts.interrupt,
         });
     }
 
@@ -114,6 +118,10 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Cycles:</span>
                                     <span>{this.state.cycles}</span>
+                                </li>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Interrupt:</span>
+                                    <span>{InterruptType[this.state.interrupts]}</span>
                                 </li>
                             </ul>
                         </div>
@@ -223,6 +231,24 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Cycles:</span>
                                     <span>{this.state.op != null ? this.state.op.getCycle() : ""}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </fieldset>
+                </div>
+                <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
+                    <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
+                        <legend>Stack</legend>
+                        <div style={{display: "flex"}}>
+                            <ul style={{listStyle: "none", flexGrow: 1, padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
+                                <li style={{display: "flex"}}>
+                                    <span>
+                                        {this.props.snes.cpu.stack.stack.map((value) => {
+                                            return (
+                                                <div>{value.toString(16).toUpperCase() + ", "}</div>
+                                            );
+                                        })}
+                                    </span>
                                 </li>
                             </ul>
                         </div>
