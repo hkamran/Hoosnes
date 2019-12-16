@@ -13,6 +13,20 @@ export class Renderer {
         this.screen = ppu.screen;
     }
 
+    /**
+     * Rendering a BG is simple.
+     *
+     * https://wiki.superfamicom.org/backgrounds
+     * https://wiki.superfamicom.org/making-a-small-game-tic-tac-toe
+     * https://wiki.superfamicom.org/sprites
+     *
+     * Get your H and V offsets (either by reading the appropriate registers or by doing the offset-per-tile calculation).
+     * Use those to translate the screen X and Y into playing field X and Y (Note this is rather complicated for Mode 7)
+     * Look up the tilemap for those coordinates
+     * Use that to find the character data
+     * If necessary, de-bitplane it and stick it in a buffer.
+
+     */
     public tick(): void {
         let caddr: number = this.ppu.registers.cgramaddr.get();
         let colorl: number = this.ppu.cgram.readByte(0);
