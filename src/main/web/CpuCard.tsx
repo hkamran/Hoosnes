@@ -37,6 +37,7 @@ interface ICpuCardState {
 
     cycles: number;
     interrupts: InterruptType;
+    stack: number[];
 }
 
 
@@ -71,6 +72,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
 
             cycles: 0,
             interrupts: InterruptType.NONE,
+            stack: [],
         };
     }
 
@@ -104,6 +106,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
 
             cycles: this.props.snes.cpu.cycles,
             interrupts: this.props.snes.cpu.interrupts.interrupt,
+            stack: this.props.snes.cpu.stack.stack,
         });
     }
 
@@ -236,21 +239,15 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                         </div>
                     </fieldset>
                 </div>
-                <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
+                <div style={{display: "flex", flexDirection: "row", flexGrow: 1, width: "310px"}}>
                     <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
                         <legend>Stack</legend>
-                        <div style={{display: "flex"}}>
-                            <ul style={{listStyle: "none", flexGrow: 1, padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
-                                <li style={{display: "flex"}}>
-                                    <span>
-                                        {this.props.snes.cpu.stack.stack.map((value) => {
-                                            return (
-                                                <div>{value.toString(16).toUpperCase() + ", "}</div>
-                                            );
-                                        })}
-                                    </span>
-                                </li>
-                            </ul>
+                        <div style={{display: "block", fontSize: "12px"}}>
+                            {this.state.stack.map((value, index) => {
+                                return (
+                                    <span key={index}>0x{value.toString(16).toUpperCase() + ", "}</span>
+                                );
+                            })}
                         </div>
                     </fieldset>
                 </div>
