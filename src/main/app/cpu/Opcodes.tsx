@@ -12,21 +12,32 @@ import {InterruptType} from "./Interrupts";
 export class OpContext {
 
     public opaddr: Address;
-    public opcode: Operation;
+    public op: Operation;
 
     public console: Console;
     public cpu: Cpu;
     public bus: Bus;
     public registers: Registers;
 
-    constructor(opaddr: Address, opcode: Operation, console: Console) {
-        this.opaddr = opaddr;
-        this.opcode = opcode;
+    private static singleton: OpContext;
 
-        this.console = console;
-        this.cpu = console.cpu;
-        this.bus = console.bus;
-        this.registers = console.cpu.registers;
+    constructor(cpu: Cpu, opaddr: Address, op: Operation) {
+        Objects.requireNonNull(cpu);
+        Objects.requireNonNull(cpu.console);
+        Objects.requireNonNull(cpu.console.bus);
+        Objects.requireNonNull(cpu.registers);
+
+        this.cpu = cpu;
+        this.console = cpu.console;
+        this.bus = cpu.console.bus;
+        this.registers = cpu.registers;
+
+        this.opaddr = opaddr;
+        this.op = op;
+    }
+
+    public static create(cpu: Cpu, opaddr: Address, op: Operation): OpContext {
+        return new OpContext(cpu, opaddr, op);
     }
 
     public getOperand(index: number): Read {
@@ -76,7 +87,7 @@ export class OpContext {
 
         let mask: number = (is8Bit || false) ? 0x80 : 0x8000;
         let sum = a + b;
-        let isOverflow = ((!(((a ^ b) & mask) != 0) && (((a ^ sum) & mask)) !=0)? 1:0);
+        let isOverflow = ((!(((a ^ b) & mask) != 0) && (((a ^ sum) & mask)) != 0) ? 1 : 0);
         this.registers.p.setV(isOverflow ? 1 : 0);
     }
 
@@ -92,14 +103,29 @@ export class OpContext {
     }
 }
 
+export class OpResult {
+    public size: number = 0;
+    public cycles: number = 0;
+
+    public with(size: number, cycles: number): OpResult {
+        this.size = size;
+        this.cycles = cycles;
+
+        return this;
+    }
+}
+
 export class Operation {
+
+    protected result: OpResult = new OpResult();
+
     public name: string;
     public code: number;
     public cycle: number;
-    public size: number[];
+    public size: number;
     public mode: IAddressingMode;
 
-    constructor(code: number, cycle: number, cycleOptions: number[], size: number[], mode: IAddressingMode) {
+    constructor(code: number, cycle: number, size: number, mode: IAddressingMode) {
         Objects.requireNonNull(mode);
 
         this.code = code;
@@ -112,19 +138,10 @@ export class Operation {
         return null;
     }
 
-    public getCycle(): number {
-        let additionals = 0;
-
-        return this.cycle + additionals;
-    }
-
     public getSize(): number {
-        if (this.size == null || this.size.length == 0) {
-            throw new Error("Invalid size!");
-        }
-
-        return this.size[0];
+        return this.size;
     }
+
 }
 
 export class ADC extends Operation {
@@ -154,7 +171,7 @@ export class ADC extends Operation {
         context.setFlagZ(result, is8Bit);
         context.setFlagC(result, is8Bit);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -175,7 +192,7 @@ export class AND extends Operation {
         context.setFlagZ(result, is8Bit);
         context.setFlagN(result, is8Bit);
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -209,7 +226,7 @@ export class ASL extends Operation {
         context.setFlagN(result, is8Bit);
         context.setFlagC(result, is8Bit);
 
-        return this.getSize();
+        return this.cycle;
     }
 
 }
@@ -225,8 +242,10 @@ export class BCC extends Operation {
             let next: number = current + result.get();
 
             context.registers.pc.set(next & 0xFFFF);
+
+            return this.cycle;
         }
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -241,8 +260,10 @@ export class BCS extends Operation {
             let next: number = current + result.get();
 
             context.registers.pc.set(next & 0xFFFF);
+
+            return this.cycle;
         }
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -257,8 +278,10 @@ export class BEQ extends Operation {
             let next: number = current + result.get();
 
             context.registers.pc.set(next & 0xFFFF);
+
+            return this.cycle;
         }
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -278,7 +301,7 @@ export class BIT extends Operation {
 
         // TODO
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -293,9 +316,11 @@ class BMI extends Operation {
             let next: number = current + result.get();
 
             context.registers.pc.set(next & 0xFFFF);
+
+            return this.cycle;
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -312,10 +337,10 @@ class BNE extends Operation {
 
             context.registers.pc.set(next & 0xFF);
 
-            return this.getCycle() + (next > 0xFF ? 1: 0);
+            return this.cycle + (next > 0xFF ? 1 : 0);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -331,10 +356,10 @@ class BPL extends Operation {
 
             context.registers.pc.set(next & 0xFF);
 
-            return this.getCycle() + (next > 0xFF ? 1: 0);
+            return this.cycle + (next > 0xFF ? 1 : 0);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -347,7 +372,7 @@ class CMP extends Operation {
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let size: number = is8Bit ? 7 : 15;
 
-        let a: number = is8Bit ? context.registers.a.getLower(): context.registers.a.get();
+        let a: number = is8Bit ? context.registers.a.getLower() : context.registers.a.get();
         let b: Read = this.mode.getValue(context);
 
         let value: number = (a & mask) - (b.get() & mask);
@@ -356,7 +381,7 @@ class CMP extends Operation {
         context.registers.p.setN((value >> size) & 1);
         context.registers.p.setZ(((value & mask) == 0) ? 1 : 0);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -367,7 +392,7 @@ class COP extends Operation {
     public execute(context: OpContext): number {
         context.cpu.interrupts.set(InterruptType.COP);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -380,7 +405,7 @@ class CPX extends Operation {
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let size: number = is8Bit ? 7 : 15;
 
-        let a: number = is8Bit ? context.registers.x.getLower(): context.registers.x.get();
+        let a: number = is8Bit ? context.registers.x.getLower() : context.registers.x.get();
         let b: Read = this.mode.getValue(context);
 
         let value: number = (a & mask) - (b.get() & mask);
@@ -389,7 +414,7 @@ class CPX extends Operation {
         context.registers.p.setN((value >> size) & 1);
         context.registers.p.setZ(((value & mask) == 0) ? 1 : 0);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -402,7 +427,7 @@ class CPY extends Operation {
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let size: number = is8Bit ? 7 : 15;
 
-        let a: number = is8Bit ? context.registers.y.getLower(): context.registers.y.get();
+        let a: number = is8Bit ? context.registers.y.getLower() : context.registers.y.get();
         let b: Read = this.mode.getValue(context);
 
         let value: number = (a & mask) - (b.get() & mask);
@@ -411,7 +436,7 @@ class CPY extends Operation {
         context.registers.p.setN((value >> size) & 1);
         context.registers.p.setZ(((value & mask) == 0) ? 1 : 0);
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -420,7 +445,7 @@ class CLC extends Operation {
 
     public execute(context: OpContext): number {
         context.cpu.registers.p.setC(0);
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -429,7 +454,7 @@ class CLD extends Operation {
 
     public execute(context: OpContext): number {
         context.cpu.registers.p.setD(0);
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -439,7 +464,7 @@ class CLI extends Operation {
 
     public execute(context: OpContext): number {
         context.cpu.registers.p.setD(0);
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -449,7 +474,7 @@ class CLV extends Operation {
 
     public execute(context: OpContext): number {
         context.cpu.registers.p.setV(0);
-        return this.getCycle();
+        return this.cycle;
     }
 
 
@@ -466,7 +491,7 @@ class BRA extends Operation {
 
         context.registers.pc.set(next & 0xFF);
 
-        return this.getCycle() + (next > 0xFF ? 1: 0);
+        return this.cycle + (next > 0xFF ? 1 : 0);
     }
 }
 
@@ -476,7 +501,7 @@ class BRK extends Operation {
     public execute(context: OpContext): number {
         context.cpu.interrupts.set(InterruptType.BRK);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -493,9 +518,9 @@ class BVS extends Operation {
 
             context.registers.pc.set(next & 0xFF);
 
-            return this.getCycle() + (next > 0xFF ? 1: 0);
+            return this.cycle + (next > 0xFF ? 1 : 0);
         }
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -512,9 +537,9 @@ class BVC extends Operation {
 
             context.registers.pc.set(next & 0xFF);
 
-            return this.getCycle() + (next > 0xFF ? 1: 0);
+            return this.cycle + (next > 0xFF ? 1 : 0);
         }
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -530,7 +555,7 @@ class BRL extends Operation {
 
         context.registers.pc.set(next & 0xFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -544,7 +569,7 @@ class DEC extends Operation {
 
         if (is8Bit) {
             let loData: Read = context.bus.readByte(address.getLow());
-            let value: number= loData.get() - 1;
+            let value: number = loData.get() - 1;
 
             context.bus.writeByte(address.getLow(), value & 0xFF);
 
@@ -555,13 +580,13 @@ class DEC extends Operation {
             let hiData: Read = context.bus.readByte(address.getHigh());
             let value: number = Bit.toUint16(hiData.get(), loData.get()) - 1;
 
-            context.bus.writeByte(address.getHigh(),Bit.getUint16Upper(value) & 0xFFFF);
-            context.bus.writeByte(address.getLow(),Bit.getUint16Lower(value) & 0xFFFF);
+            context.bus.writeByte(address.getHigh(), Bit.getUint16Upper(value) & 0xFFFF);
+            context.bus.writeByte(address.getLow(), Bit.getUint16Lower(value) & 0xFFFF);
 
             context.setFlagN(value, is8Bit);
             context.setFlagZ(value, is8Bit);
         }
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -578,7 +603,7 @@ class DEX extends Operation {
 
         context.registers.x.set(value & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -595,7 +620,7 @@ class DEY extends Operation {
 
         context.registers.y.set(value & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -607,7 +632,6 @@ class EOR extends Operation {
         //TODO
         console.log(this.name);
         return null;
-
 
 
     }
@@ -623,7 +647,7 @@ class INC extends Operation {
 
         if (is8Bit) {
             let loData: Read = context.bus.readByte(address.getLow());
-            let value: number= loData.get() + 1;
+            let value: number = loData.get() + 1;
 
             context.bus.writeByte(address.getLow(), value & 0xFF);
 
@@ -632,7 +656,7 @@ class INC extends Operation {
         } else {
             let loData: Read = context.bus.readByte(address.getLow());
             let hiData: Read = context.bus.readByte(address.getHigh());
-            let value: number= Bit.toUint16(hiData.get(), loData.get()) + 1;
+            let value: number = Bit.toUint16(hiData.get(), loData.get()) + 1;
 
             context.bus.writeByte(address.getLow(), Bit.getUint16Lower(value) & 0xFF);
             context.bus.writeByte(address.getHigh(), Bit.getUint16Upper(value) & 0xFF);
@@ -640,7 +664,7 @@ class INC extends Operation {
             context.setFlagN(value, is8Bit);
             context.setFlagZ(value, is8Bit);
         }
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -657,7 +681,7 @@ class INY extends Operation {
 
         context.registers.y.set(value & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -672,7 +696,7 @@ class XCE extends Operation {
         context.registers.p.setE(c);
         context.registers.p.setC(e);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -687,7 +711,7 @@ class XBA extends Operation {
         let value: number = Bit.toUint16(lo, hi);
         context.registers.a.set(value);
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -706,7 +730,7 @@ class WAI extends Operation {
     public execute(context: OpContext): number {
         context.cpu.interrupts.wait = true;
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -718,7 +742,7 @@ class TYX extends Operation {
         let y: number = context.cpu.registers.y.get();
 
         context.cpu.registers.x.set(y);
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -729,7 +753,7 @@ class TYA extends Operation {
         let y: number = context.cpu.registers.y.get();
 
         context.cpu.registers.a.set(y);
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -740,7 +764,7 @@ class TXY extends Operation {
         let x: number = context.cpu.registers.x.get();
 
         context.cpu.registers.y.set(x);
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -752,7 +776,7 @@ class TAX extends Operation {
         let a: number = context.cpu.registers.a.get();
 
         context.cpu.registers.x.set(a);
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -764,7 +788,7 @@ class TAY extends Operation {
         let a: number = context.cpu.registers.a.get();
 
         context.cpu.registers.y.set(a);
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -775,7 +799,7 @@ class TCD extends Operation {
         let a: number = context.cpu.registers.a.get();
 
         context.cpu.registers.d.set(a);
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -797,7 +821,7 @@ class TCS extends Operation {
             context.registers.sp.set(a);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -809,7 +833,7 @@ class TDC extends Operation {
         let d: number = context.registers.d.get();
         context.registers.a.set(d);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -838,7 +862,7 @@ class TRB extends Operation {
             context.setFlagZ(value);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -861,7 +885,7 @@ class TXS extends Operation {
             context.registers.sp.set(value);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -894,7 +918,7 @@ class TSB extends Operation {
             context.bus.writeByte(addressing.getHigh(), Bit.getUint16Upper(value));
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -923,7 +947,7 @@ class TXA extends Operation {
             context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -950,7 +974,7 @@ class TSX extends Operation {
             context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -962,7 +986,7 @@ class TSC extends Operation {
         let value: number = context.cpu.registers.sp.get();
         context.cpu.registers.a.set(value);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -985,7 +1009,7 @@ class STZ extends Operation {
             context.bus.writeByte(hiAddr, 0);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -998,7 +1022,8 @@ class JMP extends Operation {
         let address: Address = addressing.getLow();
 
         context.registers.pc.set(address.toValue());
-        return this.getCycle();
+
+        return this.cycle;
     }
 
 }
@@ -1016,7 +1041,7 @@ class JSR extends Operation {
         context.registers.pc.set(address.toValue());
         context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1050,7 +1075,7 @@ class LDA extends Operation {
             context.setFlagN(hiData.get(), is8Bit);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1077,7 +1102,7 @@ class LDX extends Operation {
             context.registers.x.set(value);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1104,7 +1129,7 @@ class LDY extends Operation {
             context.registers.y.set(value);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -1143,7 +1168,7 @@ class NOP extends Operation {
     public name: string = "NOP";
 
     public execute(context: OpContext): number {
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1175,7 +1200,7 @@ class ORA extends Operation {
             context.setFlagN(result, is8Bit);
             context.setFlagZ(result, is8Bit);
         }
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1191,7 +1216,7 @@ class PEA extends Operation {
         context.cpu.stack.pushWord(value);
         context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -1206,7 +1231,7 @@ class PEI extends Operation {
         context.cpu.stack.pushWord(value);
         context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1222,7 +1247,7 @@ class PER extends Operation {
         context.cpu.stack.pushWord(value);
         context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -1233,18 +1258,18 @@ class PHA extends Operation {
         let sp: number = context.registers.sp.get();
 
         if (context.registers.p.getM()) {
-            let result : number = context.cpu.registers.a.getLower();
+            let result: number = context.cpu.registers.a.getLower();
 
             context.cpu.stack.pushByte(result);
             context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
         } else {
-            let result : number = context.cpu.registers.a.get();
+            let result: number = context.cpu.registers.a.get();
 
             context.cpu.stack.pushWord(result);
             context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -1252,13 +1277,13 @@ class PHB extends Operation {
     public name: string = "PHB";
 
     public execute(context: OpContext): number {
-        let result : number = context.cpu.registers.dbr.get();
+        let result: number = context.cpu.registers.dbr.get();
         let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushByte(result);
         context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1278,8 +1303,8 @@ class STA extends Operation {
     public name: string = "STA";
 
     public execute(context: OpContext): number {
-        let loData : number = context.cpu.registers.a.getLower();
-        let hiData : number = context.cpu.registers.a.getUpper();
+        let loData: number = context.cpu.registers.a.getLower();
+        let hiData: number = context.cpu.registers.a.getUpper();
 
         let addresses: Addressing = this.mode.getAddressing(context);
 
@@ -1295,7 +1320,7 @@ class STA extends Operation {
             context.bus.writeByte(hiAddr, hiData);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -1326,7 +1351,7 @@ class ROL extends Operation {
             context.registers.a.set(result);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1363,7 +1388,7 @@ class ROR extends Operation {
             context.bus.writeByte(addressing.getHigh(), value);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -1371,8 +1396,8 @@ class STY extends Operation {
     public name: string = "STY";
 
     public execute(context: OpContext): number {
-        let loData : number = context.cpu.registers.y.getLower();
-        let hiData : number = context.cpu.registers.y.getUpper();
+        let loData: number = context.cpu.registers.y.getLower();
+        let hiData: number = context.cpu.registers.y.getUpper();
 
         let addresses: Addressing = this.mode.getAddressing(context);
 
@@ -1388,7 +1413,7 @@ class STY extends Operation {
             context.bus.writeByte(hiAddr, hiData);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -1397,13 +1422,13 @@ class PHD extends Operation {
     public name: string = "PHD";
 
     public execute(context: OpContext): number {
-        let result : number = context.cpu.registers.d.get();
+        let result: number = context.cpu.registers.d.get();
         let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(result);
         context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1413,13 +1438,13 @@ class PHK extends Operation {
     public name: string = "PHK";
 
     public execute(context: OpContext): number {
-        let result : number = context.cpu.registers.k.get();
+        let result: number = context.cpu.registers.k.get();
         let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushByte(result);
         context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1428,13 +1453,13 @@ class PHP extends Operation {
     public name: string = "PHP";
 
     public execute(context: OpContext): number {
-        let p : number = context.registers.p.get();
+        let p: number = context.registers.p.get();
         let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushByte(p & 0xFF);
         context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1458,7 +1483,7 @@ class PHX extends Operation {
             context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1482,7 +1507,7 @@ class PHY extends Operation {
             context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1492,7 +1517,7 @@ class PLA extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
-        let data : number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
+        let data: number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
         let sp: number = context.registers.sp.get();
 
         if (is8Bit) {
@@ -1504,7 +1529,7 @@ class PLA extends Operation {
         context.registers.a.set(data);
         context.setFlagN(data, is8Bit);
         context.setFlagZ(data, is8Bit);
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1521,7 +1546,7 @@ class PLB extends Operation {
         context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1538,7 +1563,7 @@ class PLD extends Operation {
         context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -1546,13 +1571,13 @@ class PLP extends Operation {
     public name: string = "PLP";
 
     public execute(context: OpContext): number {
-        let p : number = context.cpu.stack.popByte();
+        let p: number = context.cpu.stack.popByte();
         let sp: number = context.registers.sp.get();
 
         context.registers.p.set(p);
         context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1562,7 +1587,7 @@ class PLX extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
-        let data : number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
+        let data: number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
         let sp: number = context.registers.sp.get();
 
         if (is8Bit) {
@@ -1576,7 +1601,7 @@ class PLX extends Operation {
 
         context.registers.x.set(data);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1586,7 +1611,7 @@ class PLY extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
-        let data : number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
+        let data: number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
         let sp: number = context.registers.sp.get();
 
         if (is8Bit) {
@@ -1600,7 +1625,7 @@ class PLY extends Operation {
 
         context.registers.y.set(data);
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -1614,7 +1639,7 @@ class REP extends Operation {
         let result: number = p & -data;
         context.registers.p.set(result);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1623,8 +1648,8 @@ class STX extends Operation {
     public name: string = "STX";
 
     public execute(context: OpContext): number {
-        let loData : number = context.cpu.registers.x.getLower();
-        let hiData : number = context.cpu.registers.x.getUpper();
+        let loData: number = context.cpu.registers.x.getLower();
+        let hiData: number = context.cpu.registers.x.getUpper();
 
         let addresses: Addressing = this.mode.getAddressing(context);
 
@@ -1640,7 +1665,7 @@ class STX extends Operation {
             context.bus.writeByte(hiAddr, hiData);
         }
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1657,8 +1682,8 @@ class RTI extends Operation {
     public name: string = "RTI";
 
     public execute(context: OpContext): number {
-        let p : number = context.cpu.stack.popByte();
-        let pc : number = context.cpu.stack.popWord();
+        let p: number = context.cpu.stack.popByte();
+        let pc: number = context.cpu.stack.popWord();
         let sp: number = context.registers.sp.get();
 
         context.cpu.registers.pc.set(pc & 0xFFFF);
@@ -1666,11 +1691,10 @@ class RTI extends Operation {
         context.cpu.registers.sp.set((sp + 3) & 0xFFFF);
 
         if (context.registers.p.getE() == 0) {
-            let pb : number = context.cpu.stack.popByte();
+            let pb: number = context.cpu.stack.popByte();
             context.registers.k.set(pb);
         }
-
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -1678,15 +1702,15 @@ class RTL extends Operation {
     public name: string = "RTL";
 
     public execute(context: OpContext): number {
-        let pc : number = context.cpu.stack.popWord();
-        let pbc : number = context.cpu.stack.popByte();
+        let pc: number = context.cpu.stack.popWord();
+        let pbc: number = context.cpu.stack.popByte();
         let sp: number = context.registers.sp.get();
 
         context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
         context.cpu.registers.k.set(pbc & 0xFF);
         context.cpu.registers.sp.set((sp + 3) & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1695,13 +1719,13 @@ class RTS extends Operation {
     public name: string = "RTS";
 
     public execute(context: OpContext): number {
-        let pc : number = context.cpu.stack.popWord();
+        let pc: number = context.cpu.stack.popWord();
         let sp: number = context.registers.sp.get();
 
         context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
         context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
 
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1711,7 +1735,7 @@ class SEC extends Operation {
 
     public execute(context: OpContext): number {
         context.registers.p.setC(1);
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1721,7 +1745,7 @@ class SED extends Operation {
 
     public execute(context: OpContext): number {
         context.registers.p.setD(1);
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1731,7 +1755,7 @@ class SEI extends Operation {
 
     public execute(context: OpContext): number {
         context.registers.p.setI(1);
-        return this.getCycle();
+        return this.cycle;
     }
 
 }
@@ -1745,7 +1769,7 @@ class SEP extends Operation {
         let result: number = status || (value.get() & 0xFF);
         context.registers.p.set(result);
 
-        return this.getCycle();
+        return this.cycle;
     }
 }
 
@@ -1755,294 +1779,294 @@ export class Opcodes {
 
     constructor() {
 
-        this.opcodes[0x61] = new ADC(0x61,1, [2, 3], [2], AddressingModes.directX);
-        this.opcodes[0x63] = new ADC(0x63,4, [1], [2], AddressingModes.stack);
-        this.opcodes[0x65] = new ADC(0x65,4, [1], [2], AddressingModes.direct);
-        this.opcodes[0x67] = new ADC(0x67,6, [1, 2], [2], AddressingModes.directIndexedIndirect);
-        this.opcodes[0x69] = new ADC(0x69,2, [1], [2, 12], AddressingModes.immediateM);
-        this.opcodes[0x6D] = new ADC(0x6D,4, [1], [3], AddressingModes.absolute);
-        this.opcodes[0x6F] = new ADC(0x6F,4, [5], [4], AddressingModes.absoluteLong);
-        this.opcodes[0x71] = new ADC(0x71,5, [1, 2, 3], [2], AddressingModes.directY);
-        this.opcodes[0x72] = new ADC(0x72,7, [1], [2], AddressingModes.direct);
-        this.opcodes[0x73] = new ADC(0x73,7, [1], [2], AddressingModes.stackY);
-        this.opcodes[0x75] = new ADC(0x75,4, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x77] = new ADC(0x77,6, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x79] = new ADC(0x79,4, [1, 3], [3], AddressingModes.absoluteX);
-        this.opcodes[0x7D] = new ADC(0x7D,4, [1, 3], [3], AddressingModes.absoluteY);
-        this.opcodes[0x7F] = new ADC(0x7F,5, [1], [4], AddressingModes.longX);
+        this.opcodes[0x61] = new ADC(0x61, 1, 2, AddressingModes.directX);
+        this.opcodes[0x63] = new ADC(0x63, 4, 2, AddressingModes.stack);
+        this.opcodes[0x65] = new ADC(0x65, 4, 2, AddressingModes.direct);
+        this.opcodes[0x67] = new ADC(0x67, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0x69] = new ADC(0x69, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0x6D] = new ADC(0x6D, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x6F] = new ADC(0x6F, 4, 4, AddressingModes.absoluteLong);
+        this.opcodes[0x71] = new ADC(0x71, 5, 2, AddressingModes.directY);
+        this.opcodes[0x72] = new ADC(0x72, 7, 2, AddressingModes.direct);
+        this.opcodes[0x73] = new ADC(0x73, 7, 2, AddressingModes.stackY);
+        this.opcodes[0x75] = new ADC(0x75, 4, 2, AddressingModes.directX);
+        this.opcodes[0x77] = new ADC(0x77, 6, 2, AddressingModes.directX);
+        this.opcodes[0x79] = new ADC(0x79, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0x7D] = new ADC(0x7D, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0x7F] = new ADC(0x7F, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0x21] = new AND(0x21,6, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x23] = new AND(0x23,4, [1], [2], AddressingModes.stack);
-        this.opcodes[0x25] = new AND(0x25,3, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0x27] = new AND(0x27,6, [1, 2], [2], AddressingModes.directIndexedIndirect);
-        this.opcodes[0x29] = new AND(0x29,2, [1], [2, 12], AddressingModes.immediateM);
-        this.opcodes[0x2D] = new AND(0x2D,4, [1], [3], AddressingModes.absolute);
-        this.opcodes[0x2F] = new AND(0x2F,5, [1], [4], AddressingModes.long);
-        this.opcodes[0x31] = new AND(0x31,5, [1, 2, 3], [2], AddressingModes.directY);
-        this.opcodes[0x32] = new AND(0x32,5, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0x33] = new AND(0x33,7, [1], [2], AddressingModes.stack);
-        this.opcodes[0x35] = new AND(0x35,4, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x37] = new AND(0x37,6, [1, 2], [2], AddressingModes.directY);
-        this.opcodes[0x39] = new AND(0x39,4, [1, 3], [3], AddressingModes.absoluteY);
-        this.opcodes[0x3D] = new AND(0x3D,4, [1, 3], [3], AddressingModes.absoluteY);
-        this.opcodes[0x3F] = new AND(0x3F,5, [1], [4], AddressingModes.longX);
+        this.opcodes[0x21] = new AND(0x21, 6, 2, AddressingModes.directX);
+        this.opcodes[0x23] = new AND(0x23, 4, 2, AddressingModes.stack);
+        this.opcodes[0x25] = new AND(0x25, 3, 2, AddressingModes.direct);
+        this.opcodes[0x27] = new AND(0x27, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0x29] = new AND(0x29, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0x2D] = new AND(0x2D, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x2F] = new AND(0x2F, 5, 4, AddressingModes.long);
+        this.opcodes[0x31] = new AND(0x31, 5, 2, AddressingModes.directY);
+        this.opcodes[0x32] = new AND(0x32, 5, 2, AddressingModes.direct);
+        this.opcodes[0x33] = new AND(0x33, 7, 2, AddressingModes.stack);
+        this.opcodes[0x35] = new AND(0x35, 4, 2, AddressingModes.directX);
+        this.opcodes[0x37] = new AND(0x37, 6, 2, AddressingModes.directY);
+        this.opcodes[0x39] = new AND(0x39, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0x3D] = new AND(0x3D, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0x3F] = new AND(0x3F, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0x06] = new ASL(0x06,5, [2, 4], [2], AddressingModes.direct);
-        this.opcodes[0x0A] = new ASL(0x0A,2, [], [1], AddressingModes.accumulator);
-        this.opcodes[0x0E] = new ASL(0x0E,6, [4], [3], AddressingModes.absolute);
-        this.opcodes[0x16] = new ASL(0x16,6, [2, 4], [2], AddressingModes.directIndirectIndexed);
-        this.opcodes[0x1E] = new ASL(0x1E,7, [4], [3], AddressingModes.absoluteX);
+        this.opcodes[0x06] = new ASL(0x06, 5, 2, AddressingModes.direct);
+        this.opcodes[0x0A] = new ASL(0x0A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0x0E] = new ASL(0x0E, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x16] = new ASL(0x16, 6, 2, AddressingModes.directIndirectIndexed);
+        this.opcodes[0x1E] = new ASL(0x1E, 7, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0x90] = new BCC(0x90,2, [5, 6], [2], AddressingModes.relative8);
-        this.opcodes[0xB0] = new BCS(0xB0,2, [5, 6], [2], AddressingModes.relative8);
-        this.opcodes[0xF0] = new BEQ(0xF0,2, [5, 6], [2], AddressingModes.relative8);
+        this.opcodes[0x90] = new BCC(0x90, 2, 2, AddressingModes.relative8);
+        this.opcodes[0xB0] = new BCS(0xB0, 2, 2, AddressingModes.relative8);
+        this.opcodes[0xF0] = new BEQ(0xF0, 2, 2, AddressingModes.relative8);
 
-        this.opcodes[0x24] = new BIT(0x24,3, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0x2C] = new BIT(0x2C,4, [1], [3], AddressingModes.absolute);
-        this.opcodes[0x34] = new BIT(0x34,4, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x3C] = new BIT(0x3C,4, [1, 3], [3], AddressingModes.absoluteX);
-        this.opcodes[0x89] = new BIT(0x89,2, [1], [2, 12], AddressingModes.immediateM);
+        this.opcodes[0x24] = new BIT(0x24, 3, 2, AddressingModes.direct);
+        this.opcodes[0x2C] = new BIT(0x2C, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x34] = new BIT(0x34, 4, 2, AddressingModes.directX);
+        this.opcodes[0x3C] = new BIT(0x3C, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0x89] = new BIT(0x89, 2, 3, AddressingModes.immediateM);
 
-        this.opcodes[0x30] = new BMI(0x30,2, [5, 6], [2], AddressingModes.relative8);
-        this.opcodes[0xD0] = new BNE(0xD0,2, [5, 6], [2], AddressingModes.relative8);
-        this.opcodes[0x10] = new BPL(0x10,2, [5, 6], [2], AddressingModes.relative8);
-        this.opcodes[0x80] = new BRA(0x80,3, [6], [2], AddressingModes.relative8);
-        this.opcodes[0x00] = new BRK(0x00,7, [7], [2, 13], AddressingModes.stack);
-        this.opcodes[0x82] = new BRL(0x82,4, [], [3], AddressingModes.relative16);
-        this.opcodes[0x50] = new BVC(0x50,2, [5, 6], [2], AddressingModes.relative8);
-        this.opcodes[0x70] = new BVS(0x70,2, [5, 6], [2], AddressingModes.relative8);
+        this.opcodes[0x30] = new BMI(0x30, 2, 2, AddressingModes.relative8);
+        this.opcodes[0xD0] = new BNE(0xD0, 2, 2, AddressingModes.relative8);
+        this.opcodes[0x10] = new BPL(0x10, 2, 2, AddressingModes.relative8);
+        this.opcodes[0x80] = new BRA(0x80, 3, 2, AddressingModes.relative8);
+        this.opcodes[0x00] = new BRK(0x00, 7, 2, AddressingModes.stack);
+        this.opcodes[0x82] = new BRL(0x82, 4, 3, AddressingModes.relative16);
+        this.opcodes[0x50] = new BVC(0x50, 2, 2, AddressingModes.relative8);
+        this.opcodes[0x70] = new BVS(0x70, 2, 2, AddressingModes.relative8);
 
-        this.opcodes[0x18] = new CLC(0x18,2, [], [1], AddressingModes.implied);
-        this.opcodes[0xD8] = new CLD(0xD8,2, [], [1], AddressingModes.implied);
-        this.opcodes[0x58] = new CLI(0x58,2, [], [1], AddressingModes.implied);
-        this.opcodes[0xB8] = new CLV(0xB8,2, [], [1], AddressingModes.implied);
-        this.opcodes[0xC1] = new CMP(0xC1,6, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0xC3] = new CMP(0xC3,4, [1], [2], AddressingModes.stack);
-        this.opcodes[0xC5] = new CMP(0xC5,3, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0xC7] = new CMP(0xC7,6, [1, 2], [2], AddressingModes.directIndexedIndirect);
-        this.opcodes[0xC9] = new CMP(0xC9,2, [1], [2, 12], AddressingModes.immediateM);
-        this.opcodes[0xCD] = new CMP(0xCD,4, [1], [3], AddressingModes.absolute);
-        this.opcodes[0xCF] = new CMP(0xCF,5, [1], [4], AddressingModes.long);
-        this.opcodes[0xD1] = new CMP(0xD1,5, [1, 2, 3], [2], AddressingModes.directY);
-        this.opcodes[0xD2] = new CMP(0xD2,5, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0xD3] = new CMP(0xD3,7, [1], [2], AddressingModes.stackY);
-        this.opcodes[0xD5] = new CMP(0xD5,4, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0xD7] = new CMP(0xD7,6, [1, 2], [2], AddressingModes.directY);
-        this.opcodes[0xD9] = new CMP(0xD9,4, [1, 3], [3], AddressingModes.absoluteY);
-        this.opcodes[0xDD] = new CMP(0xDD,4, [1, 3], [3], AddressingModes.absoluteX);
-        this.opcodes[0xDF] = new CMP(0xDF,5, [1], [4], AddressingModes.longX);
+        this.opcodes[0x18] = new CLC(0x18, 2, 1, AddressingModes.implied);
+        this.opcodes[0xD8] = new CLD(0xD8, 2, 1, AddressingModes.implied);
+        this.opcodes[0x58] = new CLI(0x58, 2, 1, AddressingModes.implied);
+        this.opcodes[0xB8] = new CLV(0xB8, 2, 1, AddressingModes.implied);
+        this.opcodes[0xC1] = new CMP(0xC1, 6, 2, AddressingModes.directX);
+        this.opcodes[0xC3] = new CMP(0xC3, 4, 2, AddressingModes.stack);
+        this.opcodes[0xC5] = new CMP(0xC5, 3, 2, AddressingModes.direct);
+        this.opcodes[0xC7] = new CMP(0xC7, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0xC9] = new CMP(0xC9, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0xCD] = new CMP(0xCD, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xCF] = new CMP(0xCF, 5, 4, AddressingModes.long);
+        this.opcodes[0xD1] = new CMP(0xD1, 5, 2, AddressingModes.directY);
+        this.opcodes[0xD2] = new CMP(0xD2, 5, 2, AddressingModes.direct);
+        this.opcodes[0xD3] = new CMP(0xD3, 7, 2, AddressingModes.stackY);
+        this.opcodes[0xD5] = new CMP(0xD5, 4, 2, AddressingModes.directX);
+        this.opcodes[0xD7] = new CMP(0xD7, 6, 2, AddressingModes.directY);
+        this.opcodes[0xD9] = new CMP(0xD9, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0xDD] = new CMP(0xDD, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0xDF] = new CMP(0xDF, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0x02] = new COP(0x02,7, [7], [2, 13], AddressingModes.stack);
+        this.opcodes[0x02] = new COP(0x02, 7, 2, AddressingModes.stack);
 
-        this.opcodes[0xE0] = new CPX(0xE0,2, [8], [2, 14], AddressingModes.immediateX);
-        this.opcodes[0xE4] = new CPX(0xE4,3, [2, 8], [2], AddressingModes.direct);
-        this.opcodes[0xEC] = new CPX(0xEC,4, [8], [3], AddressingModes.absolute);
-        this.opcodes[0xC0] = new CPY(0xC0,2, [], [2, 14], AddressingModes.immediateX);
-        this.opcodes[0xC4] = new CPY(0xC4,5, [2, 4], [2], AddressingModes.direct);
-        this.opcodes[0xCC] = new CPY(0xCC,6, [4], [3], AddressingModes.absolute);
+        this.opcodes[0xE0] = new CPX(0xE0, 2, 3, AddressingModes.immediateX);
+        this.opcodes[0xE4] = new CPX(0xE4, 3, 2, AddressingModes.direct);
+        this.opcodes[0xEC] = new CPX(0xEC, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xC0] = new CPY(0xC0, 2, 3, AddressingModes.immediateX);
+        this.opcodes[0xC4] = new CPY(0xC4, 5, 2, AddressingModes.direct);
+        this.opcodes[0xCC] = new CPY(0xCC, 6, 3, AddressingModes.absolute);
 
-        this.opcodes[0x3A] = new DEC(0x3A,2, [], [1], AddressingModes.accumulator);
-        this.opcodes[0xC6] = new DEC(0xC6,5, [2, 4], [2], AddressingModes.direct);
-        this.opcodes[0xCE] = new DEC(0xCE,6, [4], [3], AddressingModes.absolute);
-        this.opcodes[0xD6] = new DEC(0xD6,6, [2, 4], [2], AddressingModes.directX);
-        this.opcodes[0xDE] = new DEC(0xDE,7, [4], [3], AddressingModes.absoluteX);
+        this.opcodes[0x3A] = new DEC(0x3A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0xC6] = new DEC(0xC6, 5, 2, AddressingModes.direct);
+        this.opcodes[0xCE] = new DEC(0xCE, 6, 3, AddressingModes.absolute);
+        this.opcodes[0xD6] = new DEC(0xD6, 6, 2, AddressingModes.directX);
+        this.opcodes[0xDE] = new DEC(0xDE, 7, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0xCA] = new DEX(0xCA,2, [], [1], AddressingModes.implied);
-        this.opcodes[0x88] = new DEY(0x88,2, [], [1], AddressingModes.implied);
+        this.opcodes[0xCA] = new DEX(0xCA, 2, 1, AddressingModes.implied);
+        this.opcodes[0x88] = new DEY(0x88, 2, 1, AddressingModes.implied);
 
-        this.opcodes[0x41] = new EOR(0x41,6, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x43] = new EOR(0x43,4, [1], [2], AddressingModes.stack);
-        this.opcodes[0x45] = new EOR(0x45,3, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0x47] = new EOR(0x47,6, [1, 2], [2], AddressingModes.directIndexedIndirect);
-        this.opcodes[0x49] = new EOR(0x49,2, [1], [2, 12], AddressingModes.immediateM);
-        this.opcodes[0x4D] = new EOR(0x4D,4, [1], [3], AddressingModes.absolute);
-        this.opcodes[0x4F] = new EOR(0x4F,5, [1], [4], AddressingModes.long);
-        this.opcodes[0x51] = new EOR(0x51,5, [1, 2, 3], [2], AddressingModes.directY);
-        this.opcodes[0x52] = new EOR(0x52,5, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0x53] = new EOR(0x53,7, [1], [2], AddressingModes.stackY);
-        this.opcodes[0x55] = new EOR(0x55,4, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x57] = new EOR(0x57,6, [1, 2], [2], AddressingModes.directY);
-        this.opcodes[0x59] = new EOR(0x59,4, [1, 3], [3], AddressingModes.absoluteY);
-        this.opcodes[0x5D] = new EOR(0x5D,4, [1, 3], [3], AddressingModes.absoluteX);
-        this.opcodes[0x5F] = new EOR(0x5F,5, [1], [4], AddressingModes.longX);
+        this.opcodes[0x41] = new EOR(0x41, 6, 2, AddressingModes.directX);
+        this.opcodes[0x43] = new EOR(0x43, 4, 2, AddressingModes.stack);
+        this.opcodes[0x45] = new EOR(0x45, 3, 2, AddressingModes.direct);
+        this.opcodes[0x47] = new EOR(0x47, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0x49] = new EOR(0x49, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0x4D] = new EOR(0x4D, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x4F] = new EOR(0x4F, 5, 4, AddressingModes.long);
+        this.opcodes[0x51] = new EOR(0x51, 5, 2, AddressingModes.directY);
+        this.opcodes[0x52] = new EOR(0x52, 5, 2, AddressingModes.direct);
+        this.opcodes[0x53] = new EOR(0x53, 7, 2, AddressingModes.stackY);
+        this.opcodes[0x55] = new EOR(0x55, 4, 2, AddressingModes.directX);
+        this.opcodes[0x57] = new EOR(0x57, 6, 2, AddressingModes.directY);
+        this.opcodes[0x59] = new EOR(0x59, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0x5D] = new EOR(0x5D, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0x5F] = new EOR(0x5F, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0x1A] = new INC(0x1A,2, [], [1], AddressingModes.accumulator);
-        this.opcodes[0xE6] = new INC(0xE6,5, [2, 4], [2], AddressingModes.direct);
-        this.opcodes[0xEE] = new INC(0xEE,6, [4], [3], AddressingModes.absolute);
-        this.opcodes[0xF6] = new INC(0xF6,6, [2, 4], [2], AddressingModes.directX);
-        this.opcodes[0xFE] = new INC(0xFE,7, [4], [3], AddressingModes.absoluteX);
-        this.opcodes[0xE8] = new INC(0xE8,2, [], [1], AddressingModes.implied);
-        this.opcodes[0xC8] = new INY(0xC8,2, [], [1], AddressingModes.implied);
+        this.opcodes[0x1A] = new INC(0x1A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0xE6] = new INC(0xE6, 5, 2, AddressingModes.direct);
+        this.opcodes[0xEE] = new INC(0xEE, 6, 3, AddressingModes.absolute);
+        this.opcodes[0xF6] = new INC(0xF6, 6, 2, AddressingModes.directX);
+        this.opcodes[0xFE] = new INC(0xFE, 7, 3, AddressingModes.absoluteX);
+        this.opcodes[0xE8] = new INC(0xE8, 2, 1, AddressingModes.implied);
+        this.opcodes[0xC8] = new INY(0xC8, 2, 1, AddressingModes.implied);
 
-        this.opcodes[0x4C] = new JMP(0x4C,3, [], [3], AddressingModes.absoluteJump);
-        this.opcodes[0x5C] = new JMP(0x5C,4, [], [4], AddressingModes.long); // TODO
-        this.opcodes[0x6C] = new JMP(0x6C,5, [], [3], AddressingModes.absoluteJump);
-        this.opcodes[0x7C] = new JMP(0x7C,6, [], [3], AddressingModes.absoluteX); // TODO
-        this.opcodes[0xDC] = new JMP(0xDC,6, [], [3], AddressingModes.absoluteJump);
+        this.opcodes[0x4C] = new JMP(0x4C, 3, 3, AddressingModes.absoluteJump);
+        this.opcodes[0x5C] = new JMP(0x5C, 4, 4, AddressingModes.long); // TODO
+        this.opcodes[0x6C] = new JMP(0x6C, 5, 3, AddressingModes.absoluteJump);
+        this.opcodes[0x7C] = new JMP(0x7C, 6, 3, AddressingModes.absoluteX); // TODO
+        this.opcodes[0xDC] = new JMP(0xDC, 6, 3, AddressingModes.absoluteJump);
 
-        this.opcodes[0x20] = new JSR(0x20,6, [], [3], AddressingModes.absoluteJump);
-        this.opcodes[0x22] = new JSR(0x22,8, [], [4], AddressingModes.absoluteX); // TODO
-        this.opcodes[0xFC] = new JSR(0xFC,8, [], [3], AddressingModes.absoluteX); // TODO
+        this.opcodes[0x20] = new JSR(0x20, 6, 3, AddressingModes.absoluteJump);
+        this.opcodes[0x22] = new JSR(0x22, 8, 4, AddressingModes.absoluteX); // TODO
+        this.opcodes[0xFC] = new JSR(0xFC, 8, 3, AddressingModes.absoluteX); // TODO
 
-        this.opcodes[0xA1] = new LDA(0xA1,6, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0xA3] = new LDA(0xA3,4, [1], [2], AddressingModes.stack);
-        this.opcodes[0xA5] = new LDA(0xA5,3, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0xA7] = new LDA(0xA7,6, [1, 2], [2], AddressingModes.directIndexedIndirect);
-        this.opcodes[0xA9] = new LDA(0xA9,2, [1], [2, 12], AddressingModes.immediateM);
-        this.opcodes[0xAD] = new LDA(0xAD,4, [1], [3], AddressingModes.absolute);
-        this.opcodes[0xAF] = new LDA(0xAF,5, [1], [4], AddressingModes.long);
-        this.opcodes[0xB1] = new LDA(0xB1,5, [1, 2, 3], [2], AddressingModes.directY);
-        this.opcodes[0xB2] = new LDA(0xB2,5, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0xB3] = new LDA(0xB3,7, [1], [2], AddressingModes.stackY);
-        this.opcodes[0xB5] = new LDA(0xB5,4, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0xB7] = new LDA(0xB7,6, [1, 2], [2], AddressingModes.directY);
-        this.opcodes[0xB9] = new LDA(0xB9,4, [1, 3], [3], AddressingModes.absoluteY);
-        this.opcodes[0xBD] = new LDA(0xBD,4, [1, 3], [3], AddressingModes.absoluteX);
-        this.opcodes[0xBF] = new LDA(0xBF,5, [1], [4], AddressingModes.longX);
+        this.opcodes[0xA1] = new LDA(0xA1, 6, 2, AddressingModes.directX);
+        this.opcodes[0xA3] = new LDA(0xA3, 4, 2, AddressingModes.stack);
+        this.opcodes[0xA5] = new LDA(0xA5, 3, 2, AddressingModes.direct);
+        this.opcodes[0xA7] = new LDA(0xA7, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0xA9] = new LDA(0xA9, 2, 2, AddressingModes.immediateM);
+        this.opcodes[0xAD] = new LDA(0xAD, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xAF] = new LDA(0xAF, 5, 4, AddressingModes.long);
+        this.opcodes[0xB1] = new LDA(0xB1, 5, 2, AddressingModes.directY);
+        this.opcodes[0xB2] = new LDA(0xB2, 5, 2, AddressingModes.direct);
+        this.opcodes[0xB3] = new LDA(0xB3, 7, 2, AddressingModes.stackY);
+        this.opcodes[0xB5] = new LDA(0xB5, 4, 2, AddressingModes.directX);
+        this.opcodes[0xB7] = new LDA(0xB7, 6, 2, AddressingModes.directY);
+        this.opcodes[0xB9] = new LDA(0xB9, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0xBD] = new LDA(0xBD, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0xBF] = new LDA(0xBF, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0xA2] = new LDX(0xA2,2, [8], [2, 10], AddressingModes.immediateX);
-        this.opcodes[0xA6] = new LDX(0xA6,3, [2, 8], [2], AddressingModes.direct);
-        this.opcodes[0xAE] = new LDX(0xAE,4, [8], [3], AddressingModes.absolute);
-        this.opcodes[0xB6] = new LDX(0xB6,4, [2, 8], [2], AddressingModes.directY);
-        this.opcodes[0xBE] = new LDX(0xBE,4, [3, 8], [3], AddressingModes.absoluteY);
-        this.opcodes[0xA0] = new LDY(0xA0,2, [8], [2, 14], AddressingModes.immediateX);
-        this.opcodes[0xA4] = new LDY(0xA4,3, [2, 8], [2], AddressingModes.direct);
-        this.opcodes[0xAC] = new LDY(0xAC,4, [8], [3], AddressingModes.absolute);
-        this.opcodes[0xB4] = new LDY(0xB4,4, [2, 8], [2], AddressingModes.directX);
-        this.opcodes[0xBC] = new LDY(0xBC,4, [3, 8], [3], AddressingModes.absoluteX);
+        this.opcodes[0xA2] = new LDX(0xA2, 2, 2, AddressingModes.immediateX);
+        this.opcodes[0xA6] = new LDX(0xA6, 3, 2, AddressingModes.direct);
+        this.opcodes[0xAE] = new LDX(0xAE, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xB6] = new LDX(0xB6, 4, 2, AddressingModes.directY);
+        this.opcodes[0xBE] = new LDX(0xBE, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0xA0] = new LDY(0xA0, 2, 2, AddressingModes.immediateX);
+        this.opcodes[0xA4] = new LDY(0xA4, 3, 2, AddressingModes.direct);
+        this.opcodes[0xAC] = new LDY(0xAC, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xB4] = new LDY(0xB4, 4, 2, AddressingModes.directX);
+        this.opcodes[0xBC] = new LDY(0xBC, 4, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0x46] = new LSR(0x46,5, [2, 4], [2], AddressingModes.direct);
-        this.opcodes[0x4A] = new LSR(0x4A,2, [], [1], AddressingModes.accumulator);
-        this.opcodes[0x4E] = new LSR(0x4E,6, [4], [3], AddressingModes.absolute);
-        this.opcodes[0x56] = new LSR(0x56,6, [2, 4], [2], AddressingModes.directX);
-        this.opcodes[0x5E] = new LSR(0x5E,7, [4], [3], AddressingModes.absoluteX);
+        this.opcodes[0x46] = new LSR(0x46, 5, 2, AddressingModes.direct);
+        this.opcodes[0x4A] = new LSR(0x4A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0x4E] = new LSR(0x4E, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x56] = new LSR(0x56, 6, 2, AddressingModes.directX);
+        this.opcodes[0x5E] = new LSR(0x5E, 7, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0x54] = new MVN(0x54,1, [3], [3], AddressingModes.sourceDestination);
-        this.opcodes[0x44] = new MVP(0x44,1, [3], [3], AddressingModes.sourceDestination);
-        this.opcodes[0xEA] = new NOP(0xEA,2, [], [1], AddressingModes.implied);
+        this.opcodes[0x54] = new MVN(0x54, 1, 3, AddressingModes.sourceDestination);
+        this.opcodes[0x44] = new MVP(0x44, 1, 3, AddressingModes.sourceDestination);
+        this.opcodes[0xEA] = new NOP(0xEA, 2, 1, AddressingModes.implied);
 
-        this.opcodes[0x01] = new ORA(0x01,6, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x03] = new ORA(0x03,4, [1], [2], AddressingModes.stack);
-        this.opcodes[0x05] = new ORA(0x05,3, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0x07] = new ORA(0x07,6, [1, 2], [2], AddressingModes.directIndexedIndirect);
-        this.opcodes[0x09] = new ORA(0x09,2, [1], [2, 12], AddressingModes.immediateM);
-        this.opcodes[0x0D] = new ORA(0x0D,4, [1], [3], AddressingModes.absolute);
-        this.opcodes[0x0F] = new ORA(0x0F,5, [1], [4], AddressingModes.long);
-        this.opcodes[0x11] = new ORA(0x11,5, [1, 2, 3], [2], AddressingModes.directY);
-        this.opcodes[0x12] = new ORA(0x12,5, [1, 2], [2], AddressingModes.directIndirectIndexed);
-        this.opcodes[0x13] = new ORA(0x13,7, [1], [2], AddressingModes.stack);
-        this.opcodes[0x15] = new ORA(0x15,4, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x17] = new ORA(0x17,6, [1, 2], [2], AddressingModes.directY);
-        this.opcodes[0x19] = new ORA(0x19,4, [1, 3], [3], AddressingModes.absoluteY);
-        this.opcodes[0x1D] = new ORA(0x1D,4, [1, 3], [3], AddressingModes.absoluteX);
-        this.opcodes[0x1F] = new ORA(0x1F,5, [1], [4], AddressingModes.longX);
+        this.opcodes[0x01] = new ORA(0x01, 6, 2, AddressingModes.directX);
+        this.opcodes[0x03] = new ORA(0x03, 4, 2, AddressingModes.stack);
+        this.opcodes[0x05] = new ORA(0x05, 3, 2, AddressingModes.direct);
+        this.opcodes[0x07] = new ORA(0x07, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0x09] = new ORA(0x09, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0x0D] = new ORA(0x0D, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x0F] = new ORA(0x0F, 5, 4, AddressingModes.long);
+        this.opcodes[0x11] = new ORA(0x11, 5, 2, AddressingModes.directY);
+        this.opcodes[0x12] = new ORA(0x12, 5, 2, AddressingModes.directIndirectIndexed);
+        this.opcodes[0x13] = new ORA(0x13, 7, 2, AddressingModes.stack);
+        this.opcodes[0x15] = new ORA(0x15, 4, 2, AddressingModes.directX);
+        this.opcodes[0x17] = new ORA(0x17, 6, 2, AddressingModes.directY);
+        this.opcodes[0x19] = new ORA(0x19, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0x1D] = new ORA(0x1D, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0x1F] = new ORA(0x1F, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0xF4] = new PEA(0xF4,5, [], [3], AddressingModes.immediate16);
-        this.opcodes[0xD4] = new PEI(0xD4,6, [2], [6, 2], AddressingModes.direct); // TODO
-        this.opcodes[0x62] = new PER(0x62,6, [], [3], AddressingModes.immediate16);
-        this.opcodes[0x48] = new PHA(0x48,3, [1], [1], AddressingModes.stack);
-        this.opcodes[0x8B] = new PHB(0x8B,3, [], [1], AddressingModes.stack);
-        this.opcodes[0x0B] = new PHD(0x0B,4, [], [1], AddressingModes.stack);
-        this.opcodes[0x4B] = new PHK(0x4B,3, [], [1], AddressingModes.stack);
-        this.opcodes[0x08] = new PHP(0x08,3, [], [1], AddressingModes.stack);
-        this.opcodes[0xDA] = new PHX(0xDA,3, [8], [1], AddressingModes.stack);
-        this.opcodes[0x5A] = new PHY(0x5A,3, [8], [1], AddressingModes.stack);
+        this.opcodes[0xF4] = new PEA(0xF4, 5, 3, AddressingModes.immediate16);
+        this.opcodes[0xD4] = new PEI(0xD4, 6, 6, AddressingModes.direct); // TODO
+        this.opcodes[0x62] = new PER(0x62, 6, 3, AddressingModes.immediate16);
+        this.opcodes[0x48] = new PHA(0x48, 3, 1, AddressingModes.stack);
+        this.opcodes[0x8B] = new PHB(0x8B, 3, 1, AddressingModes.stack);
+        this.opcodes[0x0B] = new PHD(0x0B, 4, 1, AddressingModes.stack);
+        this.opcodes[0x4B] = new PHK(0x4B, 3, 1, AddressingModes.stack);
+        this.opcodes[0x08] = new PHP(0x08, 3, 1, AddressingModes.stack);
+        this.opcodes[0xDA] = new PHX(0xDA, 3, 1, AddressingModes.stack);
+        this.opcodes[0x5A] = new PHY(0x5A, 3, 1, AddressingModes.stack);
 
-        this.opcodes[0x68] = new PLA(0x68,4, [1], [1], AddressingModes.stack);
-        this.opcodes[0xAB] = new PLB(0xAB,4, [], [1], AddressingModes.stack);
-        this.opcodes[0x2B] = new PLD(0x2B,5, [], [1], AddressingModes.stack);
-        this.opcodes[0x28] = new PLP(0x28,4, [], [1], AddressingModes.stack);
-        this.opcodes[0xFA] = new PLX(0xFA,4, [8], [1], AddressingModes.stack);
-        this.opcodes[0x7A] = new PLY(0x7A,4, [8], [1], AddressingModes.stack);
+        this.opcodes[0x68] = new PLA(0x68, 4, 1, AddressingModes.stack);
+        this.opcodes[0xAB] = new PLB(0xAB, 4, 1, AddressingModes.stack);
+        this.opcodes[0x2B] = new PLD(0x2B, 5, 1, AddressingModes.stack);
+        this.opcodes[0x28] = new PLP(0x28, 4, 1, AddressingModes.stack);
+        this.opcodes[0xFA] = new PLX(0xFA, 4, 1, AddressingModes.stack);
+        this.opcodes[0x7A] = new PLY(0x7A, 4, 1, AddressingModes.stack);
 
-        this.opcodes[0xC2] = new REP(0xC2,3, [], [2], AddressingModes.immediate8);
-        this.opcodes[0x26] = new REP(0x26,5, [2, 4], [2], AddressingModes.direct);
+        this.opcodes[0xC2] = new REP(0xC2, 3, 2, AddressingModes.immediate8);
+        this.opcodes[0x26] = new REP(0x26, 5, 2, AddressingModes.direct);
 
-        this.opcodes[0x2A] = new ROL(0x2A,2, [], [1], AddressingModes.accumulator);
-        this.opcodes[0x2E] = new ROL(0x2E,6, [4], [3], AddressingModes.absolute);
-        this.opcodes[0x36] = new ROL(0x36,6, [2, 4], [2], AddressingModes.directX);
-        this.opcodes[0x3E] = new ROL(0x3E,7, [4], [3], AddressingModes.absoluteX);
+        this.opcodes[0x2A] = new ROL(0x2A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0x2E] = new ROL(0x2E, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x36] = new ROL(0x36, 6, 2, AddressingModes.directX);
+        this.opcodes[0x3E] = new ROL(0x3E, 7, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0x66] = new ROR(0x66,5, [2, 4], [2], AddressingModes.direct);
-        this.opcodes[0x6A] = new ROR(0x6A,2, [], [1], AddressingModes.accumulator);
-        this.opcodes[0x6E] = new ROR(0x6E,6, [4], [3], AddressingModes.absolute);
-        this.opcodes[0x76] = new ROR(0x76,6, [2, 4], [2], AddressingModes.directX);
-        this.opcodes[0x7E] = new ROR(0x7E,7, [4], [3], AddressingModes.absoluteX);
+        this.opcodes[0x66] = new ROR(0x66, 5, 2, AddressingModes.direct);
+        this.opcodes[0x6A] = new ROR(0x6A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0x6E] = new ROR(0x6E, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x76] = new ROR(0x76, 6, 2, AddressingModes.directX);
+        this.opcodes[0x7E] = new ROR(0x7E, 7, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0x40] = new RTI(0x40,6, [7], [1], AddressingModes.stack);
-        this.opcodes[0x6B] = new RTL(0x6B,6, [], [1], AddressingModes.stack);
-        this.opcodes[0x60] = new RTS(0x60,6, [], [1], AddressingModes.stack);
+        this.opcodes[0x40] = new RTI(0x40, 6, 1, AddressingModes.stack);
+        this.opcodes[0x6B] = new RTL(0x6B, 6, 1, AddressingModes.stack);
+        this.opcodes[0x60] = new RTS(0x60, 6, 1, AddressingModes.stack);
 
-        this.opcodes[0xE1] = new SBC(0xE1,6, [1, 2], [2], AddressingModes.immediate16);
-        this.opcodes[0xE3] = new SBC(0xE3,4, [1], [2], AddressingModes.direct); // TODO
-        this.opcodes[0xE5] = new SBC(0xE5,3, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0xE7] = new SBC(0xE7,6, [1, 2], [2], AddressingModes.directIndexedIndirect);
-        this.opcodes[0xE9] = new SBC(0xE9,2, [1], [2, 12], AddressingModes.immediateM);
-        this.opcodes[0xED] = new SBC(0xED,4, [1], [3], AddressingModes.absolute);
-        this.opcodes[0xEF] = new SBC(0xEF,5, [1], [4], AddressingModes.long);
-        this.opcodes[0xF1] = new SBC(0xF1,5, [1, 2, 3], [2], AddressingModes.directY);
-        this.opcodes[0xF2] = new SBC(0xF2,5, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0xF3] = new SBC(0xF3,7, [1], [2], AddressingModes.stackY);
-        this.opcodes[0xF5] = new SBC(0xF5,4, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0xF7] = new SBC(0xF7,6, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0xF9] = new SBC(0xF9,4, [1, 3], [3], AddressingModes.absoluteX);
-        this.opcodes[0xFD] = new SBC(0xFD,4, [1, 3], [3], AddressingModes.absoluteY);
-        this.opcodes[0xFF] = new SBC(0xFF,5, [1], [4], AddressingModes.longX);
+        this.opcodes[0xE1] = new SBC(0xE1, 6, 2, AddressingModes.immediate16);
+        this.opcodes[0xE3] = new SBC(0xE3, 4, 2, AddressingModes.direct); // TODO
+        this.opcodes[0xE5] = new SBC(0xE5, 3, 2, AddressingModes.direct);
+        this.opcodes[0xE7] = new SBC(0xE7, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0xE9] = new SBC(0xE9, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0xED] = new SBC(0xED, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xEF] = new SBC(0xEF, 5, 4, AddressingModes.long);
+        this.opcodes[0xF1] = new SBC(0xF1, 5, 2, AddressingModes.directY);
+        this.opcodes[0xF2] = new SBC(0xF2, 5, 2, AddressingModes.direct);
+        this.opcodes[0xF3] = new SBC(0xF3, 7, 2, AddressingModes.stackY);
+        this.opcodes[0xF5] = new SBC(0xF5, 4, 2, AddressingModes.directX);
+        this.opcodes[0xF7] = new SBC(0xF7, 6, 2, AddressingModes.directX);
+        this.opcodes[0xF9] = new SBC(0xF9, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0xFD] = new SBC(0xFD, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0xFF] = new SBC(0xFF, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0x38] = new SEC(0x38,2, [], [1], AddressingModes.implied);
-        this.opcodes[0xF8] = new SED(0xF8,2, [], [1], AddressingModes.implied);
-        this.opcodes[0x78] = new SEI(0x78,2, [], [1], AddressingModes.implied);
-        this.opcodes[0xE2] = new SEP(0xE2,3, [], [2], AddressingModes.immediate8);
+        this.opcodes[0x38] = new SEC(0x38, 2, 1, AddressingModes.implied);
+        this.opcodes[0xF8] = new SED(0xF8, 2, 1, AddressingModes.implied);
+        this.opcodes[0x78] = new SEI(0x78, 2, 1, AddressingModes.implied);
+        this.opcodes[0xE2] = new SEP(0xE2, 3, 2, AddressingModes.immediate8);
 
-        this.opcodes[0x81] = new STA(0x81,6, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x83] = new STA(0x83,4, [1], [2], AddressingModes.stack);
-        this.opcodes[0x85] = new STA(0x85,3, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0x87] = new STA(0x87,6, [1, 2], [2], AddressingModes.directIndirectIndexed);
-        this.opcodes[0x8D] = new STA(0x8D,4, [1], [3], AddressingModes.absolute);
-        this.opcodes[0x8F] = new STA(0x8F,5, [1], [4], AddressingModes.long);
-        this.opcodes[0x91] = new STA(0x91,6, [1, 2], [2], AddressingModes.directY);
-        this.opcodes[0x92] = new STA(0x92,5, [1, 2], [2], AddressingModes.directIndirect);
-        this.opcodes[0x93] = new STA(0x93,7, [1], [2], AddressingModes.stackY);
-        this.opcodes[0x95] = new STA(0x95,4, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x97] = new STA(0x97,6, [1, 2], [2], AddressingModes.directY);
-        this.opcodes[0x99] = new STA(0x99,5, [1], [3], AddressingModes.absoluteY);
-        this.opcodes[0x9D] = new STA(0x9D,5, [1], [3], AddressingModes.absoluteX);
-        this.opcodes[0x9F] = new STA(0x9F,5, [1], [4], AddressingModes.longX);
+        this.opcodes[0x81] = new STA(0x81, 6, 2, AddressingModes.directX);
+        this.opcodes[0x83] = new STA(0x83, 4, 2, AddressingModes.stack);
+        this.opcodes[0x85] = new STA(0x85, 3, 2, AddressingModes.direct);
+        this.opcodes[0x87] = new STA(0x87, 6, 2, AddressingModes.directIndirectIndexed);
+        this.opcodes[0x8D] = new STA(0x8D, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x8F] = new STA(0x8F, 5, 4, AddressingModes.long);
+        this.opcodes[0x91] = new STA(0x91, 6, 2, AddressingModes.directY);
+        this.opcodes[0x92] = new STA(0x92, 5, 2, AddressingModes.directIndirect);
+        this.opcodes[0x93] = new STA(0x93, 7, 2, AddressingModes.stackY);
+        this.opcodes[0x95] = new STA(0x95, 4, 2, AddressingModes.directX);
+        this.opcodes[0x97] = new STA(0x97, 6, 2, AddressingModes.directY);
+        this.opcodes[0x99] = new STA(0x99, 5, 3, AddressingModes.absoluteY);
+        this.opcodes[0x9D] = new STA(0x9D, 5, 3, AddressingModes.absoluteX);
+        this.opcodes[0x9F] = new STA(0x9F, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0xDB] = new STP(0xDB,3, [9], [1], AddressingModes.implied);
-        this.opcodes[0x86] = new STX(0x86,3, [2, 8], [2], AddressingModes.direct);
-        this.opcodes[0x8E] = new STX(0x8E,4, [8], [3], AddressingModes.absolute);
-        this.opcodes[0x96] = new STX(0x96,4, [2, 8], [2], AddressingModes.directY);
+        this.opcodes[0xDB] = new STP(0xDB, 3, 1, AddressingModes.implied);
+        this.opcodes[0x86] = new STX(0x86, 3, 2, AddressingModes.direct);
+        this.opcodes[0x8E] = new STX(0x8E, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x96] = new STX(0x96, 4, 2, AddressingModes.directY);
 
-        this.opcodes[0x84] = new STY(0x84,3, [2, 8], [2], AddressingModes.direct);
-        this.opcodes[0x8C] = new STY(0x8C,4, [8], [3], AddressingModes.absolute);
-        this.opcodes[0x94] = new STY(0x94,4, [2, 8], [2], AddressingModes.directX);
+        this.opcodes[0x84] = new STY(0x84, 3, 2, AddressingModes.direct);
+        this.opcodes[0x8C] = new STY(0x8C, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x94] = new STY(0x94, 4, 2, AddressingModes.directX);
 
-        this.opcodes[0x64] = new STZ(0x64,3, [1, 2], [2], AddressingModes.direct);
-        this.opcodes[0x74] = new STZ(0x74,4, [1, 2], [2], AddressingModes.directX);
-        this.opcodes[0x9C] = new STZ(0x9C,4, [1], [3], AddressingModes.absolute);
-        this.opcodes[0x9E] = new STZ(0x9E,5, [1], [3], AddressingModes.absoluteX);
+        this.opcodes[0x64] = new STZ(0x64, 3, 2, AddressingModes.direct);
+        this.opcodes[0x74] = new STZ(0x74, 4, 2, AddressingModes.directX);
+        this.opcodes[0x9C] = new STZ(0x9C, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x9E] = new STZ(0x9E, 5, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0xAA] = new TAX(0xAA,2, [], [1], AddressingModes.implied);
-        this.opcodes[0xA8] = new TAY(0xA8,2, [], [1], AddressingModes.implied);
-        this.opcodes[0x5B] = new TCD(0x5B,2, [], [1], AddressingModes.implied);
-        this.opcodes[0x1B] = new TCS(0x1B,2, [], [1], AddressingModes.implied);
-        this.opcodes[0x7B] = new TDC(0x7B,2, [], [1], AddressingModes.implied);
-        this.opcodes[0x14] = new TRB(0x14,5, [], [2], AddressingModes.direct);
-        this.opcodes[0x1C] = new TRB(0x1C,6, [3], [3], AddressingModes.absolute);
-        this.opcodes[0x04] = new TSB(0x04,5, [2, 4], [2], AddressingModes.direct);
-        this.opcodes[0x0C] = new TSB(0x0C,6, [4], [3], AddressingModes.absolute);
-        this.opcodes[0x3B] = new TSC(0x3B,2, [], [1], AddressingModes.implied);
-        this.opcodes[0xBA] = new TSX(0xBA,2, [], [1], AddressingModes.implied);
-        this.opcodes[0x8A] = new TXA(0x8A,2, [], [1], AddressingModes.implied);
-        this.opcodes[0x9A] = new TXS(0x9A,2, [], [1], AddressingModes.implied);
-        this.opcodes[0x9B] = new TXY(0x9B,2, [], [1], AddressingModes.implied);
-        this.opcodes[0x98] = new TYA(0x98,2, [], [1], AddressingModes.implied);
-        this.opcodes[0xBB] = new TYX(0xBB,2, [], [1], AddressingModes.implied);
-        this.opcodes[0xCB] = new WAI(0xCB,3, [10], [1], AddressingModes.implied);
-        this.opcodes[0x42] = new WDM(0x42,0, [10], [2], AddressingModes.implied); // TODO
-        this.opcodes[0xEB] = new XBA(0xEB,1, [3], [1], AddressingModes.implied);
-        this.opcodes[0xFB] = new XCE(0xFB,1, [2], [1], AddressingModes.implied);
+        this.opcodes[0xAA] = new TAX(0xAA, 2, 1, AddressingModes.implied);
+        this.opcodes[0xA8] = new TAY(0xA8, 2, 1, AddressingModes.implied);
+        this.opcodes[0x5B] = new TCD(0x5B, 2, 1, AddressingModes.implied);
+        this.opcodes[0x1B] = new TCS(0x1B, 2, 1, AddressingModes.implied);
+        this.opcodes[0x7B] = new TDC(0x7B, 2, 1, AddressingModes.implied);
+        this.opcodes[0x14] = new TRB(0x14, 5, 2, AddressingModes.direct);
+        this.opcodes[0x1C] = new TRB(0x1C, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x04] = new TSB(0x04, 5, 2, AddressingModes.direct);
+        this.opcodes[0x0C] = new TSB(0x0C, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x3B] = new TSC(0x3B, 2, 1, AddressingModes.implied);
+        this.opcodes[0xBA] = new TSX(0xBA, 2, 1, AddressingModes.implied);
+        this.opcodes[0x8A] = new TXA(0x8A, 2, 1, AddressingModes.implied);
+        this.opcodes[0x9A] = new TXS(0x9A, 2, 1, AddressingModes.implied);
+        this.opcodes[0x9B] = new TXY(0x9B, 2, 1, AddressingModes.implied);
+        this.opcodes[0x98] = new TYA(0x98, 2, 1, AddressingModes.implied);
+        this.opcodes[0xBB] = new TYX(0xBB, 2, 1, AddressingModes.implied);
+        this.opcodes[0xCB] = new WAI(0xCB, 3, 1, AddressingModes.implied);
+        this.opcodes[0x42] = new WDM(0x42, 0, 2, AddressingModes.implied); // TODO
+        this.opcodes[0xEB] = new XBA(0xEB, 1, 1, AddressingModes.implied);
+        this.opcodes[0xFB] = new XCE(0xFB, 1, 1, AddressingModes.implied);
 
     }
 

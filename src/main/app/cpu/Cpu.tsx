@@ -1,9 +1,7 @@
-import {Mode, Modes} from "../Modes";
 import {Registers} from "./Registers";
 import {Operation, Opcodes, OpContext} from "./Opcodes";
 import {InterruptHandler} from "./Interrupts";
 import {Cartridge} from "../cartridge/Cartridge";
-import {Bus} from "../bus/Bus";
 import {Objects} from "../util/Objects";
 import {Logger, LoggerManager} from "typescript-logger";
 import Console from "../Console";
@@ -19,21 +17,19 @@ export class Cpu {
     public registers: Registers;
     public opcodes: Opcodes;
     public console: Console;
-    public bus: Bus;
     public interrupts: InterruptHandler;
 
     public stack: Stack = new Stack();
     public wram: Wram = new Wram();
 
-    public cycles: number = 0;
-    public operation: Operation;
     public context: OpContext;
+
+    public cycles: number = 0;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
 
         this.console = console;
-        this.bus = console.bus;
         this.registers = new Registers();
         this.opcodes = new Opcodes();
         this.interrupts = new InterruptHandler(console, this);
@@ -54,10 +50,10 @@ export class Cpu {
         console.log(opcode.get().toString(16) + " " + operation.name);
 
         this.registers.pc.set(opaddr.toValue() + operation.getSize());
-        this.operation = operation;
 
-        this.context = new OpContext(opaddr, operation, this.console);
-        this.cycles += operation.execute(this.context) + operation.getCycle();
+        let context: OpContext = OpContext.create(this, opaddr, operation);
+        this.cycles += operation.execute(context);
+        this.context = context;
 
         let duration = this.cycles - cycles;
         return duration;

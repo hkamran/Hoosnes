@@ -28,7 +28,7 @@ export class TickEvent {
 
     constructor(snes: Console) {
         this.cycle = snes.cpu.cycles;
-        this.op = snes.cpu.operation;
+        this.op = snes.cpu.context.op;
 
         this.registerK = snes.cpu.context.opaddr.getBank();
         this.registerPC = snes.cpu.context.opaddr.getPage();

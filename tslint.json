@@ -18,6 +18,7 @@
     "curly": false,
     "comment-format": false,
     "eofline": false,
+    "jsdoc-format": false,
     "whitespace": false,
     "triple-equals": false,
     "only-arrow-functions": false,

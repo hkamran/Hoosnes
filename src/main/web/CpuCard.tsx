@@ -102,7 +102,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
             accumulator: this.props.snes.cpu.registers.p.getM(),
             overflow: this.props.snes.cpu.registers.p.getV(),
 
-            op: this.props.snes.cpu.operation,
+            op: this.props.snes.cpu.context.op,
 
             cycles: this.props.snes.cpu.cycles,
             interrupts: this.props.snes.cpu.interrupts.interrupt,
@@ -233,7 +233,7 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Cycles:</span>
-                                    <span>{this.state.op != null ? this.state.op.getCycle() : ""}</span>
+                                    <span>{this.state.op != null ? this.state.op.cycle : ""}</span>
                                 </li>
                             </ul>
                         </div>
