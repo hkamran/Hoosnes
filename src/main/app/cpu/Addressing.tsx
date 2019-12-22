@@ -747,17 +747,14 @@ export class Immediate16 implements IAddressingMode {
         let loByte: Read = context.bus.readByte(loaddr);
         let hiByte: Read = context.bus.readByte(hiaddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
         let cycles: number = result.getCycles() + hiByte.getCycles() + loByte.getCycles();
-        return Read.byte(value, cycles);
+        return Read.word(loByte.get(), hiByte.get(), cycles);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: Read = context.getOperand(0);
-        let HH: Read = context.getOperand(1);
-
-        let cycles: number = LL.getCycles() + HH.getCycles();
-        return Addressing.toWord(LL.get(), HH.get(), cycles);
+        let loaddr: Address = context.getOperandAddress(0);
+        let hiaddr: Address = context.getOperandAddress(1);
+        return Addressing.toWord(loaddr.toValue(), hiaddr.toValue(), 0);
     }
 }
 

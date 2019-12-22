@@ -57,6 +57,8 @@ export class Bus {
             throw new Error("Invalid readByte at " + address);
         }
 
+        console.log("reading " + address.toString());
+
         let read: Read = null;
 
         let bank = address.getBank();

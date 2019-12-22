@@ -1,4 +1,5 @@
 import {Mode, Modes} from "../Modes";
+import {Bit} from "../util/Bit";
 
 /**
  * +---------------------------+---------+-----------------------------------+-------------------+-------------------------------------------+
@@ -284,6 +285,36 @@ export class InterruptEnableFlagsRegister extends Register {
 
 }
 
+export class WramMemoryAddressRegister extends Register {
+
+    public address: string = "0x2181-0x2183";
+    public name: string = "WMADD";
+
+    public setLower(val: number) {
+        this.val = Bit.setUint24Lower(this.val, val);
+    }
+
+    public setMiddle(val: number) {
+        this.val = Bit.setUint24Middle(this.val, val);
+    }
+
+    public setUpper(val: number) {
+        this.val = Bit.setUint24Upper(this.val, val);
+    }
+
+    public getLower(): number {
+        return Bit.getUint24Lower(this.val);
+    }
+
+    public getMiddle(): number {
+        return Bit.getUint24Middle(this.val);
+    }
+
+    public getUpper(): number {
+        return Bit.getUint24Upper(this.val);
+    }
+}
+
 export class Registers {
 
     public a : Register = new AccumulatorRegister();
@@ -293,8 +324,8 @@ export class Registers {
     public pc : Register = new ProgramCounterRegister();
     public p : StatusRegister = new StatusRegister();
     public sp : Register = new StackPointerRegister();
-    public x : Register = new IndirectYRegister();
-    public y : Register = new IndirectXRegister();
+    public x : Register = new IndirectXRegister();
+    public y : Register = new IndirectYRegister();
 
     // IO Registers
 
@@ -328,5 +359,8 @@ export class Registers {
     public joy3h : Register = new Register();
     public joy4l : Register = new Register();
     public joy4h : Register = new Register();
+
+    public wmdata : Register = new Register();
+    public wmadd : WramMemoryAddressRegister = new WramMemoryAddressRegister();
 
 }

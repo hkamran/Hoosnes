@@ -15,6 +15,7 @@ export class BusB {
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
+        Objects.requireNonNull(console.cpu);
         Objects.requireNonNull(console.ppu);
         Objects.requireNonNull(console.ppu.registers);
 
@@ -81,13 +82,13 @@ export class BusB {
         } else if (page == 0x2115) {
             read = Read.byte(this.registers.vportcntrl.get());
         } else if (page == 0x2116) {
-            read = Read.byte(this.registers.vaddr.vraml.get());
+            read = Read.byte(this.registers.vaddr.getLower());
         } else if (page == 0x2117) {
-            read = Read.byte(this.registers.vaddr.vramh.get());
+            read = Read.byte(this.registers.vaddr.getUpper());
         } else if (page == 0x2118) {
-            read = Read.byte(this.registers.vdatawl.get());
+            read = Read.byte(this.registers.vdataw.getLower());
         } else if (page == 0x2119) {
-            read = Read.byte(this.registers.vdatawh.get());
+            read = Read.byte(this.registers.vdataw.getUpper());
         } else if (page == 0x211A) {
             read = Read.byte(this.registers.m7sel.get());
         } else if (page == 0x211B) {
@@ -151,9 +152,9 @@ export class BusB {
         } else if (page == 0x2138) {
             read = Read.byte(this.registers.oamdatar.get());
         } else if (page == 0x2139) {
-            read = Read.byte(this.registers.vdatarl.get());
+            read = Read.byte(this.registers.vdatar.getLower());
         } else if (page == 0x213A) {
-            read = Read.byte(this.registers.vdatarw.get());
+            read = Read.byte(this.registers.vdatar.getUpper());
         } else if (page == 0x213B) {
             read = Read.byte(this.registers.cgdatar.get());
         } else if (page == 0x213C) {
@@ -164,6 +165,22 @@ export class BusB {
             read = Read.byte(this.registers.stat77.get());
         } else if (page == 0x213F) {
             read = Read.byte(this.registers.stat78.get());
+        } else if (page == 0x2140) {
+
+        } else if (page == 0x2141) {
+
+        } else if (page == 0x2142) {
+
+        } else if (page == 0x2143) {
+
+        } else if (page == 0x2180) {
+            read = Read.byte(this.console.cpu.registers.wmdata.get());
+        } else if (page == 0x2181) {
+            read = Read.byte(this.console.cpu.registers.wmadd.getLower());
+        } else if (page == 0x2182) {
+            read = Read.byte(this.console.cpu.registers.wmadd.getMiddle());
+        } else if (page == 0x2183) {
+            read = Read.byte(this.console.cpu.registers.wmadd.getUpper());
         } else {
             throw new Error("Invalid read on BusB at " + address.toValue());
         }
@@ -175,14 +192,14 @@ export class BusB {
 
     public writeByte(address: Address, val: number): Write {
         if (address == null || val == null || val < 0 || val > 0xFF) {
-            throw new Error("Invalid writeByte at " + address + " with " + val);
+            throw new Error("Invalid writeByte at " + address.toString() + " with " + val);
         }
 
         let bank = address.getBank();
         let page = address.getPage();
 
         if (page < 0x2100 || page > 0x2183) {
-            throw new Error("Invalid writeByte at " + address);
+            throw new Error("Invalid writeByte at " + address.toString());
         }
 
         if (page == 0x2100) {
@@ -230,13 +247,13 @@ export class BusB {
         } else if (page == 0x2115) {
             this.registers.vportcntrl.set(val);
         } else if (page == 0x2116) {
-            this.registers.vaddr.vraml.set(val);
+            this.registers.vaddr.setLower(val);
         } else if (page == 0x2117) {
-            this.registers.vaddr.vramh.set(val);
+            this.registers.vaddr.setUpper(val);
         } else if (page == 0x2118) {
-            this.registers.vdatawl.set(val);
+            this.registers.vdataw.setLower(val);
         } else if (page == 0x2119) {
-            this.registers.vdatawh.set(val);
+            this.registers.vdataw.setUpper(val);
         } else if (page == 0x211A) {
             this.registers.m7sel.set(val);
         } else if (page == 0x211B) {
@@ -300,9 +317,9 @@ export class BusB {
         } else if (page == 0x2138) {
             this.registers.oamdatar.set(val);
         } else if (page == 0x2139) {
-            this.registers.vdatarl.set(val);
+            this.registers.vdatar.setLower(val);
         } else if (page == 0x213A) {
-            this.registers.vdatarw.set(val);
+            this.registers.vdatar.setUpper(val);
         } else if (page == 0x213B) {
             this.registers.cgdatar.set(val);
         } else if (page == 0x213C) {
@@ -313,8 +330,24 @@ export class BusB {
             this.registers.stat77.set(val);
         } else if (page == 0x213F) {
             this.registers.stat78.set(val);
+        } else if (page == 0x2140) {
+
+        } else if (page == 0x2141) {
+
+        } else if (page == 0x2142) {
+
+        } else if (page == 0x2143) {
+
+        } else if (page == 0x2180) {
+            this.console.cpu.registers.wmdata.set(val);
+        } else if (page == 0x2181) {
+            this.console.cpu.registers.wmadd.setLower(val);
+        } else if (page == 0x2182) {
+            this.console.cpu.registers.wmadd.setMiddle(val);
+        } else if (page == 0x2183) {
+            this.console.cpu.registers.wmadd.setUpper(val);
         } else {
-            throw new Error("Invalid write on BusB at " + address.toValue());
+            throw new Error("Invalid write on BusB at " + address.toString());
         }
 
 

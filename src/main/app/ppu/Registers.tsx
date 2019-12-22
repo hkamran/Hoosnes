@@ -3,6 +3,7 @@ import {Mode, Modes} from "../Modes";
 import Console from "../Console";
 import {CGram} from "../memory/CGram";
 import {Bit} from "../util/Bit";
+import {Objects} from "../util/Objects";
 
 const INVALID_SET: string = "Invalid value set";
 
@@ -18,6 +19,10 @@ export class Register {
     public label: string;
 
     constructor(console: Console) {
+        Objects.requireNonNull(console);
+        Objects.requireNonNull(console.ppu);
+        Objects.requireNonNull(console.ppu.registers);
+
         this.console = console;
     }
 
@@ -31,25 +36,6 @@ export class Register {
 
     public get(): number {
         return this.val;
-    }
-
-    public setUpper(val: number) {
-        if (this.mode != Modes.bit16) throw new Error("Cannot set upper on 8 bit register");
-        this.val = (0xFF << 8) || this.val;
-        this.val = (val << 8) && this.val;
-    }
-
-    public setLower(val: number) {
-        this.val = (0xFF << 0) || this.val;
-        this.val = (val << 0) && this.val;
-    }
-
-    public getLower(): number {
-        return (this.val >> 0) & 0xFF;
-    }
-
-    public getUpper(): number {
-        return (this.val >> 8) & 0xFF;
     }
 
 }
@@ -456,17 +442,21 @@ export class VideoPortControlRegister extends Register {
     public getAddressIncrementAmount(): number {
         let result: number = (this.val & 0x3);
         if (result == 0x00) {
-            return 1;
+            return 2;
         } else if (result == 0x01) {
-            return 32;
+            return 64;
         } else if (result == 0x02) {
             return 128;
         } else if (result == 0x03) {
-            return 128;
+            return 256;
         }
     }
 
     public getAddressFormation(): number {
+        // 00 = No remapping
+        // 01 = Remap addressing aaaaaaaaBBBccccc => aaaaaaaacccccBBB
+        // 10 = Remap addressing aaaaaaaBBBcccccc => aaaaaaaccccccBBB
+        // 11 = Remap addressing aaaaaaBBBccccccc => aaaaaacccccccBBB
         return (this.val >> 2) & 0x3;
     }
 
@@ -477,47 +467,63 @@ export class VRAMAddressRegister extends Register {
     public address: string = "0x2115-0x2116";
     public label: string = "VMADD";
 
-    public vraml: VRAMAddressLowRegister;
-    public vramh: VRAMAddressHighRegister;
-
-    constructor(console: Console) {
-        super(console);
-        this.vraml = new VRAMAddressLowRegister(console);
-        this.vramh = new VRAMAddressHighRegister(console);
+    public setLower(val: number) {
+        this.val = Bit.setUint16Lower(this.val, val);
     }
 
-    public get(): number {
-        return Bit.toUint16(this.vramh.get(), this.vraml.get());
+    public setUpper(val: number) {
+        this.val = Bit.setUint16Upper(this.val, val);
     }
 
+    public getLower(): number {
+        return Bit.getUint16Lower(this.val);
+    }
+
+    public getUpper(): number {
+        return Bit.getUint16Upper(this.val);
+    }
 }
 
-export class VRAMAddressLowRegister extends Register {
+export class VRAMDataWriteRegister extends Register {
 
-    public address: string = "0x2116";
-    public label: string = "VMADDL";
+    public address: string = "0x2118-0x2119";
+    public label: string = "VMDATA";
 
-}
+    public setLower(val: number) {
+        if (this.console.ppu.registers.vportcntrl.getAddressIncrementMode() == 0) {
+            // write and increment
+            let amount = this.console.ppu.registers.vportcntrl.getAddressIncrementAmount();
+        }
 
-export class VRAMAddressHighRegister extends Register {
+        this.val = Bit.setUint16Lower(this.val, val);
+    }
 
-    public address: string = "0x2117";
-    public label: string = "VMADDH";
+    public setUpper(val: number) {
+        if (this.console.ppu.registers.vportcntrl.getAddressIncrementMode() == 1) {
+            // write and increment
+            let amount = this.console.ppu.registers.vportcntrl.getAddressIncrementAmount();
+        }
 
-}
+        this.val = Bit.setUint16Upper(this.val, val);
+    }
 
-export class VRAMDataWriteLowRegister extends Register {
+    public getLower(): number {
+        if (this.console.ppu.registers.vportcntrl.getAddressIncrementMode() == 0) {
+            // write and increment
+            let amount = this.console.ppu.registers.vportcntrl.getAddressIncrementAmount();
+        }
 
-    public address: string = "2118";
-    public label: string = "VMDATAL";
+        return Bit.getUint16Lower(this.val);
+    }
 
-}
+    public getUpper(): number {
+        if (this.console.ppu.registers.vportcntrl.getAddressIncrementMode() == 1) {
+            // write and increment
+            let amount = this.console.ppu.registers.vportcntrl.getAddressIncrementAmount();
+        }
 
-export class VRAMDataWriteHighRegister extends Register {
-
-    public address: string = "2119";
-    public label: string = "VMDATAH";
-
+        return Bit.getUint16Upper(this.val);
+    }
 }
 
 export class Mode7Register extends Register {
@@ -778,18 +784,26 @@ export class OAMDataReadRegister extends Register {
 
 }
 
-export class VRAMDataReadLowRegister extends Register {
+export class VRAMDataReadRegister extends Register {
 
-    public address: string = "2139";
-    public label: string = "VMDATALREAD";
+    public address: string = "0x2139-0x213A";
+    public label: string = "VMDATA";
 
-}
+    public setLower(val: number) {
+        this.val = Bit.setUint16Lower(this.val, val);
+    }
 
-export class VRAMDataReadHighRegister extends Register {
+    public setUpper(val: number) {
+        this.val = Bit.setUint16Upper(this.val, val);
+    }
 
-    public address: string = "213A";
-    public label: string = "VMDATAHREAD";
+    public getLower(): number {
+        return Bit.getUint16Lower(this.val);
+    }
 
+    public getUpper(): number {
+        return Bit.getUint16Upper(this.val);
+    }
 }
 
 export class CGRAMDataReadRegister extends Register {
@@ -923,10 +937,8 @@ export class Registers {
     public vcharlocbg34: CharacterAddressForBG3And4Register;
     public vportcntrl: VideoPortControlRegister;
     public vaddr: VRAMAddressRegister;
-    public vdatawl: VRAMDataWriteLowRegister;
-    public vdatawh: VRAMDataWriteHighRegister;
-    public vdatarl: VRAMDataReadLowRegister;
-    public vdatarw: VRAMDataReadHighRegister;
+    public vdataw: VRAMDataWriteRegister;
+    public vdatar: VRAMDataReadRegister;
 
     public inidisp: ScreenDisplayRegister;
     public bgmode: BhModeAndCharacterSizeRegister;
@@ -997,10 +1009,8 @@ export class Registers {
         this.vcharlocbg34 = new CharacterAddressForBG3And4Register(console);
         this.vportcntrl = new VideoPortControlRegister(console);
         this.vaddr = new VRAMAddressRegister(console);
-        this.vdatawl = new VRAMDataWriteLowRegister(console);
-        this.vdatawh = new VRAMDataWriteHighRegister(console);
-        this.vdatarl = new VRAMDataReadLowRegister(console);
-        this.vdatarw = new VRAMDataReadHighRegister(console);
+        this.vdataw = new VRAMDataWriteRegister(console);
+        this.vdatar = new VRAMDataReadRegister(console);
 
         this.inidisp = new ScreenDisplayRegister(console);
         this.bgmode = new BhModeAndCharacterSizeRegister(console);

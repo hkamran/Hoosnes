@@ -124,10 +124,13 @@ export class Operation {
     public cycle: number;
     public size: number;
     public mode: IAddressingMode;
+    public cpu: Cpu;
 
-    constructor(code: number, cycle: number, size: number, mode: IAddressingMode) {
+    constructor(cpu: Cpu, code: number, cycle: number, size: number, mode: IAddressingMode) {
         Objects.requireNonNull(mode);
+        Objects.requireNonNull(cpu);
 
+        this.cpu = cpu;
         this.code = code;
         this.cycle = cycle;
         this.mode = mode;
@@ -174,6 +177,14 @@ export class ADC extends Operation {
         return this.cycle;
     }
 
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
+    }
+
 }
 
 export class AND extends Operation {
@@ -193,6 +204,14 @@ export class AND extends Operation {
         context.setFlagN(result, is8Bit);
 
         return this.cycle;
+    }
+
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
     }
 }
 
@@ -384,6 +403,13 @@ class CMP extends Operation {
         return this.cycle;
     }
 
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
+    }
 }
 
 class COP extends Operation {
@@ -417,6 +443,13 @@ class CPX extends Operation {
         return this.cycle;
     }
 
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate && this.cpu.registers.p.getX() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
+    }
 }
 
 class CPY extends Operation {
@@ -636,6 +669,13 @@ class EOR extends Operation {
 
     }
 
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
+    }
 }
 
 class INC extends Operation {
@@ -957,7 +997,6 @@ class TSX extends Operation {
     public execute(context: OpContext): number {
         let sp: number = context.registers.sp.get();
         let is8Bit: boolean = context.cpu.registers.p.getX() == 0;
-
         if (is8Bit) {
             let lowData: number = context.cpu.stack.popByte();
             let value: number = lowData;
@@ -1078,33 +1117,32 @@ class LDA extends Operation {
         return this.cycle;
     }
 
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
+    }
 }
 
 class LDX extends Operation {
     public name: string = "LDX";
 
     public execute(context: OpContext): number {
-        let addressing: Addressing = this.mode.getAddressing(context);
-
-        if (context.registers.p.getX() == 1) {
-            let loAddr: Address = addressing.getLow();
-
-            let result: Read = context.bus.readByte(loAddr);
-            context.registers.x.set(result.get());
-        } else {
-            let loAddr: Address = addressing.getLow();
-            let hiAddr: Address = addressing.getHigh();
-
-            let loData: Read = context.bus.readByte(loAddr);
-            let hiData: Read = context.bus.readByte(hiAddr);
-
-            let value: number = Bit.toUint16(hiData.get(), loData.get());
-            context.registers.x.set(value);
-        }
+        let value: Read = this.mode.getValue(context);
+        context.registers.x.set(value.get());
 
         return this.cycle;
     }
 
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
+    }
 }
 
 class LDY extends Operation {
@@ -1130,6 +1168,14 @@ class LDY extends Operation {
         }
 
         return this.cycle;
+    }
+
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
     }
 }
 
@@ -1203,6 +1249,13 @@ class ORA extends Operation {
         return this.cycle;
     }
 
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
+    }
 }
 
 class PEA extends Operation {
@@ -1295,6 +1348,14 @@ class SBC extends Operation {
         //TODO
         console.log(this.name);
         return null;
+    }
+
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
     }
 
 }
@@ -1532,6 +1593,13 @@ class PLA extends Operation {
         return this.cycle;
     }
 
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
+    }
 }
 
 class PLB extends Operation {
@@ -1636,7 +1704,7 @@ class REP extends Operation {
         let p: number = context.registers.p.get();
         let data: Read = this.mode.getValue(context);
 
-        let result: number = p & -data;
+        let result: number = p & (~data.get()>>>0 & 0xFF);
         context.registers.p.set(result);
 
         return this.cycle;
@@ -1777,296 +1845,295 @@ export class Opcodes {
 
     private opcodes: Operation[] = new Array<Operation>(256);
 
-    constructor() {
+    constructor(cpu: Cpu) {
 
-        this.opcodes[0x61] = new ADC(0x61, 1, 2, AddressingModes.directX);
-        this.opcodes[0x63] = new ADC(0x63, 4, 2, AddressingModes.stack);
-        this.opcodes[0x65] = new ADC(0x65, 4, 2, AddressingModes.direct);
-        this.opcodes[0x67] = new ADC(0x67, 6, 2, AddressingModes.directIndexedIndirect);
-        this.opcodes[0x69] = new ADC(0x69, 2, 3, AddressingModes.immediateM);
-        this.opcodes[0x6D] = new ADC(0x6D, 4, 3, AddressingModes.absolute);
-        this.opcodes[0x6F] = new ADC(0x6F, 4, 4, AddressingModes.absoluteLong);
-        this.opcodes[0x71] = new ADC(0x71, 5, 2, AddressingModes.directY);
-        this.opcodes[0x72] = new ADC(0x72, 7, 2, AddressingModes.direct);
-        this.opcodes[0x73] = new ADC(0x73, 7, 2, AddressingModes.stackY);
-        this.opcodes[0x75] = new ADC(0x75, 4, 2, AddressingModes.directX);
-        this.opcodes[0x77] = new ADC(0x77, 6, 2, AddressingModes.directX);
-        this.opcodes[0x79] = new ADC(0x79, 4, 3, AddressingModes.absoluteX);
-        this.opcodes[0x7D] = new ADC(0x7D, 4, 3, AddressingModes.absoluteY);
-        this.opcodes[0x7F] = new ADC(0x7F, 5, 4, AddressingModes.longX);
+        this.opcodes[0x61] = new ADC(cpu,0x61, 1, 2, AddressingModes.directX);
+        this.opcodes[0x63] = new ADC(cpu,0x63, 4, 2, AddressingModes.stack);
+        this.opcodes[0x65] = new ADC(cpu,0x65, 4, 2, AddressingModes.direct);
+        this.opcodes[0x67] = new ADC(cpu,0x67, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0x69] = new ADC(cpu,0x69, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0x6D] = new ADC(cpu,0x6D, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x6F] = new ADC(cpu,0x6F, 4, 4, AddressingModes.absoluteLong);
+        this.opcodes[0x71] = new ADC(cpu,0x71, 5, 2, AddressingModes.directY);
+        this.opcodes[0x72] = new ADC(cpu,0x72, 7, 2, AddressingModes.direct);
+        this.opcodes[0x73] = new ADC(cpu,0x73, 7, 2, AddressingModes.stackY);
+        this.opcodes[0x75] = new ADC(cpu,0x75, 4, 2, AddressingModes.directX);
+        this.opcodes[0x77] = new ADC(cpu,0x77, 6, 2, AddressingModes.directX);
+        this.opcodes[0x79] = new ADC(cpu,0x79, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0x7D] = new ADC(cpu,0x7D, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0x7F] = new ADC(cpu,0x7F, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0x21] = new AND(0x21, 6, 2, AddressingModes.directX);
-        this.opcodes[0x23] = new AND(0x23, 4, 2, AddressingModes.stack);
-        this.opcodes[0x25] = new AND(0x25, 3, 2, AddressingModes.direct);
-        this.opcodes[0x27] = new AND(0x27, 6, 2, AddressingModes.directIndexedIndirect);
-        this.opcodes[0x29] = new AND(0x29, 2, 3, AddressingModes.immediateM);
-        this.opcodes[0x2D] = new AND(0x2D, 4, 3, AddressingModes.absolute);
-        this.opcodes[0x2F] = new AND(0x2F, 5, 4, AddressingModes.long);
-        this.opcodes[0x31] = new AND(0x31, 5, 2, AddressingModes.directY);
-        this.opcodes[0x32] = new AND(0x32, 5, 2, AddressingModes.direct);
-        this.opcodes[0x33] = new AND(0x33, 7, 2, AddressingModes.stack);
-        this.opcodes[0x35] = new AND(0x35, 4, 2, AddressingModes.directX);
-        this.opcodes[0x37] = new AND(0x37, 6, 2, AddressingModes.directY);
-        this.opcodes[0x39] = new AND(0x39, 4, 3, AddressingModes.absoluteY);
-        this.opcodes[0x3D] = new AND(0x3D, 4, 3, AddressingModes.absoluteY);
-        this.opcodes[0x3F] = new AND(0x3F, 5, 4, AddressingModes.longX);
+        this.opcodes[0x21] = new AND(cpu,0x21, 6, 2, AddressingModes.directX);
+        this.opcodes[0x23] = new AND(cpu,0x23, 4, 2, AddressingModes.stack);
+        this.opcodes[0x25] = new AND(cpu,0x25, 3, 2, AddressingModes.direct);
+        this.opcodes[0x27] = new AND(cpu,0x27, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0x29] = new AND(cpu,0x29, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0x2D] = new AND(cpu,0x2D, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x2F] = new AND(cpu,0x2F, 5, 4, AddressingModes.long);
+        this.opcodes[0x31] = new AND(cpu,0x31, 5, 2, AddressingModes.directY);
+        this.opcodes[0x32] = new AND(cpu,0x32, 5, 2, AddressingModes.direct);
+        this.opcodes[0x33] = new AND(cpu,0x33, 7, 2, AddressingModes.stack);
+        this.opcodes[0x35] = new AND(cpu,0x35, 4, 2, AddressingModes.directX);
+        this.opcodes[0x37] = new AND(cpu,0x37, 6, 2, AddressingModes.directY);
+        this.opcodes[0x39] = new AND(cpu,0x39, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0x3D] = new AND(cpu,0x3D, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0x3F] = new AND(cpu,0x3F, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0x06] = new ASL(0x06, 5, 2, AddressingModes.direct);
-        this.opcodes[0x0A] = new ASL(0x0A, 2, 1, AddressingModes.accumulator);
-        this.opcodes[0x0E] = new ASL(0x0E, 6, 3, AddressingModes.absolute);
-        this.opcodes[0x16] = new ASL(0x16, 6, 2, AddressingModes.directIndirectIndexed);
-        this.opcodes[0x1E] = new ASL(0x1E, 7, 3, AddressingModes.absoluteX);
+        this.opcodes[0x06] = new ASL(cpu,0x06, 5, 2, AddressingModes.direct);
+        this.opcodes[0x0A] = new ASL(cpu,0x0A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0x0E] = new ASL(cpu,0x0E, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x16] = new ASL(cpu,0x16, 6, 2, AddressingModes.directIndirectIndexed);
+        this.opcodes[0x1E] = new ASL(cpu,0x1E, 7, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0x90] = new BCC(0x90, 2, 2, AddressingModes.relative8);
-        this.opcodes[0xB0] = new BCS(0xB0, 2, 2, AddressingModes.relative8);
-        this.opcodes[0xF0] = new BEQ(0xF0, 2, 2, AddressingModes.relative8);
+        this.opcodes[0x90] = new BCC(cpu,0x90, 2, 2, AddressingModes.relative8);
+        this.opcodes[0xB0] = new BCS(cpu,0xB0, 2, 2, AddressingModes.relative8);
+        this.opcodes[0xF0] = new BEQ(cpu,0xF0, 2, 2, AddressingModes.relative8);
 
-        this.opcodes[0x24] = new BIT(0x24, 3, 2, AddressingModes.direct);
-        this.opcodes[0x2C] = new BIT(0x2C, 4, 3, AddressingModes.absolute);
-        this.opcodes[0x34] = new BIT(0x34, 4, 2, AddressingModes.directX);
-        this.opcodes[0x3C] = new BIT(0x3C, 4, 3, AddressingModes.absoluteX);
-        this.opcodes[0x89] = new BIT(0x89, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0x24] = new BIT(cpu,0x24, 3, 2, AddressingModes.direct);
+        this.opcodes[0x2C] = new BIT(cpu,0x2C, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x34] = new BIT(cpu,0x3C, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0x89] = new BIT(cpu,0x89, 2, 3, AddressingModes.immediateM);
 
-        this.opcodes[0x30] = new BMI(0x30, 2, 2, AddressingModes.relative8);
-        this.opcodes[0xD0] = new BNE(0xD0, 2, 2, AddressingModes.relative8);
-        this.opcodes[0x10] = new BPL(0x10, 2, 2, AddressingModes.relative8);
-        this.opcodes[0x80] = new BRA(0x80, 3, 2, AddressingModes.relative8);
-        this.opcodes[0x00] = new BRK(0x00, 7, 2, AddressingModes.stack);
-        this.opcodes[0x82] = new BRL(0x82, 4, 3, AddressingModes.relative16);
-        this.opcodes[0x50] = new BVC(0x50, 2, 2, AddressingModes.relative8);
-        this.opcodes[0x70] = new BVS(0x70, 2, 2, AddressingModes.relative8);
+        this.opcodes[0x30] = new BMI(cpu,0x30, 2, 2, AddressingModes.relative8);
+        this.opcodes[0xD0] = new BNE(cpu,0xD0, 2, 2, AddressingModes.relative8);
+        this.opcodes[0x10] = new BPL(cpu,0x10, 2, 2, AddressingModes.relative8);
+        this.opcodes[0x80] = new BRA(cpu,0x80, 3, 2, AddressingModes.relative8);
+        this.opcodes[0x00] = new BRK(cpu,0x00, 7, 2, AddressingModes.stack);
+        this.opcodes[0x82] = new BRL(cpu,0x82, 4, 3, AddressingModes.relative16);
+        this.opcodes[0x50] = new BVC(cpu,0x50, 2, 2, AddressingModes.relative8);
+        this.opcodes[0x70] = new BVS(cpu,0x70, 2, 2, AddressingModes.relative8);
 
-        this.opcodes[0x18] = new CLC(0x18, 2, 1, AddressingModes.implied);
-        this.opcodes[0xD8] = new CLD(0xD8, 2, 1, AddressingModes.implied);
-        this.opcodes[0x58] = new CLI(0x58, 2, 1, AddressingModes.implied);
-        this.opcodes[0xB8] = new CLV(0xB8, 2, 1, AddressingModes.implied);
-        this.opcodes[0xC1] = new CMP(0xC1, 6, 2, AddressingModes.directX);
-        this.opcodes[0xC3] = new CMP(0xC3, 4, 2, AddressingModes.stack);
-        this.opcodes[0xC5] = new CMP(0xC5, 3, 2, AddressingModes.direct);
-        this.opcodes[0xC7] = new CMP(0xC7, 6, 2, AddressingModes.directIndexedIndirect);
-        this.opcodes[0xC9] = new CMP(0xC9, 2, 3, AddressingModes.immediateM);
-        this.opcodes[0xCD] = new CMP(0xCD, 4, 3, AddressingModes.absolute);
-        this.opcodes[0xCF] = new CMP(0xCF, 5, 4, AddressingModes.long);
-        this.opcodes[0xD1] = new CMP(0xD1, 5, 2, AddressingModes.directY);
-        this.opcodes[0xD2] = new CMP(0xD2, 5, 2, AddressingModes.direct);
-        this.opcodes[0xD3] = new CMP(0xD3, 7, 2, AddressingModes.stackY);
-        this.opcodes[0xD5] = new CMP(0xD5, 4, 2, AddressingModes.directX);
-        this.opcodes[0xD7] = new CMP(0xD7, 6, 2, AddressingModes.directY);
-        this.opcodes[0xD9] = new CMP(0xD9, 4, 3, AddressingModes.absoluteY);
-        this.opcodes[0xDD] = new CMP(0xDD, 4, 3, AddressingModes.absoluteX);
-        this.opcodes[0xDF] = new CMP(0xDF, 5, 4, AddressingModes.longX);
+        this.opcodes[0x18] = new CLC(cpu,0x18, 2, 1, AddressingModes.implied);
+        this.opcodes[0xD8] = new CLD(cpu,0xD8, 2, 1, AddressingModes.implied);
+        this.opcodes[0x58] = new CLI(cpu,0x58, 2, 1, AddressingModes.implied);
+        this.opcodes[0xB8] = new CLV(cpu,0xB8, 2, 1, AddressingModes.implied);
+        this.opcodes[0xC1] = new CMP(cpu,0xC1, 6, 2, AddressingModes.directX);
+        this.opcodes[0xC3] = new CMP(cpu,0xC3, 4, 2, AddressingModes.stack);
+        this.opcodes[0xC5] = new CMP(cpu,0xC5, 3, 2, AddressingModes.direct);
+        this.opcodes[0xC7] = new CMP(cpu,0xC7, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0xC9] = new CMP(cpu,0xC9, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0xCD] = new CMP(cpu,0xCD, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xCF] = new CMP(cpu,0xCF, 5, 4, AddressingModes.long);
+        this.opcodes[0xD1] = new CMP(cpu,0xD1, 5, 2, AddressingModes.directY);
+        this.opcodes[0xD2] = new CMP(cpu,0xD2, 5, 2, AddressingModes.direct);
+        this.opcodes[0xD3] = new CMP(cpu,0xD3, 7, 2, AddressingModes.stackY);
+        this.opcodes[0xD5] = new CMP(cpu,0xD5, 4, 2, AddressingModes.directX);
+        this.opcodes[0xD7] = new CMP(cpu,0xD7, 6, 2, AddressingModes.directY);
+        this.opcodes[0xD9] = new CMP(cpu,0xD9, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0xDD] = new CMP(cpu,0xDD, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0xDF] = new CMP(cpu,0xDF, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0x02] = new COP(0x02, 7, 2, AddressingModes.stack);
+        this.opcodes[0x02] = new COP(cpu,0x02, 7, 2, AddressingModes.stack);
 
-        this.opcodes[0xE0] = new CPX(0xE0, 2, 3, AddressingModes.immediateX);
-        this.opcodes[0xE4] = new CPX(0xE4, 3, 2, AddressingModes.direct);
-        this.opcodes[0xEC] = new CPX(0xEC, 4, 3, AddressingModes.absolute);
-        this.opcodes[0xC0] = new CPY(0xC0, 2, 3, AddressingModes.immediateX);
-        this.opcodes[0xC4] = new CPY(0xC4, 5, 2, AddressingModes.direct);
-        this.opcodes[0xCC] = new CPY(0xCC, 6, 3, AddressingModes.absolute);
+        this.opcodes[0xE0] = new CPX(cpu,0xE0, 2, 3, AddressingModes.immediateX);
+        this.opcodes[0xE4] = new CPX(cpu,0xE4, 3, 2, AddressingModes.direct);
+        this.opcodes[0xEC] = new CPX(cpu,0xEC, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xC0] = new CPY(cpu,0xC0, 2, 3, AddressingModes.immediateX);
+        this.opcodes[0xC4] = new CPY(cpu,0xC4, 5, 2, AddressingModes.direct);
+        this.opcodes[0xCC] = new CPY(cpu,0xCC, 6, 3, AddressingModes.absolute);
 
-        this.opcodes[0x3A] = new DEC(0x3A, 2, 1, AddressingModes.accumulator);
-        this.opcodes[0xC6] = new DEC(0xC6, 5, 2, AddressingModes.direct);
-        this.opcodes[0xCE] = new DEC(0xCE, 6, 3, AddressingModes.absolute);
-        this.opcodes[0xD6] = new DEC(0xD6, 6, 2, AddressingModes.directX);
-        this.opcodes[0xDE] = new DEC(0xDE, 7, 3, AddressingModes.absoluteX);
+        this.opcodes[0x3A] = new DEC(cpu,0x3A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0xC6] = new DEC(cpu,0xC6, 5, 2, AddressingModes.direct);
+        this.opcodes[0xCE] = new DEC(cpu,0xCE, 6, 3, AddressingModes.absolute);
+        this.opcodes[0xD6] = new DEC(cpu,0xD6, 6, 2, AddressingModes.directX);
+        this.opcodes[0xDE] = new DEC(cpu,0xDE, 7, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0xCA] = new DEX(0xCA, 2, 1, AddressingModes.implied);
-        this.opcodes[0x88] = new DEY(0x88, 2, 1, AddressingModes.implied);
+        this.opcodes[0xCA] = new DEX(cpu,0xCA, 2, 1, AddressingModes.implied);
+        this.opcodes[0x88] = new DEY(cpu,0x88, 2, 1, AddressingModes.implied);
 
-        this.opcodes[0x41] = new EOR(0x41, 6, 2, AddressingModes.directX);
-        this.opcodes[0x43] = new EOR(0x43, 4, 2, AddressingModes.stack);
-        this.opcodes[0x45] = new EOR(0x45, 3, 2, AddressingModes.direct);
-        this.opcodes[0x47] = new EOR(0x47, 6, 2, AddressingModes.directIndexedIndirect);
-        this.opcodes[0x49] = new EOR(0x49, 2, 3, AddressingModes.immediateM);
-        this.opcodes[0x4D] = new EOR(0x4D, 4, 3, AddressingModes.absolute);
-        this.opcodes[0x4F] = new EOR(0x4F, 5, 4, AddressingModes.long);
-        this.opcodes[0x51] = new EOR(0x51, 5, 2, AddressingModes.directY);
-        this.opcodes[0x52] = new EOR(0x52, 5, 2, AddressingModes.direct);
-        this.opcodes[0x53] = new EOR(0x53, 7, 2, AddressingModes.stackY);
-        this.opcodes[0x55] = new EOR(0x55, 4, 2, AddressingModes.directX);
-        this.opcodes[0x57] = new EOR(0x57, 6, 2, AddressingModes.directY);
-        this.opcodes[0x59] = new EOR(0x59, 4, 3, AddressingModes.absoluteY);
-        this.opcodes[0x5D] = new EOR(0x5D, 4, 3, AddressingModes.absoluteX);
-        this.opcodes[0x5F] = new EOR(0x5F, 5, 4, AddressingModes.longX);
+        this.opcodes[0x41] = new EOR(cpu,0x41, 6, 2, AddressingModes.directX);
+        this.opcodes[0x43] = new EOR(cpu,0x43, 4, 2, AddressingModes.stack);
+        this.opcodes[0x45] = new EOR(cpu,0x45, 3, 2, AddressingModes.direct);
+        this.opcodes[0x47] = new EOR(cpu,0x47, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0x49] = new EOR(cpu,0x49, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0x4D] = new EOR(cpu,0x4D, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x4F] = new EOR(cpu,0x4F, 5, 4, AddressingModes.long);
+        this.opcodes[0x51] = new EOR(cpu,0x51, 5, 2, AddressingModes.directY);
+        this.opcodes[0x52] = new EOR(cpu,0x52, 5, 2, AddressingModes.direct);
+        this.opcodes[0x53] = new EOR(cpu,0x53, 7, 2, AddressingModes.stackY);
+        this.opcodes[0x55] = new EOR(cpu,0x55, 4, 2, AddressingModes.directX);
+        this.opcodes[0x57] = new EOR(cpu,0x57, 6, 2, AddressingModes.directY);
+        this.opcodes[0x59] = new EOR(cpu,0x59, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0x5D] = new EOR(cpu,0x5D, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0x5F] = new EOR(cpu,0x5F, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0x1A] = new INC(0x1A, 2, 1, AddressingModes.accumulator);
-        this.opcodes[0xE6] = new INC(0xE6, 5, 2, AddressingModes.direct);
-        this.opcodes[0xEE] = new INC(0xEE, 6, 3, AddressingModes.absolute);
-        this.opcodes[0xF6] = new INC(0xF6, 6, 2, AddressingModes.directX);
-        this.opcodes[0xFE] = new INC(0xFE, 7, 3, AddressingModes.absoluteX);
-        this.opcodes[0xE8] = new INC(0xE8, 2, 1, AddressingModes.implied);
-        this.opcodes[0xC8] = new INY(0xC8, 2, 1, AddressingModes.implied);
+        this.opcodes[0x1A] = new INC(cpu,0x1A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0xE6] = new INC(cpu,0xE6, 5, 2, AddressingModes.direct);
+        this.opcodes[0xEE] = new INC(cpu,0xEE, 6, 3, AddressingModes.absolute);
+        this.opcodes[0xF6] = new INC(cpu,0xF6, 6, 2, AddressingModes.directX);
+        this.opcodes[0xFE] = new INC(cpu,0xFE, 7, 3, AddressingModes.absoluteX);
+        this.opcodes[0xE8] = new INC(cpu,0xE8, 2, 1, AddressingModes.implied);
+        this.opcodes[0xC8] = new INY(cpu,0xC8, 2, 1, AddressingModes.implied);
 
-        this.opcodes[0x4C] = new JMP(0x4C, 3, 3, AddressingModes.absoluteJump);
-        this.opcodes[0x5C] = new JMP(0x5C, 4, 4, AddressingModes.long); // TODO
-        this.opcodes[0x6C] = new JMP(0x6C, 5, 3, AddressingModes.absoluteJump);
-        this.opcodes[0x7C] = new JMP(0x7C, 6, 3, AddressingModes.absoluteX); // TODO
-        this.opcodes[0xDC] = new JMP(0xDC, 6, 3, AddressingModes.absoluteJump);
+        this.opcodes[0x4C] = new JMP(cpu,0x4C, 3, 3, AddressingModes.absoluteJump);
+        this.opcodes[0x5C] = new JMP(cpu,0x5C, 4, 4, AddressingModes.long); // TODO
+        this.opcodes[0x6C] = new JMP(cpu,0x6C, 5, 3, AddressingModes.absoluteJump);
+        this.opcodes[0x7C] = new JMP(cpu,0x7C, 6, 3, AddressingModes.absoluteX); // TODO
+        this.opcodes[0xDC] = new JMP(cpu,0xDC, 6, 3, AddressingModes.absoluteJump);
 
-        this.opcodes[0x20] = new JSR(0x20, 6, 3, AddressingModes.absoluteJump);
-        this.opcodes[0x22] = new JSR(0x22, 8, 4, AddressingModes.absoluteX); // TODO
-        this.opcodes[0xFC] = new JSR(0xFC, 8, 3, AddressingModes.absoluteX); // TODO
+        this.opcodes[0x20] = new JSR(cpu,0x20, 6, 3, AddressingModes.absoluteJump);
+        this.opcodes[0x22] = new JSR(cpu,0x22, 8, 4, AddressingModes.absoluteX); // TODO
+        this.opcodes[0xFC] = new JSR(cpu,0xFC, 8, 3, AddressingModes.absoluteX); // TODO
 
-        this.opcodes[0xA1] = new LDA(0xA1, 6, 2, AddressingModes.directX);
-        this.opcodes[0xA3] = new LDA(0xA3, 4, 2, AddressingModes.stack);
-        this.opcodes[0xA5] = new LDA(0xA5, 3, 2, AddressingModes.direct);
-        this.opcodes[0xA7] = new LDA(0xA7, 6, 2, AddressingModes.directIndexedIndirect);
-        this.opcodes[0xA9] = new LDA(0xA9, 2, 2, AddressingModes.immediateM);
-        this.opcodes[0xAD] = new LDA(0xAD, 4, 3, AddressingModes.absolute);
-        this.opcodes[0xAF] = new LDA(0xAF, 5, 4, AddressingModes.long);
-        this.opcodes[0xB1] = new LDA(0xB1, 5, 2, AddressingModes.directY);
-        this.opcodes[0xB2] = new LDA(0xB2, 5, 2, AddressingModes.direct);
-        this.opcodes[0xB3] = new LDA(0xB3, 7, 2, AddressingModes.stackY);
-        this.opcodes[0xB5] = new LDA(0xB5, 4, 2, AddressingModes.directX);
-        this.opcodes[0xB7] = new LDA(0xB7, 6, 2, AddressingModes.directY);
-        this.opcodes[0xB9] = new LDA(0xB9, 4, 3, AddressingModes.absoluteY);
-        this.opcodes[0xBD] = new LDA(0xBD, 4, 3, AddressingModes.absoluteX);
-        this.opcodes[0xBF] = new LDA(0xBF, 5, 4, AddressingModes.longX);
+        this.opcodes[0xA1] = new LDA(cpu,0xA1, 6, 2, AddressingModes.directX);
+        this.opcodes[0xA3] = new LDA(cpu,0xA3, 4, 2, AddressingModes.stack);
+        this.opcodes[0xA5] = new LDA(cpu,0xA5, 3, 2, AddressingModes.direct);
+        this.opcodes[0xA7] = new LDA(cpu,0xA7, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0xA9] = new LDA(cpu,0xA9, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0xAD] = new LDA(cpu,0xAD, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xAF] = new LDA(cpu,0xAF, 5, 4, AddressingModes.long);
+        this.opcodes[0xB1] = new LDA(cpu,0xB1, 5, 2, AddressingModes.directY);
+        this.opcodes[0xB2] = new LDA(cpu,0xB2, 5, 2, AddressingModes.direct);
+        this.opcodes[0xB3] = new LDA(cpu,0xB3, 7, 2, AddressingModes.stackY);
+        this.opcodes[0xB5] = new LDA(cpu,0xB5, 4, 2, AddressingModes.directX);
+        this.opcodes[0xB7] = new LDA(cpu,0xB7, 6, 2, AddressingModes.directY);
+        this.opcodes[0xB9] = new LDA(cpu,0xB9, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0xBD] = new LDA(cpu,0xBD, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0xBF] = new LDA(cpu,0xBF, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0xA2] = new LDX(0xA2, 2, 2, AddressingModes.immediateX);
-        this.opcodes[0xA6] = new LDX(0xA6, 3, 2, AddressingModes.direct);
-        this.opcodes[0xAE] = new LDX(0xAE, 4, 3, AddressingModes.absolute);
-        this.opcodes[0xB6] = new LDX(0xB6, 4, 2, AddressingModes.directY);
-        this.opcodes[0xBE] = new LDX(0xBE, 4, 3, AddressingModes.absoluteY);
-        this.opcodes[0xA0] = new LDY(0xA0, 2, 2, AddressingModes.immediateX);
-        this.opcodes[0xA4] = new LDY(0xA4, 3, 2, AddressingModes.direct);
-        this.opcodes[0xAC] = new LDY(0xAC, 4, 3, AddressingModes.absolute);
-        this.opcodes[0xB4] = new LDY(0xB4, 4, 2, AddressingModes.directX);
-        this.opcodes[0xBC] = new LDY(0xBC, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0xA2] = new LDX(cpu,0xA2, 2, 3, AddressingModes.immediateX);
+        this.opcodes[0xA6] = new LDX(cpu,0xA6, 3, 2, AddressingModes.direct);
+        this.opcodes[0xAE] = new LDX(cpu,0xAE, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xB6] = new LDX(cpu,0xB6, 4, 2, AddressingModes.directY);
+        this.opcodes[0xBE] = new LDX(cpu,0xBE, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0xA0] = new LDY(cpu,0xA0, 2, 3, AddressingModes.immediateX);
+        this.opcodes[0xA4] = new LDY(cpu,0xA4, 3, 2, AddressingModes.direct);
+        this.opcodes[0xAC] = new LDY(cpu,0xAC, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xB4] = new LDY(cpu,0xB4, 4, 2, AddressingModes.directX);
+        this.opcodes[0xBC] = new LDY(cpu,0xBC, 4, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0x46] = new LSR(0x46, 5, 2, AddressingModes.direct);
-        this.opcodes[0x4A] = new LSR(0x4A, 2, 1, AddressingModes.accumulator);
-        this.opcodes[0x4E] = new LSR(0x4E, 6, 3, AddressingModes.absolute);
-        this.opcodes[0x56] = new LSR(0x56, 6, 2, AddressingModes.directX);
-        this.opcodes[0x5E] = new LSR(0x5E, 7, 3, AddressingModes.absoluteX);
+        this.opcodes[0x46] = new LSR(cpu,0x46, 5, 2, AddressingModes.direct);
+        this.opcodes[0x4A] = new LSR(cpu,0x4A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0x4E] = new LSR(cpu,0x4E, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x56] = new LSR(cpu,0x56, 6, 2, AddressingModes.directX);
+        this.opcodes[0x5E] = new LSR(cpu,0x5E, 7, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0x54] = new MVN(0x54, 1, 3, AddressingModes.sourceDestination);
-        this.opcodes[0x44] = new MVP(0x44, 1, 3, AddressingModes.sourceDestination);
-        this.opcodes[0xEA] = new NOP(0xEA, 2, 1, AddressingModes.implied);
+        this.opcodes[0x54] = new MVN(cpu,0x54, 1, 3, AddressingModes.sourceDestination);
+        this.opcodes[0x44] = new MVP(cpu,0x44, 1, 3, AddressingModes.sourceDestination);
+        this.opcodes[0xEA] = new NOP(cpu,0xEA, 2, 1, AddressingModes.implied);
 
-        this.opcodes[0x01] = new ORA(0x01, 6, 2, AddressingModes.directX);
-        this.opcodes[0x03] = new ORA(0x03, 4, 2, AddressingModes.stack);
-        this.opcodes[0x05] = new ORA(0x05, 3, 2, AddressingModes.direct);
-        this.opcodes[0x07] = new ORA(0x07, 6, 2, AddressingModes.directIndexedIndirect);
-        this.opcodes[0x09] = new ORA(0x09, 2, 3, AddressingModes.immediateM);
-        this.opcodes[0x0D] = new ORA(0x0D, 4, 3, AddressingModes.absolute);
-        this.opcodes[0x0F] = new ORA(0x0F, 5, 4, AddressingModes.long);
-        this.opcodes[0x11] = new ORA(0x11, 5, 2, AddressingModes.directY);
-        this.opcodes[0x12] = new ORA(0x12, 5, 2, AddressingModes.directIndirectIndexed);
-        this.opcodes[0x13] = new ORA(0x13, 7, 2, AddressingModes.stack);
-        this.opcodes[0x15] = new ORA(0x15, 4, 2, AddressingModes.directX);
-        this.opcodes[0x17] = new ORA(0x17, 6, 2, AddressingModes.directY);
-        this.opcodes[0x19] = new ORA(0x19, 4, 3, AddressingModes.absoluteY);
-        this.opcodes[0x1D] = new ORA(0x1D, 4, 3, AddressingModes.absoluteX);
-        this.opcodes[0x1F] = new ORA(0x1F, 5, 4, AddressingModes.longX);
+        this.opcodes[0x01] = new ORA(cpu,0x01, 6, 2, AddressingModes.directX);
+        this.opcodes[0x03] = new ORA(cpu,0x03, 4, 2, AddressingModes.stack);
+        this.opcodes[0x05] = new ORA(cpu,0x05, 3, 2, AddressingModes.direct);
+        this.opcodes[0x07] = new ORA(cpu,0x07, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0x09] = new ORA(cpu,0x09, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0x0D] = new ORA(cpu,0x0D, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x0F] = new ORA(cpu,0x0F, 5, 4, AddressingModes.long);
+        this.opcodes[0x11] = new ORA(cpu,0x11, 5, 2, AddressingModes.directY);
+        this.opcodes[0x12] = new ORA(cpu,0x12, 5, 2, AddressingModes.directIndirectIndexed);
+        this.opcodes[0x13] = new ORA(cpu,0x13, 7, 2, AddressingModes.stack);
+        this.opcodes[0x15] = new ORA(cpu,0x15, 4, 2, AddressingModes.directX);
+        this.opcodes[0x17] = new ORA(cpu,0x17, 6, 2, AddressingModes.directY);
+        this.opcodes[0x19] = new ORA(cpu,0x19, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0x1D] = new ORA(cpu,0x1D, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0x1F] = new ORA(cpu,0x1F, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0xF4] = new PEA(0xF4, 5, 3, AddressingModes.immediate16);
-        this.opcodes[0xD4] = new PEI(0xD4, 6, 6, AddressingModes.direct); // TODO
-        this.opcodes[0x62] = new PER(0x62, 6, 3, AddressingModes.immediate16);
-        this.opcodes[0x48] = new PHA(0x48, 3, 1, AddressingModes.stack);
-        this.opcodes[0x8B] = new PHB(0x8B, 3, 1, AddressingModes.stack);
-        this.opcodes[0x0B] = new PHD(0x0B, 4, 1, AddressingModes.stack);
-        this.opcodes[0x4B] = new PHK(0x4B, 3, 1, AddressingModes.stack);
-        this.opcodes[0x08] = new PHP(0x08, 3, 1, AddressingModes.stack);
-        this.opcodes[0xDA] = new PHX(0xDA, 3, 1, AddressingModes.stack);
-        this.opcodes[0x5A] = new PHY(0x5A, 3, 1, AddressingModes.stack);
+        this.opcodes[0xF4] = new PEA(cpu,0xF4, 5, 3, AddressingModes.immediate16);
+        this.opcodes[0xD4] = new PEI(cpu,0xD4, 6, 6, AddressingModes.direct); // TODO
+        this.opcodes[0x62] = new PER(cpu,0x62, 6, 3, AddressingModes.immediate16);
+        this.opcodes[0x48] = new PHA(cpu,0x48, 3, 1, AddressingModes.stack);
+        this.opcodes[0x8B] = new PHB(cpu,0x8B, 3, 1, AddressingModes.stack);
+        this.opcodes[0x0B] = new PHD(cpu,0x0B, 4, 1, AddressingModes.stack);
+        this.opcodes[0x4B] = new PHK(cpu,0x4B, 3, 1, AddressingModes.stack);
+        this.opcodes[0x08] = new PHP(cpu,0x08, 3, 1, AddressingModes.stack);
+        this.opcodes[0xDA] = new PHX(cpu,0xDA, 3, 1, AddressingModes.stack);
+        this.opcodes[0x5A] = new PHY(cpu,0x5A, 3, 1, AddressingModes.stack);
 
-        this.opcodes[0x68] = new PLA(0x68, 4, 1, AddressingModes.stack);
-        this.opcodes[0xAB] = new PLB(0xAB, 4, 1, AddressingModes.stack);
-        this.opcodes[0x2B] = new PLD(0x2B, 5, 1, AddressingModes.stack);
-        this.opcodes[0x28] = new PLP(0x28, 4, 1, AddressingModes.stack);
-        this.opcodes[0xFA] = new PLX(0xFA, 4, 1, AddressingModes.stack);
-        this.opcodes[0x7A] = new PLY(0x7A, 4, 1, AddressingModes.stack);
+        this.opcodes[0x68] = new PLA(cpu,0x68, 4, 1, AddressingModes.stack);
+        this.opcodes[0xAB] = new PLB(cpu,0xAB, 4, 1, AddressingModes.stack);
+        this.opcodes[0x2B] = new PLD(cpu,0x2B, 5, 1, AddressingModes.stack);
+        this.opcodes[0x28] = new PLP(cpu,0x28, 4, 1, AddressingModes.stack);
+        this.opcodes[0xFA] = new PLX(cpu,0xFA, 4, 1, AddressingModes.stack);
+        this.opcodes[0x7A] = new PLY(cpu,0x7A, 4, 1, AddressingModes.stack);
 
-        this.opcodes[0xC2] = new REP(0xC2, 3, 2, AddressingModes.immediate8);
-        this.opcodes[0x26] = new REP(0x26, 5, 2, AddressingModes.direct);
+        this.opcodes[0xC2] = new REP(cpu,0xC2, 3, 2, AddressingModes.immediate8);
+        this.opcodes[0x26] = new REP(cpu,0x26, 5, 2, AddressingModes.direct);
 
-        this.opcodes[0x2A] = new ROL(0x2A, 2, 1, AddressingModes.accumulator);
-        this.opcodes[0x2E] = new ROL(0x2E, 6, 3, AddressingModes.absolute);
-        this.opcodes[0x36] = new ROL(0x36, 6, 2, AddressingModes.directX);
-        this.opcodes[0x3E] = new ROL(0x3E, 7, 3, AddressingModes.absoluteX);
+        this.opcodes[0x2A] = new ROL(cpu,0x2A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0x2E] = new ROL(cpu,0x2E, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x36] = new ROL(cpu,0x36, 6, 2, AddressingModes.directX);
+        this.opcodes[0x3E] = new ROL(cpu,0x3E, 7, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0x66] = new ROR(0x66, 5, 2, AddressingModes.direct);
-        this.opcodes[0x6A] = new ROR(0x6A, 2, 1, AddressingModes.accumulator);
-        this.opcodes[0x6E] = new ROR(0x6E, 6, 3, AddressingModes.absolute);
-        this.opcodes[0x76] = new ROR(0x76, 6, 2, AddressingModes.directX);
-        this.opcodes[0x7E] = new ROR(0x7E, 7, 3, AddressingModes.absoluteX);
+        this.opcodes[0x66] = new ROR(cpu,0x66, 5, 2, AddressingModes.direct);
+        this.opcodes[0x6A] = new ROR(cpu,0x6A, 2, 1, AddressingModes.accumulator);
+        this.opcodes[0x6E] = new ROR(cpu,0x6E, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x76] = new ROR(cpu,0x76, 6, 2, AddressingModes.directX);
+        this.opcodes[0x7E] = new ROR(cpu,0x7E, 7, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0x40] = new RTI(0x40, 6, 1, AddressingModes.stack);
-        this.opcodes[0x6B] = new RTL(0x6B, 6, 1, AddressingModes.stack);
-        this.opcodes[0x60] = new RTS(0x60, 6, 1, AddressingModes.stack);
+        this.opcodes[0x40] = new RTI(cpu,0x40, 6, 1, AddressingModes.stack);
+        this.opcodes[0x6B] = new RTL(cpu,0x6B, 6, 1, AddressingModes.stack);
+        this.opcodes[0x60] = new RTS(cpu,0x60, 6, 1, AddressingModes.stack);
 
-        this.opcodes[0xE1] = new SBC(0xE1, 6, 2, AddressingModes.immediate16);
-        this.opcodes[0xE3] = new SBC(0xE3, 4, 2, AddressingModes.direct); // TODO
-        this.opcodes[0xE5] = new SBC(0xE5, 3, 2, AddressingModes.direct);
-        this.opcodes[0xE7] = new SBC(0xE7, 6, 2, AddressingModes.directIndexedIndirect);
-        this.opcodes[0xE9] = new SBC(0xE9, 2, 3, AddressingModes.immediateM);
-        this.opcodes[0xED] = new SBC(0xED, 4, 3, AddressingModes.absolute);
-        this.opcodes[0xEF] = new SBC(0xEF, 5, 4, AddressingModes.long);
-        this.opcodes[0xF1] = new SBC(0xF1, 5, 2, AddressingModes.directY);
-        this.opcodes[0xF2] = new SBC(0xF2, 5, 2, AddressingModes.direct);
-        this.opcodes[0xF3] = new SBC(0xF3, 7, 2, AddressingModes.stackY);
-        this.opcodes[0xF5] = new SBC(0xF5, 4, 2, AddressingModes.directX);
-        this.opcodes[0xF7] = new SBC(0xF7, 6, 2, AddressingModes.directX);
-        this.opcodes[0xF9] = new SBC(0xF9, 4, 3, AddressingModes.absoluteX);
-        this.opcodes[0xFD] = new SBC(0xFD, 4, 3, AddressingModes.absoluteY);
-        this.opcodes[0xFF] = new SBC(0xFF, 5, 4, AddressingModes.longX);
+        this.opcodes[0xE1] = new SBC(cpu,0xE1, 6, 2, AddressingModes.immediate16);
+        this.opcodes[0xE3] = new SBC(cpu,0xE3, 4, 2, AddressingModes.direct); // TODO
+        this.opcodes[0xE5] = new SBC(cpu,0xE5, 3, 2, AddressingModes.direct);
+        this.opcodes[0xE7] = new SBC(cpu,0xE7, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0xE9] = new SBC(cpu,0xE9, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0xED] = new SBC(cpu,0xED, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xEF] = new SBC(cpu,0xEF, 5, 4, AddressingModes.long);
+        this.opcodes[0xF1] = new SBC(cpu,0xF1, 5, 2, AddressingModes.directY);
+        this.opcodes[0xF2] = new SBC(cpu,0xF2, 5, 2, AddressingModes.direct);
+        this.opcodes[0xF3] = new SBC(cpu,0xF3, 7, 2, AddressingModes.stackY);
+        this.opcodes[0xF5] = new SBC(cpu,0xF5, 4, 2, AddressingModes.directX);
+        this.opcodes[0xF7] = new SBC(cpu,0xF7, 6, 2, AddressingModes.directX);
+        this.opcodes[0xF9] = new SBC(cpu,0xF9, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0xFD] = new SBC(cpu,0xFD, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0xFF] = new SBC(cpu,0xFF, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0x38] = new SEC(0x38, 2, 1, AddressingModes.implied);
-        this.opcodes[0xF8] = new SED(0xF8, 2, 1, AddressingModes.implied);
-        this.opcodes[0x78] = new SEI(0x78, 2, 1, AddressingModes.implied);
-        this.opcodes[0xE2] = new SEP(0xE2, 3, 2, AddressingModes.immediate8);
+        this.opcodes[0x38] = new SEC(cpu,0x38, 2, 1, AddressingModes.implied);
+        this.opcodes[0xF8] = new SED(cpu,0xF8, 2, 1, AddressingModes.implied);
+        this.opcodes[0x78] = new SEI(cpu,0x78, 2, 1, AddressingModes.implied);
+        this.opcodes[0xE2] = new SEP(cpu,0xE2, 3, 2, AddressingModes.immediate8);
 
-        this.opcodes[0x81] = new STA(0x81, 6, 2, AddressingModes.directX);
-        this.opcodes[0x83] = new STA(0x83, 4, 2, AddressingModes.stack);
-        this.opcodes[0x85] = new STA(0x85, 3, 2, AddressingModes.direct);
-        this.opcodes[0x87] = new STA(0x87, 6, 2, AddressingModes.directIndirectIndexed);
-        this.opcodes[0x8D] = new STA(0x8D, 4, 3, AddressingModes.absolute);
-        this.opcodes[0x8F] = new STA(0x8F, 5, 4, AddressingModes.long);
-        this.opcodes[0x91] = new STA(0x91, 6, 2, AddressingModes.directY);
-        this.opcodes[0x92] = new STA(0x92, 5, 2, AddressingModes.directIndirect);
-        this.opcodes[0x93] = new STA(0x93, 7, 2, AddressingModes.stackY);
-        this.opcodes[0x95] = new STA(0x95, 4, 2, AddressingModes.directX);
-        this.opcodes[0x97] = new STA(0x97, 6, 2, AddressingModes.directY);
-        this.opcodes[0x99] = new STA(0x99, 5, 3, AddressingModes.absoluteY);
-        this.opcodes[0x9D] = new STA(0x9D, 5, 3, AddressingModes.absoluteX);
-        this.opcodes[0x9F] = new STA(0x9F, 5, 4, AddressingModes.longX);
+        this.opcodes[0x81] = new STA(cpu,0x81, 6, 2, AddressingModes.directX);
+        this.opcodes[0x83] = new STA(cpu,0x83, 4, 2, AddressingModes.stack);
+        this.opcodes[0x85] = new STA(cpu,0x85, 3, 2, AddressingModes.direct);
+        this.opcodes[0x87] = new STA(cpu,0x87, 6, 2, AddressingModes.directIndirectIndexed);
+        this.opcodes[0x8D] = new STA(cpu,0x8D, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x8F] = new STA(cpu,0x8F, 5, 4, AddressingModes.long);
+        this.opcodes[0x91] = new STA(cpu,0x91, 6, 2, AddressingModes.directY);
+        this.opcodes[0x92] = new STA(cpu,0x92, 5, 2, AddressingModes.directIndirect);
+        this.opcodes[0x93] = new STA(cpu,0x93, 7, 2, AddressingModes.stackY);
+        this.opcodes[0x95] = new STA(cpu,0x95, 4, 2, AddressingModes.directX);
+        this.opcodes[0x97] = new STA(cpu,0x97, 6, 2, AddressingModes.directY);
+        this.opcodes[0x99] = new STA(cpu,0x99, 5, 3, AddressingModes.absoluteY);
+        this.opcodes[0x9D] = new STA(cpu,0x9D, 5, 3, AddressingModes.absoluteX);
+        this.opcodes[0x9F] = new STA(cpu,0x9F, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0xDB] = new STP(0xDB, 3, 1, AddressingModes.implied);
-        this.opcodes[0x86] = new STX(0x86, 3, 2, AddressingModes.direct);
-        this.opcodes[0x8E] = new STX(0x8E, 4, 3, AddressingModes.absolute);
-        this.opcodes[0x96] = new STX(0x96, 4, 2, AddressingModes.directY);
+        this.opcodes[0xDB] = new STP(cpu,0xDB, 3, 1, AddressingModes.implied);
+        this.opcodes[0x86] = new STX(cpu,0x86, 3, 2, AddressingModes.direct);
+        this.opcodes[0x8E] = new STX(cpu,0x8E, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x96] = new STX(cpu,0x96, 4, 2, AddressingModes.directY);
 
-        this.opcodes[0x84] = new STY(0x84, 3, 2, AddressingModes.direct);
-        this.opcodes[0x8C] = new STY(0x8C, 4, 3, AddressingModes.absolute);
-        this.opcodes[0x94] = new STY(0x94, 4, 2, AddressingModes.directX);
+        this.opcodes[0x84] = new STY(cpu,0x84, 3, 2, AddressingModes.direct);
+        this.opcodes[0x8C] = new STY(cpu,0x8C, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x94] = new STY(cpu,0x94, 4, 2, AddressingModes.directX);
 
-        this.opcodes[0x64] = new STZ(0x64, 3, 2, AddressingModes.direct);
-        this.opcodes[0x74] = new STZ(0x74, 4, 2, AddressingModes.directX);
-        this.opcodes[0x9C] = new STZ(0x9C, 4, 3, AddressingModes.absolute);
-        this.opcodes[0x9E] = new STZ(0x9E, 5, 3, AddressingModes.absoluteX);
+        this.opcodes[0x64] = new STZ(cpu,0x64, 3, 2, AddressingModes.direct);
+        this.opcodes[0x74] = new STZ(cpu,0x74, 4, 2, AddressingModes.directX);
+        this.opcodes[0x9C] = new STZ(cpu,0x9C, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x9E] = new STZ(cpu,0x9E, 5, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0xAA] = new TAX(0xAA, 2, 1, AddressingModes.implied);
-        this.opcodes[0xA8] = new TAY(0xA8, 2, 1, AddressingModes.implied);
-        this.opcodes[0x5B] = new TCD(0x5B, 2, 1, AddressingModes.implied);
-        this.opcodes[0x1B] = new TCS(0x1B, 2, 1, AddressingModes.implied);
-        this.opcodes[0x7B] = new TDC(0x7B, 2, 1, AddressingModes.implied);
-        this.opcodes[0x14] = new TRB(0x14, 5, 2, AddressingModes.direct);
-        this.opcodes[0x1C] = new TRB(0x1C, 6, 3, AddressingModes.absolute);
-        this.opcodes[0x04] = new TSB(0x04, 5, 2, AddressingModes.direct);
-        this.opcodes[0x0C] = new TSB(0x0C, 6, 3, AddressingModes.absolute);
-        this.opcodes[0x3B] = new TSC(0x3B, 2, 1, AddressingModes.implied);
-        this.opcodes[0xBA] = new TSX(0xBA, 2, 1, AddressingModes.implied);
-        this.opcodes[0x8A] = new TXA(0x8A, 2, 1, AddressingModes.implied);
-        this.opcodes[0x9A] = new TXS(0x9A, 2, 1, AddressingModes.implied);
-        this.opcodes[0x9B] = new TXY(0x9B, 2, 1, AddressingModes.implied);
-        this.opcodes[0x98] = new TYA(0x98, 2, 1, AddressingModes.implied);
-        this.opcodes[0xBB] = new TYX(0xBB, 2, 1, AddressingModes.implied);
-        this.opcodes[0xCB] = new WAI(0xCB, 3, 1, AddressingModes.implied);
-        this.opcodes[0x42] = new WDM(0x42, 0, 2, AddressingModes.implied); // TODO
-        this.opcodes[0xEB] = new XBA(0xEB, 1, 1, AddressingModes.implied);
-        this.opcodes[0xFB] = new XCE(0xFB, 1, 1, AddressingModes.implied);
+        this.opcodes[0xAA] = new TAX(cpu,0xAA, 2, 1, AddressingModes.implied);
+        this.opcodes[0xA8] = new TAY(cpu,0xA8, 2, 1, AddressingModes.implied);
+        this.opcodes[0x5B] = new TCD(cpu,0x5B, 2, 1, AddressingModes.implied);
+        this.opcodes[0x1B] = new TCS(cpu,0x1B, 2, 1, AddressingModes.implied);
+        this.opcodes[0x7B] = new TDC(cpu,0x7B, 2, 1, AddressingModes.implied);
+        this.opcodes[0x14] = new TRB(cpu,0x14, 5, 2, AddressingModes.direct);
+        this.opcodes[0x1C] = new TRB(cpu,0x1C, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x04] = new TSB(cpu,0x04, 5, 2, AddressingModes.direct);
+        this.opcodes[0x0C] = new TSB(cpu,0x0C, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x3B] = new TSC(cpu,0x3B, 2, 1, AddressingModes.implied);
+        this.opcodes[0xBA] = new TSX(cpu,0xBA, 2, 1, AddressingModes.implied);
+        this.opcodes[0x8A] = new TXA(cpu,0x8A, 2, 1, AddressingModes.implied);
+        this.opcodes[0x9A] = new TXS(cpu,0x9A, 2, 1, AddressingModes.implied);
+        this.opcodes[0x9B] = new TXY(cpu,0x9B, 2, 1, AddressingModes.implied);
+        this.opcodes[0x98] = new TYA(cpu,0x98, 2, 1, AddressingModes.implied);
+        this.opcodes[0xBB] = new TYX(cpu,0xBB, 2, 1, AddressingModes.implied);
+        this.opcodes[0xCB] = new WAI(cpu,0xCB, 3, 1, AddressingModes.implied);
+        this.opcodes[0x42] = new WDM(cpu,0x42, 0, 2, AddressingModes.implied); // TODO
+        this.opcodes[0xEB] = new XBA(cpu,0xEB, 1, 1, AddressingModes.implied);
+        this.opcodes[0xFB] = new XCE(cpu,0xFB, 1, 1, AddressingModes.implied);
 
     }
 

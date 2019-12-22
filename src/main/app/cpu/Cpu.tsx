@@ -31,7 +31,7 @@ export class Cpu {
 
         this.console = console;
         this.registers = new Registers();
-        this.opcodes = new Opcodes();
+        this.opcodes = new Opcodes(this);
         this.interrupts = new InterruptHandler(console, this);
     }
 
@@ -69,7 +69,7 @@ export class Cpu {
         this.registers.p.setM(0x1);
         this.registers.p.setD(0x0);
 
-        this.registers.a.set(0xF);
+        this.registers.a.set(0x0);
         this.registers.x.set(0x0000);
         this.registers.y.set(0x0000);
         this.registers.sp.set(0x1FF);

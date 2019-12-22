@@ -64,6 +64,57 @@ export class Bit {
         return (a) & 0xFF;
     }
 
+    public static getUint24Upper(a: number) {
+        if (a == null) {
+            return null;
+        }
+
+        return (a >> 16) & 0xFF;
+    }
+
+    public static getUint24Middle(a: number) {
+        if (a == null) {
+            return null;
+        }
+
+        return (a >> 8) & 0xFF;
+    }
+
+    public static getUint24Lower(a: number) {
+        if (a == null) {
+            return null;
+        }
+
+        return (a) & 0xFF;
+    }
+
+    public static setUint24Upper(num: number, a: number) {
+        let val: number = num;
+
+        val = val & (0x0FFFF);
+        val = val | ((a & 0xF) << 16);
+
+        return val & 0xFFFFF;
+    }
+
+    public static setUint24Middle(num: number, a: number) {
+        let val: number = num;
+
+        val = val & (0xF00FF);
+        val = val | ((a & 0xFF) << 8);
+
+        return val & 0xFFFFF;
+    }
+
+    public static setUint24Lower(num: number, a: number) {
+        let val: number = num;
+
+        val = val & (0xFFF00);
+        val = val | ((a & 0xFF) << 0);
+
+        return val & 0xFFFFF;
+    }
+
     public static setUint16Lower(num: number, a: number) {
         let val: number = num;
 
