@@ -64,8 +64,13 @@ export class OamSizeAndDataAreaRegister extends Register {
     public address: string = "0x2101";
     public label: string = "OBSEL";
 
-    public getOamSize(): OamSize {
+    public getSize(): number {
         let type : number = (this.val >> 5) & 0x7;
+        return type;
+    }
+
+    public getOamSize(): OamSize {
+        let type : number = this.getSize();
         if (type == 0x0) {
             return OamSize.create(8,8, 16, 16);
         } else if (type == 0x1) {

@@ -91,7 +91,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                     <ul style={{margin: "5px"}}>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Size:</span>
-                                            <span>{this.state.registers.oamselect.getOamSize()}</span>
+                                            <span>{this.state.registers.oamselect.getSize()}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Name Select:</span>
