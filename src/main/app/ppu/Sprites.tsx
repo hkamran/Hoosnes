@@ -31,52 +31,48 @@ export class Sprite {
     constructor(id: number, oam: Oam) {
         this.id = id;
         this.tableAIndex = id * 4;
-        this.tableBIndex = id * 2;
+        this.tableBIndex = id;
         this.oam = oam;
-    }
-
-    public getXPosition(): number {
-        let val: number =
-            this.oam.readByte(this.tableAIndex + 0);
-        return  val;
-    }
-
-    public getYPosition(): number {
-        let val: number =
-            this.oam.readByte(this.tableAIndex + 1);
-        return val;
     }
 
     public getTileNumber(): number {
         let val: number =
-            this.oam.readByte(this.tableAIndex + 2);
-        return val;
+            this.oam.low[this.tableAIndex + 0];
+        return val & 0xFF;
     }
 
-    public getAttributes(): number {
+    public getXPosition(): number {
         let val: number =
-            this.oam.readByte(this.tableAIndex + 3);
+            this.oam.low[this.tableAIndex + 1];
+        return val & 0xFF;
+    }
+
+    public getYPosition(): number {
+        let val: number =
+            this.oam.low[this.tableAIndex + 2];
+        return val & 0xFF;
+    }
+
+    private getAttributes(): number {
+        let val: number =
+            this.oam.low[this.tableAIndex + 3];
         return val;
     }
 
-    public getPageNumber(): number {
+    public getNameTable(): number {
         let val: number = this.getAttributes();
-        return val & 1;
+        return (val >> 0) & 1;
     }
 
     public getPaletteIndex(): number {
-        let val: number = this.getAttributes();
-        return (val >> 1) & 7;
+        let val: number = (this.getAttributes() >> 1) & 7;
+        let index: number = (128 + val) * 16;
+        return index;
     }
 
-    public getPriority(): number {
+    public getSpritePriority(): number {
         let val: number = this.getAttributes();
         return (val >> 4) & 3;
-    }
-
-    public isYFlipped(): boolean {
-        let val: number = this.getAttributes();
-        return ((val >> 7) & 1) == 1;
     }
 
     public isXFlipped(): boolean {
@@ -84,26 +80,25 @@ export class Sprite {
         return ((val >> 6) & 1) == 1;
     }
 
+    public isYFlipped(): boolean {
+        let val: number = this.getAttributes();
+        return ((val >> 7) & 1) == 1;
+    }
+
     public isBig(): boolean {
         let val: number = this.getSecondaryAttributes();
         return ((val >> 1) & 0x1) == 1;
     }
-
-    public getTilePage(): number {
-        let attributes: number = this.getAttributes();
-        return (attributes >> 0 & 0x1);
-    }
-
-    public isXWrapped(): number {
-        let attributes: number = this.getAttributes();
-        return (attributes >> 1 & 0x1);
+    public isXWrapped(): boolean {
+        let val: number = this.getSecondaryAttributes();
+        return ((val >> 0) & 0x1) == 1;
     }
 
     public getSecondaryAttributes(): number {
         let index: number = Math.floor(this.tableBIndex / 8);
         let offset: number = (this.tableBIndex % 8);
         let byte: number =
-            this.oam.readByte(512 + index);
+            this.oam.high[index];
 
         let val = (byte >> (6 - offset)) & 0x3;
         return val;

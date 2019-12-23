@@ -4,6 +4,8 @@ import Console from "../Console";
 import {CGram} from "../memory/CGram";
 import {Bit} from "../util/Bit";
 import {Objects} from "../util/Objects";
+import {Address} from "../bus/Address";
+import {OamSize} from "../memory/Oam";
 
 const INVALID_SET: string = "Invalid value set";
 
@@ -20,8 +22,6 @@ export class Register {
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
-        Objects.requireNonNull(console.ppu);
-        Objects.requireNonNull(console.ppu.registers);
 
         this.console = console;
     }
@@ -64,8 +64,23 @@ export class OamSizeAndDataAreaRegister extends Register {
     public address: string = "0x2101";
     public label: string = "OBSEL";
 
-    public getOamSize(): number {
-        return (this.val >> 5) & 0x7;
+    public getOamSize(): OamSize {
+        let type : number = (this.val >> 5) & 0x7;
+        if (type == 0x0) {
+            return OamSize.create(8,8, 16, 16);
+        } else if (type == 0x1) {
+            return OamSize.create(8,8, 32, 32);
+        } else if (type == 0x2) {
+            return OamSize.create(16,16, 32, 32);
+        } else if (type == 0x4) {
+            return OamSize.create(16,16, 64, 64);
+        } else if (type == 0x4) {
+            return OamSize.create(32,32, 64, 64);
+        } else if (type == 0x5) {
+            return OamSize.create(32,32, 64, 64);
+        } else {
+            throw new Error("Undocumented behaviour");
+        }
     }
 
     public getNameSelection(): number {
@@ -82,39 +97,37 @@ export class OamAddressRegister extends Register {
     public address: string = "0x2102-0x2103";
     public label: string = "OAMADD";
 
-    public oamlow: OamAddressLowRegister;
-    public oamhigh: OamAddressHighRegister;
-
     constructor(console: Console) {
         super(console);
-        this.oamlow = new OamAddressLowRegister(console);
-        this.oamhigh = new OamAddressHighRegister(console);
     }
 
-    public getPriority() {
-        return (this.oamhigh.get() >> 7) & 0x1;
+    public setUpper(val: number): void {
+        this.val = Bit.setUint16Upper(this.val, val);
     }
 
-    public getBaseAddress() {
-        let high: number = this.oamhigh.get();
-        let low: number = this.oamlow.get();
-
-        return ((high & 1) << 9) | low;
+    public setLower(val: number): void {
+        this.val = Bit.setUint16Lower(this.val, val);
     }
 
-}
+    public getUpper(): number {
+        return Bit.getUint16Upper(this.val);
+    }
 
-export class OamAddressLowRegister extends Register {
+    public getLower(): number {
+        return Bit.getUint16Lower(this.val);
+    }
 
-    public address: string = "0x2102";
-    public label: string = "OAMADDL";
+    public getAddress(): number {
+        return this.getUpper();
+    }
 
-}
+    public getPriority(): number {
+        return (this.getUpper() >> 7) & 0x1;
+    }
 
-export class OamAddressHighRegister extends Register {
-
-    public address: string = "0x2103";
-    public label: string = "OAMADDH";
+    public getTableSelector(): number {
+        return (this.getLower() >> 0) & 0x1;
+    }
 
 }
 
@@ -122,6 +135,23 @@ export class OamDataWriteRegister extends Register {
 
     public address: string = "0x2104";
     public label: string = "OAMDATA";
+
+    public set(val: number): void {
+        let ppu: Ppu = this.console.ppu;
+        let addr: number = ppu.registers.oamaddr.getAddress();
+        let bank: number = ppu.registers.oamaddr.getTableSelector();
+
+        ppu.registers.oamaddr.setUpper((addr + 1) & 0xFF);
+        ppu.oam.writeByte(Address.create(addr, bank), val);
+    }
+
+    public get(): number {
+        let ppu: Ppu = this.console.ppu;
+        let addr: number = ppu.registers.oamaddr.getAddress();
+        let bank: number = ppu.registers.oamaddr.getTableSelector();
+
+        return ppu.oam.readByte(Address.create(addr, bank));
+    }
 
 }
 
@@ -460,12 +490,40 @@ export class VideoPortControlRegister extends Register {
         return (this.val >> 2) & 0x3;
     }
 
+    public static remap(type: number, val: number) {
+        if (type == 0x00) {
+            return val;
+        } else if (type == 0x01) {
+            let top: number = (val >> 8) & 0xFF;
+            let middle: number = (val >> 5) & 0x7;
+            let bottom: number = (val >> 0) & 0x1F;
+
+            return (top << 8) | (bottom << 3) | (middle);
+        } else if (type == 0x10) {
+            let top: number = (val >> 9) & 0x7F;
+            let middle: number = (val >> 6) & 0x7;
+            let bottom: number = (val >> 0) & 0x3F;
+
+            return (top << 9) | (bottom << 3) | (middle);
+        } else if (type == 0x11) {
+            let top: number = (val >> 10) & 0x3F;
+            let middle: number = (val >> 6) & 0x7;
+            let bottom: number = (val >> 0) & 0x7F;
+
+            return (top << 10) | (bottom << 3) | (middle);
+        }
+    }
+
 }
 
 export class VRAMAddressRegister extends Register {
 
     public address: string = "0x2115-0x2116";
     public label: string = "VMADD";
+
+    public set(val: number): void {
+        super.set(val & 0xFFFF);
+    }
 
     public setLower(val: number) {
         this.val = Bit.setUint16Lower(this.val, val);
@@ -490,87 +548,102 @@ export class VRAMDataWriteRegister extends Register {
     public label: string = "VMDATA";
 
     public setLower(val: number) {
-        if (this.console.ppu.registers.vportcntrl.getAddressIncrementMode() == 0) {
-            // write and increment
-            let amount = this.console.ppu.registers.vportcntrl.getAddressIncrementAmount();
+        let ppu: Ppu = this.console.ppu;
+        let doIncrement = ppu.registers.vportcntrl.getAddressIncrementMode() == 0;
+
+        let loData: number = Bit.getUint16Lower(this.val);
+        let hiData: number = Bit.getUint16Upper(this.val);
+
+        if (doIncrement) {
+            this.write(true, loData);
         }
 
         this.val = Bit.setUint16Lower(this.val, val);
+        this.write(false, loData);
     }
 
     public setUpper(val: number) {
-        if (this.console.ppu.registers.vportcntrl.getAddressIncrementMode() == 1) {
-            // write and increment
-            let amount = this.console.ppu.registers.vportcntrl.getAddressIncrementAmount();
+        let ppu: Ppu = this.console.ppu;
+        let doIncrement = ppu.registers.vportcntrl.getAddressIncrementMode() == 1;
+
+        let loData: number = Bit.getUint16Lower(this.val);
+        let hiData: number = Bit.getUint16Upper(this.val);
+
+        if (doIncrement) {
+            this.write(true, loData, hiData);
         }
 
         this.val = Bit.setUint16Upper(this.val, val);
+        this.write(false, hiData);
     }
 
     public getLower(): number {
-        if (this.console.ppu.registers.vportcntrl.getAddressIncrementMode() == 0) {
-            // write and increment
-            let amount = this.console.ppu.registers.vportcntrl.getAddressIncrementAmount();
-        }
-
         return Bit.getUint16Lower(this.val);
     }
 
     public getUpper(): number {
-        if (this.console.ppu.registers.vportcntrl.getAddressIncrementMode() == 1) {
-            // write and increment
-            let amount = this.console.ppu.registers.vportcntrl.getAddressIncrementAmount();
-        }
-
         return Bit.getUint16Upper(this.val);
+    }
+
+    public write(doIncrement: boolean, loByte: number, hiByte?: number): void {
+        let ppu: Ppu = this.console.ppu;
+
+        let amount = ppu.registers.vportcntrl.getAddressIncrementAmount();
+        let type: number = ppu.registers.vportcntrl.getAddressFormation();
+        let address: number = VideoPortControlRegister.remap(type, ppu.registers.vaddr.get());
+
+        if (loByte) ppu.vram.writeByte(Address.create(address + 0), loByte);
+        if (hiByte) ppu.vram.writeByte(Address.create(address + 1), hiByte);
+
+        if (doIncrement) ppu.registers.vaddr.set(ppu.registers.vaddr.get() + amount);
     }
 }
 
 export class Mode7Register extends Register {
 
-    public address: string = "211A";
+    public address: string = "0x211A";
     public label: string = "VMDATAH";
 
 }
 
 export class CosXRegister extends Register {
 
-    public address: string = "211B";
+    public address: string = "0x211B";
     public label: string = "VMDATAH";
 
 }
 
 export class SinXRegister extends Register {
 
-    public address: string = "211C";
+    public address: string = "0x211C";
     public label: string = "VMDATAH";
 
 }
 
 export class SinYRegister extends Register {
 
-    public address: string = "211D";
+    public address: string = "0x211D";
     public label: string = "VMDATAH";
 
 }
 
 export class CosYRegister extends Register {
 
-    public address: string = "211E";
+    public address: string = "0x211E";
     public label: string = "VMDATAH";
 
 }
 
 export class CenterPositionXRegister extends Register {
 
-    public address: string = "211F";
+    public address: string = "0x211F";
     public label: string = "VMDATAH";
 
 }
 
 export class CenterPositionYRegister extends Register {
 
-    public address: string = "2120";
+    public address: string = "0x2120";
     public label: string = "VMDATAH";
 
 }
@@ -581,18 +654,18 @@ export class CGRAMAddressRegister extends Register {
     public label: string = "CGADD";
 
     public set(val: number): void {
-        super.set((val * 2) & 0xFFFF);
+        super.set((val * 2) % CGram.size);
     }
 
-    public increment(): void {
-        this.val = (this.val + 1) % CGram.size;
+    public increment(val: number): void {
+        this.val = (this.val + val) % CGram.size;
     }
 
 }
 
 export class CGRAMDataWriteRegister extends Register {
 
-    public address: string = "2122";
+    public address: string = "0x2122";
     public label: string = "CGDATA";
 
     public counter: number = 0;
@@ -601,119 +674,111 @@ export class CGRAMDataWriteRegister extends Register {
 
     public set(val: number): void {
         super.set(val);
+        this.low = this.high;
+        this.high = val;
         this.counter++;
-        if (this.counter == 1) {
-            this.low = val;
-        } else if (this.counter == 2) {
-            this.high = val;
-        }
-        let doWrite: boolean = this.counter % 2 == 0;
+        let doWrite: boolean = this.counter == 2;
 
         if (doWrite) {
-            let lowAddr: number = this.console.ppu.registers.cgramaddr.get();
-            this.console.ppu.cgram.writeByte(lowAddr, this.low);
+            let addr: number = this.console.ppu.registers.cgramaddr.get();
 
-            this.console.ppu.registers.cgramaddr.increment();
+            this.console.ppu.cgram.writeByte((addr + 0) % CGram.size, this.low);
+            this.console.ppu.cgram.writeByte((addr + 1) % CGram.size, this.high);
 
-            let highAddr: number = this.console.ppu.registers.cgramaddr.get();
-            this.console.ppu.cgram.writeByte(highAddr, this.high);
-
-            this.console.ppu.registers.cgramaddr.increment();
-
+            this.console.ppu.registers.cgramaddr.increment(2);
             this.counter = 0;
         }
-
     }
 
 }
 
 export class WindowMaskSettingsForBG1And2Register extends Register {
 
-    public address: string = "2123";
+    public address: string = "0x2123";
     public label: string = "W12SEL";
 
 }
 
 export class WindowMaskSettingsForBG3And4Register extends Register {
 
-    public address: string = "2124";
+    public address: string = "0x2124";
     public label: string = "W34SEL";
 
 }
 
 export class WindowMaskSettingsForObjRegister extends Register {
 
-    public address: string = "2125";
+    public address: string = "0x2125";
     public label: string = "WOBJSEL";
 
 }
 
 export class WindowPositionForBG0Register extends Register {
 
-    public address: string = "2126";
+    public address: string = "0x2126";
     public label: string = "WH0";
 
 }
 
 export class WindowPositionForBG1Register extends Register {
 
-    public address: string = "2127";
+    public address: string = "0x2127";
     public label: string = "WH1";
 
 }
 
 export class WindowPositionForBG2Register extends Register {
 
-    public address: string = "2128";
+    public address: string = "0x2128";
     public label: string = "WH2";
 
 }
 
 export class WindowPositionForBG3Register extends Register {
 
-    public address: string = "2129";
+    public address: string = "0x2129";
     public label: string = "WH3";
 
 }
 
 export class WindowMaskLogicForBgRegister extends Register {
 
-    public address: string = "212A";
+    public address: string = "0x212A";
     public label: string = "WBGLOG";
 
 }
 
 export class WindowMaskLogicForObjRegister extends Register {
 
-    public address: string = "212B";
+    public address: string = "0x212B";
     public label: string = "WOBJLOG";
 
 }
 
 export class ScreenDestinationForMainRegister extends Register {
 
-    public address: string = "212C";
+    public address: string = "0x212C";
     public label: string = "TM";
 
 }
 
 export class ScreenDestinationForSubRegister extends Register {
 
-    public address: string = "212D";
+    public address: string = "0x212D";
     public label: string = "TS";
 
 }
 
 export class WindowMaskDestinationForMainRegister extends Register {
 
-    public address: string = "212E";
+    public address: string = "0x212E";
     public label: string = "TMW";
 
 }
 
 export class WindowMaskDestinationForSubRegister extends Register {
 
-    public address: string = "212F";
+    public address: string = "0x212F";
     public label: string = "TSW";
 
 }
@@ -721,7 +786,7 @@ export class WindowMaskDestinationForSubRegister extends Register {
 // Fixed color addition or screen addition register [CGWSEL]
 export class ColorMathSelectionRegister extends Register {
 
-    public address: string = "2130";
+    public address: string = "0x2130";
     public label: string = "CGWSEL";
 
 }
@@ -729,7 +794,7 @@ export class ColorMathSelectionRegister extends Register {
 // Addition/subtraction for screens, BGs, & OBJs [CGADSUB]
 export class ColorMathAddSubAffectRegister extends Register {
 
-    public address: string = "2131";
+    public address: string = "0x2131";
     public label: string = "CGADSUB";
 
 }
@@ -737,35 +802,35 @@ export class ColorMathAddSubAffectRegister extends Register {
 // $2132
 export class ColorMathDataRegister extends Register {
 
-    public address: string = "2132";
+    public address: string = "0x2132";
     public label: string = "COLDATA";
 
 }
 
 export class ScreenModeSelectRegister extends Register {
 
-    public address: string = "2133";
+    public address: string = "0x2133";
     public label: string = "SETINI";
 
 }
 
 export class MultiplicationResultLowRegister extends Register {
 
-    public address: string = "2134";
+    public address: string = "0x2134";
     public label: string = "MPYL";
 
 }
 
 export class MultiplicationResultMiddleRegister extends Register {
 
-    public address: string = "2135";
+    public address: string = "0x2135";
     public label: string = "MPYM";
 
 }
 
 export class MultiplicationResultHighRegister extends Register {
 
-    public address: string = "2136";
+    public address: string = "0x2136";
     public label: string = "MPYH";
 
 }
@@ -779,7 +844,7 @@ export class SoftwareLatchRegister extends Register {
 
 export class OAMDataReadRegister extends Register {
 
-    public address: string = "2138";
+    public address: string = "0x2138";
     public label: string = "OAMDATAREAD";
 
 }
@@ -798,11 +863,37 @@ export class VRAMDataReadRegister extends Register {
     }
 
     public getLower(): number {
-        return Bit.getUint16Lower(this.val);
+        let ppu: Ppu = this.console.ppu;
+        let doIncrement = ppu.registers.vportcntrl.getAddressIncrementMode() == 0;
+
+        if (doIncrement) {
+            return this.read(true, false);
+        }
+
+        return this.read(false, false);
     }
 
     public getUpper(): number {
-        return Bit.getUint16Upper(this.val);
+        let ppu: Ppu = this.console.ppu;
+        let doIncrement = ppu.registers.vportcntrl.getAddressIncrementMode() == 1;
+
+        if (doIncrement) {
+            return this.read(true, true);
+        }
+
+        return this.read(false, true);
+    }
+
+    public read(doIncrement: boolean, high?: boolean): number {
+        let ppu: Ppu = this.console.ppu;
+
+        let amount = ppu.registers.vportcntrl.getAddressIncrementAmount();
+        let type: number = ppu.registers.vportcntrl.getAddressFormation();
+        let address: number = VideoPortControlRegister.remap(type, ppu.registers.vaddr.get());
+
+        if (doIncrement) ppu.registers.vaddr.set(ppu.registers.vaddr.get() + amount);
+        if (high) return ppu.vram.readByte(Address.create(address + 0));
+        if (!high) return ppu.vram.readByte(Address.create(address + 1));
     }
 }
 
@@ -810,6 +901,21 @@ export class CGRAMDataReadRegister extends Register {
 
     public address: string = "213B";
     public label: string = "CGDATAREAD";
+
+    public counter: number = 0;
+
+    public get(): number {
+        let addr: number = this.console.ppu.registers.cgramaddr.get();
+        let value: number = this.console.ppu.cgram.readByte((addr + this.counter) % CGram.size);
+
+        if (this.counter == 1) {
+            this.console.ppu.registers.cgramaddr.set((addr + 2) % CGram.size);
+            this.counter = 0;
+        } else {
+            this.counter++;
+        }
+        return value;
+    }
 
 }
 

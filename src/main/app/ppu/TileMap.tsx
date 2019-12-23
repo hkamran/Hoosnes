@@ -1,4 +1,5 @@
 import {Vram} from "../memory/Vram";
+import {Address} from "../bus/Address";
 
 
 class TileEntry {
@@ -17,17 +18,17 @@ class TileEntry {
     }
 
     public getAttributes(): number {
-        let high: number = this.vram.readByte(this.getTileAddress() + 0);
-        let low: number = this.vram.readByte(this.getTileAddress() + 1);
+        let high: number = this.vram.readByte(Address.create(this.getTileAddress() + 0));
+        let low: number = this.vram.readByte(Address.create(this.getTileAddress() + 1));
 
         let value: number = (high << 4) | low;
         return value;
     }
 
     public getCharacterAddress(): number {
-        let high: number = this.vram.readByte(this.getTileAddress() + 1);
-        let mid: number = this.vram.readByte(this.getTileAddress() + 2);
-        let low: number = this.vram.readByte(this.getTileAddress() + 3);
+        let high: number = this.vram.readByte(Address.create(this.getTileAddress() + 1));
+        let mid: number = this.vram.readByte(Address.create(this.getTileAddress() + 2));
+        let low: number = this.vram.readByte(Address.create(this.getTileAddress() + 3));
 
         let address: number = ((high & 0x3) << 7) | (mid << 4) | low;
         return address & 0xFFFF;

@@ -1971,8 +1971,8 @@ export class Opcodes {
         this.opcodes[0x7C] = new JMP(cpu,0x7C, 6, 3, AddressingModes.absoluteX); // TODO
         this.opcodes[0xDC] = new JMP(cpu,0xDC, 6, 3, AddressingModes.absoluteJump);
 
-        this.opcodes[0x20] = new JSR(cpu,0x20, 6, 3, AddressingModes.absoluteJump);
-        this.opcodes[0x22] = new JSR(cpu,0x22, 8, 4, AddressingModes.absoluteX); // TODO
+        this.opcodes[0x20] = new JSR(cpu,0x20, 6, 3, AddressingModes.absolute);
+        this.opcodes[0x22] = new JSR(cpu,0x22, 8, 4, AddressingModes.absoluteJump); // TODO
         this.opcodes[0xFC] = new JSR(cpu,0xFC, 8, 3, AddressingModes.absoluteX); // TODO
 
         this.opcodes[0xA1] = new LDA(cpu,0xA1, 6, 2, AddressingModes.directX);

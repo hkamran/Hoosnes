@@ -1,5 +1,6 @@
 import {Objects} from "../util/Objects";
 import {NumberUtil} from "../util/NumberUtil";
+import {Address} from "../bus/Address";
 
 export class Vram {
 
@@ -11,21 +12,31 @@ export class Vram {
         this.data.fill(0, 0, Vram.size);
     }
 
-    public readByte(address: number, bank?: number): number {
-        if (address == null || address < 0 || address > this.data.length) {
-            throw new Error("Invalid readByte at 0x" + address.toString(16));
+    public readByte(address: Address): number {
+        if (address == null) {
+            throw new Error("Invalid readByte at " + address);
         }
-        return this.data[address];
+
+        let offset = address.toValue();
+
+        if (offset < 0 || offset > Vram.size) {
+            throw new Error("Invalid readByte at " + address.toString());
+        }
+
+        return this.data[address.toValue()];
     }
 
-    public writeByte(address: number, val: number, bank?: number): void {
-        if (address == null || address < 0 || address > this.data.length) {
-            throw new Error("Invalid write at 0x" + address.toString(16));
+    public writeByte(address: Address, val: number): void {
+        if (address == null || val == null || val < 0 || val > 0xFF) {
+            throw new Error("Invalid write at 0x" + address + " with value " + val);
         }
 
-        if (val == null || val < 0 || val > 0xFF) {
-            throw new Error("Invalid write at 0x" + address.toString(16) + " with value " + val);
+        let offset = address.toValue();
+
+        if (offset < 0 || offset > Vram.size) {
+            throw new Error("Invalid write at 0x" + address.toString() + " with value " + val);
         }
-        this.data[address] = val;
+
+        this.data[offset] = val;
     }
 }

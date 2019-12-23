@@ -42,9 +42,9 @@ export class BusB {
         } else if (page == 0x2101) {
             read = Read.byte(this.registers.oamselect.get());
         } else if (page == 0x2102) {
-            read = Read.byte(this.registers.oamaddr.oamlow.get());
+            read = Read.byte(this.registers.oamaddr.getLower());
         } else if (page == 0x2103) {
-            read = Read.byte(this.registers.oamaddr.oamlow.get());
+            read = Read.byte(this.registers.oamaddr.getUpper());
         } else if (page == 0x2104) {
             read = Read.byte(this.registers.oamdataw.get());
         } else if (page == 0x2105) {
@@ -207,9 +207,9 @@ export class BusB {
         } else if (page == 0x2101) {
             this.registers.oamselect.set(val);
         } else if (page == 0x2102) {
-            this.registers.oamaddr.oamlow.set(val);
+            this.registers.oamaddr.setLower(val);
         } else if (page == 0x2103) {
-            this.registers.oamaddr.oamhigh.set(val);
+            this.registers.oamaddr.setUpper(val);
         } else if (page == 0x2104) {
             this.registers.oamdataw.set(val);
         } else if (page == 0x2105) {
