@@ -122,10 +122,9 @@ export class Absolute implements IAddressingMode {
         let loByte: Read = context.bus.readByte(loAddr);
         let hiByte: Read = context.bus.readByte(hiAddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
         let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
 
-        return Read.byte(value, cycles);
+        return Read.word(loByte.get(), hiByte.get(), cycles);
     }
 
     public getAddressing(context: OpContext): Addressing {

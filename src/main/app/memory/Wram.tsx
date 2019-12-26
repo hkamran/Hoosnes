@@ -40,7 +40,24 @@ export class Wram {
     }
 
     public writeByte(address: Address, value: number): Write {
-        return null;
+        Objects.requireNonNull(address);
+
+        let bank = address.getBank();
+        let page = address.getPage();
+
+        if (page > 0xFFFF || page < 0) {
+            throw new Error("Invalid writeByte on work ram!" + address);
+        }
+
+        if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
+            let multiplier: number = (page / 0x2000) * 0x2000;
+            let remainder: number = page % 0x2000;
+            this.data[multiplier + remainder] = value;
+            return new Write(address, value, 0);
+        } else {
+            this.data[page] = value;
+            return new Write(address, value, 0);
+        }
     }
 }
 

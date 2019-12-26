@@ -1,5 +1,5 @@
 import {Objects} from "../util/Objects";
-import {Read} from "../bus/Read";
+import {Read, ReadType} from "../bus/Read";
 import Console from "../Console";
 import {Address} from "../bus/Address";
 import {Cpu} from "./Cpu";
@@ -59,7 +59,7 @@ export class OpContext {
     }
 
     public setFlagC(val: number, is8Bit?: boolean): void {
-        is8Bit = is8Bit || true;
+        if (is8Bit == null) is8Bit = true;
         if (val == null || val < 0 || (is8Bit && val > 0xFF)) {
             throw new Error("Invalid flag calculation!");
         }
@@ -71,9 +71,9 @@ export class OpContext {
     }
 
     public setFlagZ(val: number, is8Bit?: boolean): void {
-        is8Bit = is8Bit || true;
+        if (is8Bit == null) is8Bit = true;
         if (val == null || val < 0 || (is8Bit && val > 0xFF)) {
-            throw new Error("Invalid flag calculation!");
+            throw new Error("Invalid flag calculation! " + val.toString(16) + " " + is8Bit);
         }
 
         let mask: number = (is8Bit || false) ? 0xFF : 0xFFFF;
@@ -92,7 +92,7 @@ export class OpContext {
     }
 
     public setFlagN(val: number, is8Bit?: boolean): void {
-        is8Bit = is8Bit || true;
+        if (is8Bit == null) is8Bit = true;
         if (val == null || val < 0 || (is8Bit && val > 0xFF)) {
             throw new Error("Invalid flag calculation!");
         }
@@ -975,7 +975,6 @@ class TXA extends Operation {
             let lowData: number = context.cpu.stack.popByte();
             let value: number = lowData;
 
-            context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
             context.cpu.registers.a.set(value);
         } else {
             let lowData: number = context.cpu.stack.popByte();
@@ -984,7 +983,6 @@ class TXA extends Operation {
             let value: number = Bit.toUint16(highData, lowData);
 
             context.cpu.registers.a.set(value);
-            context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
         }
 
         return this.cycle;
@@ -1002,7 +1000,6 @@ class TSX extends Operation {
             let value: number = lowData;
 
             context.cpu.registers.x.set(value);
-            context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
         } else {
             let lowData: number = context.cpu.stack.popByte();
             let highData: number = context.cpu.stack.popByte();
@@ -1010,7 +1007,6 @@ class TSX extends Operation {
             let value: number = Bit.toUint16(highData, lowData);
 
             context.cpu.registers.x.set(value);
-            context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
         return this.cycle;
@@ -1067,6 +1063,26 @@ class JMP extends Operation {
 
 }
 
+class JSL extends Operation {
+    public name: string = "JSL";
+
+    public execute(context: OpContext): number {
+        let bank: number = (context.registers.k.get()) & 0xFF;
+        let pc: number = (context.registers.pc.get() - 1) & 0xFFFF;
+        let addressing: Addressing = this.mode.getAddressing(context);
+        let address: Address = addressing.getLow();
+        let sp: number = context.registers.sp.get();
+
+        context.cpu.stack.pushByte(bank);
+        context.cpu.stack.pushWord(pc);
+        context.registers.pc.set(address.toValue());
+
+        return this.cycle;
+    }
+
+}
+
+
 class JSR extends Operation {
     public name: string = "JSR";
 
@@ -1078,7 +1094,6 @@ class JSR extends Operation {
 
         context.cpu.stack.pushWord(pc);
         context.registers.pc.set(address.toValue());
-        context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
         return this.cycle;
     }
@@ -1133,6 +1148,8 @@ class LDX extends Operation {
         let value: Read = this.mode.getValue(context);
         context.registers.x.set(value.get());
 
+        context.setFlagZ(value.get(), value.getType() == ReadType.BYTE);
+        context.setFlagN(value.get(), value.getType() == ReadType.BYTE);
         return this.cycle;
     }
 
@@ -1267,7 +1284,6 @@ class PEA extends Operation {
         let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(value);
-        context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
         return this.cycle;
     }
@@ -1282,7 +1298,6 @@ class PEI extends Operation {
         let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(value);
-        context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
         return this.cycle;
     }
@@ -1298,7 +1313,6 @@ class PER extends Operation {
         let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(value);
-        context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
         return this.cycle;
     }
@@ -1314,12 +1328,10 @@ class PHA extends Operation {
             let result: number = context.cpu.registers.a.getLower();
 
             context.cpu.stack.pushByte(result);
-            context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
         } else {
             let result: number = context.cpu.registers.a.get();
 
             context.cpu.stack.pushWord(result);
-            context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
         return this.cycle;
@@ -1334,7 +1346,6 @@ class PHB extends Operation {
         let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushByte(result);
-        context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
 
         return this.cycle;
     }
@@ -1487,7 +1498,6 @@ class PHD extends Operation {
         let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(result);
-        context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
 
         return this.cycle;
     }
@@ -1503,7 +1513,6 @@ class PHK extends Operation {
         let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushByte(result);
-        context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
 
         return this.cycle;
     }
@@ -1518,7 +1527,6 @@ class PHP extends Operation {
         let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushByte(p & 0xFF);
-        context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
 
         return this.cycle;
     }
@@ -1537,11 +1545,9 @@ class PHX extends Operation {
 
         if (is8Bit) {
             context.cpu.stack.pushByte(loData);
-            context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
         } else {
             context.cpu.stack.pushByte(loData);
             context.cpu.stack.pushByte(hiData);
-            context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
         return this.cycle;
@@ -1561,11 +1567,9 @@ class PHY extends Operation {
 
         if (is8Bit) {
             context.cpu.stack.pushByte(loData);
-            context.cpu.registers.sp.set((sp - 1) & 0xFFFF);
         } else {
             context.cpu.stack.pushByte(loData);
             context.cpu.stack.pushByte(hiData);
-            context.cpu.registers.sp.set((sp - 2) & 0xFFFF);
         }
 
         return this.cycle;
@@ -1580,12 +1584,6 @@ class PLA extends Operation {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let data: number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
         let sp: number = context.registers.sp.get();
-
-        if (is8Bit) {
-            context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
-        } else {
-            context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
-        }
 
         context.registers.a.set(data);
         context.setFlagN(data, is8Bit);
@@ -1611,7 +1609,6 @@ class PLB extends Operation {
         let sp: number = context.registers.sp.get();
 
         context.registers.k.set(value);
-        context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
         return this.cycle;
@@ -1628,7 +1625,6 @@ class PLD extends Operation {
         let sp: number = context.registers.sp.get();
 
         context.registers.d.set(value);
-        context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
         return this.cycle;
@@ -1643,7 +1639,6 @@ class PLP extends Operation {
         let sp: number = context.registers.sp.get();
 
         context.registers.p.set(p);
-        context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
 
         return this.cycle;
     }
@@ -1657,12 +1652,6 @@ class PLX extends Operation {
         let is8Bit: boolean = context.registers.p.getX() == 1;
         let data: number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
         let sp: number = context.registers.sp.get();
-
-        if (is8Bit) {
-            context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
-        } else {
-            context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
-        }
 
         context.setFlagN(data, is8Bit);
         context.setFlagZ(data, is8Bit);
@@ -1681,12 +1670,6 @@ class PLY extends Operation {
         let is8Bit: boolean = context.registers.p.getX() == 1;
         let data: number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
         let sp: number = context.registers.sp.get();
-
-        if (is8Bit) {
-            context.cpu.registers.sp.set((sp + 1) & 0xFFFF);
-        } else {
-            context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
-        }
 
         context.setFlagN(data, is8Bit);
         context.setFlagZ(data, is8Bit);
@@ -1756,7 +1739,6 @@ class RTI extends Operation {
 
         context.cpu.registers.pc.set(pc & 0xFFFF);
         context.cpu.registers.p.set(p & 0xFF);
-        context.cpu.registers.sp.set((sp + 3) & 0xFFFF);
 
         if (context.registers.p.getE() == 0) {
             let pb: number = context.cpu.stack.popByte();
@@ -1776,7 +1758,6 @@ class RTL extends Operation {
 
         context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
         context.cpu.registers.k.set(pbc & 0xFF);
-        context.cpu.registers.sp.set((sp + 3) & 0xFFFF);
 
         return this.cycle;
     }
@@ -1791,7 +1772,6 @@ class RTS extends Operation {
         let sp: number = context.registers.sp.get();
 
         context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
-        context.cpu.registers.sp.set((sp + 2) & 0xFFFF);
 
         return this.cycle;
     }
@@ -1832,9 +1812,10 @@ class SEP extends Operation {
     public name: string = "SEP";
 
     public execute(context: OpContext): number {
+        debugger;
         let value: Read = this.mode.getValue(context);
         let status: number = context.registers.p.get();
-        let result: number = status || (value.get() & 0xFF);
+        let result: number = status | (value.get() & 0xFF);
         context.registers.p.set(result);
 
         return this.cycle;
@@ -1972,7 +1953,7 @@ export class Opcodes {
         this.opcodes[0xDC] = new JMP(cpu,0xDC, 6, 3, AddressingModes.absoluteJump);
 
         this.opcodes[0x20] = new JSR(cpu,0x20, 6, 3, AddressingModes.absolute);
-        this.opcodes[0x22] = new JSR(cpu,0x22, 8, 4, AddressingModes.absoluteJump); // TODO
+        this.opcodes[0x22] = new JSL(cpu,0x22, 8, 4, AddressingModes.absoluteJump); // TODO
         this.opcodes[0xFC] = new JSR(cpu,0xFC, 8, 3, AddressingModes.absoluteX); // TODO
 
         this.opcodes[0xA1] = new LDA(cpu,0xA1, 6, 2, AddressingModes.directX);

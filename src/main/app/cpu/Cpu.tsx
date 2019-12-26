@@ -19,7 +19,7 @@ export class Cpu {
     public console: Console;
     public interrupts: InterruptHandler;
 
-    public stack: Stack = new Stack();
+    public stack: Stack;
     public wram: Wram = new Wram();
 
     public context: OpContext;
@@ -30,9 +30,10 @@ export class Cpu {
         Objects.requireNonNull(console);
 
         this.console = console;
-        this.registers = new Registers();
         this.opcodes = new Opcodes(this);
         this.interrupts = new InterruptHandler(console, this);
+        this.registers = new Registers(console);
+        this.stack = new Stack(console);
     }
 
     public tick(): number {

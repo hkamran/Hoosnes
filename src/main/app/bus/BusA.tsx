@@ -32,7 +32,7 @@ export class BusA {
         let bank = address.getBank();
         let page = address.getPage();
 
-        if (page < 0x2100 || page > 0x2183) {
+        if (page < 0x2100 || page > 0x437A) {
             throw new Error("Invalid readByte at " + address);
         }
 
@@ -96,6 +96,206 @@ export class BusA {
             read = Read.byte(this.registers.joy4l.get());
         } else if (page == 0x421F) {
             read = Read.byte(this.registers.joy4h.get());
+        } else if (page == 0x4300) {
+            // --------------------------
+            // DMA 0
+            // --------------------------
+            read = Read.byte(this.registers.dma0.control.get());
+        } else if (page == 0x4301) {
+            read = Read.byte(this.registers.dma0.destination.get());
+        } else if (page == 0x4302) {
+            read = Read.byte(this.registers.dma0.source.getLower());
+        } else if (page == 0x4303) {
+            read = Read.byte(this.registers.dma0.source.getMiddle());
+        } else if (page == 0x4304) {
+            read = Read.byte(this.registers.dma0.source.getUpper());
+        } else if (page == 0x4305) {
+            read = Read.byte(this.registers.dma0.size.getLower());
+        } else if (page == 0x4306) {
+            read = Read.byte(this.registers.dma0.size.getUpper());
+        } else if (page == 0x4307) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4308) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4309) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x430A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4310) {
+            // --------------------------
+            // DMA 1
+            // --------------------------
+            read = Read.byte(this.registers.dma1.control.get());
+        } else if (page == 0x4311) {
+            read = Read.byte(this.registers.dma1.destination.get());
+        } else if (page == 0x4312) {
+            read = Read.byte(this.registers.dma1.source.getLower());
+        } else if (page == 0x4313) {
+            read = Read.byte(this.registers.dma1.source.getMiddle());
+        } else if (page == 0x4314) {
+            read = Read.byte(this.registers.dma1.source.getUpper());
+        } else if (page == 0x4315) {
+            read = Read.byte(this.registers.dma1.size.getLower());
+        } else if (page == 0x4316) {
+            read = Read.byte(this.registers.dma1.size.getUpper());
+        } else if (page == 0x4317) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4318) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4319) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x431A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4320) {
+            // --------------------------
+            // DMA 2
+            // --------------------------
+            read = Read.byte(this.registers.dma2.control.get());
+        } else if (page == 0x4321) {
+            read = Read.byte(this.registers.dma2.destination.get());
+        } else if (page == 0x4322) {
+            read = Read.byte(this.registers.dma2.source.getLower());
+        } else if (page == 0x4323) {
+            read = Read.byte(this.registers.dma2.source.getMiddle());
+        } else if (page == 0x4324) {
+            read = Read.byte(this.registers.dma2.source.getUpper());
+        } else if (page == 0x4325) {
+            read = Read.byte(this.registers.dma2.size.getLower());
+        } else if (page == 0x4326) {
+            read = Read.byte(this.registers.dma2.size.getUpper());
+        } else if (page == 0x4327) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4328) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4329) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x432A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4330) {
+            // --------------------------
+            // DMA 3
+            // --------------------------
+            read = Read.byte(this.registers.dma3.control.get());
+        } else if (page == 0x4331) {
+            read = Read.byte(this.registers.dma3.destination.get());
+        } else if (page == 0x4332) {
+            read = Read.byte(this.registers.dma3.source.getLower());
+        } else if (page == 0x4333) {
+            read = Read.byte(this.registers.dma3.source.getMiddle());
+        } else if (page == 0x4334) {
+            read = Read.byte(this.registers.dma3.source.getUpper());
+        } else if (page == 0x4335) {
+            read = Read.byte(this.registers.dma3.size.getLower());
+        } else if (page == 0x4336) {
+            read = Read.byte(this.registers.dma3.size.getUpper());
+        } else if (page == 0x4337) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4338) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4339) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x433A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4340) {
+            // --------------------------
+            // DMA 4
+            // --------------------------
+            read = Read.byte(this.registers.dma4.control.get());
+        } else if (page == 0x4341) {
+            read = Read.byte(this.registers.dma4.destination.get());
+        } else if (page == 0x4342) {
+            read = Read.byte(this.registers.dma4.source.getLower());
+        } else if (page == 0x4343) {
+            read = Read.byte(this.registers.dma4.source.getMiddle());
+        } else if (page == 0x4344) {
+            read = Read.byte(this.registers.dma4.source.getUpper());
+        } else if (page == 0x4345) {
+            read = Read.byte(this.registers.dma4.size.getLower());
+        } else if (page == 0x4346) {
+            read = Read.byte(this.registers.dma4.size.getUpper());
+        } else if (page == 0x4347) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4348) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4349) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x434A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4350) {
+            // --------------------------
+            // DMA 5
+            // --------------------------
+            read = Read.byte(this.registers.dma5.control.get());
+        } else if (page == 0x4351) {
+            read = Read.byte(this.registers.dma5.destination.get());
+        } else if (page == 0x4352) {
+            read = Read.byte(this.registers.dma5.source.getLower());
+        } else if (page == 0x4353) {
+            read = Read.byte(this.registers.dma5.source.getMiddle());
+        } else if (page == 0x4354) {
+            read = Read.byte(this.registers.dma5.source.getUpper());
+        } else if (page == 0x4355) {
+            read = Read.byte(this.registers.dma5.size.getLower());
+        } else if (page == 0x4356) {
+            read = Read.byte(this.registers.dma5.size.getUpper());
+        } else if (page == 0x4357) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4358) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4359) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x435A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4360) {
+            // --------------------------
+            // DMA 6
+            // --------------------------
+            read = Read.byte(this.registers.dma6.control.get());
+        } else if (page == 0x4361) {
+            read = Read.byte(this.registers.dma6.destination.get());
+        } else if (page == 0x4362) {
+            read = Read.byte(this.registers.dma6.source.getLower());
+        } else if (page == 0x4363) {
+            read = Read.byte(this.registers.dma6.source.getMiddle());
+        } else if (page == 0x4364) {
+            read = Read.byte(this.registers.dma6.source.getUpper());
+        } else if (page == 0x4365) {
+            read = Read.byte(this.registers.dma6.size.getLower());
+        } else if (page == 0x4366) {
+            read = Read.byte(this.registers.dma6.size.getUpper());
+        } else if (page == 0x4367) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4368) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4369) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x436A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4370) {
+            // --------------------------
+            // DMA 7
+            // --------------------------
+            read = Read.byte(this.registers.dma7.control.get());
+        } else if (page == 0x4371) {
+            read = Read.byte(this.registers.dma7.destination.get());
+        } else if (page == 0x4372) {
+            read = Read.byte(this.registers.dma7.source.getLower());
+        } else if (page == 0x4373) {
+            read = Read.byte(this.registers.dma7.source.getMiddle());
+        } else if (page == 0x4374) {
+            read = Read.byte(this.registers.dma7.source.getUpper());
+        } else if (page == 0x4375) {
+            read = Read.byte(this.registers.dma7.size.getLower());
+        } else if (page == 0x4376) {
+            read = Read.byte(this.registers.dma7.size.getUpper());
+        } else if (page == 0x4377) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4378) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4379) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x437A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
         } else {
             throw new Error("Invalid read on BusA at " + address.toValue());
         }
@@ -112,7 +312,7 @@ export class BusA {
         let bank = address.getBank();
         let page = address.getPage();
 
-        if (page < 0x4200 || page > 0x421F) {
+        if (page < 0x4200 || page > 0x437A) {
             throw new Error("Invalid writeByte at " + address);
         }
 
@@ -176,6 +376,206 @@ export class BusA {
             this.registers.joy4l.set(val);
         } else if (page == 0x421F) {
             this.registers.joy4h.set(val);
+        } else if (page == 0x4300) {
+            // --------------------------
+            // DMA 0
+            // --------------------------
+            this.registers.dma0.control.set(val);
+        } else if (page == 0x4301) {
+            this.registers.dma0.destination.set(val);
+        } else if (page == 0x4302) {
+            this.registers.dma0.source.setLower(val);
+        } else if (page == 0x4303) {
+            this.registers.dma0.source.setMiddle(val);
+        } else if (page == 0x4304) {
+            this.registers.dma0.source.setUpper(val);
+        } else if (page == 0x4305) {
+            this.registers.dma0.size.setLower(val);
+        } else if (page == 0x4306) {
+            this.registers.dma0.size.setUpper(val);
+        } else if (page == 0x4307) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4308) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4309) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x430A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4310) {
+            // --------------------------
+            // DMA 1
+            // --------------------------
+            this.registers.dma1.control.set(val);
+        } else if (page == 0x4311) {
+            this.registers.dma1.destination.set(val);
+        } else if (page == 0x4312) {
+            this.registers.dma1.source.setLower(val);
+        } else if (page == 0x4313) {
+            this.registers.dma1.source.setMiddle(val);
+        } else if (page == 0x4314) {
+            this.registers.dma1.source.setUpper(val);
+        } else if (page == 0x4315) {
+            this.registers.dma1.size.setLower(val);
+        } else if (page == 0x4316) {
+            this.registers.dma1.size.setUpper(val);
+        } else if (page == 0x4317) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4318) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4319) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x431A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4320) {
+            // --------------------------
+            // DMA 2
+            // --------------------------
+            this.registers.dma2.control.set(val);
+        } else if (page == 0x4321) {
+            this.registers.dma2.destination.set(val);
+        } else if (page == 0x4322) {
+            this.registers.dma2.source.setLower(val);
+        } else if (page == 0x4323) {
+            this.registers.dma2.source.setMiddle(val);
+        } else if (page == 0x4324) {
+            this.registers.dma2.source.setUpper(val);
+        } else if (page == 0x4325) {
+            this.registers.dma2.size.setLower(val);
+        } else if (page == 0x4326) {
+            this.registers.dma2.size.setUpper(val);
+        } else if (page == 0x4327) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4328) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4329) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x432A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4330) {
+            // --------------------------
+            // DMA 3
+            // --------------------------
+            this.registers.dma3.control.set(val);
+        } else if (page == 0x4331) {
+            this.registers.dma3.destination.set(val);
+        } else if (page == 0x4332) {
+            this.registers.dma3.source.setLower(val);
+        } else if (page == 0x4333) {
+            this.registers.dma3.source.setMiddle(val);
+        } else if (page == 0x4334) {
+            this.registers.dma3.source.setUpper(val);
+        } else if (page == 0x4335) {
+            this.registers.dma3.size.setLower(val);
+        } else if (page == 0x4336) {
+            this.registers.dma3.size.setUpper(val);
+        } else if (page == 0x4337) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4338) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4339) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x433A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4340) {
+            // --------------------------
+            // DMA 4
+            // --------------------------
+            this.registers.dma4.control.set(val);
+        } else if (page == 0x4341) {
+            this.registers.dma4.destination.set(val);
+        } else if (page == 0x4342) {
+            this.registers.dma4.source.setLower(val);
+        } else if (page == 0x4343) {
+            this.registers.dma4.source.setMiddle(val);
+        } else if (page == 0x4344) {
+            this.registers.dma4.source.setUpper(val);
+        } else if (page == 0x4345) {
+            this.registers.dma4.size.setLower(val);
+        } else if (page == 0x4346) {
+            this.registers.dma4.size.setUpper(val);
+        } else if (page == 0x4347) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4348) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4349) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x434A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4350) {
+            // --------------------------
+            // DMA 5
+            // --------------------------
+            this.registers.dma5.control.set(val);
+        } else if (page == 0x4351) {
+            this.registers.dma5.destination.set(val);
+        } else if (page == 0x4352) {
+            this.registers.dma5.source.setLower(val);
+        } else if (page == 0x4353) {
+            this.registers.dma5.source.setMiddle(val);
+        } else if (page == 0x4354) {
+            this.registers.dma5.source.setUpper(val);
+        } else if (page == 0x4355) {
+            this.registers.dma5.size.setLower(val);
+        } else if (page == 0x4356) {
+            this.registers.dma5.size.setUpper(val);
+        } else if (page == 0x4357) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4358) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4359) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x435A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4360) {
+            // --------------------------
+            // DMA 6
+            // --------------------------
+            this.registers.dma6.control.set(val);
+        } else if (page == 0x4361) {
+            this.registers.dma6.destination.set(val);
+        } else if (page == 0x4362) {
+            this.registers.dma6.source.setLower(val);
+        } else if (page == 0x4363) {
+            this.registers.dma6.source.setMiddle(val);
+        } else if (page == 0x4364) {
+            this.registers.dma6.source.setUpper(val);
+        } else if (page == 0x4365) {
+            this.registers.dma6.size.setLower(val);
+        } else if (page == 0x4366) {
+            this.registers.dma6.size.setUpper(val);
+        } else if (page == 0x4367) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4368) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4369) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x436A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4370) {
+            // --------------------------
+            // DMA 7
+            // --------------------------
+            this.registers.dma7.control.set(val);
+        } else if (page == 0x4371) {
+            this.registers.dma7.destination.set(val);
+        } else if (page == 0x4372) {
+            this.registers.dma7.source.setLower(val);
+        } else if (page == 0x4373) {
+            this.registers.dma7.source.setMiddle(val);
+        } else if (page == 0x4374) {
+            this.registers.dma7.source.setUpper(val);
+        } else if (page == 0x4375) {
+            this.registers.dma7.size.setLower(val);
+        } else if (page == 0x4376) {
+            this.registers.dma7.size.setUpper(val);
+        } else if (page == 0x4377) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4378) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x4379) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
+        } else if (page == 0x437A) {
+            throw new Error("Invalid read on BusA at " + address.toValue());
         } else {
             throw new Error("Invalid write on BusA at " + address.toValue());
         }

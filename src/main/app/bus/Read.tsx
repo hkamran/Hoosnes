@@ -14,6 +14,7 @@ export class Read {
     private constructor(low: number, high: number, type: ReadType, cycles?: number) {
         this.low = low;
         this.high = high;
+        this.type = type;
         this.cycles = cycles | 0;
     }
 

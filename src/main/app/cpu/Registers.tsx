@@ -1,5 +1,8 @@
 import {Mode, Modes} from "../Modes";
 import {Bit} from "../util/Bit";
+import {DmaChannel, DmaEnableRegister} from "./Dma";
+import {Objects} from "../util/Objects";
+import Console from "../Console";
 
 /**
  * +---------------------------+---------+-----------------------------------+-------------------+-------------------------------------------+
@@ -317,50 +320,128 @@ export class WramMemoryAddressRegister extends Register {
 
 export class Registers {
 
-    public a : Register = new AccumulatorRegister();
-    public dbr : Register = new DataBankRegister();
-    public d : Register = new DirectPageRegister();
-    public k : Register = new ProgramBankRegister();
-    public pc : Register = new ProgramCounterRegister();
-    public p : StatusRegister = new StatusRegister();
-    public sp : Register = new StackPointerRegister();
-    public x : Register = new IndirectXRegister();
-    public y : Register = new IndirectYRegister();
+    public a : Register;
+    public dbr : Register;
+    public d : Register;
+    public k : Register;
+    public pc : Register;
+    public p : StatusRegister;
+    public sp : Register;
+    public x : Register;
+    public y : Register;
 
     // IO Registers
 
-    public nmitimen : Register = new Register();
-    public wrio : Register = new Register();
-    public wrmpya : Register = new Register();
-    public wrmpyb : Register = new Register();
-    public wrdivl : Register = new Register();
-    public wrdivh : Register = new Register();
-    public wrdivb : Register = new Register();
-    public htimel : Register = new Register();
-    public htimeh : Register = new Register();
-    public vtimel : Register = new Register();
-    public vtimeh : Register = new Register();
-    public mdmaen : Register = new Register();
-    public hdmaen : Register = new Register();
-    public memsel : Register = new Register();
-    public rdnmi : Register = new Register();
-    public timeup : Register = new Register();
-    public hvbjoy : Register = new Register();
-    public rdio : Register = new Register();
-    public rddivl : Register = new Register();
-    public rddivh : Register = new Register();
-    public rdmpyl : Register = new Register();
-    public rdmpyh : Register = new Register();
-    public joy1l : Register = new Register();
-    public joy1h : Register = new Register();
-    public joy2l : Register = new Register();
-    public joy2h : Register = new Register();
-    public joy3l : Register = new Register();
-    public joy3h : Register = new Register();
-    public joy4l : Register = new Register();
-    public joy4h : Register = new Register();
+    public nmitimen : Register;
+    public wrio : Register;
+    public wrmpya : Register;
+    public wrmpyb : Register;
+    public wrdivl : Register;
+    public wrdivh : Register;
+    public wrdivb : Register;
+    public htimel : Register;
+    public htimeh : Register;
+    public vtimel : Register;
+    public vtimeh : Register;
+    public hdmaen : Register;
+    public memsel : Register;
+    public rdnmi : Register;
+    public timeup : Register;
+    public hvbjoy : Register;
+    public rdio : Register;
+    public rddivl : Register;
+    public rddivh : Register;
+    public rdmpyl : Register;
+    public rdmpyh : Register;
+    public joy1l : Register;
+    public joy1h : Register;
+    public joy2l : Register;
+    public joy2h : Register;
+    public joy3l : Register;
+    public joy3h : Register;
+    public joy4l : Register;
+    public joy4h : Register;
 
-    public wmdata : Register = new Register();
-    public wmadd : WramMemoryAddressRegister = new WramMemoryAddressRegister();
+    public wmdata : Register;
+    public wmadd : WramMemoryAddressRegister;
+
+    public dma0: DmaChannel;
+    public dma1: DmaChannel;
+    public dma2: DmaChannel;
+    public dma3: DmaChannel;
+    public dma4: DmaChannel;
+    public dma5: DmaChannel;
+    public dma6: DmaChannel;
+    public dma7: DmaChannel;
+    public mdmaen: DmaEnableRegister;
+
+    constructor(console: Console) {
+        Objects.requireNonNull(console);
+
+        this.a = new AccumulatorRegister();
+        this.dbr = new DataBankRegister();
+        this.d = new DirectPageRegister();
+        this.k = new ProgramBankRegister();
+        this.pc = new ProgramCounterRegister();
+        this.p = new StatusRegister();
+        this.sp = new StackPointerRegister();
+        this.x = new IndirectXRegister();
+        this.y = new IndirectYRegister();
+
+        // IO Registers
+
+        this.nmitimen = new Register();
+        this.wrio = new Register();
+        this.wrmpya = new Register();
+        this.wrmpyb = new Register();
+        this.wrdivl = new Register();
+        this.wrdivh = new Register();
+        this.wrdivb = new Register();
+        this.htimel = new Register();
+        this.htimeh = new Register();
+        this.vtimel = new Register();
+        this.vtimeh = new Register();
+        this.hdmaen = new Register();
+        this.memsel = new Register();
+        this.rdnmi = new Register();
+        this.timeup = new Register();
+        this.hvbjoy = new Register();
+        this.rdio = new Register();
+        this.rddivl = new Register();
+        this.rddivh = new Register();
+        this.rdmpyl = new Register();
+        this.rdmpyh = new Register();
+        this.joy1l = new Register();
+        this.joy1h = new Register();
+        this.joy2l = new Register();
+        this.joy2h = new Register();
+        this.joy3l = new Register();
+        this.joy3h = new Register();
+        this.joy4l = new Register();
+        this.joy4h = new Register();
+
+        this.wmdata = new Register();
+        this.wmadd = new WramMemoryAddressRegister();
+
+        this.dma0 = new DmaChannel(console, 0);
+        this.dma1 = new DmaChannel(console, 1);
+        this.dma2 = new DmaChannel(console, 2);
+        this.dma3 = new DmaChannel(console, 3);
+        this.dma4 = new DmaChannel(console, 4);
+        this.dma5 = new DmaChannel(console, 5);
+        this.dma6 = new DmaChannel(console, 6);
+        this.dma7 = new DmaChannel(console, 7);
+
+        this.mdmaen = new DmaEnableRegister(console, [
+            this.dma0,
+            this.dma1,
+            this.dma2,
+            this.dma3,
+            this.dma4,
+            this.dma5,
+            this.dma6,
+            this.dma7,
+        ]);
+    }
 
 }

@@ -79,12 +79,12 @@ export class OamSizeAndDataAreaRegister extends Register {
             return OamSize.create(16,16, 32, 32);
         } else if (type == 0x4) {
             return OamSize.create(16,16, 64, 64);
-        } else if (type == 0x4) {
+        } else if (type == 0x6) {
             return OamSize.create(32,32, 64, 64);
         } else if (type == 0x5) {
             return OamSize.create(32,32, 64, 64);
         } else {
-            throw new Error("Undocumented behaviour");
+            throw new Error("Undocumented behaviour type " + type);
         }
     }
 
