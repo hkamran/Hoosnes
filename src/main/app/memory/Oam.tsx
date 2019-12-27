@@ -1,5 +1,5 @@
 // The second data area, the OAM, is used to store properties of the sprites. It includes information about position,
-// size, priority, etc. There can be 128 objects maximum, and the bus is 544 bytes: the first 512 bytes have four
+// transferSize, priority, etc. There can be 128 objects maximum, and the bus is 544 bytes: the first 512 bytes have four
 // bytes of information per sprite, and the last 32 bytes have two more bits of information.  Two or more sprites can
 // share the same set of tiles.
 

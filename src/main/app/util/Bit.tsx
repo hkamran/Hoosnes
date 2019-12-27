@@ -118,7 +118,7 @@ export class Bit {
     public static setUint16Lower(num: number, a: number) {
         let val: number = num;
 
-        val = val & 0x00;
+        val = val & 0xFF00;
         val = val | a;
 
         return val;
@@ -127,8 +127,8 @@ export class Bit {
     public static setUint16Upper(num: number, a: number) {
         let val: number = num;
 
-        val = val & (0x00 << 8);
-        val = val | ((a << 8) | 0x00);
+        val = val & (0x00FF);
+        val = val | ((a & 0xFF) << 8);
 
         return val;
     }

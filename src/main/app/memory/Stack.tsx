@@ -1,6 +1,7 @@
 import {Bit} from "../util/Bit";
 import Console from "../Console";
 import {Address} from "../bus/Address";
+import {Read} from "../bus/Read";
 
 export class Stack {
 
@@ -40,7 +41,10 @@ export class Stack {
             return 0;
         }
         let sp: number = this.console.cpu.registers.sp.get();
+        let value: number = this.stack.pop();
         this.console.cpu.registers.sp.set((sp + 1) & 0xFFFF);
-        return this.stack.pop();
+
+        console.log(`popping ${value.toString(16)}`);
+        return value;
     }
 }

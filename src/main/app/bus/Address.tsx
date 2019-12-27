@@ -39,7 +39,7 @@ export class Address {
 
     public static create(val: number, bank?: number): Address {
         if (val == null || val < 0)
-            throw new Error("Invalid Address");
+            throw new Error("Invalid Address given " + val + " " + bank);
 
         if (bank == null) {
             bank = (val >> 16) & 0xFF;

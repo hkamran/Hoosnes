@@ -13,6 +13,7 @@ import {Objects} from "../util/Objects";
  *  http://6502.org/tutorials/65c816opcodes.html#5.7
  */
 export interface IAddressingMode  {
+    label: string;
     getValue(context: OpContext) : Read;
     getAddressing(context: OpContext) : Addressing;
 }
@@ -759,6 +760,8 @@ export class Immediate16 implements IAddressingMode {
 
 export class Implied implements IAddressingMode {
 
+    public label: string = "Implied";
+
     public getValue(context: OpContext): Read {
         let opaddr: number = context.opaddr.toValue();
         return Read.byte(opaddr, 0);
@@ -840,19 +843,21 @@ export class Relative8 implements IAddressingMode {
     public label: string = "RELATIVE 8";
 
     public getValue(context: OpContext): Read {
-        let result: Addressing = this.getAddressing(context);
-        return Read.byte(result.getLow().toValue(), 0);
+        throw new Error("Not supported");
+        // let result: Addressing = this.getAddressing(context);
+        // return Read.byte(result.getLow().toValue(), 0);
     }
 
     public getAddressing(context: OpContext): Addressing {
         let LL: Read = context.getOperand(0);
+        let pc: number = context.registers.pc.get();
 
         if (LL.get() < 0x80) {
             let cycles: number = LL.getCycles();
-            return Addressing.toByte(LL.get(), cycles);
+            return Addressing.toByte(pc + LL.get(), cycles);
         } else {
             let cycles: number = LL.getCycles();
-            return Addressing.toByte(LL.get() - 0x100, cycles);
+            return Addressing.toByte(pc - 0x100 + LL.get() , cycles);
         }
     }
 }

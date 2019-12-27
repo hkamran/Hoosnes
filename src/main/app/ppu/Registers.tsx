@@ -6,6 +6,7 @@ import {Bit} from "../util/Bit";
 import {Objects} from "../util/Objects";
 import {Address} from "../bus/Address";
 import {OamSize} from "../memory/Oam";
+import {Vram} from "../memory/Vram";
 
 const INVALID_SET: string = "Invalid value set";
 
@@ -30,7 +31,7 @@ export class Register {
         if (val == null || val < 0) {
             throw Error("Invalid set " + val + " to register.");
         }
-        if (this.mode == Modes.bit8 && this.val > 0xFF) throw new Error("value is to big for register");
+        if (this.mode == Modes.bit8 && this.val > 0xFF) throw new Error("value is to big for register 0x" + val.toString(16));
         this.val = val;
     }
 
@@ -527,7 +528,7 @@ export class VRAMAddressRegister extends Register {
     public label: string = "VMADD";
 
     public set(val: number): void {
-        super.set(val & 0xFFFF);
+        this.val = (val & 0xFFFF) % Vram.size;
     }
 
     public setLower(val: number) {
@@ -564,7 +565,6 @@ export class VRAMDataWriteRegister extends Register {
         }
 
         this.val = Bit.setUint16Lower(this.val, val);
-        this.write(false, loData);
     }
 
     public setUpper(val: number) {
@@ -579,7 +579,6 @@ export class VRAMDataWriteRegister extends Register {
         }
 
         this.val = Bit.setUint16Upper(this.val, val);
-        this.write(false, hiData);
     }
 
     public getLower(): number {
@@ -596,9 +595,8 @@ export class VRAMDataWriteRegister extends Register {
         let amount = ppu.registers.vportcntrl.getAddressIncrementAmount();
         let type: number = ppu.registers.vportcntrl.getAddressFormation();
         let address: number = VideoPortControlRegister.remap(type, ppu.registers.vaddr.get());
-
-        if (loByte) ppu.vram.writeByte(Address.create(address + 0), loByte);
-        if (hiByte) ppu.vram.writeByte(Address.create(address + 1), hiByte);
+        if (loByte != null) ppu.vram.writeByte(Address.create((address + 0) % Vram.size), loByte);
+        if (hiByte != null) ppu.vram.writeByte(Address.create((address + 1) % Vram.size), hiByte);
 
         if (doIncrement) ppu.registers.vaddr.set(ppu.registers.vaddr.get() + amount);
     }

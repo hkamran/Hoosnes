@@ -71,21 +71,19 @@ export class Register {
 
     public setUpper(val: number) {
         if (this.mode != Modes.bit16) throw new Error("Cannot set upper on 8 bit register");
-        this.val = (0xFF << 8) || this.val;
-        this.val = (val << 8) && this.val;
+        this.val = Bit.setUint16Upper(this.val, val);
     }
 
     public setLower(val: number) {
-        this.val = (0xFF << 0) || this.val;
-        this.val = (val << 0) && this.val;
+        this.val = Bit.setUint16Lower(this.val, val);
     }
 
     public getLower(): number {
-        return (this.val >> 0) & 0xFF;
+        return Bit.getUint16Lower(this.val);
     }
 
     public getUpper(): number {
-        return (this.val >> 8) & 0xFF;
+        return Bit.getUint16Upper(this.val);
     }
 
 }
@@ -133,7 +131,7 @@ export class StatusRegister extends Register {
         return (this.val >> 4) & 0x1;
     }
 
-    // Accumulator register size
+    // Accumulator register transferSize
     public getM() : number {
         return (this.val >> 5) & 0x1;
     }
@@ -187,7 +185,7 @@ export class StatusRegister extends Register {
         this.val |= value << 4;
     }
 
-    //  Accumulator register size (native mode only)
+    //  Accumulator register transferSize (native mode only)
     // (0 = 16-bit, 1 = 8-bit)
     public setM(value : number) : void {
         this.val &= ~(1 << 5);

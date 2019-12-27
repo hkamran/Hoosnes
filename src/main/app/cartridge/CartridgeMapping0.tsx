@@ -44,7 +44,7 @@ export class CartridgeMapping0 implements ICartridgeMapping {
 
                 return Read.byte(value, 0);
             }
-        } else if (0x8000 <= address.toValue() && address.toValue() <= 0xFFFF) {
+        } else if (0x8000 <= page && page <= 0xFFFF) {
             if (0x80 <= bank && bank <= 0xFF) {
                 let index = ((bank - 0x80) * 0xFFFF) + (page - 0x8000);
                 let value = this.cartridge.rom[index];

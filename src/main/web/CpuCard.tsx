@@ -232,8 +232,16 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                                     <span>{this.state.op != null ? this.state.op.name.toUpperCase() : ""}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Mode:</span>
+                                    <span>{this.state.op != null ? this.state.op.mode.label : ""}</span>
+                                </li>
+                                <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Cycles:</span>
                                     <span>{this.state.op != null ? this.state.op.cycle : ""}</span>
+                                </li>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Size:</span>
+                                    <span>{this.state.op != null ? this.state.op.getSize() : ""}</span>
                                 </li>
                             </ul>
                         </div>

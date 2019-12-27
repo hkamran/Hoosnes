@@ -9,7 +9,7 @@ format: tttttttt xxxxxxxxx yyyyyyyy vhppcccs
 table A: xxxx xxxx yyyy yyyy tttt tttt vhpp ccct
 
 t = index in vram
-s = size;
+s = transferSize;
 c = palette;
 p = getPriority
 h = horizontal flip

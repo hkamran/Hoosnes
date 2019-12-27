@@ -4,6 +4,7 @@ import {Bit} from "../util/Bit";
 import {Address} from "../bus/Address";
 import {Read} from "../bus/Read";
 import Console from "../Console";
+import {Mode, Modes} from "../Modes";
 
 export enum DmaTransferType {
     CPU_TO_PPU, PPU_TO_CPU,
@@ -15,6 +16,21 @@ export enum DmaWriteMode {
     TWO_BYTES,
     TWO_WORDS,
     FOUR_BYTES_SEQUENCE,
+}
+
+export enum DmaAddressingMode {
+    ABSOLUTE,
+    INDIRECT,
+}
+
+export enum DmaAddressingSelectionType {
+    AUTOMATIC,
+    FIXED,
+}
+
+export enum DmaAddressingAutomaticType {
+    INCREMENT,
+    DECREMENT,
 }
 
 export class DmaControlRegister extends Register {
@@ -31,20 +47,19 @@ export class DmaControlRegister extends Register {
     /*
      * HDMA Addressing Mode (0==Absolute, 1==Indirect)
      */
-    public getAddressingMode(): number {
-        let type: number = (this.val >> 6) & 0x1;
-        return type;
+    public getAddressingMode(): DmaAddressingMode {
+        let isAbsolute: boolean = ((this.val >> 6) & 0x1) == 0;
+        return isAbsolute ? DmaAddressingMode.ABSOLUTE: DmaAddressingMode.INDIRECT;
     }
 
-    /*
-     * CPU addr Auto inc/dec selection (0==Increment, 1==Decrement)
-     */
-    public getIncrementMode(): number {
-        return (this.val >> 5) & 0x1;
+    public getAddressingSelectionType(): DmaAddressingSelectionType {
+        let isAutomatic = ((this.val >> 3) & 0x1) == 0;
+        return isAutomatic ? DmaAddressingSelectionType.AUTOMATIC: DmaAddressingSelectionType.FIXED;
     }
 
-    public isIncrementDisabled(): boolean {
-        return ((this.val >> 4) & 0x1) == 0x1;
+    public getAutomaticAddressingType(): DmaAddressingAutomaticType {
+        let isIncrement = ((this.val >> 4) & 0x1) == 0x0;
+        return isIncrement ? DmaAddressingAutomaticType.INCREMENT: DmaAddressingAutomaticType.DECREMENT;
     }
 
     public getWriteMode(isHDMA?: boolean): DmaWriteMode {
@@ -82,14 +97,23 @@ export class DmaControlRegister extends Register {
 
 }
 
-export class DmaDestinationRegister extends Register {
+export class DmaPpuAddressRegister extends Register {
 
+    protected mode : Mode = Modes.bit16;
     public address: string = "0x43x1";
     public label: string = "BBADx";
 
+    public set(val: number): void {
+        super.set(0x2100 | (val & 0xFF));
+    }
+
+    public getBbusAddress(): number {
+        return this.val;
+    }
+
 }
 
-export class DmaSourceRegister extends Register {
+export class DmaCpuAddressRegister extends Register {
 
     public address: string = "0x43x2-0x43x4";
     public label: string = "A1Tx";
@@ -117,10 +141,23 @@ export class DmaSourceRegister extends Register {
     public getUpper(): number {
         return Bit.getUint24Upper(this.val);
     }
+
+    public getAbusBank(): number {
+        return Bit.getUint24Upper(this.val);
+    }
+
+    public getAbusAddress(): number {
+        return this.val & 0xFFFF;
+    }
+
+    public get(): number {
+        return this.val;
+    }
 }
 
 export class DmaTransferSizeRegister extends Register {
 
+    protected mode : Mode = Modes.bit16;
     public address: string = "0x43x5-0x43x6";
     public label: string = "DASx";
 
@@ -145,9 +182,9 @@ export class DmaChannel {
 
     private console: Console;
     public control: DmaControlRegister;
-    public source: DmaSourceRegister;            // 24-bit
-    public destination: DmaDestinationRegister;  // 8-bit
-    public size: DmaTransferSizeRegister;        // 16-bit
+    public cpuAddressRegister: DmaCpuAddressRegister;
+    public ppuAddressRegister: DmaPpuAddressRegister;
+    public transferSize: DmaTransferSizeRegister;
     public index: number;
 
     constructor(console: Console, index: number) {
@@ -155,57 +192,84 @@ export class DmaChannel {
         this.index = index;
 
         this.control = new DmaControlRegister(console);
-        this.source = new DmaSourceRegister(console);
-        this.destination = new DmaDestinationRegister(console);
-        this.size = new DmaTransferSizeRegister(console);
+        this.cpuAddressRegister = new DmaCpuAddressRegister(console);
+        this.ppuAddressRegister = new DmaPpuAddressRegister(console);
+        this.transferSize = new DmaTransferSizeRegister(console);
     }
 
     public execute(): number {
-        let source: number = this.source.get();
-        let destination: number = this.destination.get();
-        let amount: number = this.size.get() == 0 ? 65536 : this.size.get();
+        let direction: DmaTransferType = this.control.getTransferDirection();
+        let addressingMode: DmaAddressingMode = this.control.getAddressingMode();
+        let addressingSelection: DmaAddressingSelectionType = this.control.getAddressingSelectionType();
+        let automaticAddressingType: DmaAddressingAutomaticType = this.control.getAutomaticAddressingType();
+        let aBusAddress: number = this.cpuAddressRegister.get();
+        let bBusAddress: number = this.ppuAddressRegister.getBbusAddress();
+        let transferSize: number = this.transferSize.get();
+        let writeMode: DmaWriteMode = this.control.getWriteMode();
 
-        let step: number = this.control.isIncrementDisabled() ?
-            0 : (this.control.getIncrementMode() ? -1 : 1);
+        let step: number = addressingSelection == DmaAddressingSelectionType.FIXED ?
+            0 : (automaticAddressingType == DmaAddressingAutomaticType.DECREMENT ? -1 : 1);
 
-        console.log(`DMA ${this.index} transfer from ${source} to ${destination} ${amount}`);
+        console.log(this.toString());
+        debugger;
+        let source: number = (direction == DmaTransferType.PPU_TO_CPU)
+            ? bBusAddress :  aBusAddress;
+        let destination: number = (direction == DmaTransferType.PPU_TO_CPU)
+            ? aBusAddress : bBusAddress;
 
-        let mode: DmaWriteMode = this.control.getWriteMode();
-
-        while (amount > 0) {
+        while (transferSize > 0) {
             let data: Read = this.console.bus.readByte(Address.create(source));
+            let count: number = 0;
 
-            if (mode == DmaWriteMode.ONE_BYTE) {
-                this.console.bus.writeByte(Address.create(destination), data.get());
-                amount -= 1;
-            } else if (mode == DmaWriteMode.TWO_BYTES) {
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
-                destination += step * 2;
-            } else if (mode == DmaWriteMode.TWO_BYTES_SEQUENCE) {
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination + 1), data.get());
-                destination += step * 2;
-            } else if (mode == DmaWriteMode.TWO_WORDS) {
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination + 1), data.get());
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination + 1), data.get());
-                destination += step * 4;
-            } else if (mode == DmaWriteMode.FOUR_BYTES_SEQUENCE) {
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination + 1), data.get());
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination + 2), data.get());
-                if (amount-- > 0) this.console.bus.writeByte(Address.create(destination + 4), data.get());
-                destination += step * 4;
+            if (writeMode == DmaWriteMode.ONE_BYTE) {
+                if (transferSize-- > 0)this.console.bus.writeByte(Address.create(destination), data.get());
+                destination += step * 1;
+            } else if (writeMode == DmaWriteMode.TWO_BYTES) {
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
+                count += 2;
+            } else if (writeMode == DmaWriteMode.TWO_BYTES_SEQUENCE) {
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination + 1), data.get());
+                count += step * 2;
+            } else if (writeMode == DmaWriteMode.TWO_WORDS) {
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination + 1), data.get());
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination + 1), data.get());
+                count += step * 4;
+            } else if (writeMode == DmaWriteMode.FOUR_BYTES_SEQUENCE) {
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination), data.get());
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination + 1), data.get());
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination + 2), data.get());
+                if (transferSize-- > 0) this.console.bus.writeByte(Address.create(destination + 4), data.get());
+                count += step * 4;
             } else {
-                throw new Error();
+                throw new Error("DMA Error");
+            }
+
+            if (direction == DmaTransferType.PPU_TO_CPU) {
+                destination += count;
+            } else {
+                source += count;
             }
         }
+        this.transferSize.set(0x0);
+        return transferSize * 8;
+    }
 
-        this.size.set(0x0);
-
-        return amount * 8;
+    public toString(): string {
+        return `DmaChannel[`
+            + `direction=${DmaTransferType[this.control.getTransferDirection()]}, `
+            + `mode=${DmaAddressingMode[this.control.getAddressingMode()]}, `
+            + `direction=${DmaAddressingAutomaticType[this.control.getAutomaticAddressingType()]}, `
+            + `addressing=${DmaAddressingSelectionType[this.control.getAddressingSelectionType()]}, `
+            + `transferMode=${this.control.getWriteMode()}, `
+            + `bBusAddress=${this.ppuAddressRegister.getBbusAddress().toString(16)}, `
+            + `aBusAddress=0x${this.cpuAddressRegister.getAbusAddress().toString(16)}, `
+            + `aBusBank=0x${this.cpuAddressRegister.getAbusBank().toString(16)}, `
+            + `transferSize=0x${this.transferSize.get().toString(16)}, `
+        + `]`;
     }
 }
 
@@ -230,6 +294,7 @@ export class DmaEnableRegister extends Register {
         for (let channel of this.channels) {
             let isEnabled: boolean = (val & 1) == 1;
             if (isEnabled) this.cycles += channel.execute();
+            val = (val >> 1) & 0xFF;
         }
     }
 
