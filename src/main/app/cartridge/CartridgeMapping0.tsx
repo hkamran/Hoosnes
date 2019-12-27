@@ -46,12 +46,12 @@ export class CartridgeMapping0 implements ICartridgeMapping {
             }
         } else if (0x8000 <= page && page <= 0xFFFF) {
             if (0x80 <= bank && bank <= 0xFF) {
-                let index = ((bank - 0x80) * 0xFFFF) + (page - 0x8000);
+                let index = ((bank - 0x80) * 0x8000) + (page - 0x8000);
                 let value = this.cartridge.rom[index];
 
                 return Read.byte(value, 0);
             } else if (0x00 <= bank && bank <= 0x7F) {
-                let index = ((bank - 0x00) * 0xFFFF) + (page - 0x8000);
+                let index = ((bank - 0x00) * 0x8000) + (page - 0x8000);
                 let value = this.cartridge.rom[index];
                 return Read.byte(value, 0);
             }
@@ -60,7 +60,7 @@ export class CartridgeMapping0 implements ICartridgeMapping {
     }
 
     public write(address: Address, value: number): Write {
-        return null;
+        throw new Error("Invalid write at " + address.toString());
     }
 
 }
