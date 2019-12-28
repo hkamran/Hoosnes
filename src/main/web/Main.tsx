@@ -12,6 +12,7 @@ import {Card} from "./core/layout/Card";
 import {Register, Registers} from "../app/cpu/Registers";
 import {Operation} from "../app/cpu/Opcodes";
 import {PpuCard} from "./PpuCard";
+import {TileCard} from "./TileCard";
 
 declare let window : any;
 window.snes = new Console();
@@ -79,6 +80,7 @@ export class Main extends React.Component<IMainProps, any> {
                     <ScreenCard snes={window.snes} />
                     <PaletteCard snes={window.snes} />
                     <SpriteCard snes={window.snes} />
+                    <TileCard snes={window.snes} />
                     <CartridgeCard snes={window.snes} cartridge={window.snes.cartridge} />
                 </div>
                 <div style={{display: 'flex', flexDirection: 'row'}}>

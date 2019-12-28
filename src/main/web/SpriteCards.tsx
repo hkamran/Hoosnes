@@ -3,8 +3,6 @@ import {Card} from "./core/layout/Card";
 import {PaletteBppType, Color} from "../app/ppu/Palette";
 import Console from "../app/Console";
 
-declare let window : any;
-
 interface ISpriteCardProps {
     snes: Console;
 }
