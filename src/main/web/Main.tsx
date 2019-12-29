@@ -78,9 +78,9 @@ export class Main extends React.Component<IMainProps, any> {
             <div style={{display: 'flex', flexDirection: 'column'}}>
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                     <ScreenCard snes={window.snes} />
-                    <PaletteCard snes={window.snes} />
                     <SpriteCard snes={window.snes} />
                     <TileCard snes={window.snes} />
+                    <PaletteCard snes={window.snes} />
                     <CartridgeCard snes={window.snes} cartridge={window.snes.cartridge} />
                 </div>
                 <div style={{display: 'flex', flexDirection: 'row'}}>

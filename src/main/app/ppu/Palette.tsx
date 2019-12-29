@@ -1,9 +1,9 @@
 import {CGram} from "../memory/CGram";
 
-export enum PaletteBppType {
-    Eight,
-    Four,
-    Two,
+export enum BppType {
+    Eight = 8,
+    Four = 4,
+    Two = 2,
 }
 
 export class Color {
@@ -42,15 +42,15 @@ export class Palette {
         this.cgram = cgram;
     }
 
-    public getPalette(type: PaletteBppType, index: number): Color[] {
-        if (type == PaletteBppType.Eight) {
+    public getPalette(type: BppType, index: number): Color[] {
+        if (type == BppType.Eight) {
             return this.fetchRange(0, 256);
-        } else if (type == PaletteBppType.Four) {
+        } else if (type == BppType.Four) {
             if (index < 0 || index > 15) {
                 return null;
             }
             return this.fetchRange(index * 15, index * 15 + 15);
-        } else if (type == PaletteBppType.Two) {
+        } else if (type == BppType.Two) {
             if (index < 0 || index > 63) {
                 return null;
             }

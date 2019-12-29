@@ -5,7 +5,7 @@ import {CGram} from "../memory/CGram";
 import {Bit} from "../util/Bit";
 import {Objects} from "../util/Objects";
 import {Address} from "../bus/Address";
-import {OamSize} from "../memory/Oam";
+import {OamSizes} from "../memory/Oam";
 import {Vram} from "../memory/Vram";
 
 const INVALID_SET: string = "Invalid value set";
@@ -70,20 +70,20 @@ export class OamSizeAndDataAreaRegister extends Register {
         return type;
     }
 
-    public getOamSize(): OamSize {
+    public getObjectSizes(): OamSizes {
         let type : number = this.getSize();
         if (type == 0x0) {
-            return OamSize.create(8,8, 16, 16);
+            return OamSizes.create(8,8, 16, 16);
         } else if (type == 0x1) {
-            return OamSize.create(8,8, 32, 32);
+            return OamSizes.create(8,8, 32, 32);
         } else if (type == 0x2) {
-            return OamSize.create(16,16, 32, 32);
+            return OamSizes.create(16,16, 32, 32);
         } else if (type == 0x4) {
-            return OamSize.create(16,16, 64, 64);
+            return OamSizes.create(16,16, 64, 64);
         } else if (type == 0x6) {
-            return OamSize.create(32,32, 64, 64);
+            return OamSizes.create(32,32, 64, 64);
         } else if (type == 0x5) {
-            return OamSize.create(32,32, 64, 64);
+            return OamSizes.create(32,32, 64, 64);
         } else {
             throw new Error("Undocumented behaviour type " + type);
         }

@@ -9,6 +9,7 @@ import {Registers} from "./Registers";
 import {Screen, ScreenStates} from "./Screen";
 import {InterruptType} from "../cpu/Interrupts";
 import {Renderer} from "./Renderer";
+import {Tiles} from "./Tiles";
 
 export enum ScreenType {
     HBLANK, VBLANK, PRELINE, RENDER,
@@ -24,7 +25,7 @@ export class Ppu {
 
     public palette: Palette;
     public sprites: Sprites;
-    public tiles: TileMap;
+    public tiles: Tiles;
     public registers: Registers;
 
     public scanline: number = 0;
@@ -44,7 +45,7 @@ export class Ppu {
 
         this.palette = new Palette(this.cgram);
         this.sprites = new Sprites(this.oam);
-        this.tiles = new TileMap(this.vram);
+        this.tiles = new Tiles(this);
         this.registers = new Registers(console);
 
         this.screen = new Screen();

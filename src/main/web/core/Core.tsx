@@ -9,7 +9,6 @@ import Navigation from './layout/Navigation';
 import CoreStore from './stores/core/CoreStore';
 
 import 'bootstrap/dist/css/bootstrap.css';
-import './Core.css';
 
 export default class Core extends React.Component<any, any> {
 

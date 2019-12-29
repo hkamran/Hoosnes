@@ -1,0 +1,21 @@
+body {
+    margin: 20px;
+    font-family: arial, sans-serif;
+}
+
+table, th, td {
+    font-size: 12px;
+    text-align: left;
+    padding: 8px;
+    border-collapse: collapse;
+}
+
+th {
+    position: sticky;
+    background: #eee;
+    top: 0px;
+}
+
+tr:hover {
+    background-color: #eee;
+}

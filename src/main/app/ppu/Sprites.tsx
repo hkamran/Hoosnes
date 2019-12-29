@@ -21,6 +21,12 @@ table a
 
 */
 
+export enum Orientation {
+    VERTICAL,
+    HORIZONTAL,
+    NONE,
+}
+
 export class Sprite {
 
     private readonly id: number;
@@ -35,19 +41,19 @@ export class Sprite {
         this.oam = oam;
     }
 
-    public getTileNumber(): number {
+    public getXPosition(): number {
         let val: number =
             this.oam.low[this.tableAIndex + 0];
         return val & 0xFF;
     }
 
-    public getXPosition(): number {
+    public getYPosition(): number {
         let val: number =
             this.oam.low[this.tableAIndex + 1];
         return val & 0xFF;
     }
 
-    public getYPosition(): number {
+    public getTileNumber(): number {
         let val: number =
             this.oam.low[this.tableAIndex + 2];
         return val & 0xFF;
@@ -64,10 +70,25 @@ export class Sprite {
         return (val >> 0) & 1;
     }
 
+    // https://sneslab.net/wiki/PPU_Registers
     public getPaletteIndex(): number {
         let val: number = (this.getAttributes() >> 1) & 7;
-        let index: number = (128 + val) * 16;
+        let index: number = 128 + (val * 16);
         return index;
+    }
+
+    public getOrientation(): Orientation {
+        let val: number = this.getAttributes();
+        let isYFlipped: boolean = ((val >> 7) & 1) == 1;
+        let isXFlipped: boolean = ((val >> 7) & 1) == 1;
+
+        if (isXFlipped) {
+            return Orientation.HORIZONTAL;
+        } else if (isYFlipped) {
+            return Orientation.VERTICAL;
+        } else {
+            return Orientation.NONE;
+        }
     }
 
     public getSpritePriority(): number {
