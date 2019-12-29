@@ -4,7 +4,7 @@ import {Logger, LoggerManager} from 'typescript-logger';
 import {Bus} from "./bus/Bus";
 import {Ppu} from "./ppu/Ppu";
 
-export default class Console {
+export class Console {
 
     public log : Logger = LoggerManager.create('Console');
 

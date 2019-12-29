@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Card} from "./core/layout/Card";
 import {BppType, Color} from "../app/ppu/Palette";
-import Console from "../app/Console";
+import {Console} from "../app/Console";
 import {Orientation, Sprite} from "../app/ppu/Sprites";
 import {OamSizes} from "../app/memory/Oam";
 

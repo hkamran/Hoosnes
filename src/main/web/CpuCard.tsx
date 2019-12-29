@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Card} from "./core/layout/Card";
-import Console from "../app/Console";
+import {Console} from "../app/Console";
 import {Modes} from "../app/Modes";
 import {Register, StatusRegister} from "../app/cpu/Registers";
 import {CSSProperties} from "react";

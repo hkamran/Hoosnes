@@ -1,6 +1,6 @@
 import {Objects} from "../util/Objects";
 import {Read, ReadType} from "../bus/Read";
-import Console from "../Console";
+import {Console} from "../Console";
 import {Address} from "../bus/Address";
 import {Cpu} from "./Cpu";
 import {Bus} from "../bus/Bus";

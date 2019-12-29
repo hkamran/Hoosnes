@@ -1,7 +1,7 @@
 import {Address} from "./Address";
 import {Read} from "./Read";
 import {Write} from "./Write";
-import Console from "../Console";
+import {Console} from "../Console";
 import {Objects} from "../util/Objects";
 import {Registers} from "../ppu/Registers";
 

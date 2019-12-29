@@ -1,5 +1,5 @@
 import {Bit} from "../util/Bit";
-import Console from "../Console";
+import {Console} from "../Console";
 import {Address} from "../bus/Address";
 import {Read} from "../bus/Read";
 

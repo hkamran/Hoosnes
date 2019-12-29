@@ -2,7 +2,7 @@ import {Mode, Modes} from "../Modes";
 import {Bit} from "../util/Bit";
 import {DmaChannel, DmaEnableRegister} from "./Dma";
 import {Objects} from "../util/Objects";
-import Console from "../Console";
+import {Console} from "../Console";
 
 /**
  * +---------------------------+---------+-----------------------------------+-------------------+-------------------------------------------+

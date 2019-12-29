@@ -1,4 +1,4 @@
-import Console from "../app/Console";
+import {Console} from "../app/Console";
 import * as React from "react";
 import {Card} from "./core/layout/Card";
 import {TileAttributes} from "../app/ppu/Tiles";

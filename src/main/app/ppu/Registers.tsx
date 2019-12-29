@@ -1,6 +1,6 @@
 import {Ppu} from "./Ppu";
 import {Mode, Modes} from "../Modes";
-import Console from "../Console";
+import {Console} from "../Console";
 import {CGram} from "../memory/CGram";
 import {Bit} from "../util/Bit";
 import {Objects} from "../util/Objects";

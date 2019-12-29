@@ -1,4 +1,4 @@
-import Console from "../Console";
+import {Console} from "../Console";
 import {Objects} from "../util/Objects";
 import {Address} from "./Address";
 import {Read} from "./Read";

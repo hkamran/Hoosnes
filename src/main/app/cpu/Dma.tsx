@@ -3,7 +3,7 @@ import {Register} from "../ppu/Registers";
 import {Bit} from "../util/Bit";
 import {Address} from "../bus/Address";
 import {Read} from "../bus/Read";
-import Console from "../Console";
+import {Console} from "../Console";
 import {Mode, Modes} from "../Modes";
 
 export enum DmaTransferType {

@@ -1,4 +1,4 @@
-import Console from "../Console";
+import {Console} from "../Console";
 import {CGram} from "../memory/CGram";
 import {Palette} from "./Palette";
 import {Sprites} from "./Sprites";

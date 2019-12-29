@@ -1,5 +1,5 @@
 import {Objects} from "../util/Objects";
-import Console from "../Console";
+import {Console} from "../Console";
 import {Address} from "./Address";
 import {Write} from "./Write";
 import {Read} from "./Read";

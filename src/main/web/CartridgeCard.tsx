@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Card} from "./core/layout/Card";
 import {BppType, Color} from "../app/ppu/Palette";
-import Console from "../app/Console";
+import {Console} from "../app/Console";
 import {Cartridge} from "../app/cartridge/Cartridge";
 
 declare let window : any;

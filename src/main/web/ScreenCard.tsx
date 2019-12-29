@@ -3,7 +3,7 @@ import {CSSProperties} from "react";
 import {RefObject} from "react";
 import Stats from 'stats.js';
 import {Card} from "./core/layout/Card";
-import Console from "../app/Console";
+import {Console} from "../app/Console";
 
 
 declare let window : any;

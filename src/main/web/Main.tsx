@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import Core from './core/Core';
-import Console from './../app/Console';
+import {Console} from "../app/Console";
 import {ScreenCard} from "./ScreenCard";
 import {PaletteCard} from "./PaletteCard";
 import {CartridgeCard} from "./CartridgeCard";

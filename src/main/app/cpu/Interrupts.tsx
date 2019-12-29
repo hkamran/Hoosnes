@@ -1,6 +1,6 @@
 import {Cpu} from "./Cpu";
 import {Registers} from "./Registers";
-import Console from "../Console";
+import {Console} from "../Console";
 
 export enum InterruptType {
     NONE,
