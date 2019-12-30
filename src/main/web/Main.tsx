@@ -81,12 +81,12 @@ export class Main extends React.Component<IMainProps, any> {
                     <SpriteCard snes={window.snes} />
                     <TileCard snes={window.snes} />
                     <PaletteCard snes={window.snes} />
-                    <CartridgeCard snes={window.snes} cartridge={window.snes.cartridge} />
                 </div>
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                     <PpuCard snes={window.snes} addFetchFunction={this.addFetchFunction.bind(this)} />
                     <CpuCard snes={window.snes} addFetchFunction={this.addFetchFunction.bind(this)} />
                     <DebuggerCard snes={window.snes} tick={this.tick.bind(this)} logs={this.state.logs} />
+                    <CartridgeCard snes={window.snes} cartridge={window.snes.cartridge} />
                 </div>
             </div>
         );

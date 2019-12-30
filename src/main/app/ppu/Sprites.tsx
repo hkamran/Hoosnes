@@ -116,8 +116,8 @@ export class Sprite {
     }
 
     public getSecondaryAttributes(): number {
-        let index: number = Math.floor(this.tableBIndex / 8);
-        let offset: number = (this.tableBIndex % 8);
+        let index: number = Math.floor(this.tableBIndex / 4);
+        let offset: number = (this.tableBIndex % 4) * 2;
         let byte: number =
             this.oam.high[index];
 

@@ -44,7 +44,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
         return (
             <Card title="Sprites">
                 <div style={{flexDirection: "row", display:"flex"}}>
-                    <div style={{border: "1px solid #ddd", width: "390px", height: "300px", marginRight: "15px", overflow: "hidden", overflowY: "scroll"}}>
+                    <div style={{border: "1px solid #ddd", width: "430px", height: "300px", marginRight: "15px", overflow: "hidden", overflowY: "scroll"}}>
                         <table style={{width: "100%"}}>
                             <thead>
                                 <tr>
@@ -56,6 +56,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
                                     <th>Priority</th>
                                     <th>Palette</th>
                                     <th>Flip</th>
+                                    <th>X-Wrap</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -80,6 +81,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
                                             <td>{sprite.getSpritePriority()}</td>
                                             <td>{sprite.getPaletteIndex()}</td>
                                             <td>{Orientation[sprite.getOrientation()]}</td>
+                                            <td>{sprite.isXWrapped().toString().toUpperCase()}</td>
                                         </tr>
                                     );
                                 })}
