@@ -111,12 +111,8 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                             <span>{this.state.registers.oamaddr.getPriority()}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
-                                            <span style={{flexGrow: 1}} className="header">Base Address:</span>
-                                            <span>{this.state.registers.oamaddr.getAddress()}</span>
-                                        </li>
-                                        <li style={{display: "flex"}}>
-                                            <span style={{flexGrow: 1}} className="header">Table:</span>
-                                            <span>{this.state.registers.oamaddr.getTableSelector()}</span>
+                                            <span style={{flexGrow: 1}} className="header">Table Address:</span>
+                                            <span>{this.state.registers.oamaddr.getTableAddress()}</span>
                                         </li>
                                     </ul>
                                 </li>

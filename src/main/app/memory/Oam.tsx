@@ -38,7 +38,7 @@ export class Oam {
         this.low.fill(0, 0, Oam.TABLE_LOW_SIZE);
 
         this.high = new Array(Oam.TABLE_HIGH_SIZE);
-        this.high.fill(0, 0, Oam.TABLE_HIGH_SIZE);
+        this.high.fill(0xFF, 0, Oam.TABLE_HIGH_SIZE);
     }
 
     public readByte(address: Address): number {
@@ -49,17 +49,12 @@ export class Oam {
         let bank = address.getBank();
         let offset = address.getPage();
 
-        if (bank == 0x00) {
-            if (offset < 0 || offset > Oam.TABLE_LOW_SIZE) {
-                throw new Error("Invalid write at 0x" + address.toString());
-            }
+        if (offset < 512) {
             return this.low[offset];
-        } else {
-            if (offset < 0 || offset > Oam.TABLE_HIGH_SIZE) {
-                throw new Error("Invalid write at 0x" + address.toString());
-            }
-            return this.high[offset];
+        } else if (offset < 544) {
+            return this.high[offset - 512];
         }
+        throw new Error("Invalid read at " + address.toString());
     }
 
     public writeByte(address: Address, val: number): void {
@@ -70,16 +65,12 @@ export class Oam {
         let bank = address.getBank();
         let offset = address.getPage();
 
-        if (bank == 0x00) {
-            if (offset < 0 || offset > Oam.TABLE_LOW_SIZE) {
-                throw new Error("Invalid write at 0x" + address.toString());
-            }
+        if (offset < 512) {
             this.low[offset] = val;
+        } else if (offset < 544) {
+            this.high[offset - 512] = val;
         } else {
-            if (offset < 0 || offset > Oam.TABLE_HIGH_SIZE) {
-                throw new Error("Invalid write at 0x" + address.toString());
-            }
-            this.high[offset] = val;
+            throw Error("Invalid write at " + address.toString() + " " + val);
         }
     }
 }

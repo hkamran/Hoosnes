@@ -123,16 +123,16 @@ export class OamAddressRegister extends Register {
         return Bit.getUint16Lower(this.val);
     }
 
-    public getAddress(): number {
-        return this.getUpper();
+    public getTableAddress(): number {
+        return Bit.toUint16(this.getUpper() & 0x7F, this.getLower());
+    }
+
+    public setTableAddress(value: number) {
+        this.val = (this.getPriority() << 14) | ((value) % 544);
     }
 
     public getPriority(): number {
         return (this.getUpper() >> 7) & 0x1;
-    }
-
-    public getTableSelector(): number {
-        return (this.getLower() >> 0) & 0x1;
     }
 
 }
@@ -142,23 +142,31 @@ export class OamDataWriteRegister extends Register {
     public address: string = "0x2104";
     public label: string = "OAMDATA";
 
+    public buffer: number;
+
     public set(val: number): void {
         let ppu: Ppu = this.console.ppu;
-        let addr: number = ppu.registers.oamaddr.getAddress();
-        let bank: number = ppu.registers.oamaddr.getTableSelector();
+        let addr: number = ppu.registers.oamaddr.getTableAddress();
 
-        ppu.registers.oamaddr.setUpper((addr + 1) & 0xFF);
-        ppu.oam.writeByte(Address.create(addr, bank), val);
+        let isEven: boolean = (addr & 0x1) == 0;
+
+        if (isEven) {
+            this.buffer = val;
+        }
+        if (addr < 512) {
+            if (!isEven) {
+                ppu.oam.writeByte(Address.create(addr - 1), this.buffer);
+                ppu.oam.writeByte(Address.create(addr), this.buffer);
+            }
+        } else {
+            ppu.oam.writeByte(Address.create(512 + (addr & 0x1f)), this.buffer);
+        }
+        ppu.registers.oamaddr.setTableAddress(addr + 1);
     }
 
     public get(): number {
-        let ppu: Ppu = this.console.ppu;
-        let addr: number = ppu.registers.oamaddr.getAddress();
-        let bank: number = ppu.registers.oamaddr.getTableSelector();
-
-        return ppu.oam.readByte(Address.create(addr, bank));
+        throw new Error("Invalid read on 0x2104");
     }
-
 }
 
 export class BhModeAndCharacterSizeRegister extends Register {
@@ -849,6 +857,19 @@ export class OAMDataReadRegister extends Register {
 
     public address: string = "0x2138";
     public label: string = "OAMDATAREAD";
+
+    public get(): number {
+        let ppu: Ppu = this.console.ppu;
+        let addr: number = ppu.registers.oamaddr.getTableAddress();
+
+        ppu.registers.oamaddr.setTableAddress(addr + 1);
+
+        if (addr >= 0x512) {
+            return ppu.oam.readByte(Address.create(512 + (addr & 0x1f)));
+        } else {
+            return ppu.oam.readByte(Address.create(addr));
+        }
+    }
 
 }
 

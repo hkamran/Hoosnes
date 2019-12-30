@@ -57,7 +57,7 @@ export class Bus {
             throw new Error("Invalid readByte at " + address);
         }
 
-        console.log("reading " + address.toString());
+        //console.log("reading " + address.toString());
 
         let read: Read = null;
 
@@ -117,7 +117,7 @@ export class Bus {
             throw new Error("Invalid readByte at " + address);
         }
 
-        console.log("writing " + address + " 0x" + value.toString(16));
+        //console.log("writing " + address + " 0x" + value.toString(16));
 
         let write: Write = new Write(address, value, 0);
 
