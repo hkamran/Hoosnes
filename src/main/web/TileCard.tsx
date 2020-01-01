@@ -17,6 +17,54 @@ interface ITileCardState {
     tilesPerRow: number;
 }
 
+/**
+ * Characters used for tiles and sprites are 8×8 pixels in size and are stored as bitplanes in VRAM. Each plane contains a bitmap, and corresponding bits set to 1 in different planes are combined to refer to a color in the character's color palette. The number of colors available for a character can vary and is determined by the tile or sprite settings. The number of bitplanes required for the character depends on the number of available colors:
+
+ 4 colors: 2 planes
+ 16 colors: 4 planes
+ 256 colors: 8 planes
+
+ B: addressof(A) +  1 × 8 × (color depth / 2)
+ C: addressof(A) + 16 × 8 × (color depth / 2)
+ D: addressof(A) + 17 × 8 × (color depth / 2)
+
+
+ The record format for the low table is 4 bytes:
+ byte OBJ*4+0: xxxxxxxx
+ byte OBJ*4+1: yyyyyyyy
+ byte OBJ*4+2: cccccccc
+ byte OBJ*4+3: vhoopppN
+
+ The record format for the high table is 2 bits:
+ bit 0/2/4/6 of byte OBJ/4: X
+ bit 1/3/5/7 of byte OBJ/4: s
+
+ The values are:
+ Xxxxxxxxx = X position of the sprite. Basically, consider this signed but see
+ below.
+ yyyyyyyy  = Y position of the sprite. Values 0-239 are on-screen. -63 through
+ -1 are "off the top", so the bottom part of the sprite comes in at the
+ top of the screen. Note that this implies a really big sprite can go off
+ the bottom and come back in the top.
+ cccccccc  = First tile of the sprite. See below for the calculation of the
+ VRAM address. Note that this could also be considered as 'rrrrcccc'
+ specifying the row and column of the tile in the 16x16 character table.
+ N         = Name table of the sprite. See below for the calculation of the
+ VRAM address.
+ ppp       = Palette of the sprite. The first palette index is 128+ppp*16.
+ oo        = Sprite priority. See below for details.
+ h/v       = Horizontal/Veritcal flip flags. Note this flips the whole sprite,
+ not just the individual tiles. However, the rectangular sprites are
+ flipped vertically as if they were two square sprites (i.e. rows
+ "01234567" flip to "32107654", not "76543210").
+ s         = Sprite size flag. See below for details.
+
+ ((Base<<13) + (cccccccc<<4) + (N ? ((Name+1)<<12) : 0)) & 0x7fff
+ OAM name selection is a trick for cheap sprite animation, ignore it until you learn how to experiment on your own.
+ http://folk.uio.no/sigurdkn/snes/registers.txt
+
+ */
+
 export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
 
     public canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -27,7 +75,7 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
         tileHeightSize: 8,
         tileWidthSize: 8,
         tileBorderOpacity: 100,
-        tilesPerRow: 31,
+        tilesPerRow: 16,
     };
 
     constructor(props : ITileCardProps) {
@@ -67,10 +115,11 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
 
         let tileXIndex: number = 0;
         let tileYIndex: number = 0;
+        let tileNumber = 0;
 
         while (vramIndex < length) {
 
-            let attributes: TileAttributes = TileAttributes.create(8, 8, BppType.Four);
+            let attributes: TileAttributes = TileAttributes.create(tileNumber,8, 8, BppType.Four);
             let tile: number[][] = this.props.snes.ppu.tiles.getTile(Address.create(vramIndex), attributes);
             vramIndex += attributes.getTileSize();
 
@@ -132,10 +181,11 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
             }
 
             tileXIndex += 1;
-            if (tileXIndex >= 31) {
+            if (tileXIndex >= this.state.tilesPerRow) {
                 tileYIndex += 1;
                 tileXIndex = 0;
             }
+            tileNumber++;
         }
         this.context.putImageData(image, 0, 0);
     }

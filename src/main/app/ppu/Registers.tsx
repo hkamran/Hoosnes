@@ -156,10 +156,10 @@ export class OamDataWriteRegister extends Register {
         if (addr < 512) {
             if (!isEven) {
                 ppu.oam.writeByte(Address.create(addr - 1), this.buffer);
-                ppu.oam.writeByte(Address.create(addr), this.buffer);
+                ppu.oam.writeByte(Address.create(addr), val);
             }
         } else {
-            ppu.oam.writeByte(Address.create(512 + (addr & 0x1f)), this.buffer);
+            ppu.oam.writeByte(Address.create(512 + (addr & 0x1f)), val);
         }
         ppu.registers.oamaddr.setTableAddress(addr + 1);
     }
@@ -562,6 +562,8 @@ export class VRAMDataWriteRegister extends Register {
     public label: string = "VMDATA";
 
     public setLower(val: number) {
+        this.val = Bit.setUint16Lower(this.val, val);
+
         let ppu: Ppu = this.console.ppu;
         let doIncrement = ppu.registers.vportcntrl.getAddressIncrementMode() == 0;
 
@@ -571,11 +573,11 @@ export class VRAMDataWriteRegister extends Register {
         if (doIncrement) {
             this.write(true, loData);
         }
-
-        this.val = Bit.setUint16Lower(this.val, val);
     }
 
     public setUpper(val: number) {
+        this.val = Bit.setUint16Upper(this.val, val);
+
         let ppu: Ppu = this.console.ppu;
         let doIncrement = ppu.registers.vportcntrl.getAddressIncrementMode() == 1;
 
@@ -585,8 +587,6 @@ export class VRAMDataWriteRegister extends Register {
         if (doIncrement) {
             this.write(true, loData, hiData);
         }
-
-        this.val = Bit.setUint16Upper(this.val, val);
     }
 
     public getLower(): number {

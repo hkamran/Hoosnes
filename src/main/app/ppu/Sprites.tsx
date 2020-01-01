@@ -1,5 +1,8 @@
 
 import {Oam} from "../memory/Oam";
+import {Ppu} from "./Ppu";
+import {Objects} from "../util/Objects";
+import {Address} from "../bus/Address";
 
 /*
 always 4 BPP
@@ -33,12 +36,16 @@ export class Sprite {
     private readonly tableAIndex: number;
     private readonly tableBIndex: number;
     private oam: Oam;
+    private ppu: Ppu;
 
-    constructor(id: number, oam: Oam) {
+    constructor(id: number, oam: Oam, ppu: Ppu) {
+        Objects.requireNonNull(ppu);
+        
         this.id = id;
         this.tableAIndex = id * 4;
         this.tableBIndex = id;
         this.oam = oam;
+        this.ppu = ppu;
     }
 
     public getXPosition(): number {
@@ -65,7 +72,21 @@ export class Sprite {
         return val;
     }
 
-    public getNameTable(): number {
+    public getTileAddress(): Address {
+        let name1TableAddr: number = this.ppu.registers.oamselect.getBaseSelection() << 13;
+        let name2TableAddr: number = this.ppu.registers.oamselect.getNameSelection() << 12;
+
+        let tiletable: number = this.getTileTable();
+        let tileNumber: number = this.getTileNumber();
+
+        // Sprites are always 4 bpp
+        let baseAddr: number = (name1TableAddr) + (tileNumber<<4);
+        let offsetAddr: number = (tiletable == 1 ? ((name2TableAddr + 1) << 12) : 0);
+
+        return Address.create((baseAddr + offsetAddr) & 0x7fff);
+    }
+
+    public getTileTable(): number {
         let val: number = this.getAttributes();
         return (val >> 0) & 1;
     }
@@ -73,14 +94,13 @@ export class Sprite {
     // https://sneslab.net/wiki/PPU_Registers
     public getPaletteIndex(): number {
         let val: number = (this.getAttributes() >> 1) & 7;
-        let index: number = 128 + (val * 16);
+        let index: number = (128 + (val * 16)) * 2;
         return index;
     }
 
     public getOrientation(): Orientation {
-        let val: number = this.getAttributes();
-        let isYFlipped: boolean = ((val >> 7) & 1) == 1;
-        let isXFlipped: boolean = ((val >> 7) & 1) == 1;
+        let isYFlipped: boolean = this.isXFlipped();
+        let isXFlipped: boolean = this.isYFlipped();
 
         if (isXFlipped) {
             return Orientation.HORIZONTAL;
@@ -96,12 +116,12 @@ export class Sprite {
         return (val >> 4) & 3;
     }
 
-    public isXFlipped(): boolean {
+    public isYFlipped(): boolean {
         let val: number = this.getAttributes();
         return ((val >> 6) & 1) == 1;
     }
 
-    public isYFlipped(): boolean {
+    public isXFlipped(): boolean {
         let val: number = this.getAttributes();
         return ((val >> 7) & 1) == 1;
     }
@@ -121,7 +141,7 @@ export class Sprite {
         let byte: number =
             this.oam.high[index];
 
-        let val = (byte >> (6 - offset)) & 0x3;
+        let val = (byte >> offset) & 0x3;
         return val;
     }
 }
@@ -131,17 +151,19 @@ export class Sprites {
     public static size: number = 128;
 
     public oam: Oam;
+    public ppu: Ppu;
     public sprites: Sprite[] = [];
 
-    constructor(oam: Oam) {
+    constructor(oam: Oam, ppu: Ppu) {
         this.oam = oam;
+        this.ppu = ppu;
 
         this.initSprites();
     }
 
     private initSprites(): void {
         for (let i = 0; i < Sprites.size; i++) {
-            this.sprites.push(new Sprite(i, this.oam));
+            this.sprites.push(new Sprite(i, this.oam, this.ppu));
         }
     }
 

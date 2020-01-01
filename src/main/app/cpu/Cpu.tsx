@@ -48,7 +48,7 @@ export class Cpu {
         let opcode: Read = this.console.bus.readByte(opaddr);
         let operation: Operation = this.opcodes.get(opcode.get());
 
-        console.log(opcode.get().toString(16) + " " + operation.name);
+        // console.log(opcode.get().toString(16) + " " + operation.name);
 
         this.registers.pc.set(opaddr.toValue() + operation.getSize());
 

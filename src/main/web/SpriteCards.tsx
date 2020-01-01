@@ -4,6 +4,7 @@ import {BppType, Color} from "../app/ppu/Palette";
 import {Console} from "../app/Console";
 import {Orientation, Sprite} from "../app/ppu/Sprites";
 import {OamSizes} from "../app/memory/Oam";
+import {TileAttributes} from "../app/ppu/Tiles";
 
 interface ISpriteCardProps {
     snes: Console;
@@ -11,6 +12,11 @@ interface ISpriteCardProps {
 
 interface ISpriteCardState {
     selected: number | null;
+    tilePixelSize: number;
+    tileHeightSize: number;
+    tileWidthSize: number;
+    tileBorderOpacity: number;
+    tilesPerRow: number;
 }
 
 export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardState> {
@@ -20,11 +26,20 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
 
     public state: ISpriteCardState = {
         selected: null,
+        tilePixelSize: 4,
+        tileHeightSize: 8,
+        tileWidthSize: 8,
+        tileBorderOpacity: 100,
+        tilesPerRow: 16, //16 (width) by 0x1FX (height)
     };
 
     constructor(props : ISpriteCardProps) {
         super(props);
         this.canvasRef = React.createRef<HTMLCanvasElement>();
+    }
+
+    public componentDidUpdate(prevProps: Readonly<ISpriteCardProps>, prevState: Readonly<ISpriteCardState>, snapshot?: any): void {
+        this.refresh();
     }
 
     public componentDidMount(): void {
@@ -37,14 +52,97 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
         });
     }
 
-    public render() {
+    public refresh(): void {
+        if (this.state.selected == null) {
+            this.context = this.canvasRef.current.getContext("2d", {alpha: false});
 
+            this.canvasRef.current.width = 100;
+            this.canvasRef.current.height = 100;
+            return;
+        }
+
+        let sprite: Sprite = this.props.snes.ppu.sprites.getSprite(this.state.selected);
+        let dimensions: OamSizes = this.props.snes.ppu.registers.oamselect.getObjectSizes();
+        let height: number = sprite.isBig() ? dimensions.bigHeight : dimensions.smallHeight;
+        let width: number = sprite.isBig() ? dimensions.bigWidth : dimensions.smallWidth;
+        let attributes: TileAttributes = TileAttributes.create(sprite.getTileNumber(), height, width, BppType.Four, sprite.isYFlipped(), sprite.isXFlipped());
+        let tile: number[][] = this.props.snes.ppu.tiles.getTile(sprite.getTileAddress(), attributes);
+
+        this.context = this.canvasRef.current.getContext("2d", {alpha: false});
+
+        let totalWidth = width * this.state.tilePixelSize;
+        let totalHeight = height * this.state.tilePixelSize;
+
+        this.canvasRef.current.width = totalWidth;
+        this.canvasRef.current.height = totalHeight;
+
+        let image: ImageData = this.context.createImageData(totalWidth, totalHeight);
+
+        for (let index = 0; index < image.data.length; index += 4) {
+            image.data[index + 0] = 0;
+            image.data[index + 1] = 0;
+            image.data[index + 2] = 0;
+            image.data[index + 3] = 255;
+        }
+
+        let tileBottomIndex: number = ((this.state.tileHeightSize * this.state.tilePixelSize) * 0) * totalWidth;
+        let tileRightIndex: number = (0 * this.state.tilePixelSize * this.state.tileWidthSize);
+
+        let colors: Color[] = this.props.snes.ppu.palette.getPalette(BppType.Four, sprite.getPaletteIndex());
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                let palette = tile[y][x];
+
+                let yIndex: number = tileBottomIndex + ((y * this.state.tilePixelSize) * totalWidth);
+                let xIndex: number = tileRightIndex + (x * this.state.tilePixelSize);
+
+                // Write pixel size
+
+                for (let yOffset = 0; yOffset < this.state.tilePixelSize; yOffset++) {
+                    for (let xOffset = 0; xOffset < this.state.tilePixelSize; xOffset++) {
+                        let index = 0;
+                        index += yIndex + (yOffset * totalWidth);
+                        index += (xIndex + xOffset);
+                        index *= 4;
+
+                        let color: Color = colors[palette];
+                        if (color == null) {
+                            continue;
+                        }
+
+                        image.data[index + 0] = color.red;
+                        image.data[index + 1] = color.green;
+                        image.data[index + 2] = color.blue;
+                        image.data[index + 3] = color.opacity;
+                    }
+                }
+            }
+        }
+
+
+        this.context.putImageData(image, 0, 0);
+    }
+
+    public zoomIn(): void {
+        this.setState({
+            tilePixelSize: Math.min(this.state.tilePixelSize + 1, 7),
+        });
+    }
+
+    public zoomOut(): void {
+        this.setState({
+            tilePixelSize: Math.max(this.state.tilePixelSize - 1, 1),
+        });
+    }
+
+    public render() {
         let sizes: OamSizes = this.props.snes.ppu.registers.oamselect.getObjectSizes();
 
         return (
             <Card title="Sprites">
                 <div style={{flexDirection: "row", display:"flex"}}>
-                    <div style={{border: "1px solid #ddd", width: "430px", height: "300px", marginRight: "15px", overflow: "hidden", overflowY: "scroll"}}>
+                    <div style={{border: "1px solid #ddd", width: "470px", height: "300px", marginRight: "15px", overflow: "hidden", overflowY: "scroll"}}>
                         <table style={{width: "100%"}}>
                             <thead>
                                 <tr>
@@ -96,14 +194,15 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
                         <div>
                             <canvas ref={this.canvasRef}
                                     style={{
-                                        width: "100px",
-                                        height: "100px",
                                         border: "2px solid #000",
                                         borderRadius: "2px",
                                         marginRight: "10px",
                                     }}
                             />
                         </div>
+                        <button onClick={this.refresh.bind(this)}>Refresh</button>
+                        <button onClick={this.zoomIn.bind(this)}>+</button>
+                        <button onClick={this.zoomOut.bind(this)}>-</button>
                     </div>
                 </div>
             </Card>

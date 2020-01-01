@@ -1,4 +1,5 @@
 import {CGram} from "../memory/CGram";
+import {Bit} from "../util/Bit";
 
 export enum BppType {
     Eight = 8,
@@ -44,37 +45,29 @@ export class Palette {
 
     public getPalette(type: BppType, index: number): Color[] {
         if (type == BppType.Eight) {
-            return this.fetchRange(0, 256);
+            return this.fetchRange(0, 512);
         } else if (type == BppType.Four) {
-            if (index < 0 || index > 15) {
-                return null;
-            }
-            return this.fetchRange(index * 15, index * 15 + 15);
+            return this.fetchRange(index, index + (16 * 2));
         } else if (type == BppType.Two) {
-            if (index < 0 || index > 63) {
-                return null;
-            }
-            return this.fetchRange(index * 4, index * 4 + 4);
+            return this.fetchRange(index, index + (4 * 2));
         } else {
             return null;
         }
     }
 
     private fetchRange(startIndex: number, endIndex: number): Color[] {
-        if (startIndex == null || startIndex < 0 || startIndex > 256 ||
-            endIndex == null || endIndex < 0 || endIndex > 256 || startIndex > endIndex) {
+        if (startIndex == null || startIndex < 0 || startIndex > 512 ||
+            endIndex == null || endIndex < 0 || endIndex > 512 || startIndex > endIndex) {
             throw new Error("Invalid palette " + startIndex + " " + endIndex);
         }
 
         let colors: Color[] = [];
-        let cramIndex: number = 0;
-        for (let i = startIndex; i < endIndex; i++) {
-            let lowHalf: number = this.cgram.readByte(cramIndex + 0) << 0;
-            let highHalf: number = this.cgram.readByte(cramIndex + 1) << 8;
+        for (let i = startIndex; i < endIndex; i = i + 2) {
+            let lowHalf: number = this.cgram.readByte(i + 0);
+            let highHalf: number = this.cgram.readByte(i + 1);
 
-            let byte: number = lowHalf | highHalf;
+            let byte: number = Bit.toUint16(highHalf, lowHalf);
             let color: Color = Color.parse(byte);
-            cramIndex += 2;
             colors.push(color);
         }
         return colors;
