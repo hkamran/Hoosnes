@@ -119,7 +119,7 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
 
         while (vramIndex < length) {
 
-            let attributes: TileAttributes = TileAttributes.create(tileNumber,8, 8, BppType.Four);
+            let attributes: TileAttributes = TileAttributes.create(8, 8, BppType.Four);
             let tile: number[][] = this.props.snes.ppu.tiles.getTile(Address.create(vramIndex), attributes);
             vramIndex += attributes.getTileSize();
 

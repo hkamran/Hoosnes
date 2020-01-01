@@ -3,6 +3,7 @@ import {Oam} from "../memory/Oam";
 import {Ppu} from "./Ppu";
 import {Objects} from "../util/Objects";
 import {Address} from "../bus/Address";
+import {Orientation} from "./Tiles";
 
 /*
 always 4 BPP
@@ -23,12 +24,6 @@ max 128 objects
 table a
 
 */
-
-export enum Orientation {
-    VERTICAL,
-    HORIZONTAL,
-    NONE,
-}
 
 export class Sprite {
 

@@ -7,23 +7,6 @@ import {Objects} from "../util/Objects";
 import {NumberUtil} from "../util/NumberUtil";
 import {Address} from "../bus/Address";
 
-export class OamSizes {
-    public smallHeight: number;
-    public smallWidth: number;
-    public bigHeight: number;
-    public bigWidth: number;
-
-    public static create(sh, sw, bh, bw): OamSizes {
-        let size: OamSizes = new OamSizes();
-        size.smallHeight = sh;
-        size.smallWidth = sw;
-        size.bigHeight = bh;
-        size.bigWidth = bw;
-
-        return size;
-    }
-}
-
 export class Oam {
 
     public static readonly TABLE_LOW_SIZE: number = 512;

@@ -2,9 +2,8 @@ import * as React from "react";
 import {Card} from "./core/layout/Card";
 import {BppType, Color} from "../app/ppu/Palette";
 import {Console} from "../app/Console";
-import {Orientation, Sprite} from "../app/ppu/Sprites";
-import {OamSizes} from "../app/memory/Oam";
-import {TileAttributes} from "../app/ppu/Tiles";
+import {Dimension, Orientation, TileAttributes} from "../app/ppu/Tiles";
+import {Sprite} from "../app/ppu/Sprites";
 
 interface ISpriteCardProps {
     snes: Console;
@@ -62,10 +61,10 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
         }
 
         let sprite: Sprite = this.props.snes.ppu.sprites.getSprite(this.state.selected);
-        let dimensions: OamSizes = this.props.snes.ppu.registers.oamselect.getObjectSizes();
-        let height: number = sprite.isBig() ? dimensions.bigHeight : dimensions.smallHeight;
-        let width: number = sprite.isBig() ? dimensions.bigWidth : dimensions.smallWidth;
-        let attributes: TileAttributes = TileAttributes.create(sprite.getTileNumber(), height, width, BppType.Four, sprite.isYFlipped(), sprite.isXFlipped());
+        let dimensions: {small: Dimension, big: Dimension} = this.props.snes.ppu.registers.oamselect.getObjectSizes();
+        let height: number = sprite.isBig() ? dimensions.big.height : dimensions.small.height;
+        let width: number = sprite.isBig() ? dimensions.big.width : dimensions.small.width;
+        let attributes: TileAttributes = TileAttributes.create(height, width, BppType.Four, sprite.isYFlipped(), sprite.isXFlipped());
         let tile: number[][] = this.props.snes.ppu.tiles.getTile(sprite.getTileAddress(), attributes);
 
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
@@ -137,7 +136,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
     }
 
     public render() {
-        let sizes: OamSizes = this.props.snes.ppu.registers.oamselect.getObjectSizes();
+        let sizes: {small: Dimension, big: Dimension} = this.props.snes.ppu.registers.oamselect.getObjectSizes();
 
         return (
             <Card title="Sprites">
@@ -160,8 +159,8 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
                             <tbody>
                                 {this.props.snes.ppu.sprites.getSprites().map((sprite: Sprite, index: number) => {
 
-                                    let height: number = sprite.isBig() ? sizes.bigHeight: sizes.smallHeight;
-                                    let width: number = sprite.isBig() ? sizes.bigWidth: sizes.smallWidth;
+                                    let height: number = sprite.isBig() ? sizes.big.height: sizes.small.height;
+                                    let width: number = sprite.isBig() ? sizes.big.width: sizes.small.width;
 
                                     let style = {cursor: "pointer", background: ""};
 

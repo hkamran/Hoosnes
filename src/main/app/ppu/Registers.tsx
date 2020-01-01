@@ -5,10 +5,9 @@ import {CGram} from "../memory/CGram";
 import {Bit} from "../util/Bit";
 import {Objects} from "../util/Objects";
 import {Address} from "../bus/Address";
-import {OamSizes} from "../memory/Oam";
 import {Vram} from "../memory/Vram";
+import {Dimension} from "./Tiles";
 
-const INVALID_SET: string = "Invalid value set";
 
 // http://baltimorebarcams.com/eb/snes/docs/65816/SNES%20Registers.html
 // https://en.wikibooks.org/wiki/Super_NES_Programming/SNES_Hardware_Registers
@@ -70,20 +69,20 @@ export class OamSizeAndDataAreaRegister extends Register {
         return type;
     }
 
-    public getObjectSizes(): OamSizes {
+    public getObjectSizes(): {small: Dimension, big: Dimension} {
         let type : number = this.getSize();
         if (type == 0x0) {
-            return OamSizes.create(8,8, 16, 16);
+            return {small: Dimension.get8by8(), big: Dimension.get16by16()};
         } else if (type == 0x1) {
-            return OamSizes.create(8,8, 32, 32);
+            return {small: Dimension.get8by8(), big: Dimension.get32by32()};
         } else if (type == 0x2) {
-            return OamSizes.create(16,16, 32, 32);
+            return {small: Dimension.get16by16(), big: Dimension.get32by32()};
         } else if (type == 0x4) {
-            return OamSizes.create(16,16, 64, 64);
+            return {small: Dimension.get16by16(), big: Dimension.get64by64()};
         } else if (type == 0x6) {
-            return OamSizes.create(32,32, 64, 64);
+            return {small: Dimension.get32by32(), big: Dimension.get64by64()};
         } else if (type == 0x5) {
-            return OamSizes.create(32,32, 64, 64);
+            return {small: Dimension.get32by32(), big: Dimension.get64by64()};
         } else {
             throw new Error("Undocumented behaviour type " + type);
         }
