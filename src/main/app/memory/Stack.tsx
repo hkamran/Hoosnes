@@ -44,7 +44,6 @@ export class Stack {
         let value: number = this.stack.pop();
         this.console.cpu.registers.sp.set((sp + 1) & 0xFFFF);
 
-        console.log(`popping ${value.toString(16)}`);
         return value;
     }
 }

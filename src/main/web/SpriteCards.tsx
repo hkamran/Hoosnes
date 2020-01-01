@@ -56,8 +56,8 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
         if (this.state.selected == null) {
             this.context = this.canvasRef.current.getContext("2d", {alpha: false});
 
-            this.canvasRef.current.width = 100;
-            this.canvasRef.current.height = 100;
+            this.canvasRef.current.width = 128;
+            this.canvasRef.current.height = 128;
             return;
         }
 
