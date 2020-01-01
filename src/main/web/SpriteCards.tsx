@@ -142,7 +142,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
         return (
             <Card title="Sprites">
                 <div style={{flexDirection: "row", display:"flex"}}>
-                    <div style={{border: "1px solid #ddd", width: "470px", height: "300px", marginRight: "15px", overflow: "hidden", overflowY: "scroll"}}>
+                    <div style={{border: "1px solid #ddd", width: "490px", height: "300px", marginRight: "15px", overflow: "hidden", overflowY: "scroll"}}>
                         <table style={{width: "100%"}}>
                             <thead>
                                 <tr>

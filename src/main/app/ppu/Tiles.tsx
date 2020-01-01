@@ -66,8 +66,8 @@ export class Tiles {
         let bpp: number = attributes.bpp.valueOf();
         let index: number = address.toValue();
 
-        for (let height: number = 0; height < attributes.height; height += 8) {
-            for (let width: number = 0; width < attributes.width; width += 8) {
+        for (let yBase: number = 0; yBase < attributes.height; yBase += 8) {
+            for (let xBase: number = 0; xBase < attributes.width; xBase += 8) {
 
                 let plane: number = 0;
                 for (let i = 0; i < bpp / 2; i++) {
@@ -78,20 +78,21 @@ export class Tiles {
                         }
                     }
 
-                    let yIndex: number = 0;
+                    let yOffset: number = 0;
                     for (let row of rows) {
                         let shift: number = plane;
                         for (let cell of row) {
                             let bits: number = cell;
                             for (let bitIndex = 0; bitIndex < 8; bitIndex++) {
                                 let bit = bits & 1;
-                                let xIndex: number = 7 - bitIndex;
-                                tile[height + yIndex][width + xIndex] |= (bit << shift);
+                                let xIndex: number = attributes.hflip ? (attributes.width - 8 - xBase) + bitIndex : xBase + (7 - bitIndex);
+                                let yIndex: number = attributes.vflip ? (attributes.height - 8 - yBase) + (7 - yOffset) : yBase + yOffset;
+                                tile[yIndex][xIndex] |= (bit << shift);
                                 bits = bits >> 1;
                             }
                             shift++;
                         }
-                        yIndex++;
+                        yOffset++;
                     }
 
                     plane += 2;

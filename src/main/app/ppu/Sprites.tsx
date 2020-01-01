@@ -99,8 +99,8 @@ export class Sprite {
     }
 
     public getOrientation(): Orientation {
-        let isYFlipped: boolean = this.isXFlipped();
-        let isXFlipped: boolean = this.isYFlipped();
+        let isYFlipped: boolean = this.isYFlipped();
+        let isXFlipped: boolean = this.isXFlipped();
 
         if (isXFlipped) {
             return Orientation.HORIZONTAL;
@@ -118,12 +118,12 @@ export class Sprite {
 
     public isYFlipped(): boolean {
         let val: number = this.getAttributes();
-        return ((val >> 6) & 1) == 1;
+        return ((val >> 7) & 1) == 1;
     }
 
     public isXFlipped(): boolean {
         let val: number = this.getAttributes();
-        return ((val >> 7) & 1) == 1;
+        return ((val >> 6) & 1) == 1;
     }
 
     public isBig(): boolean {
