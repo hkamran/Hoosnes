@@ -256,7 +256,7 @@ export class TileAddressForBG1Register extends Register {
     public address: string = "0x2107";
     public label: string = "BG1SC";
 
-    public getTileAddress(): number {
+    public getTileMapAddress(): number {
         return (((this.val >> 2) & 0x3F) << 11) * 2048;
     }
 

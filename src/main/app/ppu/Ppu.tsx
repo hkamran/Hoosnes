@@ -10,6 +10,7 @@ import {Screen, ScreenStates} from "./Screen";
 import {InterruptType} from "../cpu/Interrupts";
 import {Renderer} from "./Renderer";
 import {Tiles} from "./Tiles";
+import {Backgrounds} from "./Backgrounds";
 
 export enum ScreenType {
     HBLANK, VBLANK, PRELINE, RENDER,
@@ -17,22 +18,23 @@ export enum ScreenType {
 
 export class Ppu {
 
+    public scanline: number = 0;
+    public cycle: number = 0;
+    public frames: number = 0;
+
     public console: Console;
 
+    public registers: Registers;
     public cgram: CGram;
     public oam: Oam;
     public vram: Vram;
 
+    public tiles: Tiles;
+    public tileMaps: TileMaps;
+
     public palette: Palette;
     public sprites: Sprites;
-    public tileMaps: TileMaps;
-    public tiles: Tiles;
-    public registers: Registers;
-
-    public scanline: number = 0;
-    public cycle: number = 0;
-
-    public frames: number = 0;
+    public backgrounds: Backgrounds;
 
     public screen: Screen;
     public renderer: Renderer;
@@ -55,6 +57,7 @@ export class Ppu {
         this.screen = new Screen();
         this.renderer = new Renderer(this);
         this.state = ScreenType.PRELINE;
+        this.backgrounds = new Backgrounds(this);
     }
 
     public tick(): void {

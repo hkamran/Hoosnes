@@ -13,6 +13,7 @@ import {Register, Registers} from "../app/cpu/Registers";
 import {Operation} from "../app/cpu/Opcodes";
 import {PpuCard} from "./PpuCard";
 import {TileCard} from "./TileCard";
+import {BackgroundsCard} from "./BackgroundsCard";
 
 declare let window : any;
 window.snes = new Console();
@@ -76,17 +77,22 @@ export class Main extends React.Component<IMainProps, any> {
     public render() {
         return (
             <div style={{display: 'flex', flexDirection: 'column'}}>
-                <div style={{display: 'flex', flexDirection: 'row'}}>
-                    <ScreenCard snes={window.snes} />
-                    <SpriteCard snes={window.snes} />
-                    <TileCard snes={window.snes} />
-                    <PaletteCard snes={window.snes} />
+                <div style={{display: 'flex', flexDirection: 'column'}}>
+                    <div style={{display: 'flex', flexDirection: 'row'}}>
+                        <ScreenCard snes={window.snes} />
+                        <SpriteCard snes={window.snes} />
+                        <TileCard snes={window.snes} />
+                    </div>
+                    <div style={{display: 'flex', flexDirection: 'row'}}>
+                        <BackgroundsCard snes={window.snes} />
+                        <PaletteCard snes={window.snes} />
+                        <CartridgeCard snes={window.snes} cartridge={window.snes.cartridge} />
+                    </div>
                 </div>
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                     <PpuCard snes={window.snes} addFetchFunction={this.addFetchFunction.bind(this)} />
                     <CpuCard snes={window.snes} addFetchFunction={this.addFetchFunction.bind(this)} />
                     <DebuggerCard snes={window.snes} tick={this.tick.bind(this)} logs={this.state.logs} />
-                    <CartridgeCard snes={window.snes} cartridge={window.snes.cartridge} />
                 </div>
             </div>
         );

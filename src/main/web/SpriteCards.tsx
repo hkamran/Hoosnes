@@ -90,7 +90,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
 
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
-                let palette = tile[y][x];
+                let palette: number = tile.data[y][x];
 
                 let yIndex: number = tileBottomIndex + ((y * this.state.tilePixelSize) * totalWidth);
                 let xIndex: number = tileRightIndex + (x * this.state.tilePixelSize);

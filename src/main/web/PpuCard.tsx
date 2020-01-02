@@ -18,7 +18,6 @@ interface IPpuCardState {
     ppu: Ppu;
 }
 
-
 export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
 
     public context: CanvasRenderingContext2D;
@@ -121,19 +120,19 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                     <ul style={{margin: "5px"}}>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">BG4 Tile Size:</span>
-                                            <span>{this.state.registers.bgmode.getBG4TileSize()}</span>
+                                            <span>{this.state.registers.bgmode.getBG4TileSize().toString()}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">BG3 Tile Size:</span>
-                                            <span>{this.state.registers.bgmode.getBG3TileSize()}</span>
+                                            <span>{this.state.registers.bgmode.getBG3TileSize().toString()}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">BG2 Tile Size:</span>
-                                            <span>{this.state.registers.bgmode.getBG2TileSize()}</span>
+                                            <span>{this.state.registers.bgmode.getBG2TileSize().toString()}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">BG1 Tile Size:</span>
-                                            <span>{this.state.registers.bgmode.getBG1TileSize()}</span>
+                                            <span>{this.state.registers.bgmode.getBG1TileSize().toString()}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">BG3 Priority:</span>
@@ -175,11 +174,11 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                     <ul style={{margin: "5px"}}>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Tile Address:</span>
-                                            <span>{this.state.registers.vtilebg1.getTileAddress()}</span>
+                                            <span>{this.state.registers.vtilebg1.getTileMapAddress()}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
-                                            <span>{this.state.registers.vtilebg1.getDimension()}</span>
+                                            <span>{this.state.registers.vtilebg1.getDimension().toString()}</span>
                                         </li>
                                     </ul>
                                 </li>
@@ -192,7 +191,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
-                                            <span>{this.state.registers.vtilebg2.getDimension()}</span>
+                                            <span>{this.state.registers.vtilebg2.getDimension().toString()}</span>
                                         </li>
                                     </ul>
                                 </li>
@@ -205,7 +204,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
-                                            <span>{this.state.registers.vtilebg3.getDimension()}</span>
+                                            <span>{this.state.registers.vtilebg3.getDimension().toString()}</span>
                                         </li>
                                     </ul>
                                 </li>
@@ -218,7 +217,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
-                                            <span>{this.state.registers.vtilebg4.getDimension()}</span>
+                                            <span>{this.state.registers.vtilebg4.getDimension().toString()}</span>
                                         </li>
                                     </ul>
                                 </li>

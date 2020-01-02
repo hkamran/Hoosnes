@@ -3,8 +3,9 @@ import {Dimension, Tile, TileAttributes} from "./Tiles";
 import {Address} from "../bus/Address";
 import {Ppu} from "./Ppu";
 import {BppType} from "./Palette";
-import {TileMaps, TileMap} from "./TileMaps";
+import {TileMap} from "./TileMaps";
 import {ArrayUtil} from "../util/ArrayUtil";
+import {Objects} from "../util/Objects";
 
 /**
  *
@@ -33,19 +34,27 @@ import {ArrayUtil} from "../util/ArrayUtil";
 
 export class Backgrounds {
 
-    private vram: Vram;
+    private ppu: Ppu;
 
-    constructor(vram: Vram) {
-        this.vram = vram;
+    public bg1: Background1;
+    public bg2: Background1;
+    public bg3: Background1;
+    public bg4: Background1;
+
+    constructor(ppu: Ppu) {
+        this.ppu = ppu;
+        this.bg1 = new Background1(ppu);
     }
 
 }
 
-export abstract class Background {
+abstract class Background {
 
-    private ppu: Ppu;
+    protected ppu: Ppu;
 
     constructor(ppu: Ppu) {
+        Objects.requireNonNull(ppu);
+
         this.ppu = ppu;
     }
 
@@ -67,7 +76,7 @@ export abstract class Background {
         return Tile.create([], TileAttributes.create(backgroundDimension.height, backgroundDimension.width, bpp));
     }
 
-    private convertToTiles(tileMaps: TileMap[]) {
+    private convertToTiles(tileMaps: TileMap[]): Tile[] {
         // address_of_character = (base_location_bits << 13) + (8 * color_depth * character_number);
 
         let bpp: number = this.getBpp().valueOf();
@@ -104,5 +113,55 @@ export abstract class Background {
     public abstract getTileMapAddress(): number;
     public abstract getVerticalScrollOffset(): number;
     public abstract getHorizontalScrollOffset(): number;
+
+}
+
+
+
+export class Background1 extends Background {
+
+    public getBackgroundDimension(): Dimension {
+        return this.ppu.registers.vtilebg1.getDimension();
+    }
+
+    public getBaseCharacterAddress(): number {
+        return this.ppu.registers.vcharlocbg12.getBaseAddressForBG1();
+    }
+
+    public getBpp(): BppType {
+        let value: number = this.ppu.registers.bgmode.getMode();
+        if (value == 0) {
+            return BppType.Two;
+        } else if (value == 1) {
+            return BppType.Four;
+        } else if (value == 2) {
+            return BppType.Four;
+        }
+        throw new Error("Not implemented!");
+    }
+
+    public getCharacterDimension(): Dimension {
+        return this.ppu.registers.bgmode.getBG1TileSize();
+    }
+
+    public getHorizontalScrollOffset(): number {
+        return this.ppu.registers.bg1hofs.getBG1HortOffset();
+    }
+
+    public getVerticalScrollOffset(): number {
+        return this.ppu.registers.bg1vofs.getBG1VertOffset();
+    }
+
+    public getTileMapAddress(): number {
+        return this.ppu.registers.vtilebg1.getTileMapAddress();
+    }
+
+    public isHorizontallyExtended(): boolean {
+        return this.ppu.registers.vtilebg1.isExtendedHorizontally();
+    }
+
+    public isVerticallyExtended(): boolean {
+        return this.ppu.registers.vtilebg1.isExtendedVertically();
+    }
 
 }
