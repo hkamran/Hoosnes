@@ -179,7 +179,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
-                                            <span>{this.state.registers.vtilebg1.getScreenSize()}</span>
+                                            <span>{this.state.registers.vtilebg1.getDimension()}</span>
                                         </li>
                                     </ul>
                                 </li>
@@ -192,7 +192,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
-                                            <span>{this.state.registers.vtilebg2.getScreenSize()}</span>
+                                            <span>{this.state.registers.vtilebg2.getDimension()}</span>
                                         </li>
                                     </ul>
                                 </li>
@@ -205,7 +205,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
-                                            <span>{this.state.registers.vtilebg3.getScreenSize()}</span>
+                                            <span>{this.state.registers.vtilebg3.getDimension()}</span>
                                         </li>
                                     </ul>
                                 </li>
@@ -218,7 +218,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
-                                            <span>{this.state.registers.vtilebg4.getScreenSize()}</span>
+                                            <span>{this.state.registers.vtilebg4.getDimension()}</span>
                                         </li>
                                     </ul>
                                 </li>

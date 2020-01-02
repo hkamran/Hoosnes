@@ -173,24 +173,24 @@ export class BhModeAndCharacterSizeRegister extends Register {
     public address: string = "0x2105";
     public label: string = "BGMODE";
 
-    public getBG4TileSize(): number {
+    public getBG4TileSize(): Dimension {
         let is8by8 = ((this.val >> 7) & 1) == 0;
-        return is8by8 ? 8: 16;
+        return is8by8 ? Dimension.get8by8() : Dimension.get16by16();
     }
 
-    public getBG3TileSize(): number {
+    public getBG3TileSize(): Dimension {
         let is8by8 = ((this.val >> 6) & 1) == 0;
-        return is8by8 ? 8: 16;
+        return is8by8 ? Dimension.get8by8() : Dimension.get16by16();
     }
 
-    public getBG2TileSize(): number {
+    public getBG2TileSize(): Dimension {
         let is8by8 = ((this.val >> 5) & 1) == 0;
-        return is8by8 ? 8: 16;
+        return is8by8 ? Dimension.get8by8() : Dimension.get16by16();
     }
 
-    public getBG1TileSize(): number {
+    public getBG1TileSize(): Dimension {
         let is8by8 = ((this.val >> 4) & 1) == 0;
-        return is8by8 ? 8: 16;
+        return is8by8 ? Dimension.get8by8() : Dimension.get16by16();
     }
 
     public getBG3Priority(): boolean {
@@ -230,27 +230,53 @@ export class MosaicRegister extends Register {
 
 }
 
+/**
+ * 2107  wb++?- BG1SC - BG1 Tilemap Address and Size
+ 2108  wb++?- BG2SC - BG2 Tilemap Address and Size
+ 2109  wb++?- BG3SC - BG3 Tilemap Address and Size
+ 210a  wb++?- BG4SC - BG4 Tilemap Address and Size
+ aaaaaayx
+
+ aaaaaa = Tilemap address in VRAM (Addr>>10)
+ x    = Tilemap horizontal mirroring
+ y    = Tilemap veritcal mirroring
+ All tilemaps are 32x32 tiles. If x and y are both unset, there is
+ one tilemap at Addr. If x is set, a second tilemap follows the
+ first that should be considered "to the right of" the first. If y
+ is set, a second tilemap follows the first that should be
+ considered "below" the first. If both are set, then a second
+ follows "to the right", then a third "below", and a fourth "below
+ and to the right".
+
+ See the section "BACKGROUNDS" below for more details.
+ */
+
 export class TileAddressForBG1Register extends Register {
 
     public address: string = "0x2107";
     public label: string = "BG1SC";
 
     public getTileAddress(): number {
-        return (this.val >> 2) & 0x3F;
+        return (((this.val >> 2) & 0x3F) << 11) * 2048;
     }
 
-    // 00=32x32 01=64x32
-    // 10=32x64 11=64x64
-    public getScreenSize(): number {
-        let val: number = this.val & 0x2;
-        if (val == 0x00) {
-            return 32;
-        } else if (val == 0x01) {
-            return 32;
-        } else if (val == 0x02) {
-            return 64;
-        } else if (val == 0x03) {
-            return 64;
+    public isExtendedHorizontally() {
+        return ((this.val >> 0) & 0x1) == 0x1;
+    }
+
+    public isExtendedVertically() {
+        return ((this.val >> 1) & 0x1) == 0x1;
+    }
+
+    public getDimension(): Dimension {
+        if (this.isExtendedHorizontally() && this.isExtendedVertically()) {
+            return Dimension.get64by64();
+        } else if (this.isExtendedVertically()) {
+            return Dimension.get64by32();
+        } else if (this.isExtendedHorizontally()) {
+            return Dimension.get32by64();
+        } else {
+            return Dimension.get32by32();
         }
     }
 }
@@ -264,18 +290,23 @@ export class TileAddressForBG2Register extends Register {
         return (this.val >> 2) & 0x3F;
     }
 
-    // 00=32x32 01=64x32
-    // 10=32x64 11=64x64
-    public getScreenSize(): number {
-        let val: number = this.val & 0x2;
-        if (val == 0x00) {
-            return 32;
-        } else if (val == 0x01) {
-            return 32;
-        } else if (val == 0x02) {
-            return 64;
-        } else if (val == 0x03) {
-            return 64;
+    public isExtendedHorizontally() {
+        return ((this.val >> 0) & 0x1) == 0x1;
+    }
+
+    public isExtendedVertically() {
+        return ((this.val >> 1) & 0x1) == 0x1;
+    }
+
+    public getDimension(): Dimension {
+        if (this.isExtendedHorizontally() && this.isExtendedVertically()) {
+            return Dimension.get64by64();
+        } else if (this.isExtendedVertically()) {
+            return Dimension.get64by32();
+        } else if (this.isExtendedHorizontally()) {
+            return Dimension.get32by64();
+        } else {
+            return Dimension.get32by32();
         }
     }
 }
@@ -289,18 +320,23 @@ export class TileAddressForBG3Register extends Register {
         return (this.val >> 2) & 0x3F;
     }
 
-    // 00=32x32 01=64x32
-    // 10=32x64 11=64x64
-    public getScreenSize(): number {
-        let val: number = this.val & 0x2;
-        if (val == 0x00) {
-            return 32;
-        } else if (val == 0x01) {
-            return 32;
-        } else if (val == 0x02) {
-            return 64;
-        } else if (val == 0x03) {
-            return 64;
+    public isExtendedHorizontally() {
+        return ((this.val >> 0) & 0x1) == 0x1;
+    }
+
+    public isExtendedVertically() {
+        return ((this.val >> 1) & 0x1) == 0x1;
+    }
+
+    public getDimension(): Dimension {
+        if (this.isExtendedHorizontally() && this.isExtendedVertically()) {
+            return Dimension.get64by64();
+        } else if (this.isExtendedVertically()) {
+            return Dimension.get64by32();
+        } else if (this.isExtendedHorizontally()) {
+            return Dimension.get32by64();
+        } else {
+            return Dimension.get32by32();
         }
     }
 }
@@ -314,18 +350,23 @@ export class TileAddressForBG4Register extends Register {
         return (this.val >> 2) & 0x3F;
     }
 
-    // 00=32x32 01=64x32
-    // 10=32x64 11=64x64
-    public getScreenSize(): number {
-        let val: number = this.val & 0x2;
-        if (val == 0x00) {
-            return 32;
-        } else if (val == 0x01) {
-            return 32;
-        } else if (val == 0x02) {
-            return 64;
-        } else if (val == 0x03) {
-            return 64;
+    public isExtendedHorizontally() {
+        return ((this.val >> 0) & 0x1) == 0x1;
+    }
+
+    public isExtendedVertically() {
+        return ((this.val >> 1) & 0x1) == 0x1;
+    }
+
+    public getDimension(): Dimension {
+        if (this.isExtendedHorizontally() && this.isExtendedVertically()) {
+            return Dimension.get64by64();
+        } else if (this.isExtendedVertically()) {
+            return Dimension.get64by32();
+        } else if (this.isExtendedHorizontally()) {
+            return Dimension.get32by64();
+        } else {
+            return Dimension.get32by32();
         }
     }
 }
@@ -336,11 +377,11 @@ export class CharacterAddressForBG1And2Register extends Register {
     public label: string = "BG12NBA";
 
     public getBaseAddressForBG1(): number {
-       return ((this.val >> 4) & 0xF) << 12;
+       return ((this.val >> 4) & 0xF) << 13;
     }
 
     public getBaseAddressForBG2(): number {
-        return ((this.val >> 0) & 0xF) << 12;
+        return ((this.val >> 0) & 0xF) << 13;
     }
 
 }

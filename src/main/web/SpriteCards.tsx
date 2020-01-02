@@ -2,7 +2,7 @@ import * as React from "react";
 import {Card} from "./core/layout/Card";
 import {BppType, Color} from "../app/ppu/Palette";
 import {Console} from "../app/Console";
-import {Dimension, Orientation, TileAttributes} from "../app/ppu/Tiles";
+import {Dimension, Orientation, Tile, TileAttributes} from "../app/ppu/Tiles";
 import {Sprite} from "../app/ppu/Sprites";
 
 interface ISpriteCardProps {
@@ -61,13 +61,12 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
         }
 
         let sprite: Sprite = this.props.snes.ppu.sprites.getSprite(this.state.selected);
-        let dimensions: {small: Dimension, big: Dimension} = this.props.snes.ppu.registers.oamselect.getObjectSizes();
-        let height: number = sprite.isBig() ? dimensions.big.height : dimensions.small.height;
-        let width: number = sprite.isBig() ? dimensions.big.width : dimensions.small.width;
-        let attributes: TileAttributes = TileAttributes.create(height, width, BppType.Four, sprite.isYFlipped(), sprite.isXFlipped());
-        let tile: number[][] = this.props.snes.ppu.tiles.getTile(sprite.getTileAddress(), attributes);
+        let tile: Tile = sprite.getTile();
 
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
+
+        let height: number = tile.attributes.getHeight();
+        let width: number = tile.attributes.getWidth();
 
         let totalWidth = width * this.state.tilePixelSize;
         let totalHeight = height * this.state.tilePixelSize;

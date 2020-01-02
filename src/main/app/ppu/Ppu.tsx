@@ -3,7 +3,7 @@ import {CGram} from "../memory/CGram";
 import {Palette} from "./Palette";
 import {Sprites} from "./Sprites";
 import {Oam} from "../memory/Oam";
-import {TileMap} from "./TileMap";
+import {TileMaps} from "./TileMaps";
 import {Vram} from "../memory/Vram";
 import {Registers} from "./Registers";
 import {Screen, ScreenStates} from "./Screen";
@@ -25,6 +25,7 @@ export class Ppu {
 
     public palette: Palette;
     public sprites: Sprites;
+    public tileMaps: TileMaps;
     public tiles: Tiles;
     public registers: Registers;
 
@@ -45,9 +46,11 @@ export class Ppu {
 
         this.registers = new Registers(console);
 
+        this.tiles = new Tiles(this);
+        this.tileMaps = new TileMaps(this.vram);
+
         this.palette = new Palette(this.cgram);
         this.sprites = new Sprites(this.oam, this);
-        this.tiles = new Tiles(this);
 
         this.screen = new Screen();
         this.renderer = new Renderer(this);

@@ -3,6 +3,7 @@ import {Objects} from "../util/Objects";
 import {BppType} from "./Palette";
 import {Vram} from "../memory/Vram";
 import {Address} from "../bus/Address";
+import {ArrayUtil} from "../util/ArrayUtil";
 
 export class Dimension {
 
@@ -13,6 +14,8 @@ export class Dimension {
     private static readonly dimension16by16: Dimension = Dimension.create(16,16);
     private static readonly dimension32by32: Dimension = Dimension.create(32,32);
     private static readonly dimension64by64: Dimension = Dimension.create(64,64);
+    private static readonly dimension64by32: Dimension = Dimension.create(32,64);
+    private static readonly dimension32by64: Dimension = Dimension.create(64,32);
 
     constructor(width: number, height: number) {
         Objects.requireNonNull(width);
@@ -41,6 +44,18 @@ export class Dimension {
 
     public static get64by64(): Dimension {
         return this.dimension64by64;
+    }
+
+    public static get32by64(): Dimension {
+        return this.dimension32by64;
+    }
+
+    public static get64by32(): Dimension {
+        return this.dimension64by32;
+    }
+
+    public toString(): string {
+        return `${this.height}x${this.width}`;
     }
 
 }
@@ -94,6 +109,21 @@ export class TileAttributes {
 
 }
 
+export class Tile {
+
+    public attributes: TileAttributes;
+    public data: number[][];
+
+    constructor(data: number[][], attributes: TileAttributes) {
+        this.data = data;
+        this.attributes = attributes;
+    }
+
+    public static create(data: number[][], attributes: TileAttributes) {
+        return new Tile(data, attributes);
+    }
+}
+
 export class Tiles {
 
     public ppu: Ppu;
@@ -106,7 +136,7 @@ export class Tiles {
         this.vram = ppu.vram;
     }
 
-    public getTile(address: Address, attributes: TileAttributes): number[][] {
+    public getTile(address: Address, attributes: TileAttributes): Tile {
         Objects.requireNonNull(address);
         Objects.requireNonNull(attributes);
 
@@ -117,12 +147,12 @@ export class Tiles {
         }
     }
 
-    private getTile8Bpp(address: Address, attributes: TileAttributes): number[][] {
+    private getTile8Bpp(address: Address, attributes: TileAttributes): Tile {
         throw new Error("Not implemented!");
     }
 
-    private getTileNon8Bpp(address: Address, attributes: TileAttributes): number[][] {
-        let tile = this.create2dMatrix(attributes.getHeight(), attributes.getWidth());
+    private getTileNon8Bpp(address: Address, attributes: TileAttributes): Tile {
+        let tile = ArrayUtil.create2dMatrix(attributes.getHeight(), attributes.getWidth());
         let bpp: number = attributes.bpp.valueOf();
         let index: number = address.toValue();
 
@@ -138,7 +168,7 @@ export class Tiles {
                 for (let i = 0; i < bpp / 2; i++) {
 
                     // Capture 8x8 tile from vram (8 bytes high, 2 bytes long)
-                    let rows: number[][] = this.create2dMatrix(8, 2);
+                    let rows: number[][] = ArrayUtil.create2dMatrix(8, 2);
                     for (let y = 0; y < rows.length; y++) {
                         for (let x = 0; x < rows[y].length; x++) {
                             rows[y][x] = this.vram.data[index++ % this.vram.data.length];
@@ -172,20 +202,8 @@ export class Tiles {
         }
 
 
-        return tile;
+        return Tile.create(tile, attributes);
     }
 
-    private create2dMatrix(height: number, width: number) {
-        Objects.requireNonNull(height);
-        Objects.requireNonNull(width);
 
-        let tile: number[][] = [];
-        for (let y = 0; y < height; y++) {
-            tile.push([]);
-            for (let x = 0; x < width; x++) {
-                tile[y].push(0);
-            }
-        }
-        return tile;
-    }
 }
