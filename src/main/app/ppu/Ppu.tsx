@@ -6,15 +6,13 @@ import {Oam} from "../memory/Oam";
 import {TileMaps} from "./TileMaps";
 import {Vram} from "../memory/Vram";
 import {Registers} from "./Registers";
-import {Screen, ScreenStates} from "./Screen";
+import {Screen, ScreenRegion, ScreenState} from "./Screen";
 import {InterruptType} from "../cpu/Interrupts";
 import {Renderer} from "./Renderer";
 import {Tiles} from "./Tiles";
 import {Backgrounds} from "./Backgrounds";
 
-export enum ScreenType {
-    HBLANK, VBLANK, PRELINE, RENDER,
-}
+
 
 export class Ppu {
 
@@ -38,7 +36,6 @@ export class Ppu {
 
     public screen: Screen;
     public renderer: Renderer;
-    public state: ScreenType;
 
     constructor(console: Console) {
         this.console = console;
@@ -56,38 +53,37 @@ export class Ppu {
 
         this.screen = new Screen();
         this.renderer = new Renderer(this);
-        this.state = ScreenType.PRELINE;
         this.backgrounds = new Backgrounds(this);
     }
 
     public tick(): void {
         let isScreenFinished: boolean =
-            ScreenStates.VERT_BLANK.end == this.scanline &&
-            ScreenStates.HORT_BLANK.end == this.cycle;
+            ScreenRegion.VERT_BLANK.end == this.scanline &&
+            ScreenRegion.HORT_BLANK.end == this.cycle;
 
-        let isCycleFinished: boolean = 
-            ScreenStates.HORT_BLANK.end <= this.cycle;
+        let isCycleFinished: boolean =
+            ScreenRegion.HORT_BLANK.end <= this.cycle;
 
         let isScanlineFinished: boolean =
-            ScreenStates.VERT_BLANK.end <= this.scanline;
+            ScreenRegion.VERT_BLANK.end <= this.scanline;
 
         let isVBlankStart: boolean =
-            ScreenStates.HORT_PRELINE.start == this.cycle &&
-            ScreenStates.VERT_BLANK.start == this.scanline;
+            ScreenRegion.HORT_PRELINE.start == this.cycle &&
+            ScreenRegion.VERT_BLANK.start == this.scanline;
 
         let isVBlankEnd: boolean =
-            ScreenStates.HORT_PRELINE.start == this.cycle &&
-            ScreenStates.VERT_BLANK.end == this.scanline;
+            ScreenRegion.HORT_PRELINE.start == this.cycle &&
+            ScreenRegion.VERT_BLANK.end == this.scanline;
 
         let isRendering: boolean =
-            ScreenStates.VERT_RENDERLINE.isInRange(this.scanline) &&
-            ScreenStates.HORT_RENDERLINE.isInRange(this.cycle);
+            ScreenRegion.VERT_RENDERLINE.isInRange(this.scanline) &&
+            ScreenRegion.HORT_RENDERLINE.isInRange(this.cycle);
 
         let isHBlank: boolean =
-            ScreenStates.HORT_BLANK.isInRange(this.cycle);
+            ScreenRegion.HORT_BLANK.isInRange(this.cycle);
 
         let isPreline: boolean =
-            ScreenStates.HORT_RENDERLINE.start >= this.cycle;
+            ScreenRegion.HORT_RENDERLINE.start >= this.cycle;
 
         this.cycle++;
         if (isCycleFinished) {
@@ -99,7 +95,7 @@ export class Ppu {
         }
 
         if (isRendering) {
-            this.state = ScreenType.RENDER;
+            this.screen.state = ScreenState.RENDER;
             this.renderer.tick();
         }
 
@@ -109,7 +105,7 @@ export class Ppu {
         }
 
         if (isVBlankStart) {
-            this.state = ScreenType.VBLANK;
+            this.screen.state = ScreenState.VBLANK;
             this.console.cpu.interrupts.set(InterruptType.NMI);
         }
 
@@ -118,15 +114,16 @@ export class Ppu {
         }
 
         if (isHBlank) {
-            this.state = ScreenType.HBLANK;
+            this.screen.state = ScreenState.HBLANK;
         }
 
         if (isPreline) {
-            this.state = ScreenType.PRELINE;
+            this.screen.state = ScreenState.PRELINE;
         }
     }
 
     public reset():  void {
+        this.screen.state = ScreenState.PRELINE;
 
     }
 }

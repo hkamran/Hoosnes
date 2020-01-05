@@ -1,15 +1,15 @@
 import {Ppu} from "./Ppu";
 import {Color} from "./Palette";
 
-export class ScreenStates {
+export class ScreenRegion {
 
-    public static HORT_PRELINE: ScreenStates = new ScreenStates(0, 21);
-    public static HORT_RENDERLINE: ScreenStates = new ScreenStates(22, 277);
-    public static HORT_BLANK: ScreenStates = new ScreenStates(278, 339);
+    public static HORT_PRELINE: ScreenRegion = new ScreenRegion(0, 21);
+    public static HORT_RENDERLINE: ScreenRegion = new ScreenRegion(22, 277);
+    public static HORT_BLANK: ScreenRegion = new ScreenRegion(278, 339);
 
-    public static VERT_PRELINE: ScreenStates = new ScreenStates(0, 1);
-    public static VERT_RENDERLINE: ScreenStates = new ScreenStates(2, 224);
-    public static VERT_BLANK: ScreenStates = new ScreenStates(225, 261);
+    public static VERT_PRELINE: ScreenRegion = new ScreenRegion(0, 1);
+    public static VERT_RENDERLINE: ScreenRegion = new ScreenRegion(2, 224);
+    public static VERT_BLANK: ScreenRegion = new ScreenRegion(225, 261);
 
     public start: number;
     public end: number;
@@ -24,6 +24,10 @@ export class ScreenStates {
     }
 }
 
+export enum ScreenState {
+    HBLANK, VBLANK, PRELINE, RENDER,
+}
+
 /**
  * R = 255 / 8 = 31
  * G = 255 / 8 = 31
@@ -34,6 +38,7 @@ export class ScreenStates {
 export class Screen {
 
     public context: CanvasRenderingContext2D;
+    public state: ScreenState;
 
     public static readonly WIDTH: number = 256;
     public static readonly HEIGHT: number = 224;

@@ -6,7 +6,8 @@ import {Register, StatusRegister} from "../app/cpu/Registers";
 import {CSSProperties} from "react";
 import {Operation} from "../app/cpu/Opcodes";
 import {Registers} from "../app/ppu/Registers";
-import {Ppu, ScreenType} from "../app/ppu/Ppu";
+import {Ppu} from "../app/ppu/Ppu";
+import {ScreenState} from "../app/ppu/Screen";
 
 interface IPpuCardProps {
     snes: Console;
@@ -59,7 +60,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Screen State:</span>
-                                    <span>{ScreenType[this.state.ppu.state]}</span>
+                                    <span>{ScreenState[this.state.ppu.screen.state]}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Frames:</span>
