@@ -48,7 +48,7 @@ export class Backgrounds {
 
 }
 
-abstract class Background {
+export abstract class Background {
 
     protected ppu: Ppu;
 
@@ -58,50 +58,184 @@ abstract class Background {
         this.ppu = ppu;
     }
 
-    public getImage(): Tile {
+    public getTile(): Tile {
         let tileMapAddress: number = this.getTileMapAddress();
         let isVerticallyExtended: boolean = this.isVerticallyExtended();
         let isHorizontallyExtended: boolean = this.isHorizontallyExtended();
-        let characterDimension: Dimension = this.getCharacterDimension();
-        let backgroundDimension: Dimension = this.getBackgroundDimension();
-        let bpp: BppType = this.getBpp();
-
-        let tileAttributes: TileAttributes = TileAttributes.create(characterDimension.height, characterDimension.width, bpp);
 
         let topLeft: Tile[] = this.convertToTiles(this.ppu.tileMaps.getTileMaps(Address.create(tileMapAddress + (0x800 * 0))));
         let topRight: Tile[] = isHorizontallyExtended ? this.convertToTiles(this.ppu.tileMaps.getTileMaps(Address.create(tileMapAddress + (0x800 * 1)))) : null;
         let bottomLeft: Tile[] = isVerticallyExtended ? this.convertToTiles(this.ppu.tileMaps.getTileMaps(Address.create(tileMapAddress + (0x800 * 2)))) : null;
         let bottomRight: Tile[] = isHorizontallyExtended && isVerticallyExtended ? this.convertToTiles(this.ppu.tileMaps.getTileMaps(Address.create(tileMapAddress + (0x800 * 3)))) : null;
 
-        return Tile.create([], TileAttributes.create(backgroundDimension.height, backgroundDimension.width, bpp));
+        return this.compose(topLeft, topRight, bottomLeft, bottomRight);
+    }
+
+    public getTileMaps(): TileMap[][] {
+        let tileMapAddress: number = this.getTileMapAddress();
+        let isVerticallyExtended: boolean = this.isVerticallyExtended();
+        let isHorizontallyExtended: boolean = this.isHorizontallyExtended();
+
+        let topLeft: TileMap[] = this.ppu.tileMaps.getTileMaps(Address.create(tileMapAddress + (0x800 * 0)));
+        let topRight: TileMap[] = isHorizontallyExtended ? this.ppu.tileMaps.getTileMaps(Address.create(tileMapAddress + (0x800 * 1))) : null;
+        let bottomLeft: TileMap[] = isVerticallyExtended ? this.ppu.tileMaps.getTileMaps(Address.create(tileMapAddress + (0x800 * 2))) : null;
+        let bottomRight: TileMap[] = isHorizontallyExtended && isVerticallyExtended ? this.ppu.tileMaps.getTileMaps(Address.create(tileMapAddress + (0x800 * 3))) : null;
+
+        let tileMaps: TileMap[][] = [];
+
+        let yIndex: number = 0;
+        let xIndex: number = 0;
+
+        if (topLeft) {
+            yIndex = 0;
+            xIndex = 0;
+            for (let tile of topLeft) {
+                if (tileMaps[yIndex] == null) {
+                    tileMaps.push([]);
+                }
+                tileMaps[yIndex][xIndex++] = tile;
+                if (xIndex >= 32) {
+                    yIndex++;
+                    xIndex = 0;
+                }
+            }
+        }
+
+        if (topRight) {
+            yIndex = 0;
+            xIndex = 32;
+            for (let tile of topRight) {
+                if (tileMaps[yIndex] == null) {
+                    tileMaps.push([]);
+                }
+                tileMaps[yIndex][xIndex++] = tile;
+                if (xIndex >= 64) {
+                    yIndex++;
+                    xIndex = 0;
+                }
+            }
+        }
+
+        if (bottomLeft) {
+            yIndex = 32;
+            xIndex = 0;
+            for (let tile of bottomLeft) {
+                if (tileMaps[yIndex] == null) {
+                    tileMaps.push([]);
+                }
+                tileMaps[yIndex][xIndex++] = tile;
+                if (xIndex >= 32) {
+                    yIndex++;
+                    xIndex = 0;
+                }
+            }
+        }
+
+        if (bottomRight) {
+            yIndex = 32;
+            xIndex = 32;
+            for (let tile of bottomRight) {
+                if (tileMaps[yIndex] == null) {
+                    tileMaps.push([]);
+                }
+                tileMaps[yIndex][xIndex++] = tile;
+                if (xIndex >= 64) {
+                    yIndex++;
+                    xIndex = 0;
+                }
+            }
+        }
+
+        return tileMaps;
     }
 
     private convertToTiles(tileMaps: TileMap[]): Tile[] {
         // address_of_character = (base_location_bits << 13) + (8 * color_depth * character_number);
-
         let bpp: number = this.getBpp().valueOf();
         let base: number = this.getBaseCharacterAddress();
         let characterDimension: Dimension = this.getCharacterDimension();
-        let attribute: TileAttributes = TileAttributes.create(characterDimension.height, characterDimension.width, this.getBpp());
 
         let tiles: Tile[] = [];
         for (let tileMap of tileMaps) {
-            let address: Address = Address.create(base * (8 * bpp * tileMap.getCharacterNumber()));
-            tiles.push(this.ppu.tiles.getTile(address, attribute));
+            let address: Address = Address.create(base + (8 * bpp * tileMap.getCharacterNumber()));
+            let attribute: TileAttributes = TileAttributes.create(characterDimension.height, characterDimension.width, this.getBpp(), tileMap.isYFlipped(), tileMap.isXFlipped());
+            let tile: Tile = this.ppu.tiles.getTile(address, attribute);
+            tiles.push(tile);
         }
         return tiles;
     }
 
-    private compose(topLeft: Tile[], topRight: Tile[], bottomLeft: Tile[], bottomRight: Tile[], backgroundDimension: Dimension) {
-        let data: number[][] = ArrayUtil.create2dMatrix(backgroundDimension.height, backgroundDimension.width);
+    private compose(topLeft: Tile[], topRight: Tile[], bottomLeft: Tile[], bottomRight: Tile[]): Tile {
+        let characterDimension: Dimension = this.getCharacterDimension();
+        let backgroundDimension: Dimension = this.getBackgroundDimension();
         let bpp: BppType = this.getBpp();
+
+        let data: number[][] = ArrayUtil.create2dMatrix(
+            backgroundDimension.height * characterDimension.height,
+            backgroundDimension.width * characterDimension.width,
+        );
 
         let yIndex: number = 0;
         let xIndex: number = 0;
-        for (let tile of topLeft) {
+
+        if (topLeft) {
+            for (let tile of topLeft) {
+                for (let yOffset = 0; yOffset < tile.data.length; yOffset++) {
+                    for (let xOffset = 0; xOffset < tile.data[yOffset].length; xOffset++) {
+                        if (data[yIndex + yOffset] == null) {
+                            break;
+                        }
+                        data[yIndex + yOffset][xIndex + xOffset] = tile.data[yOffset][xOffset];
+                    }
+                }
+                xIndex += characterDimension.width;
+                if (xIndex >= characterDimension.width * backgroundDimension.width) {
+                    yIndex += characterDimension.height;
+                    xIndex = 0;
+                }
+            }
         }
 
-        return [];
+        if (topRight) {
+            for (let tile of topRight) {
+                for (let yOffset = 0; yOffset < tile.data.length; yOffset++) {
+                    for (let xOffset = 0; xOffset < tile.data[yOffset].length; xOffset++) {
+                        data[yIndex + yOffset][xIndex + xOffset] = tile.data[yOffset][xOffset];
+                    }
+                }
+                xIndex += characterDimension.width;
+            }
+            yIndex += characterDimension.height;
+        }
+
+        if (bottomLeft) {
+            xIndex = 0;
+            for (let tile of bottomLeft) {
+                for (let yOffset = 0; yOffset < tile.data.length; yOffset++) {
+                    for (let xOffset = 0; xOffset < tile.data[yOffset].length; xOffset++) {
+                        data[yIndex + yOffset][xIndex + xOffset] = tile.data[yOffset][xOffset];
+                    }
+                }
+                xIndex += characterDimension.width;
+            }
+            yIndex += characterDimension.height;
+        }
+
+        if (bottomRight) {
+            for (let tile of bottomRight) {
+                for (let yOffset = 0; yOffset < tile.data.length; yOffset++) {
+                    for (let xOffset = 0; xOffset < tile.data[yOffset].length; xOffset++) {
+                        data[yIndex + yOffset][xIndex + xOffset] = tile.data[yOffset][xOffset];
+                    }
+                }
+                xIndex += characterDimension.width;
+            }
+            yIndex += characterDimension.height;
+        }
+
+        return new Tile(data, TileAttributes.create(
+            backgroundDimension.height * characterDimension.height,
+            backgroundDimension.width * characterDimension.width, bpp));
     }
 
     public abstract getBpp(): BppType;

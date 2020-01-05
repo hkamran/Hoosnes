@@ -69,13 +69,14 @@ export enum Orientation {
 export class TileAttributes {
 
     public dimension: Dimension;
-    public orientation: Orientation;
+    public isYFlipped: boolean;
+    public isXFlipped: boolean;
     public bpp: BppType = BppType.Two;
 
     constructor(height: number, width: number, vflip: boolean, hflip: boolean, bpp: BppType) {
         this.dimension = Dimension.create(height, width);
-        this.orientation = vflip ? Orientation.VERTICAL :
-            ((hflip) ? Orientation.HORIZONTAL : Orientation.NONE);
+        this.isYFlipped = vflip;
+        this.isXFlipped = hflip;
         this.bpp = bpp;
     }
 
@@ -100,11 +101,11 @@ export class TileAttributes {
     }
 
     public isFlipVertical() {
-        return this.orientation == Orientation.VERTICAL;
+        return this.isYFlipped;
     }
 
     public isFlipHorizontal() {
-        return this.orientation == Orientation.HORIZONTAL;
+        return this.isXFlipped;
     }
 
 }
@@ -186,7 +187,7 @@ export class Tiles {
                                 let xIndex: number = attributes.isFlipHorizontal() ?
                                     (attributes.getWidth() - width - xBase) + bitIndex : xBase + (width - 1 - bitIndex);
                                 let yIndex: number = attributes.isFlipVertical() ?
-                                    (attributes.getHeight() - height - yBase) + (height - yOffset) : yBase + yOffset;
+                                    (attributes.getHeight() - height - yBase) + (height - 1 - yOffset) : yBase + yOffset;
                                 tile[yIndex][xIndex] |= (bit << shift);
                                 bits = bits >> 1;
                             }

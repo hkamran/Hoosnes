@@ -1,6 +1,6 @@
 import {Vram} from "../memory/Vram";
 import {Address} from "../bus/Address";
-import {Dimension} from "./Tiles";
+import {Dimension, Tile} from "./Tiles";
 import {Objects} from "../util/Objects";
 import {Bit} from "../util/Bit";
 
@@ -28,11 +28,11 @@ export class TileMap {
         return (this.value >> 10) & 0x7;
     }
 
-    public isYFlipped(): boolean {
+    public isXFlipped(): boolean {
         return ((this.value >> 14) & 0x1) == 1;
     }
 
-    public isXFlipped(): boolean {
+    public isYFlipped(): boolean {
         return ((this.value >> 15) & 0x1) == 1;
     }
 
@@ -58,14 +58,22 @@ export class TileMaps {
         this.dimension = Dimension.get32by32();
     }
 
+    public getTileMap(address: Address): TileMap {
+        let index = address.toValue();
+        let tileMap = TileMap.create(
+            this.vram.data[index % this.vram.data.length],
+            this.vram.data[index + 1 % this.vram.data.length]);
+        return tileMap;
+    }
+
     public getTileMaps(address: Address): TileMap[] {
         let index = address.toValue();
         let target = (index + ((this.dimension.width * this.dimension.height) * 2))
             % this.vram.data.length;
 
         let entries: TileMap[] = [];
-        while (index <= target) {
-            entries.push(TileMap.create(this.vram[index], this.vram[index + 1]));
+        while (index < target) {
+            entries.push(TileMap.create(this.vram.data[index], this.vram.data[index + 1]));
             index += TileMap.SIZE_IN_BYTES;
         }
 
