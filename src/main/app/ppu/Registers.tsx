@@ -257,7 +257,7 @@ export class TileAddressForBG1Register extends Register {
     public label: string = "BG1SC";
 
     public getTileMapAddress(): number {
-        return (((this.val >> 2) & 0x3F) << 11) * 2048;
+        return (((this.val >> 2) & 0x3F) * 0x400);
     }
 
     public isExtendedHorizontally() {
@@ -612,6 +612,8 @@ export class VRAMDataWriteRegister extends Register {
 
         if (doIncrement) {
             this.write(true, loData);
+        } else {
+            this.write(false, loData);
         }
     }
 
@@ -626,6 +628,8 @@ export class VRAMDataWriteRegister extends Register {
 
         if (doIncrement) {
             this.write(true, loData, hiData);
+        } else {
+            this.write(false, loData, hiData);
         }
     }
 

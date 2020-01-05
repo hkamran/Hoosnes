@@ -174,7 +174,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                     <ul style={{margin: "5px"}}>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Tile Address:</span>
-                                            <span>{this.state.registers.vtilebg1.getTileMapAddress()}</span>
+                                            <span>{this.state.registers.vtilebg1.getTileMapAddress().toString(16)}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
@@ -187,7 +187,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                     <ul style={{margin: "5px"}}>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Tile Address:</span>
-                                            <span>{this.state.registers.vtilebg2.getTileAddress()}</span>
+                                            <span>{this.state.registers.vtilebg2.getTileAddress().toString(16)}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
@@ -200,7 +200,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                     <ul style={{margin: "5px"}}>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Tile Address:</span>
-                                            <span>{this.state.registers.vtilebg3.getTileAddress()}</span>
+                                            <span>{this.state.registers.vtilebg3.getTileAddress().toString(16)}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
@@ -213,7 +213,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                     <ul style={{margin: "5px"}}>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Tile Address:</span>
-                                            <span>{this.state.registers.vtilebg4.getTileAddress()}</span>
+                                            <span>{this.state.registers.vtilebg4.getTileAddress().toString(16)}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>
