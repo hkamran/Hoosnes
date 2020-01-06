@@ -30,7 +30,10 @@ export class Register {
         if (val == null || val < 0) {
             throw Error("Invalid set " + val + " to register.");
         }
-        if (this.mode == Modes.bit8 && this.val > 0xFF) throw new Error("value is to big for register 0x" + val.toString(16));
+        if (this.mode == Modes.bit8 && val > 0xFF) {
+            debugger;
+            throw new Error("value is to big for register 0x" + val.toString(16));
+        }
         this.val = val;
     }
 
@@ -709,7 +712,7 @@ export class CGRAMAddressRegister extends Register {
     public label: string = "CGADD";
 
     public set(val: number): void {
-        super.set((val * 2) % CGram.size);
+        this.val = ((val * 2) % CGram.size);
     }
 
     public increment(val: number): void {

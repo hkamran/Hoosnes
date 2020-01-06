@@ -31,14 +31,13 @@ export class Cpu {
 
         this.console = console;
         this.opcodes = new Opcodes(this);
-        this.interrupts = new InterruptHandler(console, this);
         this.registers = new Registers(console);
         this.stack = new Stack(console);
+        this.interrupts = new InterruptHandler(console, this);
     }
 
     public tick(): number {
-        if (this.interrupts.wait) return 0;
-        let interrupts: number = this.interrupts.tick();
+        let wait: number = this.interrupts.tick();
 
         let pc: number = this.registers.pc.get();
         let bank: number = this.registers.k.get();
@@ -47,8 +46,6 @@ export class Cpu {
         let opaddr: Address = Address.create(pc, bank);
         let opcode: Read = this.console.bus.readByte(opaddr);
         let operation: Operation = this.opcodes.get(opcode.get());
-
-        // console.log(opcode.get().toString(16) + " " + operation.name);
 
         this.registers.pc.set(opaddr.toValue() + operation.getSize());
 

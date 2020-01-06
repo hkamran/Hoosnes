@@ -60,7 +60,7 @@ export class OpContext {
 
     public setFlagC(val: number, is8Bit?: boolean): void {
         if (is8Bit == null) is8Bit = true;
-        if (val == null || val < 0 || (is8Bit && val > 0xFF)) {
+        if (val == null || val < 0) {
             throw new Error("Invalid flag calculation!");
         }
 
@@ -72,7 +72,7 @@ export class OpContext {
 
     public setFlagZ(val: number, is8Bit?: boolean): void {
         if (is8Bit == null) is8Bit = true;
-        if (val == null || val < 0 || (is8Bit && val > 0xFF)) {
+        if (val == null || val < 0) {
             throw new Error("Invalid flag calculation! " + val.toString(16) + " " + is8Bit);
         }
 
@@ -93,7 +93,7 @@ export class OpContext {
 
     public setFlagN(val: number, is8Bit?: boolean): void {
         if (is8Bit == null) is8Bit = true;
-        if (val == null || val < 0 || (is8Bit && val > 0xFF)) {
+        if (val == null || val < 0) {
             throw new Error("Invalid flag calculation!");
         }
 

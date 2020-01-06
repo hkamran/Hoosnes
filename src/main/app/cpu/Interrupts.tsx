@@ -164,7 +164,7 @@ export class InterruptHandler {
 
     private doIRQ(): number {
         if (this.registers.p.getI() == 1) {
-            return;
+            return ;
         }
 
         this.wait = false;

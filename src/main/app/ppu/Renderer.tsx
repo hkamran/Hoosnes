@@ -28,10 +28,7 @@ export class Renderer {
 
      */
     public tick(): void {
-        let caddr: number = this.ppu.registers.cgramaddr.get();
-        let colorl: number = this.ppu.cgram.readByte(0);
-        let colorh: number = this.ppu.cgram.readByte(0 + 1);
-        let color: Color = Color.parse(Bit.toUint16(colorh, colorl));
+        let color: Color = this.ppu.palette.getPalette(0);
 
         let x: number = this.ppu.cycle - ScreenRegion.HORT_PRELINE.end;
         let y: number = this.ppu.scanline - ScreenRegion.VERT_PRELINE.end;
