@@ -1341,9 +1341,9 @@ class SBC extends Operation {
     public name: string = "SBC";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        throw new Error("Not implemented!");
+        //console.log(this.name);
+        //return null;
     }
 
     public getSize(): number {

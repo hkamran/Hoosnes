@@ -58,6 +58,10 @@ export abstract class Background {
         this.ppu = ppu;
     }
 
+    public getScanline(y: number): Tile {
+        return null;
+    }
+
     public getTile(): Tile {
         let tileMapAddress: number = this.getTileMapAddress();
         let isVerticallyExtended: boolean = this.isVerticallyExtended();

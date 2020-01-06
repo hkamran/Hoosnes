@@ -1,5 +1,6 @@
 import {CGram} from "../memory/CGram";
 import {Bit} from "../util/Bit";
+import {Objects} from "../util/Objects";
 
 export enum BppType {
     Eight = 8,
@@ -43,7 +44,31 @@ export class Palette {
         this.cgram = cgram;
     }
 
-    public getPalette(type: BppType, index: number): Color[] {
+    public getPalettes(start: number, end: number) {
+        if (start == null || end == null || end < start || start < 0 || end < 0) {
+            throw new Error(`Invalid getPalettes from ${start} to ${end}`);
+        }
+
+        return this.fetchRange((start * 2), (end * 2));
+    }
+
+    public getPalette(index: number): Color {
+        if (index == null || index < 0 || index > 256) {
+            throw new Error(`Invalid getPalette from ${index}`);
+        }
+
+        let lowHalf: number = this.cgram.readByte((index * 2) + 0);
+        let highHalf: number = this.cgram.readByte((index * 2) + 1);
+
+        let byte: number = Bit.toUint16(highHalf, lowHalf);
+        let color: Color = Color.parse(byte);
+
+        Objects.requireNonNull(color);
+
+        return color;
+    }
+
+    public getPalettesForBppType(index: number, type: BppType) {
         if (type == BppType.Eight) {
             return this.fetchRange(0, 512);
         } else if (type == BppType.Four) {
@@ -51,7 +76,7 @@ export class Palette {
         } else if (type == BppType.Two) {
             return this.fetchRange(index, index + (4 * 2));
         } else {
-            return null;
+            throw new Error(`Invalid getPaletteWithBppType from ${index} ${type}`);
         }
     }
 
