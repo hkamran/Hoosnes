@@ -153,7 +153,7 @@ export class Tiles {
     }
 
     private getTileNon8Bpp(address: Address, attributes: TileAttributes): Tile {
-        let tile = ArrayUtil.create2dMatrix(attributes.getHeight(), attributes.getWidth());
+        let image: number[][] = ArrayUtil.create2dMatrix(attributes.getHeight(), attributes.getWidth());
         let bpp: number = attributes.bpp.valueOf();
         let index: number = address.toValue();
 
@@ -188,7 +188,7 @@ export class Tiles {
                                     (attributes.getWidth() - width - xBase) + bitIndex : xBase + (width - 1 - bitIndex);
                                 let yIndex: number = attributes.isFlipVertical() ?
                                     (attributes.getHeight() - height - yBase) + (height - 1 - yOffset) : yBase + yOffset;
-                                tile[yIndex][xIndex] |= (bit << shift);
+                                image[yIndex][xIndex] |= (bit << shift);
                                 bits = bits >> 1;
                             }
                             shift++;
@@ -203,7 +203,7 @@ export class Tiles {
         }
 
 
-        return Tile.create(tile, attributes);
+        return Tile.create(image, attributes);
     }
 
 

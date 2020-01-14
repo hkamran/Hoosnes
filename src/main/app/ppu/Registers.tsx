@@ -31,7 +31,6 @@ export class Register {
             throw Error("Invalid set " + val + " to register.");
         }
         if (this.mode == Modes.bit8 && val > 0xFF) {
-            debugger;
             throw new Error("value is to big for register 0x" + val.toString(16));
         }
         this.val = val;
