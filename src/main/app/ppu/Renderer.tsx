@@ -40,22 +40,20 @@ export class Renderer {
         let base: number = this.ppu.backgrounds.bg1.getBaseCharacterAddress();
         let characterDimension: Dimension = this.ppu.backgrounds.bg1.getCharacterDimension();
 
-        if (x % characterDimension.width == 0) {
-            let tileYIndex: number = Math.floor(y / 8) - 1;
-            let tileXIndex: number = Math.floor(x / 8) - 1;
-            let tileMap: TileMap = this.ppu.backgrounds.bg1.getTileMap(tileYIndex, tileXIndex);
+        let tileYIndex: number = Math.floor(y / 8);
+        let tileXIndex: number = Math.floor(x / 8);
+        let tileMap: TileMap = this.ppu.backgrounds.bg1.getTileMap(tileYIndex, tileXIndex);
 
-            let address: Address = Address.create(base + (8 * bpp * tileMap.getCharacterNumber()));
-            let attribute: TileAttributes = TileAttributes.create(characterDimension.height, characterDimension.width, this.ppu.backgrounds.bg1.getBpp(), tileMap.isYFlipped(), tileMap.isXFlipped());
-            let tile: Tile = this.ppu.tiles.getTile(address, attribute);
+        let address: Address = Address.create(base + (8 * bpp * tileMap.getCharacterNumber()));
+        let attribute: TileAttributes = TileAttributes.create(characterDimension.height, characterDimension.width, this.ppu.backgrounds.bg1.getBpp(), tileMap.isYFlipped(), tileMap.isXFlipped());
+        let tile: Tile = this.ppu.tiles.getTile(address, attribute);
 
-            let colors: Color[] = this.ppu.palette.getPalettesForBppType(tileMap.getPaletteNumber(), bpp);
-            for (let i = 0; i < characterDimension.width; i++) {
-                let pixel = colors[tile.data[y % 8][x % 8]];
-                if (pixel) {
-                    color = pixel;
-                }
-            }
+        let colors: Color[] = this.ppu.palette.getPalettesForBppType(tileMap.getPaletteNumber(), bpp);
+
+        let index = tile.data[y % 8][x % 8];
+        let pixel = colors[index];
+        if (pixel) {
+            color = pixel;
         }
 
         this.screen.setPixel(x, y, color);

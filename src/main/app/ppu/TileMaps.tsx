@@ -61,8 +61,8 @@ export class TileMaps {
     public getTileMap(address: Address): TileMap {
         let index = address.toValue();
         let tileMap = TileMap.create(
-            this.vram.data[index % this.vram.data.length],
-            this.vram.data[index + 1 % this.vram.data.length]);
+            this.vram.data[(index + 0) % this.vram.data.length],
+            this.vram.data[(index + 1) % this.vram.data.length]);
         return tileMap;
     }
 
