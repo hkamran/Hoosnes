@@ -2,10 +2,11 @@ import {Vram} from "../memory/Vram";
 import {Dimension, Tile, TileAttributes} from "./Tiles";
 import {Address} from "../bus/Address";
 import {Ppu} from "./Ppu";
-import {BppType} from "./Palette";
+import {BppType, Color} from "./Palette";
 import {TileMap} from "./TileMaps";
 import {ArrayUtil} from "../util/ArrayUtil";
 import {Objects} from "../util/Objects";
+import {Screen} from "./Screen";
 
 /**
  *
@@ -65,13 +66,60 @@ export abstract class Background {
         let yOffset: number = y * (0x40 * (isVerticallyExtended ? 2 : 1));
         let xOffset: number = x * 2;
 
-        let index: number = tileMapAddress + yOffset * xOffset;
+        let index: number = tileMapAddress + yOffset + xOffset;
 
         let tileMap: TileMap = this.ppu.tileMaps.getTileMap(Address.create(index));
         return tileMap;
     }
 
-    public getTile(): Tile {
+    public getLineImage(y: number): Color[] {
+        let characterDimension: Dimension = this.getCharacterDimension();
+        let backgroundDimension: Dimension = this.getBackgroundDimension();
+        let bpp: number = this.ppu.backgrounds.bg1.getBpp().valueOf();
+        let vertScrollOffset: number = this.getVerticalScrollOffset();
+
+        let yStart: number = (y + vertScrollOffset);
+        let yHarse: number = Math.floor((yStart) / characterDimension.height) % backgroundDimension.height;
+        let yCoarse: number = (yStart) % characterDimension.height;
+
+        let xStart: number = this.getHorizontalScrollOffset() % backgroundDimension.width;
+        let xEnd: number = xStart + Screen.WIDTH;
+
+        let results: Color[] = [];
+        for (let xHarse: number = Math.floor(xStart / characterDimension.width);
+             xHarse < Math.floor(xEnd / characterDimension.width); xHarse++) {
+            let tileMap: TileMap = this.getTileMap(xHarse, yHarse);
+            let tile: Tile = this.getTile(tileMap);
+
+            let colors: Color[] = this.ppu.palette.getPalettesForBppType(tileMap.getPaletteNumber(), bpp);
+            let sliver: number[] = tile.data[yCoarse];
+            for (let xCoarse: number = 0; xCoarse < sliver.length; xCoarse++) {
+                let index: number = sliver[xCoarse];
+                let color: Color = colors[index];
+                if (index == 0) color.opacity = 0;
+                results.push(color);
+            }
+        }
+
+        return results;
+    }
+
+    public getTile(tileMap: TileMap) {
+        Objects.requireNonNull(tileMap);
+
+        // address_of_character = (base_location_bits << 13) + (8 * color_depth * character_number);
+        let bpp: number = this.getBpp().valueOf();
+        let base: number = this.getBaseCharacterAddress();
+        let characterDimension: Dimension = this.getCharacterDimension();
+
+        let address: Address = Address.create(base + (8 * bpp * tileMap.getCharacterNumber()));
+        let attribute: TileAttributes = TileAttributes.create(characterDimension.height, characterDimension.width, this.getBpp(), tileMap.isYFlipped(), tileMap.isXFlipped());
+        let tile: Tile = this.ppu.tiles.getTile(address, attribute);
+
+        return tile;
+    }
+
+    public getImage(): Tile {
         let tileMapAddress: number = this.getTileMapAddress();
         let isVerticallyExtended: boolean = this.isVerticallyExtended();
         let isHorizontallyExtended: boolean = this.isHorizontallyExtended();
@@ -163,16 +211,12 @@ export abstract class Background {
     }
 
     private convertToTiles(tileMaps: TileMap[]): Tile[] {
-        // address_of_character = (base_location_bits << 13) + (8 * color_depth * character_number);
-        let bpp: number = this.getBpp().valueOf();
-        let base: number = this.getBaseCharacterAddress();
-        let characterDimension: Dimension = this.getCharacterDimension();
-
         let tiles: Tile[] = [];
         for (let tileMap of tileMaps) {
-            let address: Address = Address.create(base + (8 * bpp * tileMap.getCharacterNumber()));
-            let attribute: TileAttributes = TileAttributes.create(characterDimension.height, characterDimension.width, this.getBpp(), tileMap.isYFlipped(), tileMap.isXFlipped());
-            let tile: Tile = this.ppu.tiles.getTile(address, attribute);
+            let tile: Tile = this.getTile(tileMap);
+            if (tile == null) {
+                throw new Error("Invalid tile given!");
+            }
             tiles.push(tile);
         }
         return tiles;

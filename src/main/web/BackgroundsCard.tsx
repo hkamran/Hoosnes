@@ -65,7 +65,7 @@ export class BackgroundsCard extends React.Component<IBackgroundsCardProps, IBac
         if (this.state.selected == 4) background = this.props.snes.ppu.backgrounds.bg4;
 
         if (background) {
-            let tile: Tile = background.getTile();
+            let tile: Tile = background.getImage();
             let tileMaps: TileMap[][] = background.getTileMaps();
             this.context = this.canvasRef.current.getContext("2d", {alpha: false});
 

@@ -96,7 +96,9 @@ export class Ppu {
 
         if (isRendering) {
             this.screen.state = ScreenState.RENDER;
-            this.renderer.tick();
+            if (ScreenRegion.HORT_RENDERLINE.end == this.cycle) {
+                this.renderer.tick();
+            }
         }
 
         if (isScreenFinished) {

@@ -425,10 +425,17 @@ export class VerticalScrollForBG1Register extends Register {
     public label: string = "BG1VOFS";
     public prev: number = 0;
 
+    public set(val: number): void {
+        this.prev = this.val & 0xFF;
+        this.val = val & 0xFF;
+    }
+
     public getBG1VertOffset(): number {
-        let result = (this.val << 8) | this.prev;
-        this.prev = this.val;
-        return result;
+        let low: number = this.prev & 0xFF;
+        let high: number = this.val & 0xFF;
+
+        let result = (high << 8) | low;
+        return result & 1023;
     }
 
     public getBG1Mode7VertOffset(): number {

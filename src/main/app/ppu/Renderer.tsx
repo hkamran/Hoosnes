@@ -31,32 +31,16 @@ export class Renderer {
 
      */
     public tick(): void {
-        let color: Color = this.ppu.palette.getPalette(0);
+        let base: Color = this.ppu.palette.getPalette(0);
 
-        let x: number = this.ppu.cycle - ScreenRegion.HORT_PRELINE.end;
         let y: number = this.ppu.scanline - ScreenRegion.VERT_PRELINE.end;
+        let colors: Color[] = this.ppu.backgrounds.bg1.getLineImage(y);
 
-        let bpp: number = this.ppu.backgrounds.bg1.getBpp().valueOf();
-        let base: number = this.ppu.backgrounds.bg1.getBaseCharacterAddress();
-        let characterDimension: Dimension = this.ppu.backgrounds.bg1.getCharacterDimension();
-
-        let tileYIndex: number = Math.floor(y / 8);
-        let tileXIndex: number = Math.floor(x / 8);
-        let tileMap: TileMap = this.ppu.backgrounds.bg1.getTileMap(tileYIndex, tileXIndex);
-
-        let address: Address = Address.create(base + (8 * bpp * tileMap.getCharacterNumber()));
-        let attribute: TileAttributes = TileAttributes.create(characterDimension.height, characterDimension.width, this.ppu.backgrounds.bg1.getBpp(), tileMap.isYFlipped(), tileMap.isXFlipped());
-        let tile: Tile = this.ppu.tiles.getTile(address, attribute);
-
-        let colors: Color[] = this.ppu.palette.getPalettesForBppType(tileMap.getPaletteNumber(), bpp);
-
-        let index = tile.data[y % 8][x % 8];
-        let pixel = colors[index];
-        if (pixel) {
-            color = pixel;
+        for (let x: number = 0; x < colors.length; x++) {
+            let color: Color = colors[x];
+            if (color.opacity == 0) color = base;
+            this.screen.setPixel(x, y, color);
         }
-
-        this.screen.setPixel(x, y, color);
     }
 
 }
