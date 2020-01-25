@@ -596,8 +596,8 @@ class DEX extends Operation {
     public name: string = "DEX";
 
     public execute(context: OpContext): number {
-        let value: number = context.registers.x.get() - 1;
         let is8Bit: boolean = context.registers.x.get() == 1;
+        let value: number = (context.registers.x.get() - 1) & (is8Bit ? 0xFF: 0xFFFF);
 
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
@@ -1341,9 +1341,23 @@ class SBC extends Operation {
     public name: string = "SBC";
 
     public execute(context: OpContext): number {
-        throw new Error("Not implemented!");
-        //console.log(this.name);
-        //return null;
+        let a: number = context.cpu.registers.a.get();
+        let b: Read = this.mode.getValue(context);
+        let c: number = context.cpu.registers.p.getC();
+
+        let result: number = a + b.get() + c;
+
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+
+        context.registers.a.set(result & mask);
+
+        context.setFlagV(a, c, is8Bit);
+        context.setFlagN(result, is8Bit);
+        context.setFlagZ(result, is8Bit);
+        context.setFlagC(result, is8Bit);
+
+        return this.cycle;
     }
 
     public getSize(): number {

@@ -210,8 +210,8 @@ export class Cartridge {
     }
 
     public writeByte(address: Address, value: number): Write {
-        throw new Error("Cannot write to cartridge");
-        // return this.mapping.write(address, value);
+        throw new Error("Cannot write to cartridge: " + address.toString());
+        // return new Write(address, 0, 0);
     }
 
     private getMapping(mappingType: CartridgeMappingType): ICartridgeMapping {
