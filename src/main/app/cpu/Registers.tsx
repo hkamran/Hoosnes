@@ -286,6 +286,13 @@ export class InterruptEnableFlagsRegister extends Register {
 
 }
 
+export class NmiFlagRegister extends Register {
+
+    public address: string = "4210";
+    public name: string = "RDNMI";
+
+}
+
 export class WramMemoryAddressRegister extends Register {
 
     public address: string = "0x2181-0x2183";
@@ -343,7 +350,7 @@ export class Registers {
     public vtimeh : Register;
     public hdmaen : Register;
     public memsel : Register;
-    public rdnmi : Register;
+    public rdnmi : NmiFlagRegister;
     public timeup : Register;
     public hvbjoy : Register;
     public rdio : Register;
@@ -401,7 +408,7 @@ export class Registers {
         this.vtimeh = new Register();
         this.hdmaen = new Register();
         this.memsel = new Register();
-        this.rdnmi = new Register();
+        this.rdnmi = new NmiFlagRegister();
         this.timeup = new Register();
         this.hvbjoy = new Register();
         this.rdio = new Register();

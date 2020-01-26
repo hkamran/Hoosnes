@@ -37,7 +37,8 @@ export class Cpu {
     }
 
     public tick(): number {
-        let wait: number = this.interrupts.tick();
+        this.interrupts.tick();
+        if (this.interrupts.wait) return this.interrupts.stall;
 
         let pc: number = this.registers.pc.get();
         let bank: number = this.registers.k.get();

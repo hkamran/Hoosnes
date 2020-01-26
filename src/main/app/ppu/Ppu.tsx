@@ -108,11 +108,13 @@ export class Ppu {
 
         if (isVBlankStart) {
             this.screen.state = ScreenState.VBLANK;
+            this.console.cpu.registers.rdnmi.set(0x80);
             this.console.cpu.interrupts.set(InterruptType.NMI);
         }
 
         if (isVBlankEnd) {
             // vertical blank end
+            this.console.cpu.registers.rdnmi.set(0x00);
         }
 
         if (isHBlank) {

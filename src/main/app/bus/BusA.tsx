@@ -56,6 +56,8 @@ export class BusA {
             read = Read.byte(this.registers.htimeh.get());
         } else if (page == 0x4209) {
             read = Read.byte(this.registers.vtimel.get());
+        } else if (page == 0x4210) {
+            read = Read.byte(this.registers.rdnmi.get());
         } else if (page == 0x420A) {
             read = Read.byte(this.registers.vtimeh.get());
         } else if (page == 0x420B) {

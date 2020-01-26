@@ -630,11 +630,17 @@ class EOR extends Operation {
     public name: string = "EOR";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let a: number = context.registers.a.get();
+        let data: Read = this.mode.getValue(context);
 
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let value: number = ((a & mask) ^ (data.get() & mask)) & mask;
 
+        context.setFlagN(value, is8Bit);
+        context.setFlagZ(value, is8Bit);
+
+        return this.cycle;
     }
 
     public getSize(): number {

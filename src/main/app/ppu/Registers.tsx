@@ -603,6 +603,10 @@ export class VRAMAddressRegister extends Register {
     public getUpper(): number {
         return Bit.getUint16Upper(this.val);
     }
+
+    public get(): number {
+        return this.val;
+    }
 }
 
 export class VRAMDataWriteRegister extends Register {

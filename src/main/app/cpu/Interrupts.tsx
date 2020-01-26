@@ -21,6 +21,7 @@ export class InterruptHandler {
     private cpu: Cpu;
 
     public wait: boolean = false;
+    public stall: number = 3;
 
     constructor(console: Console, cpu: Cpu) {
         this.console = console;
@@ -93,6 +94,7 @@ export class InterruptHandler {
             this.registers.k.set(bank);
         }
         this.interrupt = InterruptType.NONE;
+        this.wait = false;
         return 0;
     }
 
@@ -126,6 +128,7 @@ export class InterruptHandler {
             this.registers.k.set(bank);
         }
         this.interrupt = InterruptType.NONE;
+        this.wait = false;
         return 0;
     }
 
@@ -159,6 +162,7 @@ export class InterruptHandler {
             this.registers.k.set(bank);
         }
         this.interrupt = InterruptType.NONE;
+        this.wait = false;
         return 0;
     }
 
@@ -198,14 +202,17 @@ export class InterruptHandler {
             this.registers.k.set(bank);
         }
         this.interrupt = InterruptType.NONE;
+        this.wait = false;
         return 0;
     }
 
     private doABT(): number {
+        this.wait = false;
         throw new Error("Invalid interrupt ABORT");
     }
 
     private doRST(): number {
+        this.wait = false;
         throw new Error("Invalid interrupt RESET");
     }
 }
