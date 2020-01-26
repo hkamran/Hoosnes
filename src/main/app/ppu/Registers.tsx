@@ -288,8 +288,8 @@ export class TileAddressForBG2Register extends Register {
     public address: string = "0x2108";
     public label: string = "BG2SC";
 
-    public getTileAddress(): number {
-        return (this.val >> 2) & 0x3F;
+    public getTileMapAddress(): number {
+        return (((this.val >> 2) & 0x3F) * 0x400);
     }
 
     public isExtendedHorizontally() {

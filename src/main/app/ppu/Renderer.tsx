@@ -33,13 +33,18 @@ export class Renderer {
      */
     public tick(): void {
         let base: Color = this.ppu.palette.getPalette(0);
-
         let y: number = this.ppu.scanline - ScreenRegion.VERT_PRELINE.end;
-        let colors: Color[] = this.ppu.backgrounds.bg1.getLineImage(y);
 
-        for (let x: number = 0; x < colors.length; x++) {
-            let color: Color = colors[x];
-            if (color.opacity == 0) color = base;
+        let bg1Colors: Color[] = this.ppu.backgrounds.bg1.getLineImage(y);
+        let bg2Colors: Color[] = this.ppu.backgrounds.bg2.getLineImage(y);
+
+        for (let x: number = 0; x < Screen.WIDTH; x++) {
+            let bg1Color: Color = bg1Colors[x];
+            let bg2Color: Color = bg2Colors[x];
+
+            let color: Color = base;
+            if (bg1Color.opacity > 0) color = bg1Color;
+            if (bg2Color.opacity > 0) color = bg2Color;
             this.screen.setPixel(x, y, color);
         }
 

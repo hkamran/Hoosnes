@@ -38,13 +38,14 @@ export class Backgrounds {
     private ppu: Ppu;
 
     public bg1: Background1;
-    public bg2: Background1;
+    public bg2: Background2;
     public bg3: Background1;
     public bg4: Background1;
 
     constructor(ppu: Ppu) {
         this.ppu = ppu;
         this.bg1 = new Background1(ppu);
+        this.bg2 = new Background2(ppu);
     }
 
 }
@@ -353,6 +354,54 @@ export class Background1 extends Background {
 
     public isVerticallyExtended(): boolean {
         return this.ppu.registers.vtilebg1.isExtendedVertically();
+    }
+
+}
+
+export class Background2 extends Background {
+
+    public getBackgroundDimension(): Dimension {
+        return this.ppu.registers.vtilebg2.getDimension();
+    }
+
+    public getBaseCharacterAddress(): number {
+        return this.ppu.registers.vcharlocbg12.getBaseAddressForBG2();
+    }
+
+    public getBpp(): BppType {
+        let value: number = this.ppu.registers.bgmode.getMode();
+        if (value == 0) {
+            return BppType.Two;
+        } else if (value == 1) {
+            return BppType.Four;
+        } else if (value == 2) {
+            return BppType.Four;
+        }
+        throw new Error("Not implemented!");
+    }
+
+    public getCharacterDimension(): Dimension {
+        return this.ppu.registers.bgmode.getBG2TileSize();
+    }
+
+    public getHorizontalScrollOffset(): number {
+        return this.ppu.registers.bg2hofs.getBG2HortOffset();
+    }
+
+    public getVerticalScrollOffset(): number {
+        return this.ppu.registers.bg2vofs.getBG2VertOffset();
+    }
+
+    public getTileMapAddress(): number {
+        return this.ppu.registers.vtilebg2.getTileMapAddress();
+    }
+
+    public isHorizontallyExtended(): boolean {
+        return this.ppu.registers.vtilebg2.isExtendedHorizontally();
+    }
+
+    public isVerticallyExtended(): boolean {
+        return this.ppu.registers.vtilebg2.isExtendedVertically();
     }
 
 }
