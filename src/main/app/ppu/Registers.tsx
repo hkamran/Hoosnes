@@ -259,7 +259,7 @@ export class TileAddressForBG1Register extends Register {
     public label: string = "BG1SC";
 
     public getTileMapAddress(): number {
-        return (((this.val >> 2) & 0x3F) * 0x400);
+        return (((this.val >> 2) & 0x3F) * 0x800);
     }
 
     public isExtendedHorizontally() {
@@ -289,7 +289,7 @@ export class TileAddressForBG2Register extends Register {
     public label: string = "BG2SC";
 
     public getTileMapAddress(): number {
-        return (((this.val >> 2) & 0x3F) * 0x400);
+        return (((this.val >> 2) & 0x3F) * 0x800);
     }
 
     public isExtendedHorizontally() {
@@ -319,7 +319,7 @@ export class TileAddressForBG3Register extends Register {
     public label: string = "BG3SC";
 
     public getTileAddress(): number {
-        return (this.val >> 2) & 0x3F;
+        return (((this.val >> 2) & 0x3F) * 0x800);
     }
 
     public isExtendedHorizontally() {
@@ -349,7 +349,7 @@ export class TileAddressForBG4Register extends Register {
     public label: string = "BG4SC";
 
     public getTileAddress(): number {
-        return (this.val >> 2) & 0x3F;
+        return (((this.val >> 2) & 0x3F) * 0x800);
     }
 
     public isExtendedHorizontally() {
@@ -535,13 +535,13 @@ export class VideoPortControlRegister extends Register {
     public getAddressIncrementAmount(): number {
         let result: number = (this.val & 0x3);
         if (result == 0x00) {
-            return 2;
+            return 1;
         } else if (result == 0x01) {
-            return 64;
+            return 32;
         } else if (result == 0x02) {
             return 128;
         } else if (result == 0x03) {
-            return 256;
+            return 128;
         }
     }
 
@@ -660,8 +660,8 @@ export class VRAMDataWriteRegister extends Register {
         let amount = ppu.registers.vportcntrl.getAddressIncrementAmount();
         let type: number = ppu.registers.vportcntrl.getAddressFormation();
         let address: number = VideoPortControlRegister.remap(type, ppu.registers.vaddr.get());
-        if (loByte != null) ppu.vram.writeByte(Address.create((address + 0) % Vram.size), loByte);
-        if (hiByte != null) ppu.vram.writeByte(Address.create((address + 1) % Vram.size), hiByte);
+        if (loByte != null) ppu.vram.writeByte(Address.create(((2 * address) + 0) % Vram.size), loByte);
+        if (hiByte != null) ppu.vram.writeByte(Address.create(((2 * address) + 1) % Vram.size), hiByte);
 
         if (doIncrement) ppu.registers.vaddr.set(ppu.registers.vaddr.get() + amount);
     }
