@@ -29,7 +29,7 @@ export class Color {
         let blue: number = (data >> 10 & 0x1F) * 8;
         let green: number = (data >> 5 & 0x1F) * 8;
         let red: number = (data >> 0 & 0x1F) * 8;
-        let opacity: number = (data >> 15 & 1) == 1 ? 0 : 255;
+        let opacity: number = 255;
 
         return new Color(red, green, blue, opacity);
     }

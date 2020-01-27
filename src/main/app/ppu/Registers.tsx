@@ -741,9 +741,8 @@ export class CGRAMDataWriteRegister extends Register {
     public high: number = 0;
 
     public set(val: number): void {
-        super.set(val);
-        this.low = this.high;
-        this.high = val;
+        this.low = this.high & 0xFF;
+        this.high = val & 0xFF;
         this.counter++;
         let doWrite: boolean = this.counter == 2;
 
