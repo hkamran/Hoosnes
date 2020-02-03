@@ -25,6 +25,7 @@ export class Cpu {
     public context: OpContext;
 
     public cycles: number = 0;
+    public ticks: number = 0;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -55,6 +56,7 @@ export class Cpu {
         this.context = context;
 
         let duration = this.cycles - cycles;
+        this.ticks++;
         return duration;
     }
 

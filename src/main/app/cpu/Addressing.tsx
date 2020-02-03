@@ -263,7 +263,7 @@ export class AbsoluteLongIndexed implements IAddressingMode {
 
         let lowAddr: number = Bit.toUint16(LL.get(), HH.get()) + 0;
         let midAddr: number = Bit.toUint16(LL.get(), HH.get()) + 1;
-        let highAddr: number =Bit.toUint16(LL.get(), HH.get()) + 2;
+        let highAddr: number = Bit.toUint16(LL.get(), HH.get()) + 2;
 
         let low: Read = context.bus.readByte(Address.create(lowAddr));
         let mid: Read = context.bus.readByte(Address.create(midAddr));
@@ -616,6 +616,7 @@ export class DirectIndirectLong implements IAddressingMode {
             hiPointer = hi;
         }
 
+
         let ll: Read = context.bus.readByte(Address.create(loPointer));
         let hh: Read = context.bus.readByte(Address.create(hiPointer));
         let rr: number = context.registers.dbr.get();
@@ -653,11 +654,13 @@ export class DirectIndirectIndexedLong implements IAddressingMode {
         let LL: Read = context.getOperand(0);
         let y: number = context.registers.y.get();
 
-        let loPointer: number = context.registers.d.get() + LL.get();
-        let midPointer: number = context.registers.d.get() + LL.get() + 1;
-        let hiPointer: number = context.registers.d.get() + LL.get() + 2;
+        let base: number = context.registers.d.get() + LL.get();
 
-        let addr: number = Bit.toUint24(hiPointer, midPointer, loPointer);
+        let loPointer: Read = context.bus.readByte(Address.create(base + 0));
+        let midPointer: Read = context.bus.readByte(Address.create(base + 1));
+        let hiPointer: Read = context.bus.readByte(Address.create(base + 2));
+
+        let addr: number = Bit.toUint24(hiPointer.get(), midPointer.get(), loPointer.get());
         let loaddr: number = addr + y;
         let hiaddr: number = addr + y + 1;
 
@@ -774,7 +777,7 @@ export class Implied implements IAddressingMode {
 
 export class Long implements IAddressingMode {
 
-    public label: string = " LONG";
+    public label: string = "LONG";
 
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);

@@ -126,6 +126,10 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                                     <span style={{flexGrow: 1}} className="header">Interrupt:</span>
                                     <span>{InterruptType[this.state.interrupts]}</span>
                                 </li>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Ticks:</span>
+                                    <span>{this.props.snes.cpu.ticks}</span>
+                                </li>
                             </ul>
                         </div>
                     </fieldset>

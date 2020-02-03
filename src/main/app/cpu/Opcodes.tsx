@@ -167,7 +167,8 @@ export class ADC extends Operation {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
 
-        context.registers.a.set(result & mask);
+        if (is8Bit) context.registers.a.setLower(result & mask);
+        if (!is8Bit) context.registers.a.set(result & mask);
 
         context.setFlagV(a, c, is8Bit);
         context.setFlagN(result, is8Bit);
@@ -493,10 +494,8 @@ class BRA extends Operation {
     public name: string = "BRA";
 
     public execute(context: OpContext): number {
-        let result: Read = this.mode.getValue(context);
-
-        let current: number = context.registers.pc.get();
-        let next: number = current + result.get();
+        let addressing: Addressing = this.mode.getAddressing(context);
+        let next: number = addressing.getLow().toValue();
 
         context.registers.pc.set(next & 0xFFFF);
 
@@ -704,14 +703,16 @@ class INY extends Operation {
     public name: string = "INY";
 
     public execute(context: OpContext): number {
-        let value: number = context.registers.y.get();
+
         let is8Bit: boolean = context.registers.x.get() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let value: number = (context.registers.y.get() + 1) & mask;
 
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
 
-        if (is8Bit) context.registers.y.setLower((value + 1) & 0xFF);
-        if (!is8Bit) context.registers.y.set((value + 1) & 0xFFFF);
+        if (is8Bit) context.registers.y.setLower(value);
+        if (!is8Bit) context.registers.y.set(value);
 
         return this.cycle;
     }
@@ -1351,7 +1352,7 @@ class SBC extends Operation {
         let b: Read = this.mode.getValue(context);
         let c: number = context.cpu.registers.p.getC();
 
-        let result: number = a + b.get() + c;
+        let result: number = a - b.get() - (1 - c);
 
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
@@ -1361,7 +1362,7 @@ class SBC extends Operation {
         context.setFlagV(a, c, is8Bit);
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
-        context.setFlagC(result, is8Bit);
+        context.registers.p.setC(result >= 0 ? 1 : 0);
 
         return this.cycle;
     }
@@ -1824,6 +1825,11 @@ class SEP extends Operation {
         let result: number = status | (value.get() & 0xFF);
         context.registers.p.set(result);
 
+        if (context.registers.p.getX() == 1) {
+            context.registers.x.set(context.registers.x.get() & 0x00FF);
+            context.registers.y.set(context.registers.y.get() & 0x00FF);
+        }
+
         return this.cycle;
     }
 }
@@ -1962,18 +1968,18 @@ export class Opcodes {
         this.opcodes[0x22] = new JSL(cpu,0x22, 8, 4, AddressingModes.absoluteJump); // TODO
         this.opcodes[0xFC] = new JSR(cpu,0xFC, 8, 3, AddressingModes.absoluteX); // TODO
 
-        this.opcodes[0xA1] = new LDA(cpu,0xA1, 6, 2, AddressingModes.directX);
+        this.opcodes[0xA1] = new LDA(cpu,0xA1, 6, 2, AddressingModes.directIndirectIndexed);
         this.opcodes[0xA3] = new LDA(cpu,0xA3, 4, 2, AddressingModes.stack);
         this.opcodes[0xA5] = new LDA(cpu,0xA5, 3, 2, AddressingModes.direct);
         this.opcodes[0xA7] = new LDA(cpu,0xA7, 6, 2, AddressingModes.directIndexedIndirect);
         this.opcodes[0xA9] = new LDA(cpu,0xA9, 2, 3, AddressingModes.immediateM);
         this.opcodes[0xAD] = new LDA(cpu,0xAD, 4, 3, AddressingModes.absolute);
         this.opcodes[0xAF] = new LDA(cpu,0xAF, 5, 4, AddressingModes.long);
-        this.opcodes[0xB1] = new LDA(cpu,0xB1, 5, 2, AddressingModes.directY);
-        this.opcodes[0xB2] = new LDA(cpu,0xB2, 5, 2, AddressingModes.direct);
+        this.opcodes[0xB1] = new LDA(cpu,0xB1, 5, 2, AddressingModes.directIndirectLong);
+        this.opcodes[0xB2] = new LDA(cpu,0xB2, 5, 2, AddressingModes.directIndirect);
         this.opcodes[0xB3] = new LDA(cpu,0xB3, 7, 2, AddressingModes.stackY);
         this.opcodes[0xB5] = new LDA(cpu,0xB5, 4, 2, AddressingModes.directX);
-        this.opcodes[0xB7] = new LDA(cpu,0xB7, 6, 2, AddressingModes.directY);
+        this.opcodes[0xB7] = new LDA(cpu,0xB7, 6, 2, AddressingModes.directIndirectIndexedLong);
         this.opcodes[0xB9] = new LDA(cpu,0xB9, 4, 3, AddressingModes.absoluteY);
         this.opcodes[0xBD] = new LDA(cpu,0xBD, 4, 3, AddressingModes.absoluteX);
         this.opcodes[0xBF] = new LDA(cpu,0xBF, 5, 4, AddressingModes.longX);
@@ -2072,17 +2078,17 @@ export class Opcodes {
         this.opcodes[0x78] = new SEI(cpu,0x78, 2, 1, AddressingModes.implied);
         this.opcodes[0xE2] = new SEP(cpu,0xE2, 3, 2, AddressingModes.immediate8);
 
-        this.opcodes[0x81] = new STA(cpu,0x81, 6, 2, AddressingModes.directX);
+        this.opcodes[0x81] = new STA(cpu,0x81, 6, 2, AddressingModes.directIndirectIndexed);
         this.opcodes[0x83] = new STA(cpu,0x83, 4, 2, AddressingModes.stack);
         this.opcodes[0x85] = new STA(cpu,0x85, 3, 2, AddressingModes.direct);
-        this.opcodes[0x87] = new STA(cpu,0x87, 6, 2, AddressingModes.directIndirectIndexed);
+        this.opcodes[0x87] = new STA(cpu,0x87, 6, 2, AddressingModes.directIndexedIndirect);
         this.opcodes[0x8D] = new STA(cpu,0x8D, 4, 3, AddressingModes.absolute);
         this.opcodes[0x8F] = new STA(cpu,0x8F, 5, 4, AddressingModes.long);
-        this.opcodes[0x91] = new STA(cpu,0x91, 6, 2, AddressingModes.directY);
+        this.opcodes[0x91] = new STA(cpu,0x91, 6, 2, AddressingModes.directIndirectLong);
         this.opcodes[0x92] = new STA(cpu,0x92, 5, 2, AddressingModes.directIndirect);
         this.opcodes[0x93] = new STA(cpu,0x93, 7, 2, AddressingModes.stackY);
         this.opcodes[0x95] = new STA(cpu,0x95, 4, 2, AddressingModes.directX);
-        this.opcodes[0x97] = new STA(cpu,0x97, 6, 2, AddressingModes.directY);
+        this.opcodes[0x97] = new STA(cpu,0x97, 6, 2, AddressingModes.directIndirectIndexedLong);
         this.opcodes[0x99] = new STA(cpu,0x99, 5, 3, AddressingModes.absoluteY);
         this.opcodes[0x9D] = new STA(cpu,0x9D, 5, 3, AddressingModes.absoluteX);
         this.opcodes[0x9F] = new STA(cpu,0x9F, 5, 4, AddressingModes.longX);
