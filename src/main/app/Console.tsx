@@ -3,11 +3,13 @@ import {Cartridge} from "./cartridge/Cartridge";
 import {Logger, LoggerManager} from 'typescript-logger';
 import {Bus} from "./bus/Bus";
 import {Ppu} from "./ppu/Ppu";
+import {Apu} from "./apu/Apu";
 
 export class Console {
 
     public log : Logger = LoggerManager.create('Console');
 
+    public apu: Apu;
     public cpu : Cpu;
     public ppu: Ppu;
     public bus: Bus;
@@ -16,6 +18,7 @@ export class Console {
     constructor() {
         this.cpu = new Cpu(this);
         this.ppu = new Ppu(this);
+        this.apu = new Apu(this);
         this.bus = new Bus(this);
     }
 

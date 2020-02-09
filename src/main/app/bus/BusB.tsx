@@ -166,13 +166,13 @@ export class BusB {
         } else if (page == 0x213F) {
             read = Read.byte(this.registers.stat78.get());
         } else if (page == 0x2140) {
-            read = Read.byte(0xAA, 0);
+            read = Read.byte(this.console.apu.registers.apuio0.get());
         } else if (page == 0x2141) {
-            read = Read.byte(0xBB, 0);
+            read = Read.byte(this.console.apu.registers.apuio1.get());
         } else if (page == 0x2142) {
-            read = Read.byte(0x00, 0);
+            read = Read.byte(this.console.apu.registers.apuio2.get());
         } else if (page == 0x2143) {
-            throw new Error("Not implemented!");
+            read = Read.byte(this.console.apu.registers.apuio3.get());
         } else if (page == 0x2180) {
             read = Read.byte(this.console.cpu.registers.wmdata.get());
         } else if (page == 0x2181) {

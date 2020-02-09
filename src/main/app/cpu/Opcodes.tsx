@@ -601,7 +601,8 @@ class DEX extends Operation {
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
 
-        context.registers.x.set(value & 0xFFFF);
+        if (is8Bit) context.registers.x.setLower(value);
+        if (!is8Bit) context.registers.x.set(value);
 
         return this.cycle;
     }
@@ -612,13 +613,14 @@ class DEY extends Operation {
     public name: string = "DEY";
 
     public execute(context: OpContext): number {
-        let value: number = context.registers.y.get() - 1;
         let is8Bit: boolean = context.registers.x.get() == 1;
+        let value: number = (context.registers.y.get() - 1) & (is8Bit ? 0xFF: 0xFFFF);
 
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
 
-        context.registers.y.set(value & 0xFFFF);
+        if (is8Bit) context.registers.y.setLower(value);
+        if (!is8Bit) context.registers.y.set(value);
 
         return this.cycle;
     }
@@ -752,7 +754,7 @@ class WDM extends Operation {
     public name: string = "WDM";
 
     public execute(context: OpContext): number {
-        throw new Error("Not a valid OP code");
+        return this.cycle;
     }
 
 }
@@ -1147,8 +1149,8 @@ class LDX extends Operation {
     }
 
     public getSize(): number {
-        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
-        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateX;
+        if (isImmediate && this.cpu.registers.p.getX() == 1) {
             return super.getSize() - 1;
         }
         return super.getSize();
@@ -1193,9 +1195,27 @@ class LSR extends Operation {
     public name: string = "LSR";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let isAccMode: boolean = this.mode == AddressingModes.accumulator;
+        let is8Bit: boolean = this.cpu.registers.p.getM() == 0;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+
+        let result = isAccMode ?
+            this.cpu.registers.a.getLower() :
+            this.mode.getValue(context).get();
+
+        this.cpu.registers.p.setC(result & 0x01);
+        context.setFlagN(result, is8Bit);
+        context.setFlagZ(result, is8Bit);
+
+        if (isAccMode) {
+            this.cpu.registers.a.set((result >> 1) & mask);
+        } else {
+            let addressing: Addressing = this.mode.getAddressing(context);
+            context.console.bus.writeByte(addressing.getLow(), Bit.getUint16Lower(result));
+            if (!is8Bit) context.console.bus.writeByte(addressing.getHigh(), Bit.getUint16Upper(result));
+        }
+
+        return this.cycle;
     }
 
 }
@@ -1984,7 +2004,7 @@ export class Opcodes {
         this.opcodes[0xBD] = new LDA(cpu,0xBD, 4, 3, AddressingModes.absoluteX);
         this.opcodes[0xBF] = new LDA(cpu,0xBF, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0xA2] = new LDX(cpu,0xA2, 2, 3, AddressingModes.immediateX);
+        this.opcodes[0xA2] = new LDX(cpu,0xA2, 3, 3, AddressingModes.immediateX);
         this.opcodes[0xA6] = new LDX(cpu,0xA6, 3, 2, AddressingModes.direct);
         this.opcodes[0xAE] = new LDX(cpu,0xAE, 4, 3, AddressingModes.absolute);
         this.opcodes[0xB6] = new LDX(cpu,0xB6, 4, 2, AddressingModes.directY);
