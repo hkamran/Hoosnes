@@ -35,8 +35,11 @@ export class BusA {
         if (page < 0x2100 || page > 0x437A) {
             throw new Error("Invalid readByte at " + address);
         }
-
-        if (page == 0x4200) {
+        if (page == 0x4016) {
+            read = Read.byte(this.registers.joy1l.get());
+        } else if (page == 0x4017) {
+            read = Read.byte(this.registers.joy2l.get());
+        } else if (page == 0x4200) {
             read = Read.byte(this.registers.nmitimen.get());
         } else if (page == 0x4201) {
             read = Read.byte(this.registers.wrio.get());
@@ -318,7 +321,11 @@ export class BusA {
             throw new Error("Invalid writeByte at " + address);
         }
 
-        if (page == 0x4200) {
+        if (page == 0x4016) {
+            this.registers.joy1l.set(val);
+        } else if (page == 0x4017) {
+            this.registers.joy2l.set(val);
+        } else if (page == 0x4200) {
             this.registers.nmitimen.set(val);
         } else if (page == 0x4201) {
             this.registers.wrio.set(val);

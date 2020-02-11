@@ -45,8 +45,14 @@ export class Read {
     }
 
     public static word(low: number, high: number, cycles?: number) {
-        if (low == null || low > 0xFF || low < 0 || high == null || high > 0xFF || high < 0)
-            throw new Error("Invalid read creation " + low.toString(16));
+        if (low == null || low < 0 || high < 0)
+            throw new Error(`Invalid read creation
+                ${low.toString(16)}
+                ${high.toString(16)}`);
+        if (high == null) {
+            high = Bit.getUint16Upper(low);
+            low = Bit.getUint16Lower(low);
+        }
         return new Read(low, high, ReadType.WORD, cycles);
     }
 

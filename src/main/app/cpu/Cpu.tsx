@@ -49,7 +49,8 @@ export class Cpu {
         let opcode: Read = this.console.bus.readByte(opaddr);
         let operation: Operation = this.opcodes.get(opcode.get());
 
-        this.registers.pc.set(opaddr.toValue() + operation.getSize());
+        this.registers.pc.set(opaddr.getPage() + operation.getSize());
+        this.registers.k.set(opaddr.getBank());
 
         let context: OpContext = OpContext.create(this, opaddr, operation);
         this.cycles += operation.execute(context);

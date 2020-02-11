@@ -69,6 +69,8 @@ export class Bus {
                 read = this.console.cpu.wram.readByte(address);
             } else if (0x2100 <= page && page <= 0x21FF) {
                 read = this.busB.readByte(address);
+            } else if (0x4016 <= page && page <= 0x4017) {
+                read = this.busA.readByte(address);
             } else if (0x2200 <= page && page <= 0x41FF) {
                 read = this.console.cartridge.readByte(address);
             } else if (0x4200 <= page && page <= 0x43FF) {

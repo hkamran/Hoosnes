@@ -165,14 +165,16 @@ export class BusB {
             read = Read.byte(this.registers.stat77.get());
         } else if (page == 0x213F) {
             read = Read.byte(this.registers.stat78.get());
-        } else if (page == 0x2140) {
-            read = Read.byte(this.console.apu.registers.apuio0.get());
-        } else if (page == 0x2141) {
-            read = Read.byte(this.console.apu.registers.apuio1.get());
-        } else if (page == 0x2142) {
-            read = Read.byte(this.console.apu.registers.apuio2.get());
-        } else if (page == 0x2143) {
-            read = Read.byte(this.console.apu.registers.apuio3.get());
+        } else if (page >= 0x2140 && page <= 0x2180) {
+            if (page % 4 == 0) {
+                read = Read.byte(this.console.apu.registers.apuio0.get());
+            } else if (page % 4 == 1) {
+                read = Read.byte(this.console.apu.registers.apuio1.get());
+            } else if (page % 4 == 2) {
+                read = Read.byte(this.console.apu.registers.apuio2.get());
+            } else if (page % 4 == 3) {
+                read = Read.byte(this.console.apu.registers.apuio3.get());
+            }
         } else if (page == 0x2180) {
             read = Read.byte(this.console.cpu.registers.wmdata.get());
         } else if (page == 0x2181) {
@@ -330,15 +332,17 @@ export class BusB {
             this.registers.stat77.set(val);
         } else if (page == 0x213F) {
             this.registers.stat78.set(val);
-        } else if (page == 0x2140) {
-
-        } else if (page == 0x2141) {
-
-        } else if (page == 0x2142) {
-
-        } else if (page == 0x2143) {
-
-        } else if (page == 0x2180) {
+        } else if (page >= 0x2140 && page <= 0x2180) {
+            if (page % 4 == 0) {
+                //this.console.apu.registers.apuio0.set(val);
+            } else if (page % 4 == 1) {
+                //this.console.apu.registers.apuio1.set(val);
+            } else if (page % 4 == 2) {
+                //this.console.apu.registers.apuio2.set(val);
+            } else if (page % 4 == 3) {
+                //this.console.apu.registers.apuio3.set(val);
+            }
+        }else if (page == 0x2180) {
             this.console.cpu.registers.wmdata.set(val);
         } else if (page == 0x2181) {
             this.console.cpu.registers.wmadd.setLower(val);

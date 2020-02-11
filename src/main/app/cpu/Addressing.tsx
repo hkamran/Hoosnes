@@ -313,7 +313,7 @@ export class Direct implements IAddressingMode {
         let value: number = Bit.toUint16(hiByte.get(), loByte.get());
         let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
 
-        return Read.byte(value, cycles);
+        return Read.word(value, cycles);
     }
 
     public getAddressing(context: OpContext): Addressing {
@@ -352,7 +352,7 @@ export class DirectX implements IAddressingMode {
             let value: number = Bit.toUint16(hiByte.get(), loByte.get());
             let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
 
-            return Read.byte(value, cycles);
+            return Read.word(value, cycles);
         }
     }
 
@@ -541,7 +541,7 @@ export class DirectIndirectIndexed implements IAddressingMode {
         let value: number = Bit.toUint16(hiByte.get(), loByte.get());
         let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
 
-        return Read.byte(value, cycles);
+        return Read.word(value, cycles);
     }
 
     public getAddressing(context: OpContext): Addressing {

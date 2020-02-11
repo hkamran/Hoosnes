@@ -1051,7 +1051,8 @@ class JMP extends Operation {
         let addressing: Addressing = this.mode.getAddressing(context);
         let address: Address = addressing.getLow();
 
-        context.registers.pc.set(address.toValue());
+        context.registers.pc.set(address.getPage());
+        context.registers.k.set(address.getBank());
 
         return this.cycle;
     }
@@ -1070,7 +1071,8 @@ class JSL extends Operation {
 
         context.cpu.stack.pushByte(bank);
         context.cpu.stack.pushWord(pc);
-        context.registers.pc.set(address.toValue());
+        context.registers.pc.set(address.getPage());
+        context.registers.k.set(address.getBank());
 
         return this.cycle;
     }
@@ -1120,8 +1122,8 @@ class LDA extends Operation {
             let value: number = Bit.toUint16(hiData.get(), loData.get());
 
             context.registers.a.set(value);
-            context.setFlagZ(loData.get(), is8Bit);
-            context.setFlagN(hiData.get(), is8Bit);
+            context.setFlagZ(value, is8Bit);
+            context.setFlagN(value, is8Bit);
         }
 
         return this.cycle;
@@ -1292,11 +1294,8 @@ class PEA extends Operation {
     public name: string = "PEA";
 
     public execute(context: OpContext): number {
-        let addressing: Addressing = this.mode.getAddressing(context);
-        let value = addressing.getLow().toValue();
-        let sp: number = context.registers.sp.get();
-
-        context.cpu.stack.pushWord(value);
+        let value: Read = this.mode.getValue(context);
+        context.cpu.stack.pushWord(value.get());
 
         return this.cycle;
     }
@@ -1634,9 +1633,8 @@ class PLB extends Operation {
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let value: number = context.cpu.stack.popByte();
-        let sp: number = context.registers.sp.get();
 
-        context.registers.k.set(value);
+        context.registers.dbr.set(value);
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
         return this.cycle;
@@ -1985,7 +1983,7 @@ export class Opcodes {
         this.opcodes[0xDC] = new JMP(cpu,0xDC, 6, 3, AddressingModes.absoluteJump);
 
         this.opcodes[0x20] = new JSR(cpu,0x20, 6, 3, AddressingModes.absolute);
-        this.opcodes[0x22] = new JSL(cpu,0x22, 8, 4, AddressingModes.absoluteJump); // TODO
+        this.opcodes[0x22] = new JSL(cpu,0x22, 8, 4, AddressingModes.long); // TODO
         this.opcodes[0xFC] = new JSR(cpu,0xFC, 8, 3, AddressingModes.absoluteX); // TODO
 
         this.opcodes[0xA1] = new LDA(cpu,0xA1, 6, 2, AddressingModes.directIndirectIndexed);
@@ -2144,7 +2142,7 @@ export class Opcodes {
         this.opcodes[0x98] = new TYA(cpu,0x98, 2, 1, AddressingModes.implied);
         this.opcodes[0xBB] = new TYX(cpu,0xBB, 2, 1, AddressingModes.implied);
         this.opcodes[0xCB] = new WAI(cpu,0xCB, 3, 1, AddressingModes.implied);
-        this.opcodes[0x42] = new WDM(cpu,0x42, 0, 2, AddressingModes.implied); // TODO
+        this.opcodes[0x42] = new WDM(cpu,0x42, 2, 2, AddressingModes.immediateM); // TODO
         this.opcodes[0xEB] = new XBA(cpu,0xEB, 1, 1, AddressingModes.implied);
         this.opcodes[0xFB] = new XCE(cpu,0xFB, 1, 1, AddressingModes.implied);
 

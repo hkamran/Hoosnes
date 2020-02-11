@@ -11,7 +11,7 @@ export class Wram {
     // The first 8K are also mirrored to xx0000h-xx1FFFh (xx=00h..3Fh and 80h..BFh)
     // Moreover (mainly for DMA purposes) it can be accessed via Port 218xh.
 
-    public static readonly SIZE = 0x2000;
+    public static readonly SIZE = 0x1F400;
 
     private data: number[];
 
@@ -31,9 +31,9 @@ export class Wram {
         }
 
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
-            let multiplier: number = (page / 0x2000) * 0x2000;
-            let remainder: number = page % 0x2000;
-            return Read.byte(this.data[multiplier + remainder]);
+            let index: number = ((bank - 0x7E) * 0xFFFF);
+            let offset: number = page;
+            return Read.byte(this.data[index + offset]);
         } else {
             return Read.byte(this.data[page]);
         }
