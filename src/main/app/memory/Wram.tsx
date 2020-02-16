@@ -31,11 +31,15 @@ export class Wram {
         }
 
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
-            let index: number = ((bank - 0x7E) * 0xFFFF);
-            let offset: number = page;
-            return Read.byte(this.data[index + offset]);
+            let multiplier: number = Math.floor(page / 0x2000) * 0x2000;
+            let remainder: number = page % 0x2000;
+            let offset: number = (bank == 0x7F) ? 0xFFFF : 0;
+
+            let index: number = multiplier + remainder + offset;
+            return Read.byte(this.data[index]);
         } else {
-            return Read.byte(this.data[page]);
+            let index: number = page % 0x2000;
+            return Read.byte(this.data[index]);
         }
     }
 
@@ -50,12 +54,16 @@ export class Wram {
         }
 
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
-            let multiplier: number = (page / 0x2000) * 0x2000;
+            let multiplier: number = Math.floor(page / 0x2000) * 0x2000;
             let remainder: number = page % 0x2000;
-            this.data[multiplier + remainder] = value;
+            let offset: number = (bank == 0x7F) ? 0xFFFF : 0;
+
+            let index: number = multiplier + remainder + offset;
+            this.data[index] = value;
             return new Write(address, value, 0);
         } else {
-            this.data[page] = value;
+            let index: number = page % 0x2000;
+            this.data[index] = value;
             return new Write(address, value, 0);
         }
     }

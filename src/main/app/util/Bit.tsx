@@ -119,7 +119,7 @@ export class Bit {
         let val: number = num;
 
         val = val & 0xFF00;
-        val = val | a;
+        val = val | (a & 0xFF);
 
         return val;
     }

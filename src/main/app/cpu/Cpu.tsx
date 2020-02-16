@@ -58,6 +58,7 @@ export class Cpu {
 
         let duration = this.cycles - cycles;
         this.ticks++;
+
         return duration;
     }
 

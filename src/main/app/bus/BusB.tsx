@@ -342,7 +342,7 @@ export class BusB {
             } else if (page % 4 == 3) {
                 //this.console.apu.registers.apuio3.set(val);
             }
-        }else if (page == 0x2180) {
+        } else if (page == 0x2180) {
             this.console.cpu.registers.wmdata.set(val);
         } else if (page == 0x2181) {
             this.console.cpu.registers.wmadd.setLower(val);

@@ -115,7 +115,7 @@ export class Bus {
 
 
     public writeByte(address: Address, value: number): Write {
-        if (address == null || value < 0) {
+        if (address == null || value < 0 || value > 0xFF) {
             throw new Error("Invalid readByte at " + address);
         }
 

@@ -3,7 +3,7 @@ import {Console} from "../Console";
 import {Address} from "../bus/Address";
 
 export enum ApuState {
-    TRANSFER, RUNNING, RESET
+    TRANSFER, RUNNING, RESET,
 }
 
 export class Apu {
