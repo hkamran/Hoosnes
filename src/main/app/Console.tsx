@@ -33,6 +33,7 @@ export class Console {
     public reset(): void {
         this.cpu.reset();
         this.ppu.reset();
+        this.apu.reset();
     }
 
     public tick(): void {

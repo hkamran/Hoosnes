@@ -323,6 +323,40 @@ export class WramMemoryAddressRegister extends Register {
     }
 }
 
+
+export class HvBStatusRegister extends Register {
+
+    public address: string = "0x4212";
+    public name: string = "HVBJOY";
+
+    public val: number = 0x1;
+
+    public setVBlankFlag(val: boolean): void {
+        if (val) {
+            this.val = this.val | 0x80;
+        } else {
+            this.val = this.val & 0x7F;
+        }
+    }
+
+    public setHBlankFlag(val: boolean): void {
+        if (val) {
+            this.val = this.val | 0x40;
+        } else {
+            this.val = this.val & 0xBF;
+        }
+    }
+
+    public setJoypadFlag(val: boolean): void {
+        if (val) {
+            this.val = this.val | 0x1;
+        } else {
+            this.val = this.val & 0xFE;
+        }
+    }
+
+}
+
 export class Registers {
 
     public a : Register;
@@ -352,7 +386,7 @@ export class Registers {
     public memsel : Register;
     public rdnmi : NmiFlagRegister;
     public timeup : Register;
-    public hvbjoy : Register;
+    public hvbjoy : HvBStatusRegister;
     public rdio : Register;
     public rddivl : Register;
     public rddivh : Register;
@@ -410,7 +444,7 @@ export class Registers {
         this.memsel = new Register();
         this.rdnmi = new NmiFlagRegister();
         this.timeup = new Register();
-        this.hvbjoy = new Register();
+        this.hvbjoy = new HvBStatusRegister();
         this.rdio = new Register();
         this.rddivl = new Register();
         this.rddivh = new Register();

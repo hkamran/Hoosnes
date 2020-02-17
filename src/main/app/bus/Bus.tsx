@@ -160,7 +160,7 @@ export class Bus {
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 this.console.cartridge.writeByte(address, value);
             }
-        } else if (0xC0 <= bank && bank <= 0xFF) {
+        } else if (0xF0 <= bank && bank <= 0xFF) {
             this.console.cartridge.writeByte(address, value);
         } else {
             throw new Error("Invalid bus read at " + address.toValue());

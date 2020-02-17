@@ -182,6 +182,9 @@ export class Cartridge {
         if (CartridgeMappingType[CartridgeMappingType.HIROM] === layout.toString()) {
             return SNES_OFFSET_HIROM + this.smc.offset;
         }
+        if (CartridgeMappingType[CartridgeMappingType.HIROM_FASTROM] === layout.toString()) {
+            return SNES_OFFSET_HIROM + this.smc.offset;
+        }
         if (CartridgeMappingType[CartridgeMappingType.LOROM] === layout.toString()) {
             return SNES_OFFSET_LOROM + this.smc.offset;
         }
@@ -210,15 +213,30 @@ export class Cartridge {
     }
 
     public writeByte(address: Address, value: number): Write {
+        if (value == null || value < 0 || value > 0xFF) {
+            throw new Error(`Invalid write at ${address.toString} ${value}`);
+        }
+
+        let bank: number = address.getBank();
+        let offset: number = address.getPage();
+
+        if (0x70 <= bank && bank <= 0x7D) {
+            this.sram.data[offset] = value;
+            return new Write(address, 0, 0);
+        } else if (0xFE <= bank && bank <= 0xFF) {
+            this.sram.data[offset] = value;
+            return new Write(address, 0, 0);
+        }
+
         throw new Error("Cannot write to cartridge: " + address.toString());
-        // return new Write(address, 0, 0);
     }
 
     private getMapping(mappingType: CartridgeMappingType): ICartridgeMapping {
         if (mappingType.toString() == CartridgeMappingType[CartridgeMappingType.LOROM] ||
             mappingType.toString() == CartridgeMappingType[CartridgeMappingType.LOROM_FASTROM]) {
             return new CartridgeMapping0(this);
-        } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.HIROM]) {
+        } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.HIROM] ||
+            mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.HIROM_FASTROM]) {
             return new CartridgeMapping1(this);
         } else if (mappingType.toString()  == CartridgeMappingType[CartridgeMappingType.SUPER_MMC1] ||
             mappingType.toString() == CartridgeMappingType[CartridgeMappingType.SUPER_MMC2]) {

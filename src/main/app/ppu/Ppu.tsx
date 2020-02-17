@@ -108,20 +108,24 @@ export class Ppu {
 
         if (isVBlankStart) {
             this.screen.state = ScreenState.VBLANK;
+            this.console.cpu.registers.hvbjoy.setVBlankFlag(true);
             this.console.cpu.registers.rdnmi.set(0x80);
             this.console.cpu.interrupts.set(InterruptType.NMI);
         }
 
         if (isVBlankEnd) {
             // vertical blank end
+            this.console.cpu.registers.hvbjoy.setVBlankFlag(false);
             this.console.cpu.registers.rdnmi.set(0x00);
         }
 
         if (isHBlank) {
+            this.console.cpu.registers.hvbjoy.setHBlankFlag(true);
             this.screen.state = ScreenState.HBLANK;
         }
 
         if (isPreline) {
+            this.console.cpu.registers.hvbjoy.setHBlankFlag(false);
             this.screen.state = ScreenState.PRELINE;
         }
     }

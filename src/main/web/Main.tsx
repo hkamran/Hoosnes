@@ -18,6 +18,11 @@ import {BackgroundsCard} from "./BackgroundsCard";
 declare let window : any;
 window.snes = new Console();
 
+interface IMainStates {
+    fetches: Function[];
+    logs: TickEvent[];
+}
+
 interface IMainProps {
     snes: Console;
 }
@@ -37,7 +42,7 @@ export class TickEvent {
     }
 }
 
-export class Main extends React.Component<IMainProps, any> {
+export class Main extends React.Component<IMainProps, IMainStates> {
 
     constructor(props : IMainProps) {
         super(props);
@@ -52,7 +57,11 @@ export class Main extends React.Component<IMainProps, any> {
     }
 
     public tick() {
-        this.props.snes.tick();
+        try {
+            this.props.snes.tick();
+        } catch (e) {
+            console.error(e);
+        }
 
         this.state.logs.push(new TickEvent(this.props.snes));
 

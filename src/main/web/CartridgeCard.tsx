@@ -107,6 +107,10 @@ export class CartridgeCard extends React.Component<ICartridgeCardProps, ICartrid
                                     <span style={{flexGrow: 1}} className="header">Version:</span>
                                     <span>{"0x" + this.state.version.toString(16)}</span>
                                 </li>
+                                <li style={{display: "flex"}}>
+                                    <span style={{flexGrow: 1}} className="header">Sram:</span>
+                                    <span>{this.props.snes.cartridge ? this.props.snes.cartridge.sram.size : 0}</span>
+                                </li>
                             </ul>
                         </div>
                     </fieldset>

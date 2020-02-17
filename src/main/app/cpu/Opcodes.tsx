@@ -416,7 +416,7 @@ class CPX extends Operation {
     }
 
     public getSize(): number {
-        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        let isImmediate: boolean = this.mode == AddressingModes.immediateX;
         if (isImmediate && this.cpu.registers.p.getX() == 1) {
             return super.getSize() - 1;
         }
