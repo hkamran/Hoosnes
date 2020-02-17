@@ -100,7 +100,7 @@ export class Sprite {
     // https://sneslab.net/wiki/PPU_Registers
     public getPaletteIndex(): number {
         let val: number = (this.getAttributes() >> 1) & 7;
-        let index: number = (128 + (val * 16)) * 2;
+        let index: number = 8 + val;
         return index;
     }
 

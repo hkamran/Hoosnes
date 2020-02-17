@@ -201,7 +201,7 @@ export class PpuCard extends React.Component<IPpuCardProps, IPpuCardState> {
                                     <ul style={{margin: "5px"}}>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Tile Address:</span>
-                                            <span>{this.state.registers.vtilebg3.getTileAddress().toString(16)}</span>
+                                            <span>{this.state.registers.vtilebg3.getTileMapAddress().toString(16)}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Screen Size:</span>

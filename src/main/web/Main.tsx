@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import Core from './core/Core';
 import {Console} from "../app/Console";
 import {ScreenCard} from "./ScreenCard";
 import {PaletteCard} from "./PaletteCard";
@@ -8,8 +7,6 @@ import {CartridgeCard} from "./CartridgeCard";
 import {SpriteCard} from "./SpriteCards";
 import {CpuCard} from "./CpuCard";
 import {DebuggerCard} from "./DebuggerCard";
-import {Card} from "./core/layout/Card";
-import {Register, Registers} from "../app/cpu/Registers";
 import {Operation} from "../app/cpu/Opcodes";
 import {PpuCard} from "./PpuCard";
 import {TileCard} from "./TileCard";

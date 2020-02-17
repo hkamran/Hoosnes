@@ -72,9 +72,9 @@ export class Palette {
         if (type == BppType.Eight) {
             return this.fetchRange(0, 512);
         } else if (type == BppType.Four) {
-            return this.fetchRange(index, index + (16 * 2));
+            return this.fetchRange((index + 0) * (16 * 2), (index + 1) * (16 * 2));
         } else if (type == BppType.Two) {
-            return this.fetchRange(index, index + (4 * 2));
+            return this.fetchRange((index + 0) * (4 * 2), (index + 1) * (4 * 2));
         } else {
             throw new Error(`Invalid getPaletteWithBppType from ${index} ${type}`);
         }

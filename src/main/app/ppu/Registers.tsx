@@ -318,7 +318,7 @@ export class TileAddressForBG3Register extends Register {
     public address: string = "0x2109";
     public label: string = "BG3SC";
 
-    public getTileAddress(): number {
+    public getTileMapAddress(): number {
         return (((this.val >> 2) & 0x3F) * 0x800);
     }
 
@@ -393,12 +393,12 @@ export class CharacterAddressForBG3And4Register extends Register {
     public address: string = "0x210C";
     public label: string = "BG34NBA";
 
-    public getBaseAddressForBG3(): number {
-        return ((this.val >> 4) & 0xF) << 12;
+    public getBaseAddressForBG4(): number {
+        return ((this.val >> 4) & 0xF) << 13;
     }
 
-    public getBaseAddressForBG4(): number {
-        return ((this.val >> 0) & 0xF) << 12;
+    public getBaseAddressForBG3(): number {
+        return ((this.val >> 0) & 0xF) << 13;
     }
 }
 
