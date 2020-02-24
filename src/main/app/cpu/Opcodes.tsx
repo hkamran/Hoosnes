@@ -173,7 +173,8 @@ export class ADC extends Operation {
         context.setFlagV(a, c, is8Bit);
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
-        context.setFlagC(result, is8Bit);
+        context.registers.p.setC(is8Bit ? (result > 0xFF ? 1 : 0)
+            : (result > 0xFFFF ? 1: 0));
 
         return this.cycle;
     }
@@ -1262,22 +1263,25 @@ class LSR extends Operation {
 
     public execute(context: OpContext): number {
         let isAccMode: boolean = this.mode == AddressingModes.accumulator;
-        let is8Bit: boolean = this.cpu.registers.p.getM() == 0;
+        let is8Bit: boolean = this.cpu.registers.p.getM() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
 
-        let result = isAccMode ?
-            this.cpu.registers.a.getLower() :
+        let result = isAccMode ? (is8Bit ?
+            this.cpu.registers.a.getLower() : this.cpu.registers.a.get()) :
             this.mode.getValue(context).get();
 
         this.cpu.registers.p.setC(result & 0x01);
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
 
+        let value: number = ((result & mask) >> 1) & mask;
+
         if (isAccMode) {
-            this.cpu.registers.a.set((result >> 1) & mask);
+            if (is8Bit) this.cpu.registers.a.setLower(value);
+            if (!is8Bit) this.cpu.registers.a.set(value);
         } else {
             let addressing: Addressing = this.mode.getAddressing(context);
-            context.console.bus.writeByte(addressing.getLow(), Bit.getUint16Lower(result));
+            context.console.bus.writeByte(addressing.getLow(), Bit.getUint16Lower(value));
             if (!is8Bit) context.console.bus.writeByte(addressing.getHigh(), Bit.getUint16Upper(result));
         }
 

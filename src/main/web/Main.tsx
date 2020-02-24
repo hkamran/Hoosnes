@@ -16,7 +16,7 @@ declare let window : any;
 window.snes = new Console();
 
 interface IMainStates {
-    fetches: Function[];
+    fetches: Array<() => void>;
     logs: TickEvent[];
 }
 
