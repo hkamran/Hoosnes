@@ -11,7 +11,6 @@ export class CartridgeMapping0 implements ICartridgeMapping {
     public label: string = "LOROM";
 
     private cartridge: Cartridge;
-    private sram: Sram;
 
     constructor(cartridge: Cartridge) {
         this.cartridge = cartridge;
@@ -34,13 +33,13 @@ export class CartridgeMapping0 implements ICartridgeMapping {
 
                 return Read.byte(value, 0);
             } else if (0x70 <= bank && bank <= 0x7F) {
-                let index = ((bank - 0x70) * 0xFFFF) + page;
-                let value = this.sram.data[index];
+                let index =(bank - 0x70) + page;
+                let value = this.cartridge.sram.data[index];
 
                 return Read.byte(value, 0);
             } else if (0xF0 <= bank && bank <= 0xFF) {
-                let index = (((bank - 0xF0) % 0xD) * 0xFFFF) + page;
-                let value = this.sram.data[index];
+                let index = (bank - 0xF0) + page;
+                let value = this.cartridge.sram.data[index];
 
                 return Read.byte(value, 0);
             }

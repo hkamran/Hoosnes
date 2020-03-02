@@ -126,6 +126,7 @@ const SNES_OFFSET_CHECKSUM: number = 0x1e; // xFDE
 export class Cartridge {
 
     public rom: number[];
+    public aux: number[] = [];
 
     public smc: SmcHeader; // header
     public title: string; // xFC0
@@ -156,7 +157,7 @@ export class Cartridge {
         this.title = this.getTitle(offset, offset + SNES_OFFSET_TITLE);
         this.type = this.getType(offset + SNES_OFFSET_ROM_TYPE);
         this.size = 400 << ByteReader.readByte(this.rom, offset + SNES_OFFSET_ROM_SIZE);
-        this.sram = new Sram(400 << ByteReader.readByte(this.rom, offset + SNES_OFFSET_SRAM_SIZE));
+        this.sram = new Sram(400 << ByteReader.readByte(this.rom, offset + SNES_OFFSET_SRAM_SIZE) + 400);
         this.license = ByteReader.readByte(this.rom, offset + SNES_OFFSET_LICENSE);
         this.version = ByteReader.readByte(this.rom, offset + SNES_OFFSET_VERSION);
         this.complement = ByteReader.readWord(this.rom, offset + SNES_OFFSET_COMPLEMENT_CHECK);
@@ -225,6 +226,10 @@ export class Cartridge {
             return new Write(address, 0, 0);
         } else if (0xFE <= bank && bank <= 0xFF) {
             this.sram.data[offset] = value;
+            return new Write(address, 0, 0);
+        } else if (0x00 <= bank && bank <= 0x00) {
+            console.warn(`${address.toString()} set ${value.toString(16)}`);
+            this.aux[offset] = value;
             return new Write(address, 0, 0);
         }
 

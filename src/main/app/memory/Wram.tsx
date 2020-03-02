@@ -31,9 +31,9 @@ export class Wram {
         }
 
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
-            let multiplier: number = Math.floor(page / 0x2000) * 0x2000;
             let remainder: number = page % 0x2000;
-            let offset: number = (bank == 0x7F) ? 0xFFFF : 0;
+            let multiplier: number = Math.floor(page/ 0x2000) * 0x2000;
+            let offset: number = bank == 0x7F ? 0xFFFF : 0x0000;
 
             let index: number = multiplier + remainder + offset;
             return Read.byte(this.data[index]);
@@ -54,9 +54,9 @@ export class Wram {
         }
 
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
-            let multiplier: number = Math.floor(page / 0x2000) * 0x2000;
             let remainder: number = page % 0x2000;
-            let offset: number = (bank == 0x7F) ? 0xFFFF : 0;
+            let multiplier: number = Math.floor(page/ 0x2000) * 0x2000;
+            let offset: number = bank == 0x7F ? 0xFFFF : 0x0000;
 
             let index: number = multiplier + remainder + offset;
             this.data[index] = value;

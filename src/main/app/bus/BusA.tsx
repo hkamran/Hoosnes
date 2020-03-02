@@ -350,6 +350,7 @@ export class BusA {
         } else if (page == 0x420B) {
             this.registers.mdmaen.set(val);
         } else if (page == 0x420C) {
+            console.warn("HDMA set to 0x" + val.toString(16));
             this.registers.hdmaen.set(val);
         } else if (page == 0x420D) {
             this.registers.memsel.set(val);

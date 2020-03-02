@@ -15,6 +15,8 @@ interface ITileCardState {
     tileWidthSize: number;
     tileBorderOpacity: number;
     tilesPerRow: number;
+    totalRows: number;
+    bbpType: BppType;
 }
 
 /**
@@ -76,6 +78,8 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
         tileWidthSize: 8,
         tileBorderOpacity: 100,
         tilesPerRow: 16,
+        totalRows: 5,
+        bbpType: BppType.Four,
     };
 
     constructor(props : ITileCardProps) {
@@ -96,7 +100,7 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
 
         let totalWidth = this.state.tilesPerRow * (this.state.tileWidthSize) * this.state.tilePixelSize;
-        let totalHeight = this.state.tilesPerRow * (this.state.tileHeightSize) * this.state.tilePixelSize;
+        let totalHeight = (this.state.totalRows * this.state.tilesPerRow) * (this.state.tileHeightSize) * this.state.tilePixelSize;
 
         this.canvasRef.current.width = totalWidth;
         this.canvasRef.current.height = totalHeight;
@@ -119,15 +123,15 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
 
         while (vramIndex < length) {
 
-            let attributes: TileAttributes = TileAttributes.create(8, 8, BppType.Four);
+            let attributes: TileAttributes = TileAttributes.create(8, 8, this.state.bbpType);
             let tile: Tile = this.props.snes.ppu.tiles.getTile(Address.create(vramIndex), attributes);
             vramIndex += attributes.getTileSize();
 
             let tileBottomIndex: number = ((this.state.tileHeightSize * this.state.tilePixelSize) * tileYIndex) * totalWidth;
             let tileRightIndex: number = (tileXIndex * this.state.tilePixelSize * this.state.tileWidthSize);
+            let minColor = this.state.bbpType == BppType.Two ? 8 : 0;
 
             // Write pixel
-
             for (let y = 0; y < this.state.tileHeightSize; y++) {
                 for (let x = 0; x < this.state.tileWidthSize; x++) {
                     let palette = tile.data[y][x];
@@ -137,7 +141,6 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
                     let xIndex: number = tileRightIndex + (x * this.state.tilePixelSize);
 
                     // Write pixel size
-
                     for (let yOffset = 0; yOffset < this.state.tilePixelSize; yOffset++) {
                         for (let xOffset = 0; xOffset < this.state.tilePixelSize; xOffset++) {
                             let index = 0;
@@ -145,9 +148,9 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
                             index += (xIndex + xOffset);
                             index *= 4;
 
-                            image.data[index + 0] = palette * 15;
-                            image.data[index + 1] = palette * 15;
-                            image.data[index + 2] = palette * 15;
+                            image.data[index + 0] = Math.max(palette, minColor) * 15;
+                            image.data[index + 1] = Math.max(palette, minColor) * 15;
+                            image.data[index + 2] = Math.max(palette, minColor) * 15;
                             image.data[index + 3] = 255;
                         }
                     }
@@ -202,6 +205,19 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
         });
     }
 
+    public set2Bpp(): void {
+        this.setState({
+            bbpType: BppType.Two,
+        });
+    }
+
+    public set4Bpp(): void {
+        this.setState({
+            bbpType: BppType.Four,
+        });
+    }
+
+
     public render() {
         return (
             <Card title="Tiles">
@@ -218,6 +234,8 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
                         <button onClick={this.refresh.bind(this)}>Refresh</button>
                         <button onClick={this.zoomIn.bind(this)}>+</button>
                         <button onClick={this.zoomOut.bind(this)}>-</button>
+                        <button onClick={this.set2Bpp.bind(this)}>2bpp</button>
+                        <button onClick={this.set4Bpp.bind(this)}>4bpp</button>
                     </div>
                 </div>
             </Card>

@@ -88,6 +88,57 @@ export class Bit {
         return (a) & 0xFF;
     }
 
+    public static getUint32Upper(a: number) {
+        if (a == null) {
+            return null;
+        }
+
+        return (a >> 16) & 0xFF;
+    }
+
+    public static getUint32Middle(a: number) {
+        if (a == null) {
+            return null;
+        }
+
+        return (a >> 8) & 0xFF;
+    }
+
+    public static getUint32Lower(a: number) {
+        if (a == null) {
+            return null;
+        }
+
+        return (a) & 0xFF;
+    }
+
+    public static setUint32Upper(num: number, a: number) {
+        let val: number = num;
+
+        val = val & (0x00FFFF);
+        val = val | ((a & 0xFF) << 16);
+
+        return val & 0xFFFFFF;
+    }
+
+    public static setUint32Middle(num: number, a: number) {
+        let val: number = num;
+
+        val = val & (0xFF00FF);
+        val = val | ((a & 0xFF) << 8);
+
+        return val & 0xFFFFFF;
+    }
+
+    public static setUint32Lower(num: number, a: number) {
+        let val: number = num;
+
+        val = val & (0xFFFF00);
+        val = val | ((a & 0xFF) << 0);
+
+        return val & 0xFFFFFF;
+    }
+
     public static setUint24Upper(num: number, a: number) {
         let val: number = num;
 

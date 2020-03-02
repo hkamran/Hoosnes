@@ -119,27 +119,27 @@ export class DmaCpuAddressRegister extends Register {
     public label: string = "A1Tx";
 
     public setLower(val: number): void {
-        this.val = Bit.setUint24Lower(this.val, val);
+        this.val = Bit.setUint32Lower(this.val, val);
     }
 
     public setMiddle(val: number): void {
-        this.val = Bit.setUint24Middle(this.val, val);
+        this.val = Bit.setUint32Middle(this.val, val);
     }
 
     public setUpper(val: number): void {
-        this.val = Bit.setUint24Upper(this.val, val);
+        this.val = Bit.setUint32Upper(this.val, val);
     }
 
     public getLower(): number {
-        return Bit.getUint24Lower(this.val);
+        return Bit.getUint32Lower(this.val);
     }
 
     public getMiddle(): number {
-        return Bit.getUint24Middle(this.val);
+        return Bit.getUint32Middle(this.val);
     }
 
     public getUpper(): number {
-        return Bit.getUint24Upper(this.val);
+        return Bit.getUint32Upper(this.val);
     }
 
     public getAbusBank(): number {
@@ -211,6 +211,7 @@ export class DmaChannel {
             0 : (automaticAddressingType == DmaAddressingAutomaticType.DECREMENT ? -1 : 1);
 
         console.log(this.toString());
+
         let source: number = (direction == DmaTransferType.PPU_TO_CPU)
             ? bBusAddress :  aBusAddress;
         let destination: number = (direction == DmaTransferType.PPU_TO_CPU)

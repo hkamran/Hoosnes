@@ -81,7 +81,7 @@ export class Bus {
                 read = this.console.cartridge.readByte(address);
             }
         } else if (0x40 <= bank && bank <= 0x7F) {
-            if (0x7E <= bank && bank >= 0x7F) {
+            if (0x7E <= bank && bank <= 0x7F) {
                 read = this.console.cpu.wram.readByte(address);
             } else {
                 read = this.console.cartridge.readByte(address);
