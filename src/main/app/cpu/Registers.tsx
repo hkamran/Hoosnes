@@ -329,7 +329,7 @@ export class HvBStatusRegister extends Register {
     public address: string = "0x4212";
     public name: string = "HVBJOY";
 
-    public val: number = 0x1;
+    public val: number = 0x0;
 
     public setVBlankFlag(val: boolean): void {
         if (val) {

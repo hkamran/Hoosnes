@@ -210,7 +210,7 @@ export class DmaChannel {
         let step: number = addressingSelection == DmaAddressingSelectionType.FIXED ?
             0 : (automaticAddressingType == DmaAddressingAutomaticType.DECREMENT ? -1 : 1);
 
-        console.log(this.toString());
+        //console.log(this.toString());
 
         let source: number = (direction == DmaTransferType.PPU_TO_CPU)
             ? bBusAddress :  aBusAddress;

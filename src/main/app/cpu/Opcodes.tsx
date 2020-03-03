@@ -294,16 +294,20 @@ export class BIT extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
-        let mask: number = is8Bit ? 0xFF : 0xFFFF;
-
         let a: number = is8Bit ? context.registers.a.getLower() : context.registers.a.get();
-        let b: Read = this.mode.getValue(context);
+        let b: number = this.mode.getValue(context).get();
 
-        let result = a & b.get();
+        let result = a & b;
 
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        if (isImmediate) {
+            let vMask = is8Bit ? 0x20 : 0x4000;
+            context.registers.p.setV(((b & vMask) != 0) ? 0 : 1);
+            let nMask = is8Bit ? 80 : 0x8000;
+            context.registers.p.setN(((b & nMask) != 0) ? 0 : 1);
+            context.setFlagN(result, is8Bit);
+        }
         context.setFlagZ(result, is8Bit);
-
-        // TODO
 
         return this.cycle;
     }
