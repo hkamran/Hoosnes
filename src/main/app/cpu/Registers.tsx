@@ -330,7 +330,13 @@ export class HvBStatusRegister extends Register {
     public name: string = "HVBJOY";
 
     public val: number = 0x0;
-
+//     Joypad automatic scanning flag
+//
+// - Bit 0 of $4212 is set at line $00E1 and cleared at line $00E4 in 224-line
+//     mode.
+//
+// - Bit 0 of $4212 is set at line $00F0 and cleared at line $00F3 in 239-line
+//     mode.
     public setVBlankFlag(val: boolean): void {
         if (val) {
             this.val = this.val | 0x80;

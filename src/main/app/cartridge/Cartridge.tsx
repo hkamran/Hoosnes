@@ -227,11 +227,12 @@ export class Cartridge {
         } else if (0xFE <= bank && bank <= 0xFF) {
             this.sram.data[offset] = value;
             return new Write(address, 0, 0);
-        } else if (0x00 <= bank && bank <= 0x00) {
-            console.warn(`${address.toString()} set ${value.toString(16)}`);
-            this.aux[offset] = value;
-            return new Write(address, 0, 0);
         }
+        // } else if (0x00 <= bank && bank <= 0x00) {
+        //     console.warn(`${address.toString()} set ${value.toString(16)}`);
+        //     this.aux[offset] = value;
+        //     return new Write(address, 0, 0);
+        // }
 
         throw new Error("Cannot write to cartridge: " + address.toString());
     }

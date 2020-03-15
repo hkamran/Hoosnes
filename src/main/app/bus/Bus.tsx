@@ -69,14 +69,12 @@ export class Bus {
                 read = this.console.cpu.wram.readByte(address);
             } else if (0x2100 <= page && page <= 0x21FF) {
                 read = this.busB.readByte(address);
-            } else if (0x4016 <= page && page <= 0x4017) {
-                read = this.busA.readByte(address);
-            } else if (0x2200 <= page && page <= 0x41FF) {
+            } else if (0x2200 <= page && page <= 0x3FFF) {
                 read = this.console.cartridge.readByte(address);
-            } else if (0x4200 <= page && page <= 0x43FF) {
+            } else if (0x4000 <= page && page <= 0x43FF) {
                 read = this.busA.readByte(address);
-            } else if (0x4400 <= page && page <= 0x7FFF) {
-                read = this.console.cartridge.readByte(address);
+            } else if (0x4380 <= page && page <= 0x7FFF) {
+                read = this.mdr;
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 read = this.console.cartridge.readByte(address);
             }
@@ -91,9 +89,9 @@ export class Bus {
                 read = this.console.cpu.wram.readByte(address);
             } else if (0x2100 <= page && page <= 0x21FF) {
                 read = this.busB.readByte(address);
-            } else if (0x2200 <= page && page <= 0x41FF) {
+            } else if (0x2200 <= page && page <= 0x4000) {
                 read = this.console.cartridge.readByte(address);
-            } else if (0x4200 <= page && page <= 0x43FF) {
+            } else if (0x4000 <= page && page <= 0x43FF) {
                 read = this.busA.readByte(address);
             } else if (0x4400 <= page && page <= 0x7FFF) {
                 read = this.console.cartridge.readByte(address);
@@ -131,12 +129,12 @@ export class Bus {
                 this.console.cpu.wram.writeByte(address, value);
             } else if (0x2100 <= page && page <= 0x21FF) {
                 this.busB.writeByte(address, value);
-            } else if (0x2200 <= page && page <= 0x41FF) {
+            } else if (0x2200 <= page && page <= 0x3FFF) {
                 this.console.cartridge.writeByte(address, value);
-            } else if (0x4200 <= page && page <= 0x43FF) {
+            } else if (0x4000 <= page && page <= 0x43FF) {
                 this.busA.writeByte(address, value);
-            } else if (0x4400 <= page && page <= 0x7FFF) {
-                this.console.cartridge.writeByte(address, value);
+            } else if (0x4380 <= page && page <= 0x7FFF) {
+                console.warn(`Writing ${address}=${value}`);
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 this.console.cartridge.writeByte(address, value);
             }

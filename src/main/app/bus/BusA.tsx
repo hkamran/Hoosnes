@@ -317,7 +317,7 @@ export class BusA {
         let bank = address.getBank();
         let page = address.getPage();
 
-        if (page < 0x4200 || page > 0x437A) {
+        if (page < 0x2100 || page > 0x437A) {
             throw new Error("Invalid writeByte at " + address);
         }
 

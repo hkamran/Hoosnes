@@ -85,6 +85,9 @@ export class Ppu {
         let isPreline: boolean =
             ScreenRegion.HORT_RENDERLINE.start >= this.cycle;
 
+        let isJoypadStatusStart: boolean = this.scanline == 224;
+        let isJoypadStatusEnd: boolean = this.scanline == 227;
+
         this.cycle++;
         if (isCycleFinished) {
             this.cycle = 0;
@@ -114,7 +117,6 @@ export class Ppu {
         }
 
         if (isVBlankEnd) {
-            // vertical blank end
             this.console.cpu.registers.hvbjoy.setVBlankFlag(false);
             this.console.cpu.registers.rdnmi.set(0x00);
         }
@@ -128,6 +130,15 @@ export class Ppu {
             this.console.cpu.registers.hvbjoy.setHBlankFlag(false);
             this.screen.state = ScreenState.PRELINE;
         }
+
+        if (isJoypadStatusStart) {
+            this.console.cpu.registers.hvbjoy.setJoypadFlag(true);
+        }
+
+        if (isJoypadStatusEnd) {
+            this.console.cpu.registers.hvbjoy.setJoypadFlag(false);
+        }
+
     }
 
     public reset():  void {
