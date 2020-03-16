@@ -151,7 +151,11 @@ export class ADC extends Operation {
     public name: string = "ADC";
 
     public execute(context: OpContext): number {
-        let a: number = context.cpu.registers.a.get();
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let size: number = is8Bit ? 0x80 : 0x8000;
+
+        let a: number = context.cpu.registers.a.get() & mask;
         let b: Read = this.mode.getValue(context);
         let c: number = context.cpu.registers.p.getC();
 
@@ -164,17 +168,13 @@ export class ADC extends Operation {
             result = a + b.get() + c;
         }
 
-        let is8Bit: boolean = context.registers.p.getM() == 1;
-        let mask: number = is8Bit ? 0xFF : 0xFFFF;
-
         if (is8Bit) context.registers.a.setLower(result & mask);
         if (!is8Bit) context.registers.a.set(result & mask);
 
-        context.setFlagV(a, c, is8Bit);
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
-        context.registers.p.setC(is8Bit ? (result > 0xFF ? 1 : 0)
-            : (result > 0xFFFF ? 1: 0));
+        context.registers.p.setV((!(((a ^ b.get()) & size)!=0) && (((a ^ result) & size)) !=0)? 1:0);
+        context.registers.p.setC(result > mask ? 1: 0);
 
         return this.cycle;
     }
@@ -879,9 +879,9 @@ class TAY extends Operation {
         context.setFlagZ(value, is8Bit);
 
         if (is8Bit) {
-            context.cpu.registers.y.set(value);
-        } else {
             context.cpu.registers.y.setLower(value);
+        } else {
+            context.cpu.registers.y.set(value);
         }
         return this.cycle;
     }

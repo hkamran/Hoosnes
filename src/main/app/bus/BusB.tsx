@@ -334,13 +334,13 @@ export class BusB {
             this.registers.stat78.set(val);
         } else if (page >= 0x2140 && page <= 0x2180) {
             if (page % 4 == 0) {
-                //this.console.apu.registers.apuio0.set(val);
+                this.console.apu.registers.apuio0.set(val);
             } else if (page % 4 == 1) {
-                //this.console.apu.registers.apuio1.set(val);
+                this.console.apu.registers.apuio1.set(val);
             } else if (page % 4 == 2) {
-                //this.console.apu.registers.apuio2.set(val);
+                this.console.apu.registers.apuio2.set(val);
             } else if (page % 4 == 3) {
-                //this.console.apu.registers.apuio3.set(val);
+                this.console.apu.registers.apuio3.set(val);
             }
         } else if (page == 0x2180) {
             this.console.cpu.registers.wmdata.set(val);
