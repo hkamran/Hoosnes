@@ -1,29 +1,29 @@
 import {Registers} from "./Registers";
 import {Console} from "../Console";
 import {Address} from "../bus/Address";
+import {Bit} from "../util/Bit";
 
 export enum ApuState {
-    TRANSFER, RUNNING, RESET,
+    READY, INITIALIZED, TRANSFER, FINISHED, RUNNING,
 }
 
 export class Apu {
 
     public registers: Registers;
-    public state: ApuState = ApuState.RESET;
+    public state: ApuState = ApuState.READY;
 
     public address: Address;
     public amount: number = 0;
-    public initializing: boolean = false;
 
     constructor(console: Console) {
         this.registers = new Registers(console);
     }
 
     public reset(): void {
-        this.registers.apuio0.set(0xAA);
-        this.registers.apuio1.set(0xBB);
+        this.registers.apuio0.reset();
+        this.registers.apuio1.reset();
         this.amount = 0x00;
-        this.state = ApuState.RESET;
+        this.state = ApuState.READY;
     }
 
 }

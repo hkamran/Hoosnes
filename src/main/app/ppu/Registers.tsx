@@ -15,7 +15,7 @@ import {Dimension} from "./Tiles";
 
 export class Register {
 
-    public val : number = 0;
+    protected val : number = 0;
     protected mode : Mode = Modes.bit8;
     public console: Console;
     public label: string;

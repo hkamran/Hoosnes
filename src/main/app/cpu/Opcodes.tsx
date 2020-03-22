@@ -658,25 +658,38 @@ class INC extends Operation {
     public execute(context: OpContext): number {
         let address: Addressing = this.mode.getAddressing(context);
         let is8Bit: boolean = context.registers.p.getM() == 1;
+        let isAcc: boolean = this.mode == AddressingModes.accumulator;
+        if (isAcc) {
+            let data: number = is8Bit ?
+                context.registers.a.getLower() :
+                context.registers.a.get();
+            let value: number = data + 1;
 
-        if (is8Bit) {
-            let loData: Read = context.bus.readByte(address.getLow());
-            let value: number = loData.get() + 1;
-
-            context.bus.writeByte(address.getLow(), value & 0xFF);
+            if (is8Bit) context.registers.a.setLower(value);
+            if (!is8Bit) context.registers.a.set(value);
 
             context.setFlagN(value, is8Bit);
             context.setFlagZ(value, is8Bit);
         } else {
-            let loData: Read = context.bus.readByte(address.getLow());
-            let hiData: Read = context.bus.readByte(address.getHigh());
-            let value: number = Bit.toUint16(hiData.get(), loData.get()) + 1;
+            if (is8Bit) {
+                let loData: Read = context.bus.readByte(address.getLow());
+                let value: number = loData.get() + 1;
 
-            context.bus.writeByte(address.getLow(), Bit.getUint16Lower(value) & 0xFF);
-            context.bus.writeByte(address.getHigh(), Bit.getUint16Upper(value) & 0xFF);
+                context.bus.writeByte(address.getLow(), value & 0xFF);
 
-            context.setFlagN(value, is8Bit);
-            context.setFlagZ(value, is8Bit);
+                context.setFlagN(value, is8Bit);
+                context.setFlagZ(value, is8Bit);
+            } else {
+                let loData: Read = context.bus.readByte(address.getLow());
+                let hiData: Read = context.bus.readByte(address.getHigh());
+                let value: number = Bit.toUint16(hiData.get(), loData.get()) + 1;
+
+                context.bus.writeByte(address.getLow(), Bit.getUint16Lower(value) & 0xFF);
+                context.bus.writeByte(address.getHigh(), Bit.getUint16Upper(value) & 0xFF);
+
+                context.setFlagN(value, is8Bit);
+                context.setFlagZ(value, is8Bit);
+            }
         }
         return this.cycle;
     }
