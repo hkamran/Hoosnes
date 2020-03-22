@@ -594,7 +594,7 @@ class DEX extends Operation {
     public name: string = "DEX";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.registers.x.get() == 1;
+        let is8Bit: boolean = context.registers.p.getX() == 1;
         let value: number = (context.registers.x.get() - 1) & (is8Bit ? 0xFF: 0xFFFF);
 
         context.setFlagN(value, is8Bit);
@@ -612,7 +612,7 @@ class DEY extends Operation {
     public name: string = "DEY";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.registers.x.get() == 1;
+        let is8Bit: boolean = context.registers.p.getX() == 1;
         let value: number = (context.registers.y.get() - 1) & (is8Bit ? 0xFF: 0xFFFF);
 
         context.setFlagN(value, is8Bit);
@@ -699,7 +699,7 @@ class INX extends Operation {
     public name: string = "INX";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.registers.x.get() == 1;
+        let is8Bit: boolean = context.registers.p.getX() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let value: number = (context.registers.x.get() + 1) & mask;
 
@@ -719,7 +719,7 @@ class INY extends Operation {
 
     public execute(context: OpContext): number {
 
-        let is8Bit: boolean = context.registers.x.get() == 1;
+        let is8Bit: boolean = context.registers.p.getX() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let value: number = (context.registers.y.get() + 1) & mask;
 
