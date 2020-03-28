@@ -3,6 +3,7 @@ import {Bit} from "../util/Bit";
 import {DmaChannel, DmaEnableRegister} from "./Dma";
 import {Objects} from "../util/Objects";
 import {Console} from "../Console";
+import {ScreenRegion} from "../ppu/Screen";
 
 /**
  * +---------------------------+---------+-----------------------------------+-------------------+-------------------------------------------+
@@ -284,12 +285,36 @@ export class InterruptEnableFlagsRegister extends Register {
     public address: string = "4200";
     public name: string = "NMITIMEN";
 
+    public isNMIEnabled(): boolean {
+        return (this.val & 0x80) > 0;
+    }
+
+    public isHorizontalCounterEnabled() {
+        return (this.val & 0x20) > 0;
+    }
+
+    public isVerticalCounterEnabled() {
+        return (this.val & 0x10) > 0;
+    }
+
+    public isJoypadEnabled() {
+        return (this.val & 0x1) > 0;
+    }
+
 }
 
 export class NmiFlagRegister extends Register {
 
     public address: string = "4210";
     public name: string = "RDNMI";
+
+    public setVBlankFlag(flag: boolean) {
+        if (flag) {
+            this.val |= 0x80;
+        } else {
+            this.val &= 0x7F;
+        }
+    }
 
 }
 
@@ -326,6 +351,14 @@ export class WramMemoryAddressRegister extends Register {
 
 export class HvBStatusRegister extends Register {
 
+    private console: Console;
+
+    constructor(console: Console) {
+        super();
+        this.console = console;
+    }
+
+
     public address: string = "0x4212";
     public name: string = "HVBJOY";
 
@@ -361,6 +394,23 @@ export class HvBStatusRegister extends Register {
         }
     }
 
+    public get(): number {
+        let result = super.get();
+
+        let cycle = this.console.ppu.cycle;
+        let scanline = this.console.ppu.scanline;
+
+        if (cycle < ScreenRegion.HORT_BLANK.end || cycle > ScreenRegion.HORT_BLANK.start) {
+            result |= 0x40;
+        }
+
+        if (scanline > ScreenRegion.VERT_BLANK.start) {
+            result |= 0x80;
+        }
+
+        return result;
+    }
+
 }
 
 export class Registers {
@@ -377,7 +427,7 @@ export class Registers {
 
     // IO Registers
 
-    public nmitimen : Register;
+    public nmitimen : InterruptEnableFlagsRegister;
     public wrio : Register;
     public wrmpya : Register;
     public wrmpyb : Register;
@@ -435,7 +485,7 @@ export class Registers {
 
         // IO Registers
 
-        this.nmitimen = new Register();
+        this.nmitimen = new InterruptEnableFlagsRegister();
         this.wrio = new Register();
         this.wrmpya = new Register();
         this.wrmpyb = new Register();
@@ -450,7 +500,7 @@ export class Registers {
         this.memsel = new Register();
         this.rdnmi = new NmiFlagRegister();
         this.timeup = new Register();
-        this.hvbjoy = new HvBStatusRegister();
+        this.hvbjoy = new HvBStatusRegister(console);
         this.rdio = new Register();
         this.rddivl = new Register();
         this.rddivh = new Register();

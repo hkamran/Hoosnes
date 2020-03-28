@@ -200,7 +200,7 @@ export class BusB {
         let bank = address.getBank();
         let page = address.getPage();
 
-        if (page < 0x2100 || page > 0x2183) {
+        if (page < 0x2100 || page > 0x21FF) {
             throw new Error("Invalid writeByte at " + address.toString());
         }
 
@@ -350,6 +350,8 @@ export class BusB {
             this.console.cpu.registers.wmadd.setMiddle(val);
         } else if (page == 0x2183) {
             this.console.cpu.registers.wmadd.setUpper(val);
+        } else if (0x2184 <= page && page <= 0x21FF) {
+
         } else {
             throw new Error("Invalid write on BusB at " + address.toString());
         }

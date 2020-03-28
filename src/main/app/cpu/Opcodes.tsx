@@ -19,8 +19,6 @@ export class OpContext {
     public bus: Bus;
     public registers: Registers;
 
-    private static singleton: OpContext;
-
     constructor(cpu: Cpu, opaddr: Address, op: Operation) {
         Objects.requireNonNull(cpu);
         Objects.requireNonNull(cpu.console);
@@ -302,9 +300,9 @@ export class BIT extends Operation {
         let isImmediate: boolean = this.mode == AddressingModes.immediateM;
         if (!isImmediate) {
             let vMask = is8Bit ? 0x20 : 0x4000;
-            context.registers.p.setV(((b & vMask) != 0) ? 0 : 1);
+            context.registers.p.setV(((b & vMask) != 0) ? 1 : 0);
             let nMask = is8Bit ? 0x80 : 0x8000;
-            context.registers.p.setN(((b & nMask) != 0) ? 0 : 1);
+            context.registers.p.setN(((b & nMask) != 0) ? 1 : 0);
         }
         context.setFlagZ(result, is8Bit);
 
@@ -1036,7 +1034,6 @@ class TXA extends Operation {
     public name: string = "TXA";
 
     public execute(context: OpContext): number {
-        let sp: number = context.registers.sp.get();
         let is8Bit: boolean = context.cpu.registers.p.getM() == 1;
 
         if (is8Bit) {
@@ -1061,7 +1058,6 @@ class TSX extends Operation {
     public name: string = "TSX";
 
     public execute(context: OpContext): number {
-        let sp: number = context.registers.sp.get();
         let is8Bit: boolean = context.cpu.registers.p.getX() == 0;
         if (is8Bit) {
             let lowData: number = context.cpu.stack.popByte();
@@ -1140,7 +1136,6 @@ class JSL extends Operation {
         let pc: number = (context.registers.pc.get() - 1) & 0xFFFF;
         let addressing: Addressing = this.mode.getAddressing(context);
         let address: Address = addressing.getLow();
-        let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushByte(bank);
         context.cpu.stack.pushWord(pc);
@@ -1427,7 +1422,6 @@ class PEI extends Operation {
     public execute(context: OpContext): number {
         let addressing: Addressing = this.mode.getAddressing(context);
         let value = addressing.getLow().toValue();
-        let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(value);
 
@@ -1442,7 +1436,6 @@ class PER extends Operation {
     public execute(context: OpContext): number {
         let addressing: Addressing = this.mode.getAddressing(context);
         let value = addressing.getLow().toValue();
-        let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(value);
 
@@ -1454,7 +1447,6 @@ class PHA extends Operation {
     public name: string = "PHA";
 
     public execute(context: OpContext): number {
-        let sp: number = context.registers.sp.get();
         let is8Bit: boolean = context.registers.p.getM() == 1;
         if (is8Bit) {
             let result: number = context.cpu.registers.a.getLower();
@@ -1473,7 +1465,6 @@ class PHB extends Operation {
 
     public execute(context: OpContext): number {
         let result: number = context.cpu.registers.dbr.get();
-        let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushByte(result);
 
@@ -1639,7 +1630,6 @@ class PHD extends Operation {
 
     public execute(context: OpContext): number {
         let result: number = context.cpu.registers.d.get();
-        let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushWord(result);
 
@@ -1654,7 +1644,6 @@ class PHK extends Operation {
 
     public execute(context: OpContext): number {
         let result: number = context.cpu.registers.k.get();
-        let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushByte(result);
 
@@ -1668,7 +1657,6 @@ class PHP extends Operation {
 
     public execute(context: OpContext): number {
         let p: number = context.registers.p.get();
-        let sp: number = context.registers.sp.get();
 
         context.cpu.stack.pushByte(p & 0xFF);
 
@@ -1682,7 +1670,6 @@ class PHX extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
-        let sp: number = context.registers.sp.get();
 
         let loData: number = context.registers.x.getLower();
         let hiData: number = context.registers.x.getUpper();
@@ -1704,7 +1691,6 @@ class PHY extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
-        let sp: number = context.registers.sp.get();
 
         let loData: number = context.registers.y.getLower();
         let hiData: number = context.registers.y.getUpper();
@@ -1766,7 +1752,6 @@ class PLD extends Operation {
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let value: number = context.cpu.stack.popWord();
-        let sp: number = context.registers.sp.get();
 
         context.registers.d.set(value);
         context.setFlagN(value, is8Bit);
@@ -1780,7 +1765,6 @@ class PLP extends Operation {
 
     public execute(context: OpContext): number {
         let p: number = context.cpu.stack.popByte();
-        let sp: number = context.registers.sp.get();
 
         context.registers.p.set(p);
 
@@ -1879,7 +1863,6 @@ class RTI extends Operation {
     public execute(context: OpContext): number {
         let p: number = context.cpu.stack.popByte();
         let pc: number = context.cpu.stack.popWord();
-        let sp: number = context.registers.sp.get();
 
         context.cpu.registers.pc.set(pc & 0xFFFF);
         context.cpu.registers.p.set(p & 0xFF);
@@ -1898,7 +1881,6 @@ class RTL extends Operation {
     public execute(context: OpContext): number {
         let pc: number = context.cpu.stack.popWord();
         let pbc: number = context.cpu.stack.popByte();
-        let sp: number = context.registers.sp.get();
 
         context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
         context.cpu.registers.k.set(pbc & 0xFF);
@@ -1913,7 +1895,6 @@ class RTS extends Operation {
 
     public execute(context: OpContext): number {
         let pc: number = context.cpu.stack.popWord();
-        let sp: number = context.registers.sp.get();
 
         context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
 
@@ -2095,14 +2076,14 @@ export class Opcodes {
         this.opcodes[0xC8] = new INY(cpu,0xC8, 2, 1, AddressingModes.implied);
 
         this.opcodes[0x4C] = new JMP(cpu,0x4C, 3, 3, AddressingModes.absoluteJump);
-        this.opcodes[0x5C] = new JMP(cpu,0x5C, 4, 4, AddressingModes.long); // TODO
+        this.opcodes[0x5C] = new JMP(cpu,0x5C, 4, 4, AddressingModes.long);
         this.opcodes[0x6C] = new JMP(cpu,0x6C, 5, 3, AddressingModes.absoluteJump);
-        this.opcodes[0x7C] = new JMP(cpu,0x7C, 6, 3, AddressingModes.absoluteX); // TODO
+        this.opcodes[0x7C] = new JMP(cpu,0x7C, 6, 3, AddressingModes.absoluteX);
         this.opcodes[0xDC] = new JMP(cpu,0xDC, 6, 3, AddressingModes.absoluteJump);
 
         this.opcodes[0x20] = new JSR(cpu,0x20, 6, 3, AddressingModes.absolute);
-        this.opcodes[0x22] = new JSL(cpu,0x22, 8, 4, AddressingModes.long); // TODO
-        this.opcodes[0xFC] = new JSR(cpu,0xFC, 8, 3, AddressingModes.absoluteX); // TODO
+        this.opcodes[0x22] = new JSL(cpu,0x22, 8, 4, AddressingModes.long);
+        this.opcodes[0xFC] = new JSR(cpu,0xFC, 8, 3, AddressingModes.absoluteX);
 
         this.opcodes[0xA1] = new LDA(cpu,0xA1, 6, 2, AddressingModes.directIndirectIndexed);
         this.opcodes[0xA3] = new LDA(cpu,0xA3, 4, 2, AddressingModes.stack);
@@ -2158,7 +2139,7 @@ export class Opcodes {
         this.opcodes[0x1F] = new ORA(cpu,0x1F, 5, 4, AddressingModes.longX);
 
         this.opcodes[0xF4] = new PEA(cpu,0xF4, 5, 3, AddressingModes.immediate16);
-        this.opcodes[0xD4] = new PEI(cpu,0xD4, 6, 6, AddressingModes.direct); // TODO
+        this.opcodes[0xD4] = new PEI(cpu,0xD4, 6, 6, AddressingModes.direct);
         this.opcodes[0x62] = new PER(cpu,0x62, 6, 3, AddressingModes.immediate16);
         this.opcodes[0x48] = new PHA(cpu,0x48, 3, 1, AddressingModes.stack);
         this.opcodes[0x8B] = new PHB(cpu,0x8B, 3, 1, AddressingModes.stack);
@@ -2194,7 +2175,7 @@ export class Opcodes {
         this.opcodes[0x60] = new RTS(cpu,0x60, 6, 1, AddressingModes.stack);
 
         this.opcodes[0xE1] = new SBC(cpu,0xE1, 6, 2, AddressingModes.immediate16);
-        this.opcodes[0xE3] = new SBC(cpu,0xE3, 4, 2, AddressingModes.direct); // TODO
+        this.opcodes[0xE3] = new SBC(cpu,0xE3, 4, 2, AddressingModes.direct);
         this.opcodes[0xE5] = new SBC(cpu,0xE5, 3, 2, AddressingModes.direct);
         this.opcodes[0xE7] = new SBC(cpu,0xE7, 6, 2, AddressingModes.directIndexedIndirect);
         this.opcodes[0xE9] = new SBC(cpu,0xE9, 2, 3, AddressingModes.immediateM);
@@ -2260,7 +2241,7 @@ export class Opcodes {
         this.opcodes[0x98] = new TYA(cpu,0x98, 2, 1, AddressingModes.implied);
         this.opcodes[0xBB] = new TYX(cpu,0xBB, 2, 1, AddressingModes.implied);
         this.opcodes[0xCB] = new WAI(cpu,0xCB, 3, 1, AddressingModes.implied);
-        this.opcodes[0x42] = new WDM(cpu,0x42, 2, 2, AddressingModes.immediateM); // TODO
+        this.opcodes[0x42] = new WDM(cpu,0x42, 2, 2, AddressingModes.immediateM);
         this.opcodes[0xEB] = new XBA(cpu,0xEB, 1, 1, AddressingModes.implied);
         this.opcodes[0xFB] = new XCE(cpu,0xFB, 1, 1, AddressingModes.implied);
 
