@@ -31,6 +31,9 @@ export class InterruptHandler {
 
     public tick() : number {
         switch (this.interrupt) {
+            case InterruptType.NONE: {
+                return this.doNone();
+            }
             case InterruptType.RST: {
                 return this.doRST();
             }
@@ -50,7 +53,7 @@ export class InterruptHandler {
                 return this.doBRK();
             }
             default:
-                this.doNone();
+                throw new Error(`Unknown interrupt given ${this.interrupt}`);
         }
     }
 

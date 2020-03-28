@@ -174,7 +174,7 @@ export abstract class Background {
                 tileMaps[yIndex][xIndex++] = tile;
                 if (xIndex >= 64) {
                     yIndex++;
-                    xIndex = 0;
+                    xIndex = 32;
                 }
             }
         }
@@ -204,7 +204,7 @@ export abstract class Background {
                 tileMaps[yIndex][xIndex++] = tile;
                 if (xIndex >= 64) {
                     yIndex++;
-                    xIndex = 0;
+                    xIndex = 32;
                 }
             }
         }

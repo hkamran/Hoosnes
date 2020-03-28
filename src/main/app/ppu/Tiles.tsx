@@ -14,8 +14,8 @@ export class Dimension {
     private static readonly dimension16by16: Dimension = Dimension.create(16,16);
     private static readonly dimension32by32: Dimension = Dimension.create(32,32);
     private static readonly dimension64by64: Dimension = Dimension.create(64,64);
-    private static readonly dimension64by32: Dimension = Dimension.create(32,64);
-    private static readonly dimension32by64: Dimension = Dimension.create(64,32);
+    private static readonly dimension64by32: Dimension = Dimension.create(64,32);
+    private static readonly dimension32by64: Dimension = Dimension.create(32,64);
 
     constructor(width: number, height: number) {
         Objects.requireNonNull(width);

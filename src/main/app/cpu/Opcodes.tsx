@@ -368,11 +368,11 @@ class CMP extends Operation {
         let size: number = is8Bit ? 7 : 15;
 
         let a: number = is8Bit ? context.registers.a.getLower() : context.registers.a.get();
-        let b: Read = this.mode.getValue(context);
+        let b: number = is8Bit ? this.mode.getValue(context).getLow() : this.mode.getValue(context).get();
 
-        let value: number = (a & mask) - (b.get() & mask);
+        let value: number = (a & mask) - (b & mask);
 
-        context.registers.p.setC((value >= 0 ? 1 : 0));
+        context.registers.p.setC((a >= b ? 1 : 0));
         context.registers.p.setN((value >> size) & 1);
         context.registers.p.setZ(((value & mask) == 0) ? 1 : 0);
 
@@ -403,16 +403,16 @@ class CPX extends Operation {
     public name: string = "CPX";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let is8Bit: boolean = context.registers.p.getX() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let size: number = is8Bit ? 7 : 15;
 
         let a: number = is8Bit ? context.registers.x.getLower() : context.registers.x.get();
-        let b: Read = this.mode.getValue(context);
+        let b: number = is8Bit ? this.mode.getValue(context).getLow() : this.mode.getValue(context).get();
 
-        let value: number = (a & mask) - (b.get() & mask);
+        let value: number = (a & mask) - (b & mask);
 
-        context.registers.p.setC((value >= 0 ? 1 : 0));
+        context.registers.p.setC((a >= b ? 1 : 0));
         context.registers.p.setN((value >> size) & 1);
         context.registers.p.setZ(((value & mask) == 0) ? 1 : 0);
 
@@ -432,16 +432,16 @@ class CPY extends Operation {
     public name: string = "CPY";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let is8Bit: boolean = context.registers.p.getX() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let size: number = is8Bit ? 7 : 15;
 
         let a: number = is8Bit ? context.registers.y.getLower() : context.registers.y.get();
-        let b: Read = this.mode.getValue(context);
+        let b: number = is8Bit ? this.mode.getValue(context).getLow() : this.mode.getValue(context).get();
 
-        let value: number = (a & mask) - (b.get() & mask);
+        let value: number = (a & mask) - (b & mask);
 
-        context.registers.p.setC((value >= 0 ? 1 : 0));
+        context.registers.p.setC((a >= b ? 1 : 0));
         context.registers.p.setN((value >> size) & 1);
         context.registers.p.setZ(((value & mask) == 0) ? 1 : 0);
 
@@ -1310,9 +1310,28 @@ class MVN extends Operation {
     public name: string = "MVN";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let addressing: Addressing = this.mode.getAddressing(context);
+        let amount: number = context.registers.a.get() & 0xFFFF;
+
+        let srcBank: number = addressing.getLow().getBank();
+        let srcOffset: number = addressing.getLow().getPage();
+
+        let destBank: number = addressing.getHigh().getBank();
+        let destOffset: number = addressing.getHigh().getPage();
+
+        while (amount != 0xFFFF) {
+            let src: Address = Address.create(srcOffset, srcBank);
+            let dest: Address = Address.create(destOffset, destBank);
+
+            let val : Read = context.bus.readByte(src);
+            context.bus.writeByte(dest, val.get());
+
+            srcOffset = (srcOffset + 1) & 0xFFFF;
+            destOffset = (destOffset + 1) & 0xFFFF;
+            amount = (amount - 1) & 0xFFFF;
+        }
+
+        return this.cycle;
     }
 }
 
@@ -1320,9 +1339,28 @@ class MVP extends Operation {
     public name: string = "MVP";
 
     public execute(context: OpContext): number {
-        //TODO
-        console.log(this.name);
-        return null;
+        let addressing: Addressing = this.mode.getAddressing(context);
+        let amount: number = context.registers.a.get() & 0xFFFF;
+
+        let srcBank: number = addressing.getLow().getBank();
+        let srcOffset: number = addressing.getLow().getPage();
+
+        let destBank: number = addressing.getHigh().getBank();
+        let destOffset: number = addressing.getHigh().getPage();
+
+        while (amount != 0xFFFF) {
+            let src: Address = Address.create(srcBank, srcOffset);
+            let dest: Address = Address.create(destBank, destOffset);
+
+            let val : Read = context.bus.readByte(src);
+            context.bus.writeByte(dest, val.get());
+
+            srcOffset = (srcOffset - 1) & 0xFFFF;
+            destOffset = (destOffset - 1) & 0xFFFF;
+            amount = (amount - 1) & 0xFFFF;
+        }
+
+        return this.cycle;
     }
 }
 
@@ -1417,13 +1455,12 @@ class PHA extends Operation {
 
     public execute(context: OpContext): number {
         let sp: number = context.registers.sp.get();
-        if (context.registers.p.getM()) {
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        if (is8Bit) {
             let result: number = context.cpu.registers.a.getLower();
-
             context.cpu.stack.pushByte(result);
         } else {
             let result: number = context.cpu.registers.a.get();
-
             context.cpu.stack.pushWord(result);
         }
 
@@ -1712,7 +1749,7 @@ class PLB extends Operation {
     public name: string = "PLB";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let is8Bit: boolean = true;
         let value: number = context.cpu.stack.popByte();
 
         context.registers.dbr.set(value);
@@ -1758,12 +1795,12 @@ class PLX extends Operation {
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
         let data: number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
-        let sp: number = context.registers.sp.get();
 
         context.setFlagN(data, is8Bit);
         context.setFlagZ(data, is8Bit);
 
-        context.registers.x.set(data);
+        if (is8Bit) context.registers.x.setLower(data);
+        if (!is8Bit) context.registers.x.set(data);
 
         return this.cycle;
     }
@@ -1776,12 +1813,12 @@ class PLY extends Operation {
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
         let data: number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
-        let sp: number = context.registers.sp.get();
 
         context.setFlagN(data, is8Bit);
         context.setFlagZ(data, is8Bit);
 
-        context.registers.y.set(data);
+        if (is8Bit) context.registers.y.setLower(data);
+        if (!is8Bit) context.registers.y.set(data);
 
         return this.cycle;
     }
