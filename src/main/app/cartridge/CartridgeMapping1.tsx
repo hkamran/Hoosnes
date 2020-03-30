@@ -20,33 +20,34 @@ export class CartridgeMapping1 implements ICartridgeMapping {
 
         let bank = address.getBank();
         let page = address.getPage();
+        const length = this.cartridge.rom.length;
 
         if (0xC0 <= bank && bank <= 0xFF) {
             let base: number = (bank - 0xC0) * 0xFFFF;
             let offset: number = page % 0xFFFF;
 
-            let index = base + offset;
+            let index = (base + offset) % length;
             let value = this.cartridge.rom[index];
             return Read.byte(value, 0);
         } else if (0x40 <= bank && bank <= 0x7D) {
             let base: number = (bank - 0x40) * 0xFFFF;
             let offset: number = page % 0xFFFF;
 
-            let index = base + offset;
+            let index = (base + offset) % length;
             let value = this.cartridge.rom[index];
             return Read.byte(value, 0);
         } else if (0x00 <= bank && bank < 0x40) {
             let base: number = (bank - 0x00) * 0xFFFF;
             let offset: number = page % 0xFFFF;
 
-            let index = base + offset;
+            let index = (base + offset) % length;
             let value = this.cartridge.rom[index];
             return Read.byte(value, 0);
         } else if (0x80 <= bank && bank < 0xC0) {
             let base: number = (bank - 0x80) * 0xFFFF;
             let offset: number = page % 0xFFFF;
 
-            let index = base + offset;
+            let index = (base + offset) % length;
             let value = this.cartridge.rom[index];
             return Read.byte(value, 0);
         }

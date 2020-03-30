@@ -30,6 +30,9 @@ export class Wram {
             throw new Error("Invalid readByte on work ram!");
         }
 
+        // let base: number = ((bank % 0x80) - 0x7E) << 16;
+        // let index: number = base | (page % 0x2000);
+
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
             let remainder: number = page % 0x2000;
             let multiplier: number = Math.floor(page/ 0x2000) * 0x2000;

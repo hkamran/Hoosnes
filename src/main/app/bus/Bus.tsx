@@ -114,10 +114,8 @@ export class Bus {
 
     public writeByte(address: Address, value: number): Write {
         if (address == null || value < 0 || value > 0xFF) {
-            throw new Error("Invalid readByte at " + address);
+            throw new Error(`Invalid readByte at ${address} with ${value}`);
         }
-
-        //console.log("writing " + address + " 0x" + value.toString(16));
 
         let write: Write = new Write(address, value, 0);
 

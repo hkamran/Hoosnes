@@ -21,7 +21,7 @@ export class InterruptHandler {
     private cpu: Cpu;
 
     public wait: boolean = false;
-    public stall: number = 3;
+    public static readonly STALL: number = 3;
 
     constructor(console: Console, cpu: Cpu) {
         this.console = console;
@@ -173,8 +173,6 @@ export class InterruptHandler {
         if (this.registers.p.getI() == 1) {
             return ;
         }
-
-        this.wait = false;
 
         let isNative = this.registers.p.getE() == 0;
 

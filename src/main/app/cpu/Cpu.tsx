@@ -1,6 +1,6 @@
 import {Registers} from "./Registers";
-import {Operation, Opcodes, OpContext} from "./Opcodes";
-import {InterruptHandler} from "./Interrupts";
+import {Opcodes, OpContext, Operation} from "./Opcodes";
+import {InterruptHandler, InterruptType} from "./Interrupts";
 import {Cartridge} from "../cartridge/Cartridge";
 import {Objects} from "../util/Objects";
 import {Logger, LoggerManager} from "typescript-logger";
@@ -39,7 +39,9 @@ export class Cpu {
 
     public tick(): number {
         this.interrupts.tick();
-        if (this.interrupts.wait) return this.interrupts.stall;
+        if (this.interrupts.wait) {
+            return InterruptHandler.STALL;
+        }
 
         let pc: number = this.registers.pc.get();
         let bank: number = this.registers.k.get();
