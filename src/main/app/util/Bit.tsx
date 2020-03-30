@@ -34,11 +34,7 @@ export class Bit {
         }
 
         if (b) {
-            if (c) {
-                result = (b << 8) | result;
-            } else {
-                result = (b << 0) | result;
-            }
+            result = (b << 8) | result;
         }
 
         if (c) {

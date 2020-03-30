@@ -922,8 +922,8 @@ export class SourceDestination implements IAddressingMode {
             dPage = context.registers.y.get();
         }
 
-        let sAddr: number = Bit.toUint24(sBank.get(), sPage);
-        let dAddr: number = Bit.toUint24(dBank.get(), dPage);
+        let sAddr: number = Bit.toUint24(sBank.get(), 0, sPage);
+        let dAddr: number = Bit.toUint24(dBank.get(), 0, dPage);
 
         let cycles: number = sBank.getCycles() + dBank.getCycles();
         return Addressing.toWord(sAddr, dAddr, cycles);
