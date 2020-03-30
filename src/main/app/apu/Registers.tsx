@@ -107,14 +107,10 @@ export class ApuIO01 extends Register {
     public label: string = "APUIO1";
 
     public set(val: number): void {
-        if (this.console.apu.state == ApuState.TRANSFER) {
-            this.val = val;
-        } else {
-            if (val == 0x00) {
-                this.console.apu.reset();
-                return;
-            }
+        if (val == 0x00) {
+            this.console.apu.state = ApuState.READY;
         }
+        this.val = val;
     }
 
     public get(): number {
