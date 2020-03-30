@@ -909,21 +909,21 @@ export class SourceDestination implements IAddressingMode {
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let sBank: Read = context.getOperand(0);
-        let dBank: Read = context.getOperand(1);
+        let sBank: Read = context.getOperand(1);
+        let dBank: Read = context.getOperand(0);
 
-        let sOffset: number;
-        let dOffset: number;
+        let sPage: number;
+        let dPage: number;
         if (context.registers.p.getX() == 1) {
-            sOffset = context.registers.x.getLower();
-            dOffset = context.registers.y.getLower();
+            sPage = context.registers.x.getLower();
+            dPage = context.registers.y.getLower();
         } else {
-            sOffset = context.registers.x.get();
-            dOffset = context.registers.y.get();
+            sPage = context.registers.x.get();
+            dPage = context.registers.y.get();
         }
 
-        let sAddr: number = Bit.toUint24(sBank.get(), sOffset);
-        let dAddr: number = Bit.toUint24(dBank.get(), dOffset);
+        let sAddr: number = Bit.toUint24(sBank.get(), sPage);
+        let dAddr: number = Bit.toUint24(dBank.get(), dPage);
 
         let cycles: number = sBank.getCycles() + dBank.getCycles();
         return Addressing.toWord(sAddr, dAddr, cycles);
