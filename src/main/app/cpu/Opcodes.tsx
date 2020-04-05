@@ -1483,15 +1483,14 @@ class SBC extends Operation {
     public name: string = "SBC";
 
     public execute(context: OpContext): number {
+        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+
         let a: number = context.cpu.registers.a.get();
         let b: Read = this.mode.getValue(context);
         let c: number = context.cpu.registers.p.getC();
 
-        let result: number = a - b.get() - (1 - c);
-
-        let is8Bit: boolean = context.registers.p.getM() == 1;
-        let mask: number = is8Bit ? 0xFF : 0xFFFF;
-
+        let result: number = (a - b.get() - (1 - c)) & mask;
         context.registers.a.set(result & mask);
 
         context.setFlagV(a, c, is8Bit);
