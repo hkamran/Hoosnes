@@ -1,10 +1,9 @@
 import {Registers} from "./Registers";
 import {Console} from "../Console";
 import {Address} from "../bus/Address";
-import {Bit} from "../util/Bit";
 
 export enum ApuState {
-    BOOTING, START, TRANSFER, EXECUTE, READY,
+    BOOTING, START, TRANSFER, EXECUTE,
 }
 
 export class Apu {
@@ -38,8 +37,7 @@ export class Apu {
                 registers.apuio0.read = 0xCC;
             }
         } else if (state == ApuState.START) {
-            let addr = Bit.toUint16(registers.apuio3.write, registers.apuio2.write);
-            let cmd = registers.apuio1.read;
+            let cmd = registers.apuio1.read; //TODO look into this
             let index = registers.apuio0.write;
 
             if (cmd != 0 && index == 0) {
@@ -54,8 +52,11 @@ export class Apu {
             registers.apuio0.read = index;
             let isOver = ((this.amount - index) & 0xFF) > 0b01;
             if (isOver) {
-                debugger;
-                this.state = ApuState.EXECUTE;
+                if (data == 0x00) {
+                    this.state = ApuState.EXECUTE;
+                } else {
+                    this.state = ApuState.START;
+                }
             } else if (this.amount > index) {
             } else if (this.amount == index) {
                 this.amount = (this.amount + 1) & 0xFF;
@@ -64,12 +65,11 @@ export class Apu {
             let data = registers.apuio1.write;
 
             if (data != 0 && registers.apuio0.write == 0x00) {
-                debugger;
                 this.state = ApuState.TRANSFER;
                 this.amount = 0;
             } else if (data == 0) {
-                debugger;
-                this.state = ApuState.START;
+                this.reset();
+                return;
             }
 
             registers.apuio0.read = registers.apuio0.write;
