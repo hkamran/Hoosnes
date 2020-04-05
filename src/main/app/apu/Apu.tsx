@@ -4,13 +4,13 @@ import {Address} from "../bus/Address";
 import {Bit} from "../util/Bit";
 
 export enum ApuState {
-    READY, INITIALIZED, TRANSFER, FINISHED, RUNNING,
+    BOOTING, START, TRANSFER, EXECUTE, READY,
 }
 
 export class Apu {
 
     public registers: Registers;
-    public state: ApuState = ApuState.READY;
+    public state: ApuState = ApuState.BOOTING;
 
     public address: Address;
     public amount: number = 0;
@@ -20,10 +20,59 @@ export class Apu {
     }
 
     public reset(): void {
-        this.registers.apuio0.reset();
-        this.registers.apuio1.reset();
+        this.registers.apuio0.read = 0xAA;
+        this.registers.apuio1.read = 0xBB;
         this.amount = 0x00;
-        this.state = ApuState.READY;
+        this.state = ApuState.BOOTING;
     }
 
+    public tick(): void {
+        let state = this.state;
+        let registers = this.registers;
+
+        if (state == ApuState.BOOTING) {
+            this.amount = 0x00;
+
+            if (registers.apuio0.write == 0xCC && registers.apuio1.write != 0) {
+                this.state = ApuState.START;
+                registers.apuio0.read = 0xCC;
+            }
+        } else if (state == ApuState.START) {
+            let addr = Bit.toUint16(registers.apuio3.write, registers.apuio2.write);
+            let cmd = registers.apuio1.read;
+            let index = registers.apuio0.write;
+
+            if (cmd != 0 && index == 0) {
+                this.state = ApuState.TRANSFER;
+                this.amount = 0;
+                registers.apuio0.read = this.amount;
+            }
+        } else if (state == ApuState.TRANSFER) {
+            let data = registers.apuio1.write;
+            let index = registers.apuio0.write;
+
+            registers.apuio0.read = index;
+            let isOver = ((this.amount - index) & 0xFF) > 0b01;
+            if (isOver) {
+                debugger;
+                this.state = ApuState.EXECUTE;
+            } else if (this.amount > index) {
+            } else if (this.amount == index) {
+                this.amount = (this.amount + 1) & 0xFF;
+            }
+        } else if (state == ApuState.EXECUTE) {
+            let data = registers.apuio1.write;
+
+            if (data != 0 && registers.apuio0.write == 0x00) {
+                debugger;
+                this.state = ApuState.TRANSFER;
+                this.amount = 0;
+            } else if (data == 0) {
+                debugger;
+                this.state = ApuState.START;
+            }
+
+            registers.apuio0.read = registers.apuio0.write;
+        }
+    }
 }

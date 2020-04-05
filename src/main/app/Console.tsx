@@ -38,6 +38,7 @@ export class Console {
 
     public tick(): void {
         let cycles: number = this.cpu.tick();
+        this.apu.tick();
 
         for (let i = 0; i < cycles; i++) {
             this.ppu.tick();

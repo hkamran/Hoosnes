@@ -52,53 +52,18 @@ export class ApuIO00 extends Register {
 
     public address: string = "0x2140";
     public label: string = "APUIO0";
-    public isReset: boolean = false;
+
+    public read: number =  0;
+    public write: number = 0;
 
     public set(val: number): void {
-        let { state } = this.console.apu;
-
-        if (state == ApuState.READY) {
-            this.doReady(val);
-        } else if (state == ApuState.TRANSFER) {
-            this.doTransfer(val);
-        }
+        this.write = val;
     }
 
     public get(): number {
-        return super.get();
+        return this.read;
     }
 
-    private doReady(val: number) {
-        if (val == 0xCC) {
-            this.console.apu.state = ApuState.TRANSFER;
-            this.val = 0xCC;
-            return;
-        }
-        this.val = val;
-    }
-
-    private doInit(val: number) {
-        if (val == 0x00) {
-            this.val = 0x00;
-            this.console.apu.state = ApuState.TRANSFER;
-            this.val = val;
-        }
-    }
-
-    private doTransfer(val: number) {
-        if (val == this.console.apu.amount) {
-            this.console.apu.amount++;
-        } else if (val > this.console.apu.amount) {
-            this.console.apu.amount = 0;
-            this.console.apu.state = ApuState.READY;
-            this.doReady(val);
-        }
-        this.val = val;
-    }
-
-    public reset(): void {
-        this.val = 0xAA;
-    }
 }
 
 export class ApuIO01 extends Register {
@@ -106,19 +71,15 @@ export class ApuIO01 extends Register {
     public address: string = "0x2141";
     public label: string = "APUIO1";
 
+    public read: number =  0;
+    public write: number = 0;
+
     public set(val: number): void {
-        if (val == 0x00) {
-            this.console.apu.state = ApuState.READY;
-        }
-        this.val = val;
+        this.write = val;
     }
 
     public get(): number {
-        return super.get();
-    }
-
-    public reset(): void {
-        this.val = 0xBB;
+        return this.read;
     }
 }
 
@@ -128,12 +89,15 @@ export class ApuIO02 extends Register {
     public address: string = "0x2142";
     public label: string = "APUIO2";
 
+    public read: number =  0;
+    public write: number = 0;
+
     public set(val: number): void {
-        this.val = val;
+        this.write = val;
     }
 
     public get(): number {
-        return super.get();
+        return this.read;
     }
 
 }
@@ -144,12 +108,15 @@ export class ApuIO03 extends Register {
     public address: string = "0x2143";
     public label: string = "APUIO3";
 
+    public read: number =  0;
+    public write: number = 0;
+
     public set(val: number): void {
-        this.val = val;
+        this.write = val;
     }
 
     public get(): number {
-        return super.get();
+        return this.read;
     }
 
 }
