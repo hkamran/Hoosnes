@@ -28,12 +28,12 @@ export class BusB {
             throw new Error("Invalid readByte at " + address);
         }
 
-        let read: Read = null;
+        let read: Read = this.console.bus.mdr;
 
         let bank = address.getBank();
         let page = address.getPage();
 
-        if (page < 0x2100 || page > 0x2183) {
+        if (page < 0x2100 || page > 0x21FF) {
             throw new Error("Invalid readByte at " + address);
         }
 
@@ -183,8 +183,10 @@ export class BusB {
             read = Read.byte(this.console.cpu.registers.wmadd.getMiddle());
         } else if (page == 0x2183) {
             read = Read.byte(this.console.cpu.registers.wmadd.getUpper());
+        } else if (page <= 0x21FF) {
+
         } else {
-            throw new Error("Invalid read on BusB at " + address.toValue());
+            throw new Error("Invalid read on BusB at " + address);
         }
 
 

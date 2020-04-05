@@ -722,11 +722,15 @@ export class CGRAMAddressRegister extends Register {
     public label: string = "CGADD";
 
     public set(val: number): void {
-        this.val = ((val * 2) % CGram.size);
+        this.val = val & 0xFF;
     }
 
-    public increment(val: number): void {
-        this.val = (this.val + val) % CGram.size;
+    public increment(): void {
+        this.set(this.val + 1);
+    }
+
+    public getIndex(): number {
+        return (this.val * 2) % CGram.size;
     }
 
 }
@@ -747,12 +751,12 @@ export class CGRAMDataWriteRegister extends Register {
         let doWrite: boolean = this.counter == 2;
 
         if (doWrite) {
-            let addr: number = this.console.ppu.registers.cgramaddr.get();
+            let index: number = this.console.ppu.registers.cgramaddr.getIndex();
 
-            this.console.ppu.cgram.writeByte((addr + 0) % CGram.size, this.low);
-            this.console.ppu.cgram.writeByte((addr + 1) % CGram.size, this.high);
+            this.console.ppu.cgram.writeByte((index + 0) % CGram.size, this.low);
+            this.console.ppu.cgram.writeByte((index + 1) % CGram.size, this.high);
 
-            this.console.ppu.registers.cgramaddr.increment(2);
+            this.console.ppu.registers.cgramaddr.increment();
             this.counter = 0;
         }
     }
@@ -985,11 +989,11 @@ export class CGRAMDataReadRegister extends Register {
     public counter: number = 0;
 
     public get(): number {
-        let addr: number = this.console.ppu.registers.cgramaddr.get();
-        let value: number = this.console.ppu.cgram.readByte((addr + this.counter) % CGram.size);
+        let index: number = this.console.ppu.registers.cgramaddr.getIndex();
+        let value: number = this.console.ppu.cgram.readByte((index + this.counter) % CGram.size);
 
         if (this.counter == 1) {
-            this.console.ppu.registers.cgramaddr.set((addr + 2) % CGram.size);
+            this.console.ppu.registers.cgramaddr.increment();
             this.counter = 0;
         } else {
             this.counter++;
