@@ -146,6 +146,8 @@ export class OamDataWriteRegister extends Register {
     public buffer: number;
 
     public set(val: number): void {
+        this.val = val;
+
         let ppu: Ppu = this.console.ppu;
         let addr: number = ppu.registers.oamaddr.getTableAddress();
 
@@ -163,10 +165,6 @@ export class OamDataWriteRegister extends Register {
             ppu.oam.writeByte(Address.create(512 + (addr & 0x1f)), val);
         }
         ppu.registers.oamaddr.setTableAddress(addr + 1);
-    }
-
-    public get(): number {
-        throw new Error("Invalid read on 0x2104");
     }
 }
 
