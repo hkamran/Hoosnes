@@ -4,6 +4,9 @@ import {DmaChannel, DmaEnableRegister} from "./Dma";
 import {Objects} from "../util/Objects";
 import {Console} from "../Console";
 import {ScreenRegion} from "../ppu/Screen";
+import {
+    HdmaEnableRegister,
+} from "./Hdma";
 
 /**
  * +---------------------------+---------+-----------------------------------+-------------------+-------------------------------------------+
@@ -438,7 +441,6 @@ export class Registers {
     public htimeh : Register;
     public vtimel : Register;
     public vtimeh : Register;
-    public hdmaen : Register;
     public memsel : Register;
     public rdnmi : NmiFlagRegister;
     public timeup : Register;
@@ -469,6 +471,7 @@ export class Registers {
     public dma6: DmaChannel;
     public dma7: DmaChannel;
     public mdmaen: DmaEnableRegister;
+    public hdmaen : HdmaEnableRegister;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -496,7 +499,6 @@ export class Registers {
         this.htimeh = new Register();
         this.vtimel = new Register();
         this.vtimeh = new Register();
-        this.hdmaen = new Register();
         this.memsel = new Register();
         this.rdnmi = new NmiFlagRegister();
         this.timeup = new Register();
@@ -537,6 +539,7 @@ export class Registers {
             this.dma6,
             this.dma7,
         ]);
+        this.hdmaen = new HdmaEnableRegister(console);
     }
 
 }

@@ -5,6 +5,12 @@ import {Address} from "../bus/Address";
 import {Read} from "../bus/Read";
 import {Console} from "../Console";
 import {Mode, Modes} from "../Modes";
+import {
+    HdmaLineCounterRegister,
+    HdmaTableAddressHighRegister,
+    HdmaTableAddressLowRegister,
+    HdmaTableIndirectAddressRegister,
+} from "./Hdma";
 
 export enum DmaTransferType {
     CPU_TO_PPU, PPU_TO_CPU,
@@ -187,6 +193,11 @@ export class DmaChannel {
     public transferSize: DmaTransferSizeRegister;
     public index: number;
 
+    public dasbx: HdmaTableIndirectAddressRegister;
+    public a2axl: HdmaTableAddressLowRegister;
+    public a2axh: HdmaTableAddressHighRegister;
+    public ntlrx: HdmaLineCounterRegister;
+
     constructor(console: Console, index: number) {
         this.console = console;
         this.index = index;
@@ -195,6 +206,11 @@ export class DmaChannel {
         this.cpuAddressRegister = new DmaCpuAddressRegister(console);
         this.ppuAddressRegister = new DmaPpuAddressRegister(console);
         this.transferSize = new DmaTransferSizeRegister(console);
+
+        this.dasbx = new HdmaTableIndirectAddressRegister(console);
+        this.a2axl = new HdmaTableAddressLowRegister(console);
+        this.a2axh = new HdmaTableAddressHighRegister(console);
+        this.ntlrx = new HdmaLineCounterRegister(console);
     }
 
     public execute(): number {

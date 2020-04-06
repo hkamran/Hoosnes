@@ -27,14 +27,15 @@ export class BusA {
             throw new Error("Invalid readByte at " + address);
         }
 
-        let read: Read = null;
+        let read: Read = this.console.bus.mdr;
 
         let bank = address.getBank();
         let page = address.getPage();
 
-        if (page < 0x2100 || page > 0x437A) {
+        if (page < 0x2100 || page > 0x43FF) {
             throw new Error("Invalid readByte at " + address);
         }
+
         if (page == 0x4016) {
             read = Read.byte(this.registers.joy1l.get());
         } else if (page == 0x4017) {
@@ -119,13 +120,13 @@ export class BusA {
         } else if (page == 0x4306) {
             read = Read.byte(this.registers.dma0.transferSize.getUpper());
         } else if (page == 0x4307) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma0.dasbx.get());
         } else if (page == 0x4308) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma0.a2axl.get());
         } else if (page == 0x4309) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma0.a2axh.get());
         } else if (page == 0x430A) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma0.ntlrx.get());
         } else if (page == 0x4310) {
             // --------------------------
             // DMA 1
@@ -144,13 +145,13 @@ export class BusA {
         } else if (page == 0x4316) {
             read = Read.byte(this.registers.dma1.transferSize.getUpper());
         } else if (page == 0x4317) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma1.dasbx.get());
         } else if (page == 0x4318) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma1.a2axl.get());
         } else if (page == 0x4319) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma1.a2axh.get());
         } else if (page == 0x431A) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma1.ntlrx.get());
         } else if (page == 0x4320) {
             // --------------------------
             // DMA 2
@@ -169,13 +170,13 @@ export class BusA {
         } else if (page == 0x4326) {
             read = Read.byte(this.registers.dma2.transferSize.getUpper());
         } else if (page == 0x4327) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma2.dasbx.get());
         } else if (page == 0x4328) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma2.a2axl.get());
         } else if (page == 0x4329) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma2.a2axh.get());
         } else if (page == 0x432A) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma2.ntlrx.get());
         } else if (page == 0x4330) {
             // --------------------------
             // DMA 3
@@ -194,13 +195,13 @@ export class BusA {
         } else if (page == 0x4336) {
             read = Read.byte(this.registers.dma3.transferSize.getUpper());
         } else if (page == 0x4337) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma3.dasbx.get());
         } else if (page == 0x4338) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma3.a2axl.get());
         } else if (page == 0x4339) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma3.a2axh.get());
         } else if (page == 0x433A) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma3.ntlrx.get());
         } else if (page == 0x4340) {
             // --------------------------
             // DMA 4
@@ -219,13 +220,13 @@ export class BusA {
         } else if (page == 0x4346) {
             read = Read.byte(this.registers.dma4.transferSize.getUpper());
         } else if (page == 0x4347) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma4.dasbx.get());
         } else if (page == 0x4348) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma4.a2axl.get());
         } else if (page == 0x4349) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma4.a2axh.get());
         } else if (page == 0x434A) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma4.ntlrx.get());
         } else if (page == 0x4350) {
             // --------------------------
             // DMA 5
@@ -244,13 +245,13 @@ export class BusA {
         } else if (page == 0x4356) {
             read = Read.byte(this.registers.dma5.transferSize.getUpper());
         } else if (page == 0x4357) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma5.dasbx.get());
         } else if (page == 0x4358) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma5.a2axl.get());
         } else if (page == 0x4359) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma5.a2axh.get());
         } else if (page == 0x435A) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma5.ntlrx.get());
         } else if (page == 0x4360) {
             // --------------------------
             // DMA 6
@@ -269,13 +270,13 @@ export class BusA {
         } else if (page == 0x4366) {
             read = Read.byte(this.registers.dma6.transferSize.getUpper());
         } else if (page == 0x4367) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma6.dasbx.get());
         } else if (page == 0x4368) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma6.a2axl.get());
         } else if (page == 0x4369) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma6.a2axh.get());
         } else if (page == 0x436A) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma6.ntlrx.get());
         } else if (page == 0x4370) {
             // --------------------------
             // DMA 7
@@ -294,15 +295,15 @@ export class BusA {
         } else if (page == 0x4376) {
             read = Read.byte(this.registers.dma7.transferSize.getUpper());
         } else if (page == 0x4377) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma7.dasbx.get());
         } else if (page == 0x4378) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma7.a2axl.get());
         } else if (page == 0x4379) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma7.a2axh.get());
         } else if (page == 0x437A) {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            read = Read.byte(this.registers.dma7.ntlrx.get());
         } else {
-            throw new Error("Invalid read on BusA at " + address.toValue());
+            console.warn("Invalid read on BusA at " + address);
         }
 
         return read;
@@ -317,7 +318,7 @@ export class BusA {
         let bank = address.getBank();
         let page = address.getPage();
 
-        if (page < 0x2100 || page > 0x437A) {
+        if (page < 0x2100 || page > 0x43FF) {
             throw new Error("Invalid writeByte at " + address);
         }
 
@@ -350,7 +351,6 @@ export class BusA {
         } else if (page == 0x420B) {
             this.registers.mdmaen.set(val);
         } else if (page == 0x420C) {
-            console.warn("HDMA set to 0x" + val.toString(16));
             this.registers.hdmaen.set(val);
         } else if (page == 0x420D) {
             this.registers.memsel.set(val);
@@ -404,13 +404,13 @@ export class BusA {
         } else if (page == 0x4306) {
             this.registers.dma0.transferSize.setUpper(val);
         } else if (page == 0x4307) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma0.dasbx.set(val);
         } else if (page == 0x4308) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma0.a2axl.set(val);
         } else if (page == 0x4309) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma0.a2axh.set(val);
         } else if (page == 0x430A) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma0.ntlrx.set(val);
         } else if (page == 0x4310) {
             // --------------------------
             // DMA 1
@@ -429,13 +429,13 @@ export class BusA {
         } else if (page == 0x4316) {
             this.registers.dma1.transferSize.setUpper(val);
         } else if (page == 0x4317) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma1.dasbx.set(val);
         } else if (page == 0x4318) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma1.a2axl.set(val);
         } else if (page == 0x4319) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma1.a2axh.set(val);
         } else if (page == 0x431A) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma1.ntlrx.set(val);
         } else if (page == 0x4320) {
             // --------------------------
             // DMA 2
@@ -454,13 +454,13 @@ export class BusA {
         } else if (page == 0x4326) {
             this.registers.dma2.transferSize.setUpper(val);
         } else if (page == 0x4327) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma2.dasbx.set(val);
         } else if (page == 0x4328) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma2.a2axl.set(val);
         } else if (page == 0x4329) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma2.a2axh.set(val);
         } else if (page == 0x432A) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma2.ntlrx.set(val);
         } else if (page == 0x4330) {
             // --------------------------
             // DMA 3
@@ -479,13 +479,13 @@ export class BusA {
         } else if (page == 0x4336) {
             this.registers.dma3.transferSize.setUpper(val);
         } else if (page == 0x4337) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma3.dasbx.set(val);
         } else if (page == 0x4338) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma3.a2axl.set(val);
         } else if (page == 0x4339) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma3.a2axh.set(val);
         } else if (page == 0x433A) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma3.ntlrx.set(val);
         } else if (page == 0x4340) {
             // --------------------------
             // DMA 4
@@ -504,13 +504,13 @@ export class BusA {
         } else if (page == 0x4346) {
             this.registers.dma4.transferSize.setUpper(val);
         } else if (page == 0x4347) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma4.dasbx.set(val);
         } else if (page == 0x4348) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma4.a2axl.set(val);
         } else if (page == 0x4349) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma4.a2axh.set(val);
         } else if (page == 0x434A) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma4.ntlrx.set(val);
         } else if (page == 0x4350) {
             // --------------------------
             // DMA 5
@@ -529,13 +529,13 @@ export class BusA {
         } else if (page == 0x4356) {
             this.registers.dma5.transferSize.setUpper(val);
         } else if (page == 0x4357) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma5.dasbx.set(val);
         } else if (page == 0x4358) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma5.a2axl.set(val);
         } else if (page == 0x4359) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma5.a2axh.set(val);
         } else if (page == 0x435A) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma5.ntlrx.set(val);
         } else if (page == 0x4360) {
             // --------------------------
             // DMA 6
@@ -554,13 +554,13 @@ export class BusA {
         } else if (page == 0x4366) {
             this.registers.dma6.transferSize.setUpper(val);
         } else if (page == 0x4367) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma6.dasbx.set(val);
         } else if (page == 0x4368) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma6.a2axl.set(val);
         } else if (page == 0x4369) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma6.a2axh.set(val);
         } else if (page == 0x436A) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma6.ntlrx.set(val);
         } else if (page == 0x4370) {
             // --------------------------
             // DMA 7
@@ -579,15 +579,15 @@ export class BusA {
         } else if (page == 0x4376) {
             this.registers.dma7.transferSize.setUpper(val);
         } else if (page == 0x4377) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma7.dasbx.set(val);
         } else if (page == 0x4378) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma7.a2axl.set(val);
         } else if (page == 0x4379) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma7.a2axh.set(val);
         } else if (page == 0x437A) {
-            console.warn(`Invalid write on BusA at ${address.toValue()}`);
+            this.registers.dma7.ntlrx.set(val);
         } else {
-            throw new Error("Invalid write on BusA at " + address.toValue());
+            throw new Error("Invalid write on BusA at " + address);
         }
 
         return null;
