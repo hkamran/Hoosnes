@@ -1101,8 +1101,9 @@ class STZ extends Operation {
 
     public execute(context: OpContext): number {
         let addresses: Addressing = this.mode.getAddressing(context);
+        let is8Bit: boolean = context.registers.p.getM() == 1;
 
-        if (context.registers.p.getM() == 1) {
+        if (is8Bit) {
             let loAddr: Address = addresses.getLow();
 
             context.bus.writeByte(loAddr, 0);
@@ -1614,10 +1615,11 @@ class STY extends Operation {
     public execute(context: OpContext): number {
         let loData: number = context.cpu.registers.y.getLower();
         let hiData: number = context.cpu.registers.y.getUpper();
+        let is8Bit: boolean = context.registers.p.getX() == 1;
 
         let addresses: Addressing = this.mode.getAddressing(context);
 
-        if (context.registers.p.getX() == 1) {
+        if (is8Bit) {
             let loAddr: Address = addresses.getLow();
 
             context.bus.writeByte(loAddr, loData);
@@ -1679,15 +1681,12 @@ class PHX extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
-
-        let loData: number = context.registers.x.getLower();
-        let hiData: number = context.registers.x.getUpper();
+        let data: number = context.registers.x.get();
 
         if (is8Bit) {
-            context.cpu.stack.pushByte(loData);
+            context.cpu.stack.pushByte(data & 0xFF);
         } else {
-            context.cpu.stack.pushByte(loData);
-            context.cpu.stack.pushByte(hiData);
+            context.cpu.stack.pushWord(data);
         }
 
         return this.cycle;
@@ -1700,15 +1699,12 @@ class PHY extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getX() == 1;
-
-        let loData: number = context.registers.y.getLower();
-        let hiData: number = context.registers.y.getUpper();
+        let data: number = context.registers.y.get();
 
         if (is8Bit) {
-            context.cpu.stack.pushByte(loData);
+            context.cpu.stack.pushByte(data & 0xFF);
         } else {
-            context.cpu.stack.pushByte(loData);
-            context.cpu.stack.pushByte(hiData);
+            context.cpu.stack.pushWord(data);
         }
 
         return this.cycle;
@@ -1838,10 +1834,11 @@ class STX extends Operation {
     public execute(context: OpContext): number {
         let loData: number = context.cpu.registers.x.getLower();
         let hiData: number = context.cpu.registers.x.getUpper();
+        let is8Bit: boolean = context.registers.p.getX() == 1;
 
         let addresses: Addressing = this.mode.getAddressing(context);
 
-        if (context.registers.p.getX() == 1) {
+        if (is8Bit) {
             let loAddr: Address = addresses.getLow();
 
             context.bus.writeByte(loAddr, loData);
