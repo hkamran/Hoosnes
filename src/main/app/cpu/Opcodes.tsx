@@ -1290,7 +1290,7 @@ class LDY extends Operation {
     }
 
     public getSize(): number {
-        let isImmediate: boolean = this.mode == AddressingModes.immediateX;
+        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
         if (isImmediate && this.cpu.registers.p.getM() == 1) {
             return super.getSize() - 1;
         }
