@@ -371,7 +371,7 @@ class CMP extends Operation {
         let value: number = (a & mask) - (b & mask);
 
         context.registers.p.setC((a >= b ? 1 : 0));
-        context.registers.p.setN((value >> size) & 1);
+        context.registers.p.setN((value >> size) != 0 ? 1 : 0);
         context.registers.p.setZ(((value & mask) == 0) ? 1 : 0);
 
         return this.cycle;
@@ -470,7 +470,7 @@ class CLI extends Operation {
     public name: string = "CLI";
 
     public execute(context: OpContext): number {
-        context.cpu.registers.p.setD(0);
+        context.cpu.registers.p.setI(0);
         return this.cycle;
     }
 
@@ -1216,11 +1216,33 @@ class LDX extends Operation {
     public name: string = "LDX";
 
     public execute(context: OpContext): number {
-        let value: Read = this.mode.getValue(context);
-        context.registers.x.set(value.get());
+        let addressing: Addressing = this.mode.getAddressing(context);
+        let is8Bit: boolean = context.registers.p.getX() == 1;
 
-        context.setFlagZ(value.get(), value.getType() == ReadType.BYTE);
-        context.setFlagN(value.get(), value.getType() == ReadType.BYTE);
+        if (is8Bit) {
+            let loAddr: Address = addressing.getLow();
+
+            let result: Read = context.bus.readByte(loAddr);
+            let value: number = result.get();
+
+            context.registers.x.setLower(value);
+
+            context.setFlagZ(value, is8Bit);
+            context.setFlagN(value, is8Bit);
+        } else {
+            let loAddr: Address = addressing.getLow();
+            let hiAddr: Address = addressing.getHigh();
+
+            let loData: Read = context.bus.readByte(loAddr);
+            let hiData: Read = context.bus.readByte(hiAddr);
+
+            let value: number = Bit.toUint16(hiData.get(), loData.get());
+            context.registers.x.set(value);
+
+            context.setFlagZ(value, is8Bit);
+            context.setFlagN(value, is8Bit);
+        }
+
         return this.cycle;
     }
 
@@ -1246,7 +1268,7 @@ class LDY extends Operation {
             let result: Read = context.bus.readByte(loAddr);
             let value: number = result.get();
 
-            context.registers.y.set(value);
+            context.registers.y.setLower(value);
 
             context.setFlagZ(value, is8Bit);
             context.setFlagN(value, is8Bit);
@@ -1268,7 +1290,7 @@ class LDY extends Operation {
     }
 
     public getSize(): number {
-        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
+        let isImmediate: boolean = this.mode == AddressingModes.immediateX;
         if (isImmediate && this.cpu.registers.p.getM() == 1) {
             return super.getSize() - 1;
         }
@@ -2085,7 +2107,7 @@ export class Opcodes {
         this.opcodes[0x5C] = new JMP(cpu,0x5C, 4, 4, AddressingModes.long);
         this.opcodes[0x6C] = new JMP(cpu,0x6C, 5, 3, AddressingModes.absoluteJump);
         this.opcodes[0x7C] = new JMP(cpu,0x7C, 6, 3, AddressingModes.absoluteX);
-        this.opcodes[0xDC] = new JMP(cpu,0xDC, 6, 3, AddressingModes.absoluteJump);
+        this.opcodes[0xDC] = new JMP(cpu,0xDC, 6, 3, AddressingModes.absoluteLongIndexed);
 
         this.opcodes[0x20] = new JSR(cpu,0x20, 6, 3, AddressingModes.absolute);
         this.opcodes[0x22] = new JSL(cpu,0x22, 8, 4, AddressingModes.long);

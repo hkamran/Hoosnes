@@ -321,6 +321,73 @@ export class NmiFlagRegister extends Register {
 
 }
 
+export class HorizontalTimeRegister extends Register {
+
+    public address: string = "4207-4208";
+    public name: string = "VTIME";
+
+    public setLower(val: number) {
+        this.val = Bit.setUint16Lower(this.val, val);
+    }
+
+    public setUpper(val: number) {
+        this.val = Bit.setUint16Upper(this.val, val);
+    }
+
+    public getLower(): number {
+        return Bit.getUint16Lower(this.val);
+    }
+
+    public getUpper(): number {
+        return Bit.getUint16Upper(this.val);
+    }
+}
+
+export class VerticalTimeRegister extends Register {
+
+    public address: string = "4209-420A";
+    public name: string = "VTIME";
+
+    public setLower(val: number) {
+        this.val = Bit.setUint16Lower(this.val, val);
+    }
+
+    public setUpper(val: number) {
+        this.val = Bit.setUint16Upper(this.val, val);
+    }
+
+    public getLower(): number {
+        return Bit.getUint16Lower(this.val);
+    }
+
+    public getUpper(): number {
+        return Bit.getUint16Upper(this.val);
+    }
+}
+
+export class TimeUpRegister extends Register {
+
+    public address: string = "4211";
+    public name: string = "TIMEUP";
+    private console: Console;
+
+    constructor(console: Console) {
+        super();
+        this.console = console;
+    }
+
+    public set(val: number) {
+
+    }
+
+    public get(): number {
+        let val = this.console.cpu.interrupts.irq ? 0x80 : 0x0;
+        this.console.cpu.interrupts.irq = false;
+        return val;
+    }
+
+}
+
 export class WramMemoryAddressRegister extends Register {
 
     public address: string = "0x2181-0x2183";
@@ -365,7 +432,7 @@ export class HvBStatusRegister extends Register {
     public address: string = "0x4212";
     public name: string = "HVBJOY";
 
-    public val: number = 0x0;
+    public val: number = 0x1;
 //     Joypad automatic scanning flag
 //
 // - Bit 0 of $4212 is set at line $00E1 and cleared at line $00E4 in 224-line
@@ -391,9 +458,9 @@ export class HvBStatusRegister extends Register {
 
     public setJoypadFlag(val: boolean): void {
         if (val) {
-            this.val = this.val | 0x1;
+            this.val |= 0x1;
         } else {
-            this.val = this.val & 0xFE;
+            this.val &= 0x0;
         }
     }
 
@@ -437,13 +504,11 @@ export class Registers {
     public wrdivl : Register;
     public wrdivh : Register;
     public wrdivb : Register;
-    public htimel : Register;
-    public htimeh : Register;
-    public vtimel : Register;
-    public vtimeh : Register;
+    public htime : HorizontalTimeRegister;
+    public vtime : VerticalTimeRegister;
     public memsel : Register;
     public rdnmi : NmiFlagRegister;
-    public timeup : Register;
+    public timeup : TimeUpRegister;
     public hvbjoy : HvBStatusRegister;
     public rdio : Register;
     public rddivl : Register;
@@ -495,13 +560,11 @@ export class Registers {
         this.wrdivl = new Register();
         this.wrdivh = new Register();
         this.wrdivb = new Register();
-        this.htimel = new Register();
-        this.htimeh = new Register();
-        this.vtimel = new Register();
-        this.vtimeh = new Register();
+        this.htime = new HorizontalTimeRegister();
+        this.vtime = new VerticalTimeRegister();
         this.memsel = new Register();
         this.rdnmi = new NmiFlagRegister();
-        this.timeup = new Register();
+        this.timeup = new TimeUpRegister(console);
         this.hvbjoy = new HvBStatusRegister(console);
         this.rdio = new Register();
         this.rddivl = new Register();

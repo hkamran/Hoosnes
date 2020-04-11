@@ -13,7 +13,6 @@ import {Tiles} from "./Tiles";
 import {Backgrounds} from "./Backgrounds";
 
 
-
 export class Ppu {
 
     public scanline: number = 0;
@@ -108,18 +107,35 @@ export class Ppu {
 
         if (isVBlankStart) {
             this.screen.state = ScreenState.VBLANK;
-            this.console.cpu.registers.hvbjoy.setVBlankFlag(true);
+            this.console.cpu.registers.hvbjoy.setVBlankFlag(false);
             this.console.cpu.registers.rdnmi.setVBlankFlag(true);
             if (this.console.cpu.registers.nmitimen.isNMIEnabled()) {
                 this.console.cpu.interrupts.set(InterruptType.NMI);
+            }
+            if (this.console.cpu.registers.nmitimen.isJoypadEnabled()) {
+                this.console.cpu.registers.hvbjoy.setJoypadFlag(true);
+            }
+        }
+
+        if (this.console.cpu.registers.nmitimen.isVerticalCounterEnabled() && isScanlineFinished) {
+            if (this.console.cpu.registers.vtime.get() == this.scanline) {
+                this.console.cpu.interrupts.set(InterruptType.IRQ);
+                this.console.cpu.interrupts.irq = true;
+            }
+        }
+
+        if (this.console.cpu.registers.nmitimen.isHorizontalCounterEnabled()) {
+            if (this.console.cpu.registers.htime.get() == this.cycle) {
+                this.console.cpu.interrupts.set(InterruptType.IRQ);
+                this.console.cpu.interrupts.irq = true;
             }
         }
 
         if (isVBlankEnd) {
             this.console.cpu.registers.hvbjoy.setVBlankFlag(false);
             this.console.cpu.registers.rdnmi.set(0x00);
+            this.console.cpu.registers.hvbjoy.setJoypadFlag(false);
         }
-
         if (isHBlank) {
             this.console.cpu.registers.hvbjoy.setHBlankFlag(true);
             this.screen.state = ScreenState.HBLANK;

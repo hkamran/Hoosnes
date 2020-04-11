@@ -55,15 +55,15 @@ export class BusA {
         } else if (page == 0x4206) {
             read = Read.byte(this.registers.wrdivb.get());
         } else if (page == 0x4207) {
-            read = Read.byte(this.registers.htimel.get());
+            read = Read.byte(this.registers.htime.getLower());
         } else if (page == 0x4208) {
-            read = Read.byte(this.registers.htimeh.get());
+            read = Read.byte(this.registers.htime.getUpper());
         } else if (page == 0x4209) {
-            read = Read.byte(this.registers.vtimel.get());
+            read = Read.byte(this.registers.vtime.getLower());
         } else if (page == 0x4210) {
             read = Read.byte(this.registers.rdnmi.get());
         } else if (page == 0x420A) {
-            read = Read.byte(this.registers.vtimeh.get());
+            read = Read.byte(this.registers.vtime.getUpper());
         } else if (page == 0x420B) {
             read = Read.byte(this.registers.mdmaen.get());
         } else if (page == 0x420C) {
@@ -303,7 +303,7 @@ export class BusA {
         } else if (page == 0x437A) {
             read = Read.byte(this.registers.dma7.ntlrx.get());
         } else {
-            console.warn("Invalid read on BusA at " + address);
+            //console.warn("Invalid read on BusA at " + address);
         }
 
         return read;
@@ -341,13 +341,13 @@ export class BusA {
         } else if (page == 0x4206) {
             this.registers.wrdivb.set(val);
         } else if (page == 0x4207) {
-            this.registers.htimel.set(val);
+            this.registers.htime.setLower(val);
         } else if (page == 0x4208) {
-            this.registers.htimeh.set(val);
+            this.registers.htime.setUpper(val);
         } else if (page == 0x4209) {
-            this.registers.vtimel.set(val);
+            this.registers.vtime.setLower(val);
         } else if (page == 0x420A) {
-            this.registers.vtimeh.set(val);
+            this.registers.vtime.setUpper(val);
         } else if (page == 0x420B) {
             this.registers.mdmaen.set(val);
         } else if (page == 0x420C) {

@@ -21,6 +21,7 @@ export class InterruptHandler {
     private cpu: Cpu;
 
     public wait: boolean = false;
+    public irq: boolean = false;
     public static readonly STALL: number = 3;
 
     constructor(console: Console, cpu: Cpu) {
