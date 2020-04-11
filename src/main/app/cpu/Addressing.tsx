@@ -817,10 +817,9 @@ export class LongX implements IAddressingMode {
         let loByte: Read = context.bus.readByte(loaddr);
         let hiByte: Read = context.bus.readByte(hiaddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
         let cycles: number = result.getCycles() + hiByte.getCycles() + loByte.getCycles();
 
-        return Read.byte(value, cycles);
+        return Read.word(loByte.get(), hiByte.get(), cycles);
     }
 
     public getAddressing(context: OpContext): Addressing {
