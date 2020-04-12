@@ -198,7 +198,8 @@ export class AND extends Operation {
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let result: number = a & b.get();
 
-        context.cpu.registers.a.set(result & mask);
+        if (is8Bit) context.cpu.registers.a.setLower(result & mask);
+        if (!is8Bit) context.cpu.registers.a.set(result & mask);
 
         context.setFlagZ(result, is8Bit);
         context.setFlagN(result, is8Bit);
