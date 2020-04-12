@@ -516,8 +516,8 @@ export class DirectIndexedIndirect implements IAddressingMode {
         let mm: Read = context.bus.readByte(Address.create(miPointer));
         let hh: Read = context.bus.readByte(Address.create(hiPointer));
 
-        let hiaddr: number = Bit.toUint24(hh.get(), mm.get(), ll.get());
-        let loaddr: number = hiaddr + 1;
+        let loaddr: number = Bit.toUint24(hh.get(), mm.get(), ll.get());
+        let hiaddr: number = loaddr + 1;
 
         let cycles = LL.getCycles() + ll.getCycles() + mm.getCycles() + hh.getCycles();
         return Addressing.toWord(loaddr, hiaddr, cycles);

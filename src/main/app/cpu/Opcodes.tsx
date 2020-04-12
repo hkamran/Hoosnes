@@ -445,6 +445,14 @@ class CPY extends Operation {
 
         return this.cycle;
     }
+
+    public getSize(): number {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateX;
+        if (isImmediate && this.cpu.registers.p.getX() == 1) {
+            return super.getSize() - 1;
+        }
+        return super.getSize();
+    }
 }
 
 class CLC extends Operation {
@@ -1040,22 +1048,20 @@ class TXA extends Operation {
     public name: string = "TXA";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.cpu.registers.p.getM() == 1;
+        let x: number = context.cpu.registers.x.get();
+        let is8Bit: boolean = context.registers.p.getX() == 1;
+        let mask: number = is8Bit ? 0xFF: 0xFFFF;
+
+        let value = x & mask;
+
+        context.setFlagN(value, is8Bit);
+        context.setFlagZ(value, is8Bit);
 
         if (is8Bit) {
-            let lowData: number = context.cpu.stack.popByte();
-            let value: number = lowData;
-
             context.cpu.registers.a.setLower(value);
         } else {
-            let lowData: number = context.cpu.stack.popByte();
-            let highData: number = context.cpu.stack.popByte();
-
-            let value: number = Bit.toUint16(highData, lowData);
-
             context.cpu.registers.a.set(value);
         }
-
         return this.cycle;
     }
 }
@@ -1290,8 +1296,8 @@ class LDY extends Operation {
     }
 
     public getSize(): number {
-        let isImmediate: boolean = this.mode == AddressingModes.immediateM;
-        if (isImmediate && this.cpu.registers.p.getM() == 1) {
+        let isImmediate: boolean = this.mode == AddressingModes.immediateX;
+        if (isImmediate && this.cpu.registers.p.getX() == 1) {
             return super.getSize() - 1;
         }
         return super.getSize();
@@ -2134,6 +2140,7 @@ export class Opcodes {
         this.opcodes[0xAE] = new LDX(cpu,0xAE, 4, 3, AddressingModes.absolute);
         this.opcodes[0xB6] = new LDX(cpu,0xB6, 4, 2, AddressingModes.directY);
         this.opcodes[0xBE] = new LDX(cpu,0xBE, 4, 3, AddressingModes.absoluteY);
+
         this.opcodes[0xA0] = new LDY(cpu,0xA0, 2, 3, AddressingModes.immediateX);
         this.opcodes[0xA4] = new LDY(cpu,0xA4, 3, 2, AddressingModes.direct);
         this.opcodes[0xAC] = new LDY(cpu,0xAC, 4, 3, AddressingModes.absolute);

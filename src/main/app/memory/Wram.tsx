@@ -11,7 +11,7 @@ export class Wram {
     // The first 8K are also mirrored to xx0000h-xx1FFFh (xx=00h..3Fh and 80h..BFh)
     // Moreover (mainly for DMA purposes) it can be accessed via Port 218xh.
 
-    public static readonly SIZE = 0x1F400;
+    public static readonly SIZE = 0x1FFFF;
 
     private data: number[];
 
@@ -30,18 +30,18 @@ export class Wram {
             throw new Error("Invalid readByte on work ram!");
         }
 
-        // let base: number = ((bank % 0x80) - 0x7E) << 16;
-        // let index: number = base | (page % 0x2000);
-
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
-            let remainder: number = page % 0x2000;
-            let multiplier: number = Math.floor(page/ 0x2000) * 0x2000;
-            let offset: number = bank == 0x7F ? 0xFFFF : 0x0000;
+            // let remainder: number = page % 0x2000;
+            // let multiplier: number = Math.floor(page/ 0x2000) * 0x2000;
+            // let offset: number = bank == 0x7F ? 0xFFFF : 0x0000;
+            // let index: number = multiplier + remainder + offset;
 
-            let index: number = multiplier + remainder + offset;
+            let base: number = bank == 0x7F ? 0xFFFF : 0x0000;
+            let index: number = base + (page % 0xFFFF);
             return Read.byte(this.data[index]);
         } else {
-            let index: number = page % 0x2000;
+            let base: number = (bank % 0x40) << 16;
+            let index: number = base | page % 0x2000;
             return Read.byte(this.data[index]);
         }
     }
@@ -57,15 +57,18 @@ export class Wram {
         }
 
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
-            let remainder: number = page % 0x2000;
-            let multiplier: number = Math.floor(page/ 0x2000) * 0x2000;
-            let offset: number = bank == 0x7F ? 0xFFFF : 0x0000;
+            // let remainder: number = page % 0x2000;
+            // let multiplier: number = Math.floor(page/ 0x2000) * 0x2000;
+            // let offset: number = bank == 0x7F ? 0xFFFF : 0x0000;
+            // let index: number = multiplier + remainder + offset;
 
-            let index: number = multiplier + remainder + offset;
+            let base: number = bank == 0x7F ? 0xFFFF : 0x0000;
+            let index: number = base + (page % 0xFFFF);
             this.data[index] = value;
             return new Write(address, value, 0);
         } else {
-            let index: number = page % 0x2000;
+            let base: number = (bank % 0x40) * 0x2000;
+            let index: number = base + (page % 0x2000);
             this.data[index] = value;
             return new Write(address, value, 0);
         }
