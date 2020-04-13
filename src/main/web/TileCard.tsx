@@ -15,7 +15,6 @@ interface ITileCardState {
     tileWidthSize: number;
     tileBorderOpacity: number;
     tilesPerRow: number;
-    totalRows: number;
     bbpType: BppType;
 }
 
@@ -78,7 +77,6 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
         tileWidthSize: 8,
         tileBorderOpacity: 100,
         tilesPerRow: 16,
-        totalRows: 5,
         bbpType: BppType.Four,
     };
 
@@ -99,8 +97,11 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
     public refresh(): void {
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
 
+        let tileSize = (this.state.bbpType / 2) * 0x10;
+        let numOfRows = this.props.snes.ppu.vram.data.length / (tileSize * this.state.tilesPerRow);
+
         let totalWidth = this.state.tilesPerRow * (this.state.tileWidthSize) * this.state.tilePixelSize;
-        let totalHeight = (this.state.totalRows * this.state.tilesPerRow) * (this.state.tileHeightSize) * this.state.tilePixelSize;
+        let totalHeight = (numOfRows) * (this.state.tileHeightSize) * this.state.tilePixelSize;
 
         this.canvasRef.current.width = totalWidth;
         this.canvasRef.current.height = totalHeight;

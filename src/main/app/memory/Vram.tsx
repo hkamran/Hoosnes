@@ -4,7 +4,7 @@ import {Address} from "../bus/Address";
 
 export class Vram {
 
-    public static size: number = 64000; // 64 KB 0xFA00
+    public static size: number = 0xFFFF; // 64 KB 0xFA00
     public data: number[];
 
     constructor() {

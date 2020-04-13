@@ -40,8 +40,8 @@ export class Wram {
             let index: number = base | (page % 0xFFFF);
             return Read.byte(this.data[index]);
         } else {
-            let base: number = (bank % 0x40) << 16;
-            let index: number = base | page % 0x2000;
+            let base: number = (bank % 0x40) * 0x2000;
+            let index: number = base + (page % 0x2000);
             return Read.byte(this.data[index]);
         }
     }

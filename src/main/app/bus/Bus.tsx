@@ -90,11 +90,11 @@ export class Bus {
             } else if (0x2100 <= page && page <= 0x21FF) {
                 read = this.busB.readByte(address);
             } else if (0x2200 <= page && page <= 0x4000) {
-                read = this.console.cartridge.readByte(address);
+                read = this.mdr;
             } else if (0x4000 <= page && page <= 0x43FF) {
                 read = this.busA.readByte(address);
             } else if (0x4400 <= page && page <= 0x7FFF) {
-                read = this.console.cartridge.readByte(address);
+                read = this.mdr;
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 read = this.console.cartridge.readByte(address);
             }
@@ -148,7 +148,7 @@ export class Bus {
             } else if (0x2100 <= page && page <= 0x21FF) {
                 this.busB.writeByte(address, value);
             } else if (0x2200 <= page && page <= 0x41FF) {
-                this.console.cartridge.writeByte(address, value);
+                //this.console.cartridge.writeByte(address, value);
             } else if (0x4200 <= page && page <= 0x43FF) {
                 this.busA.writeByte(address, value);
             } else if (0x4400 <= page && page <= 0x7FFF) {
