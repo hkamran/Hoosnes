@@ -53,7 +53,7 @@ export class Cpu {
         let context: OpContext = OpContext.create(this, opaddr, operation);
 
         this.context = context;
-        // this.trace();
+        this.trace();
         this.registers.pc.set(opaddr.getPage() + operation.getSize());
         this.registers.k.set(opaddr.getBank());
         this.cycles += operation.execute(context);

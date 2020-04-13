@@ -649,10 +649,11 @@ export class DirectIndirectIndexedLong implements IAddressingMode {
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: Read = context.getOperand(0);
+        let LL: number = context.getOperand(0).get();
         let y: number = context.registers.y.get();
+        let d: number = context.registers.d.get();
 
-        let base: number = context.registers.d.get() + LL.get();
+        let base: number = (d + LL) & 0xFFFF;
 
         let loPointer: Read = context.bus.readByte(Address.create(base + 0));
         let midPointer: Read = context.bus.readByte(Address.create(base + 1));
@@ -662,8 +663,7 @@ export class DirectIndirectIndexedLong implements IAddressingMode {
         let loaddr: number = addr + y;
         let hiaddr: number = addr + y + 1;
 
-        let cycles: number = LL.getCycles();
-        return Addressing.toWord(loaddr, hiaddr, cycles);
+        return Addressing.toWord(loaddr, hiaddr, 0);
     }
 }
 
