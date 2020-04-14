@@ -69,17 +69,17 @@ export class Sprite {
     }
 
     public getTileAddress(): Address {
-        let name1TableAddr: number = this.ppu.registers.oamselect.getBaseSelection() << 13;
-        let name2TableAddr: number = this.ppu.registers.oamselect.getNameSelection() << 12;
+        let baseTableAddr: number = this.ppu.registers.oamselect.getBaseSelection();
+        let secondaryTableOffset: number = this.ppu.registers.oamselect.getNameSelection();
+        let secondaryTableAddr: number = baseTableAddr + ((secondaryTableOffset + 1) << 12);
 
-        let tiletable: number = this.getTileTable();
-        let tileNumber: number = this.getTileNumber();
+        let isSecondaryTable: boolean = this.getTileTable() == 1;
+        let tileNumber: number = this.getTileNumber() << 4;
 
         // Sprites are always 4 bpp
-        let baseAddr: number = (name1TableAddr) + (tileNumber<<4);
-        let offsetAddr: number = (tiletable == 1 ? ((name2TableAddr + 1) << 12) : 0);
-
-        return Address.create((baseAddr + offsetAddr) & 0x7fff);
+        let baseAddr: number = isSecondaryTable ? secondaryTableAddr : baseTableAddr;
+        let tileAddr: number = ((baseAddr + tileNumber) & 0x7fff) * (BppType.Four / 2);
+        return Address.create(tileAddr);
     }
 
     public getTile(): Tile {

@@ -154,7 +154,7 @@ export class ADC extends Operation {
         let size: number = is8Bit ? 0x80 : 0x8000;
 
         let a: number = context.cpu.registers.a.get() & mask;
-        let b: Read = this.mode.getValue(context);
+        let b: number = this.mode.getValue(context).get() & mask;
         let c: number = context.cpu.registers.p.getC();
 
         let result: number = 0;
@@ -163,7 +163,7 @@ export class ADC extends Operation {
             //TODO
             throw new Error("Not implemented!");
         } else {
-            result = a + b.get() + c;
+            result = a + b + c;
         }
 
         if (is8Bit) context.registers.a.setLower(result & mask);
@@ -171,7 +171,7 @@ export class ADC extends Operation {
 
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
-        context.registers.p.setV((!(((a ^ b.get()) & size)!=0) && (((a ^ result) & size)) !=0)? 1:0);
+        context.registers.p.setV((!(((a ^ b) & size)!=0) && (((a ^ result) & size)) !=0)? 1:0);
         context.registers.p.setC(result > mask ? 1: 0);
 
         return this.cycle;
@@ -2201,8 +2201,9 @@ export class Opcodes {
         this.opcodes[0x7A] = new PLY(cpu,0x7A, 4, 1, AddressingModes.stack);
 
         this.opcodes[0xC2] = new REP(cpu,0xC2, 3, 2, AddressingModes.immediate8);
-        this.opcodes[0x26] = new REP(cpu,0x26, 5, 2, AddressingModes.direct);
+        this.opcodes[0xE2] = new REP(cpu,0x26, 5, 2, AddressingModes.direct);
 
+        this.opcodes[0x26] = new ROL(cpu,0x26, 2, 2, AddressingModes.direct);
         this.opcodes[0x2A] = new ROL(cpu,0x2A, 2, 1, AddressingModes.accumulator);
         this.opcodes[0x2E] = new ROL(cpu,0x2E, 6, 3, AddressingModes.absolute);
         this.opcodes[0x36] = new ROL(cpu,0x36, 6, 2, AddressingModes.directX);
