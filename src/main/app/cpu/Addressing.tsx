@@ -112,7 +112,7 @@ export class AbsoluteJump implements IAddressingMode {
 
 export class Absolute implements IAddressingMode {
 
-    public label: string = "Absolute";
+    public label: string = "ABSOLUTE";
 
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);
@@ -144,7 +144,7 @@ export class Absolute implements IAddressingMode {
 
 export class AbsoluteX implements IAddressingMode {
 
-    public label: string = "Absolute X";
+    public label: string = "ABSOLUTE, X";
 
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);
@@ -176,7 +176,7 @@ export class AbsoluteX implements IAddressingMode {
 
 export class AbsoluteY implements IAddressingMode {
 
-    public label: string = "Absolute Y";
+    public label: string = "ABSOLUTE, Y";
 
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);
@@ -209,7 +209,7 @@ export class AbsoluteY implements IAddressingMode {
 
 export class AbsoluteLong implements IAddressingMode {
 
-    public label: string = "(Absolute)";
+    public label: string = "(ABSOLUTE)";
 
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);
@@ -226,8 +226,10 @@ export class AbsoluteLong implements IAddressingMode {
         let low: Read = context.getOperand(0);
         let high: Read = context.getOperand(1);
 
-        let laddr: Address = Address.create(Bit.toUint16(high.get(), low.get()));
-        let haddr: Address = Address.create(Bit.toUint16(high.get(), low.get()));
+        let addr: number = Bit.toUint16(high.get(), low.get());
+
+        let laddr: Address = Address.create(addr);
+        let haddr: Address = Address.create(addr + 1);
 
         let LL: Read = context.bus.readByte(laddr);
         let MM: Read = context.bus.readByte(haddr);
@@ -242,7 +244,7 @@ export class AbsoluteLong implements IAddressingMode {
 
 export class AbsoluteLongIndexed implements IAddressingMode {
 
-    public label: string = "[absolute]";
+    public label: string = "[ABSOLUTE]";
 
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);
@@ -259,9 +261,11 @@ export class AbsoluteLongIndexed implements IAddressingMode {
         let LL: Read = context.getOperand(0);
         let HH: Read = context.getOperand(1);
 
-        let lowAddr: number = Bit.toUint16(LL.get(), HH.get()) + 0;
-        let midAddr: number = Bit.toUint16(LL.get(), HH.get()) + 1;
-        let highAddr: number = Bit.toUint16(LL.get(), HH.get()) + 2;
+        let base: number = Bit.toUint16(LL.get(), HH.get());
+
+        let lowAddr: number = base + 0;
+        let midAddr: number = base + 1;
+        let highAddr: number = base + 2;
 
         let low: Read = context.bus.readByte(Address.create(lowAddr));
         let mid: Read = context.bus.readByte(Address.create(midAddr));
@@ -278,6 +282,47 @@ export class AbsoluteLongIndexed implements IAddressingMode {
     }
 
 }
+
+export class AbsoluteIndirect implements IAddressingMode {
+
+    public label: string = "(ABSOLUTE, X)";
+
+    public getValue(context: OpContext): Read {
+        let result: Addressing = this.getAddressing(context);
+
+        let addr: Address = result.getLow();
+        let value: Read = context.bus.readByte(addr);
+
+        let cycles: number = result.getCycles();
+
+        return Read.byte(value.get(), cycles);
+    }
+
+    public getAddressing(context: OpContext): Addressing {
+        let low: number = context.getOperand(0).get();
+        let high: number = context.getOperand(1).get();
+        let k: number = context.cpu.registers.dbr.get();
+        let x: number = context.cpu.registers.x.get();
+
+        let offset: number = Bit.toUint16(high, low) + x;
+        let base: number = Bit.toUint24(
+            k,
+            Bit.getUint16Upper(offset),
+            Bit.getUint16Lower(offset));
+
+        let laddr: Address = Address.create(base);
+        let haddr: Address = Address.create(base + 1);
+
+        let LL: number = context.bus.readByte(laddr).get();
+        let MM: number = context.bus.readByte(haddr).get();
+        let HH: number = context.registers.k.get();
+
+        let address: number = Bit.toUint24(HH, MM, LL);
+
+        return Addressing.toByte(address, 0);
+    }
+}
+
 
 export class Accumulator implements  IAddressingMode {
 
@@ -486,44 +531,6 @@ export class DirectIndirect implements IAddressingMode {
     }
 }
 
-export class DirectIndexedIndirect implements IAddressingMode {
-
-    public label: string = "[DIRECT]";
-
-    public getValue(context: OpContext): Read {
-        let result: Addressing = this.getAddressing(context);
-        let loaddr: Address = result.getLow();
-        let hiaddr: Address = result.getHigh();
-
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
-
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.byte(value, cycles);
-    }
-
-    public getAddressing(context: OpContext): Addressing {
-        let LL: Read = context.getOperand(0);
-        let d: number = context.registers.d.get();
-
-        let loPointer: number = d + LL.get();
-        let miPointer: number = loPointer + 1;
-        let hiPointer: number = miPointer + 1;
-
-        let ll: Read = context.bus.readByte(Address.create(loPointer));
-        let mm: Read = context.bus.readByte(Address.create(miPointer));
-        let hh: Read = context.bus.readByte(Address.create(hiPointer));
-
-        let loaddr: number = Bit.toUint24(hh.get(), mm.get(), ll.get());
-        let hiaddr: number = loaddr + 1;
-
-        let cycles = LL.getCycles() + ll.getCycles() + mm.getCycles() + hh.getCycles();
-        return Addressing.toWord(loaddr, hiaddr, cycles);
-    }
-}
-
 export class DirectIndirectIndexed implements IAddressingMode {
 
     public label: string = "(DIRECT,X)";
@@ -626,6 +633,44 @@ export class DirectIndirectLong implements IAddressingMode {
         let hiaddr: number = addr + y + 1;
 
         cycles += ll.getCycles() + hh.getCycles();
+        return Addressing.toWord(loaddr, hiaddr, cycles);
+    }
+}
+
+export class DirectIndexedIndirect implements IAddressingMode {
+
+    public label: string = "[DIRECT]";
+
+    public getValue(context: OpContext): Read {
+        let result: Addressing = this.getAddressing(context);
+        let loaddr: Address = result.getLow();
+        let hiaddr: Address = result.getHigh();
+
+        let loByte: Read = context.bus.readByte(loaddr);
+        let hiByte: Read = context.bus.readByte(hiaddr);
+
+        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
+        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
+
+        return Read.byte(value, cycles);
+    }
+
+    public getAddressing(context: OpContext): Addressing {
+        let LL: Read = context.getOperand(0);
+        let d: number = context.registers.d.get();
+
+        let loPointer: number = d + LL.get();
+        let miPointer: number = loPointer + 1;
+        let hiPointer: number = miPointer + 1;
+
+        let ll: Read = context.bus.readByte(Address.create(loPointer));
+        let mm: Read = context.bus.readByte(Address.create(miPointer));
+        let hh: Read = context.bus.readByte(Address.create(hiPointer));
+
+        let loaddr: number = Bit.toUint24(hh.get(), mm.get(), ll.get());
+        let hiaddr: number = loaddr + 1;
+
+        let cycles = LL.getCycles() + ll.getCycles() + mm.getCycles() + hh.getCycles();
         return Addressing.toWord(loaddr, hiaddr, cycles);
     }
 }
@@ -1014,6 +1059,7 @@ export class AddressingModes {
     public static absoluteX: IAddressingMode = new AbsoluteX();
     public static absoluteY: IAddressingMode = new AbsoluteY();
     public static absoluteLong: IAddressingMode = new AbsoluteLong();
+    public static absoluteIndirect: IAddressingMode = new AbsoluteIndirect();
     public static absoluteLongIndexed: IAddressingMode = new AbsoluteLongIndexed();
 
     public static direct: IAddressingMode = new Direct();
