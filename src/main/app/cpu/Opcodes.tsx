@@ -1654,8 +1654,6 @@ class ROR extends Operation {
             context.registers.p.setC((a & 0x01) != 0 ? 1 : 0);
             context.setFlagN(value);
             context.setFlagZ(value);
-
-            context.bus.writeByte(addressing.getLow(), value);
         } else {
             if (is8Bit) {
                 let loData: Read = context.bus.readByte(addressing.getLow());
@@ -2128,6 +2126,7 @@ export class Opcodes {
         this.opcodes[0xE0] = new CPX(cpu,0xE0, 2, 3, AddressingModes.immediateX);
         this.opcodes[0xE4] = new CPX(cpu,0xE4, 3, 2, AddressingModes.direct);
         this.opcodes[0xEC] = new CPX(cpu,0xEC, 4, 3, AddressingModes.absolute);
+
         this.opcodes[0xC0] = new CPY(cpu,0xC0, 2, 3, AddressingModes.immediateX);
         this.opcodes[0xC4] = new CPY(cpu,0xC4, 5, 2, AddressingModes.direct);
         this.opcodes[0xCC] = new CPY(cpu,0xCC, 6, 3, AddressingModes.absolute);
