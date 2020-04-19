@@ -294,10 +294,11 @@ export class BIT extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let a: number = is8Bit ? context.registers.a.getLower() : context.registers.a.get();
         let b: number = this.mode.getValue(context).get();
 
-        let result = a & b;
+        let result = (a & mask) & (b & mask);
 
         let isImmediate: boolean = this.mode == AddressingModes.immediateM;
         if (!isImmediate) {
@@ -563,12 +564,11 @@ class BRL extends Operation {
     public name: string = "BRL";
 
     public execute(context: OpContext): number {
-        let result: Read = this.mode.getValue(context);
+        let addressing: Addressing = this.mode.getAddressing(context);
+        let pc: number = addressing.getLow().toValue();
+        context.registers.pc.set(pc);
 
-        let current: number = context.registers.pc.get();
-        let next: number = current + result.get();
-
-        context.registers.pc.set(next & 0xFFFF);
+        console.log("TEST");
 
         return this.cycle;
     }
