@@ -581,8 +581,6 @@ class BRL extends Operation {
         let pc: number = addressing.getLow().toValue();
         context.registers.pc.set(pc);
 
-        console.log("TEST");
-
         return this.cycle;
     }
 
@@ -1604,42 +1602,19 @@ class ROL extends Operation {
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
+
         let c: number = context.registers.p.getC();
-        let isAcc: boolean = this.mode == AddressingModes.accumulator;
+        let a: number = is8Bit ?
+            context.registers.a.getLower() :
+            context.registers.a.get();
+        let result: number = ((a << 1) | c) & mask;
 
-        if (isAcc) {
-            let a: number = is8Bit ?
-                context.registers.a.getLower() :
-                context.registers.a.get();
-            let result: number = ((a << 1) | c) & mask;
+        if (is8Bit) context.registers.a.setLower(result);
+        if (!is8Bit) context.registers.a.set(result);
 
-            if (is8Bit) context.registers.a.setLower(result);
-            if (!is8Bit) context.registers.a.set(result);
-
-            context.registers.p.setC((a & mask) != 0 ? 1 : 0);
-            context.setFlagN(result);
-            context.setFlagZ(result);
-        } else {
-            if (is8Bit) {
-                let a: number = context.registers.a.getLower();
-                let result: number = ((a << 1) | c) & mask;
-
-                context.registers.p.setC((a & mask) != 0 ? 1 : 0);
-                context.setFlagN(result);
-                context.setFlagZ(result);
-
-                context.registers.a.setLower(result);
-            } else {
-                let a: number = context.registers.a.get();
-                let result: number = ((a << 1) | c) & mask;
-
-                context.registers.p.setC((a & mask) != 0 ? 1 : 0);
-                context.setFlagN(result);
-                context.setFlagZ(result);
-
-                context.registers.a.set(result);
-            }
-        }
+        context.setFlagC(a, is8Bit);
+        context.setFlagN(result, is8Bit);
+        context.setFlagZ(result, is8Bit);
 
         return this.cycle;
     }
