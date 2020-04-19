@@ -160,8 +160,21 @@ export class ADC extends Operation {
         let result: number = 0;
 
         if (context.registers.p.getD() == 1) {
-            //TODO
-            throw new Error("Not implemented!");
+            if (!is8Bit) {
+                let res0 = (a & 0x000f) + (b & 0x000f) + c;
+                if (res0 > 0x0009) res0 += 0x0006;
+                let res1 = (a & 0x00f0) + (b & 0x00f0) + (res0 & 0x000f) + (res0 > 0x000f ? 0x0010 : 0x0000);
+                if (res1 > 0x009f) res1 += 0x0060;
+
+                let res2 = (a & 0x0f00) + (b & 0x0f00) + (res1 & 0x00ff) + (res1 > 0x00ff ? 0x0100 : 0x0000);
+                if (res2 > 0x09ff) res2 += 0x0600;
+                result = (a & 0xf000) + (b & 0xf000) + (res2 & 0x0fff) + (res2 > 0x0fff ? 0x1000 : 0x0000);
+            } else {
+                let low = (a & 0xf) + (b & 0xf) + c;
+                if (low > 9) low += 6;
+
+                result = (a & 0xf0) + (b & 0xf0) + (low & 0x0f) + ((low > 0x0f) ? 0x10 : 0);
+            }
         } else {
             result = a + b + c;
         }
@@ -664,14 +677,17 @@ class EOR extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
-        let a: number = context.registers.a.get();
-        let data: Read = this.mode.getValue(context);
-
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
-        let value: number = ((a & mask) ^ (data.get() & mask)) & mask;
 
-        context.setFlagN(value, is8Bit);
-        context.setFlagZ(value, is8Bit);
+        let a: number = context.registers.a.get() & mask;
+        let data: number = this.mode.getValue(context).get() & mask;
+        let result: number = (a ^ data) & mask;
+
+        if (is8Bit) context.registers.a.setLower(result);
+        if (!is8Bit) context.registers.a.set(result);
+
+        context.setFlagN(result, is8Bit);
+        context.setFlagZ(result, is8Bit);
 
         return this.cycle;
     }
@@ -1603,8 +1619,6 @@ class ROL extends Operation {
             context.registers.p.setC((a & mask) != 0 ? 1 : 0);
             context.setFlagN(result);
             context.setFlagZ(result);
-
-            context.registers.a.set(result);
         } else {
             if (is8Bit) {
                 let a: number = context.registers.a.getLower();
