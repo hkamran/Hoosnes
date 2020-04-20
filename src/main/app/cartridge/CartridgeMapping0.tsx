@@ -17,7 +17,6 @@ export class CartridgeMapping0 implements ICartridgeMapping {
     }
 
     public read(address: Address): Read {
-
         let bank = address.getBank();
         let page = address.getPage();
 
@@ -34,14 +33,12 @@ export class CartridgeMapping0 implements ICartridgeMapping {
                 return Read.byte(value, 0);
             } else if (0x70 <= bank && bank <= 0x7F) {
                 let index =(bank - 0x70) + page;
-                let value = this.cartridge.sram.data[index];
 
-                return Read.byte(value, 0);
+                return this.cartridge.sram.read(index);
             } else if (0xF0 <= bank && bank <= 0xFF) {
                 let index = (bank - 0xF0) + page;
-                let value = this.cartridge.sram.data[index];
 
-                return Read.byte(value, 0);
+                return this.cartridge.sram.read(index);
             }
         } else if (0x8000 <= page && page <= 0xFFFF) {
             if (0x80 <= bank && bank <= 0xFF) {
@@ -55,11 +52,31 @@ export class CartridgeMapping0 implements ICartridgeMapping {
                 return Read.byte(value, 0);
             }
         }
-        throw new Error("Invalid read at " + address.toString());
+
+        throw new Error(`Invalid read at ${address.toString}`);
     }
 
     public write(address: Address, value: number): Write {
-        throw new Error("Invalid write at " + address.toString());
+        if (value == null || value < 0 || value > 0xFF) {
+            throw new Error(`Invalid write at ${address.toString} ${value}`);
+        }
+
+        let bank = address.getBank();
+        let page = address.getPage();
+
+        if (0x70 <= bank && bank <= 0x7D) {
+            let index =(bank - 0x70) + page;
+
+            this.cartridge.sram.write(index, value);
+            return new Write(address, 0, 0);
+        } else if (0xFE <= bank && bank <= 0xFF) {
+            let index = (bank - 0xF0) + page;
+
+            this.cartridge.sram.write(index, value);
+            return new Write(address, 0, 0);
+        }
+
+        throw new Error(`Invalid write at ${address.toString} ${value}`);
     }
 
 }

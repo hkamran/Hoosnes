@@ -157,7 +157,7 @@ export class Cartridge {
         this.title = this.getTitle(offset, offset + SNES_OFFSET_TITLE);
         this.type = this.getType(offset + SNES_OFFSET_ROM_TYPE);
         this.size = 400 << ByteReader.readByte(this.rom, offset + SNES_OFFSET_ROM_SIZE);
-        this.sram = new Sram(400 << ByteReader.readByte(this.rom, offset + SNES_OFFSET_SRAM_SIZE) + 400);
+        this.sram = new Sram(ByteReader.readByte(this.rom, offset + SNES_OFFSET_SRAM_SIZE));
         this.license = ByteReader.readByte(this.rom, offset + SNES_OFFSET_LICENSE);
         this.version = ByteReader.readByte(this.rom, offset + SNES_OFFSET_VERSION);
         this.complement = ByteReader.readWord(this.rom, offset + SNES_OFFSET_COMPLEMENT_CHECK);
@@ -214,27 +214,7 @@ export class Cartridge {
     }
 
     public writeByte(address: Address, value: number): Write {
-        if (value == null || value < 0 || value > 0xFF) {
-            throw new Error(`Invalid write at ${address.toString} ${value}`);
-        }
-
-        let bank: number = address.getBank();
-        let offset: number = address.getPage();
-
-        if (0x70 <= bank && bank <= 0x7D) {
-            this.sram.data[offset] = value;
-            return new Write(address, 0, 0);
-        } else if (0xFE <= bank && bank <= 0xFF) {
-            this.sram.data[offset] = value;
-            return new Write(address, 0, 0);
-        }
-        // } else if (0x00 <= bank && bank <= 0x00) {
-        //     console.warn(`${address.toString()} set ${value.toString(16)}`);
-        //     this.aux[offset] = value;
-        //     return new Write(address, 0, 0);
-        // }
-
-        throw new Error("Cannot write to cartridge: " + address.toString());
+        return this.mapping.write(address, value);
     }
 
     private getMapping(mappingType: CartridgeMappingType): ICartridgeMapping {
