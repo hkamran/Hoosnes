@@ -311,12 +311,19 @@ export class NmiFlagRegister extends Register {
     public address: string = "4210";
     public name: string = "RDNMI";
 
+    public val: number = 0x42;
+
+    public set(val: number): void {
+        // ignore
+    }
+
     public setVBlankFlag(flag: boolean) {
-        if (flag) {
-            this.val |= 0x80;
-        } else {
-            this.val &= 0x7F;
-        }
+        this.val &= ~(1 << 7);
+        this.val |= (flag ? 1 : 0) << 7;
+    }
+
+    public get(): number {
+        return this.val;
     }
 
 }

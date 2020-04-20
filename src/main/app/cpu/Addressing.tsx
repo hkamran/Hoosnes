@@ -1,8 +1,8 @@
-import {Operation, OpContext} from "./Opcodes";
+import {OpContext} from "./Opcodes";
 import {Read} from "../bus/Read";
 import {Address} from "../bus/Address";
 import {Bit} from "../util/Bit";
-import {Register, Registers} from "./Registers";
+import {Registers} from "./Registers";
 import {Objects} from "../util/Objects";
 
 /**
@@ -12,10 +12,10 @@ import {Objects} from "../util/Objects";
  *  https://github.com/michielvoo/SNES/wiki/CPU
  *  http://6502.org/tutorials/65c816opcodes.html#5.7
  */
-export interface IAddressingMode  {
+export interface IAddressingMode {
     label: string;
-    getValue(context: OpContext) : Read;
-    getAddressing(context: OpContext) : Addressing;
+    getValue(context: OpContext): Read;
+    getAddressing(context: OpContext): Addressing;
 }
 
 export enum AddressingType {
@@ -60,13 +60,13 @@ export class Addressing {
         return this.type;
     }
 
-    public static toWord(low: number, high: number, cycles? : number) {
+    public static toWord(low: number, high: number, cycles?: number) {
         let lowAddr: Address = Address.create(low);
         let highAddr: Address = Address.create(high);
         return new Addressing(lowAddr, highAddr, AddressingType.WORD, cycles);
     }
 
-    public static toByte(low: number, cycles? : number) {
+    public static toByte(low: number, cycles?: number) {
         let lowAddr: Address = Address.create(low);
         return new Addressing(lowAddr, lowAddr, AddressingType.BYTE, cycles);
     }
@@ -319,7 +319,7 @@ export class AbsoluteIndirect implements IAddressingMode {
 }
 
 
-export class Accumulator implements  IAddressingMode {
+export class Accumulator implements IAddressingMode {
 
     public label: string = "ACCUMULATOR";
 
@@ -356,7 +356,6 @@ export class Direct implements IAddressingMode {
 
     public getAddressing(context: OpContext): Addressing {
         let low: Read = context.getOperand(0);
-
 
         if (context.op.name == "PEI" &&
             context.registers.p.getE() == 1 &&
@@ -415,9 +414,6 @@ export class DirectX implements IAddressingMode {
             let loaddr: number = (d + LL + x) & 0xFFFF;
             let hiaddr: number = (loaddr + 1) & 0xFFFF;
 
-
-
-
             return Addressing.toWord(loaddr, hiaddr, 0);
         }
     }
@@ -454,8 +450,6 @@ export class DirectY implements IAddressingMode {
         let LL: number = context.getOperand(0).get();
         let y = context.registers.y.get();
         let d = context.registers.d.get();
-
-
 
         if (context.registers.p.getE() == 1 && context.registers.d.getLower() == 0x00) {
 
@@ -915,12 +909,6 @@ export class Relative16 implements IAddressingMode {
 
     public getValue(context: OpContext): Read {
         throw new Error("Not implemented!")
-
-
-
-
-
-
     }
 
     public getAddressing(context: OpContext): Addressing {
@@ -929,8 +917,6 @@ export class Relative16 implements IAddressingMode {
         let pc: number = context.cpu.registers.pc.get();
 
         let base: number = (pc + Bit.toUint16(HH, LL)) & 0xFFFF;
-
-
 
         return Addressing.toByte(base, 0);
     }

@@ -308,6 +308,9 @@ export class BIT extends Operation {
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let vMask = is8Bit ? 0x40 : 0x4000;
+        let nMask = is8Bit ? 0x80 : 0x8000;
+
         let a: number = is8Bit ? context.registers.a.getLower() : context.registers.a.get();
         let b: number = this.mode.getValue(context).get();
 
@@ -315,9 +318,7 @@ export class BIT extends Operation {
 
         let isImmediate: boolean = this.mode == AddressingModes.immediateM;
         if (!isImmediate) {
-            let vMask = is8Bit ? 0x20 : 0x4000;
             context.registers.p.setV(((b & vMask) != 0) ? 1 : 0);
-            let nMask = is8Bit ? 0x80 : 0x8000;
             context.registers.p.setN(((b & nMask) != 0) ? 1 : 0);
         }
         context.setFlagZ(result, is8Bit);
@@ -390,7 +391,7 @@ class CMP extends Operation {
         let negative: number = is8Bit ? 0x80 : 0x8000;
 
         let a: number = is8Bit ? context.registers.a.getLower() : context.registers.a.get();
-        let b: number = is8Bit ? this.mode.getValue(context).getLow() : this.mode.getValue(context).get();
+        let b: number = this.mode.getValue(context).get() & mask;
 
         let value: number = (a & mask) - (b & mask);
 
