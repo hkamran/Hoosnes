@@ -977,7 +977,7 @@ export class Stack implements IAddressingMode {
         let value: number = Bit.toUint16(hiByte.get(), loByte.get());
         let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
 
-        return Read.byte(value, cycles);
+        return Read.word(value, cycles);
     }
 
     public getAddressing(context: OpContext): Addressing {

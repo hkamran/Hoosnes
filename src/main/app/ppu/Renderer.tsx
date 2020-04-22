@@ -43,8 +43,8 @@ export class Renderer {
             let bg2Color: Color = bg2Colors[x];
 
             let color: Color = base;
-            if (bg1Color.opacity > 0) color = bg1Color;
             if (bg2Color.opacity > 0) color = bg2Color;
+            if (bg1Color.opacity > 0) color = bg1Color;
             this.screen.setPixel(x, y, color);
         }
 

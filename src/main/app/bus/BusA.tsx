@@ -587,7 +587,7 @@ export class BusA {
         } else if (page == 0x437A) {
             this.registers.dma7.ntlrx.set(val);
         } else {
-            throw new Error("Invalid write on BusA at " + address);
+            console.warn("Invalid write on BusA at " + address);
         }
 
         return null;

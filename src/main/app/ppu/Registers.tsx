@@ -78,12 +78,14 @@ export class OamSizeAndDataAreaRegister extends Register {
         } else if (type == 0x1) {
             return {small: Dimension.get8by8(), big: Dimension.get32by32()};
         } else if (type == 0x2) {
+            return {small: Dimension.get8by8(), big: Dimension.get64by64()};
+        } else if (type == 0x3) {
             return {small: Dimension.get16by16(), big: Dimension.get32by32()};
         } else if (type == 0x4) {
             return {small: Dimension.get16by16(), big: Dimension.get64by64()};
-        } else if (type == 0x6) {
-            return {small: Dimension.get32by32(), big: Dimension.get64by64()};
         } else if (type == 0x5) {
+            return {small: Dimension.get32by32(), big: Dimension.get64by64()};
+        } else if (type == 0x6) {
             return {small: Dimension.get32by32(), big: Dimension.get64by64()};
         } else {
             throw new Error("Undocumented behaviour type " + type);

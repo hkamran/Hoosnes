@@ -329,6 +329,8 @@ export class Background1 extends Background {
             return BppType.Four;
         } else if (value == 2) {
             return BppType.Four;
+        } else if (value == 3) {
+            return BppType.Four;
         }
         throw new Error("Not implemented!");
     }
@@ -376,6 +378,8 @@ export class Background2 extends Background {
         } else if (value == 1) {
             return BppType.Four;
         } else if (value == 2) {
+            return BppType.Four;
+        } else if (value == 3) {
             return BppType.Four;
         }
         throw new Error("Not implemented!");
