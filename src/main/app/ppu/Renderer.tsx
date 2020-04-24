@@ -37,13 +37,16 @@ export class Renderer {
 
         let bg1Colors: Color[] = this.ppu.backgrounds.bg1.getLineImage(y);
         let bg2Colors: Color[] = this.ppu.backgrounds.bg2.getLineImage(y);
+        let bg3Colors: Color[] = this.ppu.backgrounds.bg3.getLineImage(y);
 
         for (let x: number = 0; x < Screen.WIDTH; x++) {
             let bg1Color: Color = bg1Colors[x];
             let bg2Color: Color = bg2Colors[x];
+            let bg3Color: Color = bg3Colors[x];
 
             let color: Color = base;
             if (bg2Color.opacity > 0) color = bg2Color;
+            if (bg3Color.opacity > 0) color = bg3Color;
             if (bg1Color.opacity > 0) color = bg1Color;
             this.screen.setPixel(x, y, color);
         }

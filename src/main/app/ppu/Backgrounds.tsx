@@ -77,7 +77,7 @@ export abstract class Background {
     public getLineImage(y: number): Color[] {
         let characterDimension: Dimension = this.getCharacterDimension();
         let backgroundDimension: Dimension = this.getBackgroundDimension();
-        let bpp: number = this.ppu.backgrounds.bg1.getBpp().valueOf();
+        let bpp: number = this.getBpp().valueOf();
         let vertScrollOffset: number = this.getVerticalScrollOffset();
 
         let yStart: number = (y + vertScrollOffset);
@@ -426,7 +426,7 @@ export class Background3 extends Background {
         if (value == 0) {
             return BppType.Two;
         } else if (value == 1) {
-            return BppType.Four;
+            return BppType.Two;
         } else if (value == 2) {
             return BppType.Four;
         }

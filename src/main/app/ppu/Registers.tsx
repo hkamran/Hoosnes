@@ -464,10 +464,17 @@ export class VerticalScrollForBG2Register extends Register {
     public label: string = "BG2VOFS";
     public prev: number = 0;
 
+    public set(val: number): void {
+        this.prev = this.val & 0xFF;
+        this.val = val & 0xFF;
+    }
+
     public getBG2VertOffset(): number {
-        let result = (this.val << 8) | this.prev;
-        this.prev = this.val;
-        return result;
+        let low: number = this.prev & 0xFF;
+        let high: number = this.val & 0xFF;
+
+        let result = (high << 8) | low;
+        return result & 1023;
     }
 }
 
@@ -490,10 +497,17 @@ export class VerticalScrollForBG3Register extends Register {
     public label: string = "BG3VOFS";
     public prev: number = 0;
 
+    public set(val: number): void {
+        this.prev = this.val & 0xFF;
+        this.val = val & 0xFF;
+    }
+
     public getBG3VertOffset(): number {
-        let result = (this.val << 8) | this.prev;
-        this.prev = this.val;
-        return result;
+        let low: number = this.prev & 0xFF;
+        let high: number = this.val & 0xFF;
+
+        let result = (high << 8) | low;
+        return result & 1023;
     }
 }
 
