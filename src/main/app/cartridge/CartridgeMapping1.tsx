@@ -3,6 +3,7 @@ import {Read} from "../bus/Read";
 import {Write} from "../bus/Write";
 import {Cartridge, ICartridgeMapping} from "./Cartridge";
 import {Sram} from "../memory/Sram";
+import {AddressUtil} from "../util/AddressUtil";
 
 export class CartridgeMapping1 implements ICartridgeMapping {
 
@@ -16,10 +17,12 @@ export class CartridgeMapping1 implements ICartridgeMapping {
         this.cartridge = cartridge;
     }
 
-    public read(address: Address): number {
+    public read(address: number): number {
+        AddressUtil.assertValid(address);
 
-        let bank = address.getBank();
-        let page = address.getPage();
+        let bank = AddressUtil.getBank(address);
+        let page = AddressUtil.getPage(address);
+
         const length = this.cartridge.rom.length;
 
         if (0xC0 <= bank && bank <= 0xFF) {

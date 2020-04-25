@@ -29,14 +29,6 @@ export class Address {
         return (this.bank << 16) | (this.offset);
     }
 
-    public setPage(page: number): void {
-        this.offset = page & 0xFFFF;
-    }
-
-    public setBank(bank: number): void {
-        this.bank = bank & 0xFFFF;
-    }
-
     public static create(val: number, bank?: number): Address {
         if (val == null || val < 0)
             throw new Error("Invalid Address given " + val + " " + bank);

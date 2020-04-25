@@ -16,7 +16,7 @@ export class CartridgeMapping5 implements ICartridgeMapping {
         this.cartridge = cartridge;
     }
 
-    public read(address: Address): number {
+    public read(address: number): number {
         return null;
     }
 

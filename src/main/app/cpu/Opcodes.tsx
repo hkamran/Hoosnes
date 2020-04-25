@@ -11,7 +11,7 @@ import {InterruptType} from "./Interrupts";
 
 export class OpContext {
 
-    public opaddr: Address;
+    public opaddr: number;
     public op: Operation;
 
     public console: Console;
@@ -19,7 +19,7 @@ export class OpContext {
     public bus: Bus;
     public registers: Registers;
 
-    constructor(cpu: Cpu, opaddr: Address, op: Operation) {
+    constructor(cpu: Cpu, opaddr: number, op: Operation) {
         Objects.requireNonNull(cpu);
         Objects.requireNonNull(cpu.console);
         Objects.requireNonNull(cpu.console.bus);
@@ -34,7 +34,7 @@ export class OpContext {
         this.op = op;
     }
 
-    public static create(cpu: Cpu, opaddr: Address, op: Operation): OpContext {
+    public static create(cpu: Cpu, opaddr: number, op: Operation): OpContext {
         return new OpContext(cpu, opaddr, op);
     }
 
@@ -43,16 +43,16 @@ export class OpContext {
             throw new Error("Invalid operand request");
         }
 
-        let address: Address = Address.create(this.opaddr.toValue() + index + 1);
+        let address: number = this.opaddr + index + 1;
         return this.bus.readByte(address);
     }
 
-    public getOperandAddress(index: number): Address {
+    public getOperandAddress(index: number): number {
         if (index < 0) {
             throw new Error("Invalid operand request");
         }
 
-        let address: Address = Address.create(this.opaddr.toValue() + index + 1);
+        let address: number = this.opaddr + index + 1;
         return address;
     }
 
@@ -609,7 +609,7 @@ class DEC extends Operation {
             context.setFlagZ(value, is8Bit);
         } else {
             if (is8Bit) {
-                let loData: number = context.bus.readByte(address.getLow());
+                let loData: number = context.bus.readByte(address.getLow().toValue());
                 let value: number = (loData - 1) & mask;
 
                 context.bus.writeByte(address.getLow(), value & 0xFF);
@@ -617,8 +617,8 @@ class DEC extends Operation {
                 context.setFlagN(value, is8Bit);
                 context.setFlagZ(value, is8Bit);
             } else {
-                let loData: number = context.bus.readByte(address.getLow());
-                let hiData: number = context.bus.readByte(address.getHigh());
+                let loData: number = context.bus.readByte(address.getLow().toValue());
+                let hiData: number = context.bus.readByte(address.getHigh().toValue());
                 let value: number = (Bit.toUint16(hiData, loData) - 1) & mask;
 
                 context.bus.writeByte(address.getHigh(), Bit.getUint16Upper(value) & 0xFFFF);
@@ -721,7 +721,7 @@ class INC extends Operation {
             context.setFlagZ(value, is8Bit);
         } else {
             if (is8Bit) {
-                let loData: number = context.bus.readByte(address.getLow());
+                let loData: number = context.bus.readByte(address.getLow().toValue());
                 let value: number = (loData + 1) & mask;
 
                 context.bus.writeByte(address.getLow(), value & 0xFF);
@@ -729,8 +729,8 @@ class INC extends Operation {
                 context.setFlagN(value, is8Bit);
                 context.setFlagZ(value, is8Bit);
             } else {
-                let loData: number = context.bus.readByte(address.getLow());
-                let hiData: number = context.bus.readByte(address.getHigh());
+                let loData: number = context.bus.readByte(address.getLow().toValue());
+                let hiData: number = context.bus.readByte(address.getHigh().toValue());
                 let value: number = Bit.toUint16(hiData, loData) + 1;
 
                 context.bus.writeByte(address.getLow(), Bit.getUint16Lower(value) & 0xFF);
@@ -1004,15 +1004,15 @@ class TRB extends Operation {
         let is8Bit: boolean = context.cpu.registers.p.getM() == 1;
 
         if (is8Bit) {
-            let lowData: number = context.bus.readByte(addressing.getLow());
+            let lowData: number = context.bus.readByte(addressing.getLow().toValue());
 
             let a: number = context.registers.a.getLower();
             let value: number = lowData & a;
 
             context.setFlagZ(value);
         } else {
-            let lowData: number = context.bus.readByte(addressing.getLow());
-            let highData: number = context.bus.readByte(addressing.getHigh());
+            let lowData: number = context.bus.readByte(addressing.getLow().toValue());
+            let highData: number = context.bus.readByte(addressing.getHigh().toValue());
 
             let a: number = context.registers.a.get();
             let value: number = Bit.toUint16(highData, lowData) & a;
@@ -1055,7 +1055,7 @@ class TSB extends Operation {
         let is8Bit: boolean = context.cpu.registers.p.getM() == 1;
 
         if (is8Bit) {
-            let lowData: number = context.bus.readByte(addressing.getLow());
+            let lowData: number = context.bus.readByte(addressing.getLow().toValue());
 
             let a: number = context.registers.a.getLower();
             let value: number = lowData & a;
@@ -1064,8 +1064,8 @@ class TSB extends Operation {
 
             context.bus.writeByte(addressing.getLow(), value & 0xFF);
         } else {
-            let lowData: number = context.bus.readByte(addressing.getLow());
-            let highData: number = context.bus.readByte(addressing.getHigh());
+            let lowData: number = context.bus.readByte(addressing.getLow().toValue());
+            let highData: number = context.bus.readByte(addressing.getHigh().toValue());
 
             let a: number = context.registers.a.get();
             let value: number = Bit.toUint16(highData, lowData) & a;
@@ -1223,7 +1223,7 @@ class LDA extends Operation {
         let is8Bit: boolean = context.registers.p.getM() == 1;
 
         if (is8Bit) {
-            let loAddr: Address = addressing.getLow();
+            let loAddr: number = addressing.getLow().toValue();
 
             let result: number = context.bus.readByte(loAddr);
 
@@ -1231,8 +1231,8 @@ class LDA extends Operation {
             context.setFlagZ(result, is8Bit);
             context.setFlagN(result, is8Bit);
         } else {
-            let loAddr: Address = addressing.getLow();
-            let hiAddr: Address = addressing.getHigh();
+            let loAddr: number = addressing.getLow().toValue();
+            let hiAddr: number = addressing.getHigh().toValue();
 
             let loData: number = context.bus.readByte(loAddr);
             let hiData: number = context.bus.readByte(hiAddr);
@@ -1264,7 +1264,7 @@ class LDX extends Operation {
         let is8Bit: boolean = context.registers.p.getX() == 1;
 
         if (is8Bit) {
-            let loAddr: Address = addressing.getLow();
+            let loAddr: number = addressing.getLow().toValue();
 
             let result: number = context.bus.readByte(loAddr);
             let value: number = result;
@@ -1274,8 +1274,8 @@ class LDX extends Operation {
             context.setFlagZ(value, is8Bit);
             context.setFlagN(value, is8Bit);
         } else {
-            let loAddr: Address = addressing.getLow();
-            let hiAddr: Address = addressing.getHigh();
+            let loAddr: number = addressing.getLow().toValue();
+            let hiAddr: number = addressing.getHigh().toValue();
 
             let loData: number = context.bus.readByte(loAddr);
             let hiData: number = context.bus.readByte(hiAddr);
@@ -1307,7 +1307,7 @@ class LDY extends Operation {
         let is8Bit: boolean = context.registers.p.getX() == 1;
 
         if (is8Bit) {
-            let loAddr: Address = addressing.getLow();
+            let loAddr: number = addressing.getLow().toValue();
 
             let result: number = context.bus.readByte(loAddr);
             let value: number = result;
@@ -1317,8 +1317,8 @@ class LDY extends Operation {
             context.setFlagZ(value, is8Bit);
             context.setFlagN(value, is8Bit);
         } else {
-            let loAddr: Address = addressing.getLow();
-            let hiAddr: Address = addressing.getHigh();
+            let loAddr: number = addressing.getLow().toValue();
+            let hiAddr: number = addressing.getHigh().toValue();
 
             let loData: number = context.bus.readByte(loAddr);
             let hiData: number = context.bus.readByte(hiAddr);
@@ -1387,7 +1387,7 @@ class MVN extends Operation {
         let destPage: number = addressing.getHigh().getPage();
 
         while (amount != 0xFFFF) {
-            let src: Address = Address.create(srcPage, srcBank);
+            let src: number = Address.create(srcPage, srcBank).toValue();
             let dest: Address = Address.create(destPage, destBank);
 
             let val : number = context.bus.readByte(src);
@@ -1416,7 +1416,7 @@ class MVP extends Operation {
         let destPage: number = addressing.getHigh().getPage();
 
         while (amount != 0xFFFF) {
-            let src: Address = Address.create(srcPage, srcBank);
+            let src: number = Address.create(srcPage, srcBank).toValue();
             let dest: Address = Address.create(destPage, destBank);
 
             let val : number = context.bus.readByte(src);
@@ -1448,8 +1448,8 @@ class ORA extends Operation {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
 
-        let loData: number = context.bus.readByte(addressing.getLow());
-        let hiData: number = is8Bit ? 0 : context.bus.readByte(addressing.getHigh());
+        let loData: number = context.bus.readByte(addressing.getLow().toValue());
+        let hiData: number = is8Bit ? 0 : context.bus.readByte(addressing.getHigh().toValue());
 
         let data: number = Bit.toUint16(hiData, loData);
         let a: number = context.registers.a.get() & mask;
@@ -1646,7 +1646,7 @@ class ROR extends Operation {
             context.setFlagZ(value);
         } else {
             if (is8Bit) {
-                let loData: number = context.bus.readByte(addressing.getLow());
+                let loData: number = context.bus.readByte(addressing.getLow().toValue());
 
                 let value: number = (loData >> 1) | (c << shift);
 
@@ -1656,8 +1656,8 @@ class ROR extends Operation {
 
                 context.bus.writeByte(addressing.getLow(), value);
             } else {
-                let loData: number = context.bus.readByte(addressing.getLow());
-                let hiData: number = context.bus.readByte(addressing.getHigh());
+                let loData: number = context.bus.readByte(addressing.getLow().toValue());
+                let hiData: number = context.bus.readByte(addressing.getHigh().toValue());
 
                 let data: number = Bit.toUint16(hiData, loData);
                 let value: number = (data >> 1) | (c << shift);

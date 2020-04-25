@@ -11,6 +11,7 @@ import {Operation} from "../app/cpu/Opcodes";
 import {PpuCard} from "./PpuCard";
 import {TileCard} from "./TileCard";
 import {BackgroundsCard} from "./BackgroundsCard";
+import {AddressUtil} from "../app/util/AddressUtil";
 
 declare let window : any;
 window.snes = new Console();
@@ -34,8 +35,8 @@ export class TickEvent {
         this.cycle = snes.cpu.cycles;
         this.op = snes.cpu.context.op;
 
-        this.registerK = snes.cpu.context.opaddr.getBank();
-        this.registerPC = snes.cpu.context.opaddr.getPage();
+        this.registerK = AddressUtil.getBank(snes.cpu.context.opaddr);
+        this.registerPC = AddressUtil.getPage(snes.cpu.context.opaddr);
     }
 }
 

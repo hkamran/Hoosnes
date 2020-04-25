@@ -4,6 +4,7 @@ import {Cartridge, ICartridgeMapping} from "./Cartridge";
 import {Sram} from "../memory/Sram";
 import {Read} from "../bus/Read";
 import {Bit} from "../util/Bit";
+import {AddressUtil} from "../util/AddressUtil";
 
 export class CartridgeMapping0 implements ICartridgeMapping {
 
@@ -16,9 +17,11 @@ export class CartridgeMapping0 implements ICartridgeMapping {
         this.cartridge = cartridge;
     }
 
-    public read(address: Address): number {
-        let bank = address.getBank();
-        let page = address.getPage();
+    public read(address: number): number {
+        AddressUtil.assertValid(address);
+
+        let bank = AddressUtil.getBank(address);
+        let page = AddressUtil.getPage(address);
 
         if (0x0000 <= page && page <= 0x7FFF) {
             if (0x40 <= bank && bank <= 0x6F) {

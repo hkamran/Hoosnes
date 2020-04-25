@@ -4,6 +4,7 @@ import {Address} from "../bus/Address";
 import {Read} from "../bus/Read";
 import {Write} from "../bus/Write";
 import {Bit} from "../util/Bit";
+import {AddressUtil} from "../util/AddressUtil";
 
 export class Wram {
     // The SNES includes 128Kbytes of Work RAM, which can be accessed in several ways:
@@ -21,11 +22,11 @@ export class Wram {
         this.data.fill(0, 0, Wram.SIZE);
     }
 
-    public readByte(address: Address): number {
+    public readByte(address: number): number {
         Objects.requireNonNull(address);
 
-        let bank = address.getBank();
-        let page = address.getPage();
+        let bank = AddressUtil.getBank(address);
+        let page = AddressUtil.getPage(address);
 
         if (page > 0xFFFF || page < 0) {
             throw new Error("Invalid readByte on work ram!");

@@ -8,6 +8,7 @@ import {BusB} from "./BusB";
 import {Cartridge} from "../cartridge/Cartridge";
 import {Wram} from "../memory/Wram";
 import {Bit} from "../util/Bit";
+import {AddressUtil} from "../util/AddressUtil";
 
 export class Bus {
 
@@ -39,15 +40,13 @@ export class Bus {
     // when fast memory is not enabled) take 8 master clock cycles.
     //
     // "slow" memory, which is only banks $00-$3F and $80-$BF, pages $40 and $41, take 12 master clock cycles.
-    public readByte(address: Address): number {
-        if (address == null) {
-            throw new Error("Invalid readByte at " + address);
-        }
+    public readByte(address: number): number {
+        AddressUtil.assertValid(address);
+
+        let bank = AddressUtil.getBank(address);
+        let page = AddressUtil.getPage(address);
 
         let value: number = this.mdr;
-
-        let bank = address.getBank();
-        let page = address.getPage();
 
         if (0x00 <= bank && bank < 0x3F) {
             if (0x0000 <= page && page <= 0x1FFF) {
@@ -86,7 +85,7 @@ export class Bus {
         } else if (0xC0 <= bank && bank <= 0xFF) {
             value = this.cartridge.readByte(address);
         } else {
-            throw new Error("Invalid bus value at " + address.toValue());
+            throw new Error("Invalid bus value at " + address.toString(16));
         }
 
         this.mdr = value;

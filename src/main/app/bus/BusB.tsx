@@ -5,6 +5,7 @@ import {Console} from "../Console";
 import {Objects} from "../util/Objects";
 import {Registers} from "../ppu/Registers";
 import {Bit} from "../util/Bit";
+import {AddressUtil} from "../util/AddressUtil";
 
 /**
  * Bus for IO registers in the PPU
@@ -27,15 +28,13 @@ export class BusB {
         this.registers = console.ppu.registers;
     }
 
-    public readByte(address: Address): number {
-        if (address == null) {
-            throw new Error("Invalid readByte at " + address);
-        }
+    public readByte(address: number): number {
+        AddressUtil.assertValid(address);
 
-        let value: number = this.console.bus.mdr;
+        let bank = AddressUtil.getBank(address);
+        let page = AddressUtil.getPage(address);
 
-        let bank = address.getBank();
-        let page = address.getPage();
+        let value = this.mdr;
 
         if (page < 0x2100 || page > 0x21FF) {
             throw new Error("Invalid readByte at " + address);

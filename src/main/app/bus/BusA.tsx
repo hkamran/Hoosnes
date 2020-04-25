@@ -4,6 +4,7 @@ import {Address} from "./Address";
 import {Read} from "./Read";
 import {Write} from "./Write";
 import {Registers} from "../cpu/Registers";
+import {AddressUtil} from "../util/AddressUtil";
 
 /**
  * Bus for IO registers in the CPU
@@ -24,15 +25,13 @@ export class BusA {
         this.registers = console.cpu.registers;
     }
 
-    public readByte(address: Address): number {
-        if (address == null) {
-            throw new Error("Invalid readByte at " + address);
-        }
+    public readByte(address: number): number {
+        AddressUtil.assertValid(address);
 
-        let read: number = this.mdr;
+        let bank = AddressUtil.getBank(address);
+        let page = AddressUtil.getPage(address);
 
-        let bank = address.getBank();
-        let page = address.getPage();
+        let read = this.mdr;
 
         if (page < 0x2100 || page > 0x43FF) {
             throw new Error("Invalid readByte at " + address);

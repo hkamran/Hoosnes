@@ -47,15 +47,15 @@ export class Cpu {
         let bank: number = this.registers.k.get();
         let cycles = this.cycles;
 
-        let opaddr: Address = Address.create(pc, bank);
+        let opaddr: number = Address.create(pc, bank).toValue();
         let opcode: number = this.console.bus.readByte(opaddr);
         let operation: Operation = this.opcodes.get(opcode);
         let context: OpContext = OpContext.create(this, opaddr, operation);
 
         this.context = context;
         // this.trace();
-        this.registers.pc.set(opaddr.getPage() + operation.getSize());
-        this.registers.k.set(opaddr.getBank());
+        this.registers.pc.set(pc + operation.getSize());
+        this.registers.k.set(bank);
         this.cycles += operation.execute(context);
 
         let duration = this.cycles - cycles;

@@ -6,6 +6,7 @@ import {Register, StatusRegister} from "../app/cpu/Registers";
 import {CSSProperties} from "react";
 import {Operation} from "../app/cpu/Opcodes";
 import {InterruptType} from "../app/cpu/Interrupts";
+import {AddressUtil} from "../app/util/AddressUtil";
 
 interface ICpuCardProps {
     snes: Console;
@@ -83,8 +84,8 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
     public fetch() {
         this.setState({
             a: this.props.snes.cpu.registers.a.get(),
-            pc: this.props.snes.cpu.context.opaddr.getPage(),
-            k: this.props.snes.cpu.context.opaddr.getBank(),
+            pc: AddressUtil.getPage(this.props.snes.cpu.context.opaddr),
+            k: AddressUtil.getBank(this.props.snes.cpu.context.opaddr),
             x: this.props.snes.cpu.registers.x.get(),
             y: this.props.snes.cpu.registers.y.get(),
             sp: this.props.snes.cpu.registers.sp.get(),
