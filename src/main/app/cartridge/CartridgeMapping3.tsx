@@ -1,6 +1,3 @@
-import {Address} from "../bus/Address";
-import {Read} from "../bus/Read";
-import {Write} from "../bus/Write";
 import {Sram} from "../memory/Sram";
 import {Cartridge, ICartridgeMapping} from "./Cartridge";
 
@@ -20,8 +17,7 @@ export class CartridgeMapping3 implements ICartridgeMapping {
         return null;
     }
 
-    public write(address: number, value: number): Write {
-        return null;
+    public write(address: number, value: number): void {
     }
 
 }
