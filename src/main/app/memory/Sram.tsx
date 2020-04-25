@@ -15,11 +15,11 @@ export class Sram {
         this.data.fill(0, 0, this.size);
     }
 
-    public read(index: number): Read {
+    public read(index: number): number {
         if (this.size == 0) {
-            return Read.byte(0x70, 0);
+            return 0x70;
         }
-        return Read.byte(this.data[index % this.data.length]);
+        return this.data[index % this.data.length];
     }
 
     public write(index: number, value: number): void {

@@ -48,8 +48,8 @@ export class Cpu {
         let cycles = this.cycles;
 
         let opaddr: Address = Address.create(pc, bank);
-        let opcode: Read = this.console.bus.readByte(opaddr);
-        let operation: Operation = this.opcodes.get(opcode.get());
+        let opcode: number = this.console.bus.readByte(opaddr);
+        let operation: Operation = this.opcodes.get(opcode);
         let context: OpContext = OpContext.create(this, opaddr, operation);
 
         this.context = context;

@@ -44,7 +44,7 @@ export class Read {
         return new Read(low, 0, ReadType.BYTE, cycles);
     }
 
-    public static word(low: number, high: number, cycles?: number) {
+    public static word(low: number, high?: number, cycles?: number) {
         if (low == null || low < 0 || high < 0)
             throw new Error(`Invalid read creation
                 ${low.toString(16)}

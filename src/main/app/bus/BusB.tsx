@@ -4,6 +4,7 @@ import {Write} from "./Write";
 import {Console} from "../Console";
 import {Objects} from "../util/Objects";
 import {Registers} from "../ppu/Registers";
+import {Bit} from "../util/Bit";
 
 /**
  * Bus for IO registers in the PPU
@@ -12,6 +13,9 @@ export class BusB {
 
     public console: Console;
     public registers: Registers;
+
+    // Memory Data Register
+    public mdr: number;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -23,12 +27,12 @@ export class BusB {
         this.registers = console.ppu.registers;
     }
 
-    public readByte(address: Address): Read {
+    public readByte(address: Address): number {
         if (address == null) {
             throw new Error("Invalid readByte at " + address);
         }
 
-        let read: Read = this.console.bus.mdr;
+        let value: number = this.console.bus.mdr;
 
         let bank = address.getBank();
         let page = address.getPage();
@@ -38,159 +42,159 @@ export class BusB {
         }
 
         if (page == 0x2100) {
-            read = Read.byte(this.registers.inidisp.get());
+            value = this.registers.inidisp.get();
         } else if (page == 0x2101) {
-            read = Read.byte(this.registers.oamselect.get());
+            value = this.registers.oamselect.get();
         } else if (page == 0x2102) {
-            read = Read.byte(this.registers.oamaddr.getLower());
+            value = this.registers.oamaddr.getLower();
         } else if (page == 0x2103) {
-            read = Read.byte(this.registers.oamaddr.getUpper());
+            value = this.registers.oamaddr.getUpper();
         } else if (page == 0x2104) {
-            read = Read.byte(this.registers.oamdataw.get());
+            value = this.registers.oamdataw.get();
         } else if (page == 0x2105) {
-            read = Read.byte(this.registers.bgmode.get());
+            value = this.registers.bgmode.get();
         } else if (page == 0x2106) {
-            read = Read.byte(this.registers.mosaic.get());
+            value = this.registers.mosaic.get();
         } else if (page == 0x2107) {
-            read = Read.byte(this.registers.vtilebg1.get());
+            value = this.registers.vtilebg1.get();
         } else if (page == 0x2108) {
-            read = Read.byte(this.registers.vtilebg2.get());
+            value = this.registers.vtilebg2.get();
         } else if (page == 0x2109) {
-            read = Read.byte(this.registers.vtilebg3.get());
+            value = this.registers.vtilebg3.get();
         } else if (page == 0x210A) {
-            read = Read.byte(this.registers.vtilebg4.get());
+            value = this.registers.vtilebg4.get();
         } else if (page == 0x210B) {
-            read = Read.byte(this.registers.vcharlocbg12.get());
+            value = this.registers.vcharlocbg12.get();
         } else if (page == 0x210C) {
-            read = Read.byte(this.registers.vcharlocbg34.get());
+            value = this.registers.vcharlocbg34.get();
         } else if (page == 0x210D) {
-            read = Read.byte(this.registers.bg1hofs.get());
+            value = this.registers.bg1hofs.get();
         } else if (page == 0x210E) {
-            read = Read.byte(this.registers.bg1vofs.get());
+            value = this.registers.bg1vofs.get();
         } else if (page == 0x210F) {
-            read = Read.byte(this.registers.bg2hofs.get());
+            value = this.registers.bg2hofs.get();
         } else if (page == 0x2110) {
-            read = Read.byte(this.registers.bg2vofs.get());
+            value = this.registers.bg2vofs.get();
         } else if (page == 0x2111) {
-            read = Read.byte(this.registers.bg3hofs.get());
+            value = this.registers.bg3hofs.get();
         } else if (page == 0x2112) {
-            read = Read.byte(this.registers.bg3vofs.get());
+            value = this.registers.bg3vofs.get();
         } else if (page == 0x2113) {
-            read = Read.byte(this.registers.bg4hofs.get());
+            value = this.registers.bg4hofs.get();
         } else if (page == 0x2114) {
-            read = Read.byte(this.registers.bg4vofs.get());
+            value = this.registers.bg4vofs.get();
         } else if (page == 0x2115) {
-            read = Read.byte(this.registers.vportcntrl.get());
+            value = this.registers.vportcntrl.get();
         } else if (page == 0x2116) {
-            read = Read.byte(this.registers.vaddr.getLower());
+            value = this.registers.vaddr.getLower();
         } else if (page == 0x2117) {
-            read = Read.byte(this.registers.vaddr.getUpper());
+            value = this.registers.vaddr.getUpper();
         } else if (page == 0x2118) {
-            read = Read.byte(this.registers.vdataw.getLower());
+            value = this.registers.vdataw.getLower();
         } else if (page == 0x2119) {
-            read = Read.byte(this.registers.vdataw.getUpper());
+            value = this.registers.vdataw.getUpper();
         } else if (page == 0x211A) {
-            read = Read.byte(this.registers.m7sel.get());
+            value = this.registers.m7sel.get();
         } else if (page == 0x211B) {
-            read = Read.byte(this.registers.m7a.get());
+            value = this.registers.m7a.get();
         } else if (page == 0x211C) {
-            read = Read.byte(this.registers.m7b.get());
+            value = this.registers.m7b.get();
         } else if (page == 0x211D) {
-            read = Read.byte(this.registers.m7c.get());
+            value = this.registers.m7c.get();
         } else if (page == 0x211E) {
-            read = Read.byte(this.registers.m7d.get());
+            value = this.registers.m7d.get();
         } else if (page == 0x211F) {
-            read = Read.byte(this.registers.m7x.get());
+            value = this.registers.m7x.get();
         } else if (page == 0x2120) {
-            read = Read.byte(this.registers.m7y.get());
+            value = this.registers.m7y.get();
         } else if (page == 0x2121) {
-            read = Read.byte(this.registers.cgramaddr.get());
+            value = this.registers.cgramaddr.get();
         } else if (page == 0x2122) {
-            read = Read.byte(this.registers.cgdataw.get());
+            value = this.registers.cgdataw.get();
         } else if (page == 0x2123) {
-            read = Read.byte(this.registers.w12sel.get());
+            value = this.registers.w12sel.get();
         } else if (page == 0x2124) {
-            read = Read.byte(this.registers.w34sel.get());
+            value = this.registers.w34sel.get();
         } else if (page == 0x2125) {
-            read = Read.byte(this.registers.wobjsel.get());
+            value = this.registers.wobjsel.get();
         } else if (page == 0x2126) {
-            read = Read.byte(this.registers.wh0.get());
+            value = this.registers.wh0.get();
         } else if (page == 0x2127) {
-            read = Read.byte(this.registers.wh1.get());
+            value = this.registers.wh1.get();
         } else if (page == 0x2128) {
-            read = Read.byte(this.registers.wh2.get());
+            value = this.registers.wh2.get();
         } else if (page == 0x2129) {
-            read = Read.byte(this.registers.wh3.get());
+            value = this.registers.wh3.get();
         } else if (page == 0x212A) {
-            read = Read.byte(this.registers.wbglog.get());
+            value = this.registers.wbglog.get();
         } else if (page == 0x212B) {
-            read = Read.byte(this.registers.wobjlog.get());
+            value = this.registers.wobjlog.get();
         } else if (page == 0x212C) {
-            read = Read.byte(this.registers.tm.get());
+            value = this.registers.tm.get();
         } else if (page == 0x212D) {
-            read = Read.byte(this.registers.ts.get());
+            value = this.registers.ts.get();
         } else if (page == 0x212E) {
-            read = Read.byte(this.registers.tmw.get());
+            value = this.registers.tmw.get();
         } else if (page == 0x212F) {
-            read = Read.byte(this.registers.tsw.get());
+            value = this.registers.tsw.get();
         } else if (page == 0x2130) {
-            read = Read.byte(this.registers.cgwsel.get());
+            value = this.registers.cgwsel.get();
         } else if (page == 0x2131) {
-            read = Read.byte(this.registers.cgadsub.get());
+            value = this.registers.cgadsub.get();
         } else if (page == 0x2132) {
-            read = Read.byte(this.registers.coldata.get());
+            value = this.registers.coldata.get();
         } else if (page == 0x2133) {
-            read = Read.byte(this.registers.setini.get());
+            value = this.registers.setini.get();
         } else if (page == 0x2134) {
-            read = Read.byte(this.registers.mpyl.get());
+            value = this.registers.mpyl.get();
         } else if (page == 0x2135) {
-            read = Read.byte(this.registers.mpym.get());
+            value = this.registers.mpym.get();
         } else if (page == 0x2136) {
-            read = Read.byte(this.registers.mpyh.get());
+            value = this.registers.mpyh.get();
         } else if (page == 0x2137) {
-            read = Read.byte(this.registers.slhv.get());
+            value = this.registers.slhv.get();
         } else if (page == 0x2138) {
-            read = Read.byte(this.registers.oamdatar.get());
+            value = this.registers.oamdatar.get();
         } else if (page == 0x2139) {
-            read = Read.byte(this.registers.vdatar.getLower());
+            value = this.registers.vdatar.getLower();
         } else if (page == 0x213A) {
-            read = Read.byte(this.registers.vdatar.getUpper());
+            value = this.registers.vdatar.getUpper();
         } else if (page == 0x213B) {
-            read = Read.byte(this.registers.cgdatar.get());
+            value = this.registers.cgdatar.get();
         } else if (page == 0x213C) {
-            read = Read.byte(this.registers.scanlochort.get());
+            value = this.registers.scanlochort.get();
         } else if (page == 0x213D) {
-            read = Read.byte(this.registers.scanlocvert.get());
+            value = this.registers.scanlocvert.get();
         } else if (page == 0x213E) {
-            read = Read.byte(this.registers.stat77.get());
+            value = this.registers.stat77.get();
         } else if (page == 0x213F) {
-            read = Read.byte(this.registers.stat78.get());
+            value = this.registers.stat78.get();
         } else if (page >= 0x2140 && page <= 0x2180) {
             if (page % 4 == 0) {
-                read = Read.byte(this.console.apu.registers.apuio0.get());
+                value = this.console.apu.registers.apuio0.get();
             } else if (page % 4 == 1) {
-                read = Read.byte(this.console.apu.registers.apuio1.get());
+                value = this.console.apu.registers.apuio1.get();
             } else if (page % 4 == 2) {
-                read = Read.byte(this.console.apu.registers.apuio2.get());
+                value = this.console.apu.registers.apuio2.get();
             } else if (page % 4 == 3) {
-                read = Read.byte(this.console.apu.registers.apuio3.get());
+                value = this.console.apu.registers.apuio3.get();
             }
         } else if (page == 0x2180) {
-            read = Read.byte(this.console.cpu.registers.wmdata.get());
+            value = this.console.cpu.registers.wmdata.get();
         } else if (page == 0x2181) {
-            read = Read.byte(this.console.cpu.registers.wmadd.getLower());
+            value = this.console.cpu.registers.wmadd.getLower();
         } else if (page == 0x2182) {
-            read = Read.byte(this.console.cpu.registers.wmadd.getMiddle());
+            value = this.console.cpu.registers.wmadd.getMiddle();
         } else if (page == 0x2183) {
-            read = Read.byte(this.console.cpu.registers.wmadd.getUpper());
+            value = this.console.cpu.registers.wmadd.getUpper();
         } else if (page <= 0x21FF) {
 
         } else {
-            throw new Error("Invalid read on BusB at " + address);
+            throw new Error("Invalid value on BusB at " + address);
         }
 
 
-        return read;
+        return Bit.toUint8(value);
     }
 
 

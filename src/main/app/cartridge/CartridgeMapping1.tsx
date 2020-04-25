@@ -16,7 +16,7 @@ export class CartridgeMapping1 implements ICartridgeMapping {
         this.cartridge = cartridge;
     }
 
-    public read(address: Address): Read {
+    public read(address: Address): number {
 
         let bank = address.getBank();
         let page = address.getPage();
@@ -28,28 +28,28 @@ export class CartridgeMapping1 implements ICartridgeMapping {
 
             let index = (base + offset) % length;
             let value = this.cartridge.rom[index];
-            return Read.byte(value, 0);
+            return value;
         } else if (0x40 <= bank && bank <= 0x7D) {
             let base: number = (bank - 0x40) * 0xFFFF;
             let offset: number = page % 0xFFFF;
 
             let index = (base + offset) % length;
             let value = this.cartridge.rom[index];
-            return Read.byte(value, 0);
+            return value;
         } else if (0x00 <= bank && bank < 0x40) {
             let base: number = (bank - 0x00) * 0xFFFF;
             let offset: number = page % 0xFFFF;
 
             let index = (base + offset) % length;
             let value = this.cartridge.rom[index];
-            return Read.byte(value, 0);
+            return value;
         } else if (0x80 <= bank && bank < 0xC0) {
             let base: number = (bank - 0x80) * 0xFFFF;
             let offset: number = page % 0xFFFF;
 
             let index = (base + offset) % length;
             let value = this.cartridge.rom[index];
-            return Read.byte(value, 0);
+            return value;
         }
 
         throw new Error("Invalid read at " + address.toString());

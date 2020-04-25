@@ -408,6 +408,11 @@ export class HorizontalScrollForBG1Register extends Register {
     public label: string = "BG1HOFS";
     public prev: number = 0;
 
+    public set(val: number): void {
+        this.prev = this.val & 0xFF;
+        this.val = val & 0xFF;
+    }
+
     public getBG1HortOffset(): number {
         let result = (this.val << 8) | this.prev;
         this.prev = this.val;
@@ -450,6 +455,11 @@ export class HorizontalScrollForBG2Register extends Register {
     public label: string = "BG2HOFS";
     public prev: number = 0;
 
+    public set(val: number): void {
+        this.prev = this.val & 0xFF;
+        this.val = val & 0xFF;
+    }
+
     public getBG2HortOffset(): number {
         let result = (this.val << 8) | this.prev;
         this.prev = this.val;
@@ -484,6 +494,11 @@ export class HorizontalScrollForBG3Register extends Register {
     public label: string = "BG3HOFS";
     public prev: number = 0;
 
+    public set(val: number): void {
+        this.prev = this.val & 0xFF;
+        this.val = val & 0xFF;
+    }
+
     public getBG3HortOffset(): number {
         let result = (this.val << 8) | this.prev;
         this.prev = this.val;
@@ -517,6 +532,11 @@ export class HorizontalScrollForBG4Register extends Register {
     public label: string = "BG4HOFS";
     public prev: number = 0;
 
+    public set(val: number): void {
+        this.prev = this.val & 0xFF;
+        this.val = val & 0xFF;
+    }
+
     public getBG4HortOffset(): number {
         let result = (this.val << 8) | this.prev;
         this.prev = this.val;
@@ -529,6 +549,11 @@ export class VerticalScrollForBG4Register extends Register {
     public address: string = "0x2114";
     public label: string = "BG4VOFS";
     public prev: number = 0;
+
+    public set(val: number): void {
+        this.prev = this.val & 0xFF;
+        this.val = val & 0xFF;
+    }
 
     public getBG4VertOffset(): number {
         let result = (this.val << 8) | this.prev;

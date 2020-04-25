@@ -3,6 +3,7 @@ import {NumberUtil} from "../util/NumberUtil";
 import {Address} from "../bus/Address";
 import {Read} from "../bus/Read";
 import {Write} from "../bus/Write";
+import {Bit} from "../util/Bit";
 
 export class Wram {
     // The SNES includes 128Kbytes of Work RAM, which can be accessed in several ways:
@@ -20,7 +21,7 @@ export class Wram {
         this.data.fill(0, 0, Wram.SIZE);
     }
 
-    public readByte(address: Address): Read {
+    public readByte(address: Address): number {
         Objects.requireNonNull(address);
 
         let bank = address.getBank();
@@ -31,17 +32,16 @@ export class Wram {
         }
 
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
-            // let remainder: number = page % 0x2000;
-            // let multiplier: number = Math.floor(page/ 0x2000) * 0x2000;
-            // let offset: number = bank == 0x7F ? 0xFFFF : 0x0000;
-            // let index: number = multiplier + remainder + offset;
-
             let base: number = (((bank % 0x80) - 0x7E) << 16);
             let index: number = base | (page % 0xFFFF);
-            return Read.byte(this.data[index]);
+
+            let value: number = this.data[index];
+            return Bit.toUint8(value);
         } else {
             let index: number = (page % 0x2000);
-            return Read.byte(this.data[index]);
+
+            let value: number = this.data[index];
+            return Bit.toUint8(value);
         }
     }
 

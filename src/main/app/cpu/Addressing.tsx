@@ -91,22 +91,18 @@ export class AbsoluteJump implements IAddressingMode {
         let result: Addressing = this.getAddressing(context);
 
         let addr: Address = result.getLow();
-        let byte: Read = context.bus.readByte(addr);
+        let byte: number = context.bus.readByte(addr);
 
-        let cycles: number = result.getCycles() + byte.getCycles();
-
-        return Read.byte(byte.get(), cycles);
+        return Read.byte(byte, 0);
     }
 
     public getAddressing(context: OpContext): Addressing {
         let HH: number = context.registers.k.get();
-        let MM: Read = context.getOperand(1);
-        let LL: Read = context.getOperand(0);
+        let MM: number = context.getOperand(1);
+        let LL: number = context.getOperand(0);
 
-        let data: number = Bit.toUint24(HH, MM.get(), LL.get());
-        let cycles: number = MM.getCycles() + LL.getCycles();
-
-        return Addressing.toByte(data, cycles);
+        let data: number = Bit.toUint24(HH, MM, LL);
+        return Addressing.toByte(data);
     }
 }
 
@@ -120,23 +116,21 @@ export class Absolute implements IAddressingMode {
         let loAddr: Address = result.getLow();
         let hiAddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loAddr);
-        let hiByte: Read = context.bus.readByte(hiAddr);
+        let loByte: number = context.bus.readByte(loAddr);
+        let hiByte: number = context.bus.readByte(hiAddr);
 
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.word(loByte.get(), hiByte.get(), cycles);
+        return Read.word(loByte, hiByte);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: number = context.getOperand(0).get();
-        let HH: number = context.getOperand(1).get();
+        let LL: number = context.getOperand(0);
+        let HH: number = context.getOperand(1);
         let rr: number = context.cpu.registers.dbr.get();
 
         let dataLow: number = (rr << 16) | Bit.toUint16(HH, LL);
         let dataHigh: number = dataLow + 1;
 
-        return Addressing.toWord(dataLow, dataHigh, 0);
+        return Addressing.toWord(dataLow, dataHigh);
     }
 }
 
@@ -150,25 +144,22 @@ export class AbsoluteX implements IAddressingMode {
         let loAddr: Address = result.getLow();
         let hiAddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loAddr);
-        let hiByte: Read = context.bus.readByte(hiAddr);
+        let loByte: number = context.bus.readByte(loAddr);
+        let hiByte: number = context.bus.readByte(hiAddr);
 
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-        return Read.word(loByte.get(), hiByte.get(), cycles);
+        return Read.word(loByte, hiByte);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: number = context.getOperand(0).get();
-        let MM: number = context.getOperand(1).get();
+        let LL: number = context.getOperand(0);
+        let MM: number = context.getOperand(1);
         let HH: number = context.cpu.registers.dbr.get();
-
-        let cycles: number = 0;
 
         let address: number = Bit.toUint24(HH, MM, LL);
         let low: number = address + context.registers.x.get();
         let high: number = low + 1;
 
-        return Addressing.toWord(low, high, cycles);
+        return Addressing.toWord(low, high);
     }
 }
 
@@ -182,26 +173,22 @@ export class AbsoluteY implements IAddressingMode {
         let loAddr: Address = result.getLow();
         let hiAddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loAddr);
-        let hiByte: Read = context.bus.readByte(hiAddr);
+        let loByte: number = context.bus.readByte(loAddr);
+        let hiByte: number = context.bus.readByte(hiAddr);
 
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.word(loByte.get(), hiByte.get(), cycles);
+        return Read.word(loByte, hiByte);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: number = context.getOperand(0).get();
-        let MM: number = context.getOperand(1).get();
+        let LL: number = context.getOperand(0);
+        let MM: number = context.getOperand(1);
         let HH: number = context.cpu.registers.dbr.get();
-
-        let cycles: number = 0;
 
         let address: number = Bit.toUint24(HH, MM, LL);
         let low: number = address + context.registers.y.get();
         let high: number = low + 1;
 
-        return Addressing.toWord(low, high, cycles);
+        return Addressing.toWord(low, high);
     }
 }
 
@@ -213,30 +200,26 @@ export class AbsoluteLong implements IAddressingMode {
         let result: Addressing = this.getAddressing(context);
 
         let addr: Address = result.getLow();
-        let value: Read = context.bus.readByte(addr);
+        let value: number = context.bus.readByte(addr);
 
-        let cycles: number = result.getCycles();
-
-        return Read.byte(value.get(), cycles);
+        return Read.byte(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let low: number = context.getOperand(0).get();
-        let high: number = context.getOperand(1).get();
+        let low: number = context.getOperand(0);
+        let high: number = context.getOperand(1);
 
         let addr: number = Bit.toUint16(high, low);
 
         let laddr: Address = Address.create(addr);
         let haddr: Address = Address.create(addr + 1);
 
-        let LL: Read = context.bus.readByte(laddr);
-        let MM: Read = context.bus.readByte(haddr);
+        let LL: number = context.bus.readByte(laddr);
+        let MM: number = context.bus.readByte(haddr);
         let HH: number = context.registers.k.get();
 
-        let cycles: number = LL.getCycles() + MM.getCycles();
-        let address: number = Bit.toUint24(HH, MM.get(), LL.get());
-
-        return Addressing.toByte(address, cycles);
+        let address: number = Bit.toUint24(HH, MM, LL);
+        return Addressing.toByte(address);
     }
 }
 
@@ -248,35 +231,27 @@ export class AbsoluteLongIndexed implements IAddressingMode {
         let result: Addressing = this.getAddressing(context);
 
         let addr: Address = result.getLow();
-        let value: Read = context.bus.readByte(addr);
+        let value: number = context.bus.readByte(addr);
 
-        let cycles: number = result.getCycles();
-
-        return Read.byte(value.get(), cycles);
+        return Read.byte(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: Read = context.getOperand(0);
-        let HH: Read = context.getOperand(1);
+        let LL: number = context.getOperand(0);
+        let HH: number = context.getOperand(1);
 
-        let base: number = Bit.toUint16(LL.get(), HH.get());
+        let base: number = Bit.toUint16(LL, HH);
 
         let lowAddr: number = base + 0;
         let midAddr: number = base + 1;
         let highAddr: number = base + 2;
 
-        let low: Read = context.bus.readByte(Address.create(lowAddr));
-        let mid: Read = context.bus.readByte(Address.create(midAddr));
-        let high: Read = context.bus.readByte(Address.create(highAddr));
+        let low: number = context.bus.readByte(Address.create(lowAddr));
+        let mid: number = context.bus.readByte(Address.create(midAddr));
+        let high: number = context.bus.readByte(Address.create(highAddr));
 
-        let value: number = Bit.toUint24(high.get(), mid.get(), low.get());
-        let cycles: number = LL.getCycles() +
-            HH.getCycles() +
-            low.getCycles() +
-            mid.getCycles() +
-            high.getCycles();
-
-        return Addressing.toByte(value, cycles);
+        let value: number = Bit.toUint24(high, mid, low);
+        return Addressing.toByte(value);
     }
 
 }
@@ -289,16 +264,14 @@ export class AbsoluteIndirect implements IAddressingMode {
         let result: Addressing = this.getAddressing(context);
 
         let addr: Address = result.getLow();
-        let value: Read = context.bus.readByte(addr);
+        let value: number = context.bus.readByte(addr);
 
-        let cycles: number = result.getCycles();
-
-        return Read.byte(value.get(), cycles);
+        return Read.byte(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let low: number = context.getOperand(0).get();
-        let high: number = context.getOperand(1).get();
+        let low: number = context.getOperand(0);
+        let high: number = context.getOperand(1);
         let k: number = context.cpu.registers.dbr.get();
         let x: number = context.cpu.registers.x.get();
 
@@ -308,13 +281,13 @@ export class AbsoluteIndirect implements IAddressingMode {
         let laddr: Address = Address.create(base);
         let haddr: Address = Address.create(base + 1);
 
-        let LL: number = context.bus.readByte(laddr).get();
-        let MM: number = context.bus.readByte(haddr).get();
+        let LL: number = context.bus.readByte(laddr);
+        let MM: number = context.bus.readByte(haddr);
         let HH: number = context.registers.k.get();
 
         let address: number = Bit.toUint24(HH, MM, LL);
 
-        return Addressing.toByte(address, 0);
+        return Addressing.toByte(address);
     }
 }
 
@@ -345,32 +318,29 @@ export class Direct implements IAddressingMode {
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);
 
-        let loByte: Read = context.bus.readByte(result.getLow());
-        let hiByte: Read = context.bus.readByte(result.getHigh());
+        let loByte: number = context.bus.readByte(result.getLow());
+        let hiByte: number = context.bus.readByte(result.getHigh());
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.word(value, cycles);
+        return Read.word(loByte, hiByte);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let low: Read = context.getOperand(0);
+        let low: number = context.getOperand(0);
 
         if (context.op.name == "PEI" &&
             context.registers.p.getE() == 1 &&
             context.registers.d.getLower() == 0x00) {
-            let loAddr: number = low.get();
+            let loAddr: number = low;
             let hiAddr: number = context.registers.d.getUpper();
 
             let result: number = Bit.toUint16(hiAddr, loAddr);
 
-            return Addressing.toByte(result, low.getCycles());
+            return Addressing.toByte(result);
         } else {
-            let loAddr: number = context.registers.d.get() + low.get();
+            let loAddr: number = context.registers.d.get() + low;
             let hiAddr: number = loAddr + 1;
 
-            return Addressing.toWord(loAddr, hiAddr, low.getCycles());
+            return Addressing.toWord(loAddr, hiAddr);
         }
     }
 }
@@ -382,24 +352,17 @@ export class DirectX implements IAddressingMode {
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);
 
-        if (result.getType() == AddressingType.BYTE) {
-            let low: Read = context.bus.readByte(result.getLow());
+        let loByte: number = context.bus.readByte(result.getLow());
+        let hiByte: number = result.getType() == AddressingType.WORD ?
+            context.bus.readByte(result.getHigh()) : 0;
 
-            let cycles: number = result.getCycles() + low.getCycles();
-            return Read.byte(low.get(), cycles);
-        } else {
-            let loByte: Read = context.bus.readByte(result.getLow());
-            let hiByte: Read = context.bus.readByte(result.getHigh());
+        let value: number = Bit.toUint16(hiByte, loByte);
 
-            let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-            let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-            return Read.word(value, cycles);
-        }
+        return Read.word(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: number = context.getOperand(0).get();
+        let LL: number = context.getOperand(0);
         let d = context.registers.d.get();
         let x = context.registers.x.get();
 
@@ -414,7 +377,7 @@ export class DirectX implements IAddressingMode {
             let loaddr: number = (d + LL + x) & 0xFFFF;
             let hiaddr: number = (loaddr + 1) & 0xFFFF;
 
-            return Addressing.toWord(loaddr, hiaddr, 0);
+            return Addressing.toWord(loaddr, hiaddr);
         }
     }
 }
@@ -426,33 +389,23 @@ export class DirectY implements IAddressingMode {
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);
 
-        if (result.getType() == AddressingType.BYTE) {
-            let loaddr: Address = result.getLow();
-            let low: Read = context.bus.readByte(loaddr);
+        let loaddr: Address = result.getLow();
+        let hiaddr: Address = result.getHigh();
 
-            let cycles: number = result.getCycles() + low.getCycles();
-            return Read.byte(low.get(), cycles);
-        } else {
-            let loaddr: Address = result.getLow();
-            let hiaddr: Address = result.getHigh();
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = result.getType() == AddressingType.BYTE ?
+            0 : context.bus.readByte(hiaddr);
 
-            let loByte: Read = context.bus.readByte(loaddr);
-            let hiByte: Read = context.bus.readByte(hiaddr);
-
-            let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-            let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-            return Read.byte(value, cycles);
-        }
+        let value: number = Bit.toUint16(hiByte, loByte);
+        return Read.byte(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: number = context.getOperand(0).get();
+        let LL: number = context.getOperand(0);
         let y = context.registers.y.get();
         let d = context.registers.d.get();
 
         if (context.registers.p.getE() == 1 && context.registers.d.getLower() == 0x00) {
-
             let loaddr: number = (LL + y) & 0xFF;
             let hiaddr: number = context.registers.d.getUpper();
 
@@ -461,7 +414,6 @@ export class DirectY implements IAddressingMode {
         } else {
             let loaddr: number = (d + LL + y) & 0xFFFF;
             let hiaddr: number = (loaddr + 1) & 0xFFFF;
-
 
             return Addressing.toWord(loaddr, hiaddr, 0);
         }
@@ -477,18 +429,15 @@ export class DirectIndirect implements IAddressingMode {
         let loaddr: Address = result.getLow();
         let hiaddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = context.bus.readByte(hiaddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.byte(value, cycles);
+        return Read.word(loByte, hiByte);
     }
 
     public getAddressing(context: OpContext): Addressing {
         let registers: Registers = context.registers;
-        let LL: number = context.getOperand(0).get();
+        let LL: number = context.getOperand(0);
 
         let loPointer: number;
         let hiPointer: number;
@@ -500,14 +449,13 @@ export class DirectIndirect implements IAddressingMode {
             loPointer = Bit.toUint16(dh, (LL + 0) & 0xFF);
             hiPointer = Bit.toUint16(dh, (LL + 1) & 0xFF);
 
-            let ll: Read = context.bus.readByte(Address.create(loPointer));
-            let hh: Read = context.bus.readByte(Address.create(hiPointer));
+            let ll: number = context.bus.readByte(Address.create(loPointer));
+            let hh: number = context.bus.readByte(Address.create(hiPointer));
             let rr: number = context.registers.dbr.get();
 
-            let loaddr = Bit.toUint24(rr, hh.get(), ll.get());
-            let hiaddr = loaddr + 1;
+            let loaddr = Bit.toUint24(rr, hh, ll);
+            let hiaddr = (loaddr + 1) % 0xFFFFFF;
 
-            cycles += ll.getCycles() + hh.getCycles();
             return Addressing.toWord(loaddr, hiaddr, cycles);
         } else {
             let d: number = registers.d.get();
@@ -515,14 +463,13 @@ export class DirectIndirect implements IAddressingMode {
             loPointer = d + LL;
             hiPointer = loPointer + 1;
 
-            let ll: Read = context.bus.readByte(Address.create(loPointer));
-            let hh: Read = context.bus.readByte(Address.create(hiPointer));
+            let ll: number = context.bus.readByte(Address.create(loPointer));
+            let hh: number = context.bus.readByte(Address.create(hiPointer));
             let rr: number = context.registers.dbr.get();
 
-            let loaddr = Bit.toUint24(rr, hh.get(), ll.get());
-            let hiaddr = loaddr + 1;
+            let loaddr = Bit.toUint24(rr, hh, ll);
+            let hiaddr = (loaddr + 1) % 0xFFFFFF;
 
-            cycles += ll.getCycles() + hh.getCycles();
             return Addressing.toWord(loaddr, hiaddr, cycles);
         }
     }
@@ -537,40 +484,34 @@ export class DirectIndirectIndexed implements IAddressingMode {
         let loaddr: Address = result.getLow();
         let hiaddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = context.bus.readByte(hiaddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.word(value, cycles);
+        let value: number = Bit.toUint16(hiByte, loByte);
+        return Read.word(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: Read = context.getOperand(0);
+        let LL: number = context.getOperand(0);
 
         if (context.registers.p.getE() == 1 && context.registers.d.getLower() == 0x00) {
             let dh: number = context.registers.d.getUpper();
             let x: number = context.registers.x.get();
 
-            let loPointer: number = (LL.get() + x + 0) & 0xFF;
-            let hiPointer: number = (LL.get() + x + 1) & 0xFF;
-
-            let cycles: number = LL.getCycles();
+            let loPointer: number = (LL + x + 0) & 0xFF;
+            let hiPointer: number = (LL + x + 1) & 0xFF;
 
             return Addressing.toWord(
                 Bit.toUint24(0, dh, loPointer),
-                Bit.toUint24(0, dh, hiPointer), cycles);
+                Bit.toUint24(0, dh, hiPointer));
         } else {
             let d: number = context.registers.d.getUpper();
             let x: number = context.registers.x.get();
 
-            let loPointer: number = d + LL.get() + x + 0;
-            let hiPointer: number = d + LL.get() + x + 1;
+            let loPointer: number = (d + LL + x + 0) % 0xFFFFFF;
+            let hiPointer: number = (d + LL + x + 1) % 0xFFFFFF;
 
-            let cycles: number = LL.getCycles();
-
-            return Addressing.toWord(loPointer, hiPointer, cycles);
+            return Addressing.toWord(loPointer, hiPointer);
         }
     }
 }
@@ -584,53 +525,48 @@ export class DirectIndirectLong implements IAddressingMode {
         let loaddr: Address = result.getLow();
         let hiaddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = context.bus.readByte(hiaddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.byte(value, cycles);
+        let value: number = Bit.toUint16(hiByte, loByte);
+        return Read.byte(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: Read = context.getOperand(0);
+        let LL: number = context.getOperand(0);
 
         let loPointer: number;
         let hiPointer: number;
-        let cycles: number = LL.getCycles();
 
         if (context.registers.p.getE() == 1 && context.registers.d.getLower() == 0x00) {
             let dh: number = context.registers.d.getUpper();
 
-            let lo: number = (LL.get() + 0) & 0xFF;
-            let hi: number = (LL.get() + 1) & 0xFF;
+            let lo: number = (LL + 0) & 0xFF;
+            let hi: number = (LL + 1) & 0xFF;
 
             loPointer = Bit.toUint24(0, dh, lo);
             hiPointer = Bit.toUint24(0, dh, hi);
         } else {
             let d: number = context.registers.d.getUpper();
 
-            let lo: number = d + LL.get();
-            let hi: number = d + LL.get() + 1;
+            let lo: number = d + LL;
+            let hi: number = d + LL + 1;
 
             loPointer = lo;
             hiPointer = hi;
         }
 
-
-        let ll: Read = context.bus.readByte(Address.create(loPointer));
-        let hh: Read = context.bus.readByte(Address.create(hiPointer));
+        let ll: number = context.bus.readByte(Address.create(loPointer));
+        let hh: number = context.bus.readByte(Address.create(hiPointer));
         let rr: number = context.registers.dbr.get();
 
         let y: number = context.registers.y.get();
 
-        let addr: number = Bit.toUint24(rr, hh.get(), ll.get());
+        let addr: number = Bit.toUint24(rr, hh, ll);
         let loaddr: number = addr + y;
         let hiaddr: number = addr + y + 1;
 
-        cycles += ll.getCycles() + hh.getCycles();
-        return Addressing.toWord(loaddr, hiaddr, cycles);
+        return Addressing.toWord(loaddr, hiaddr);
     }
 }
 
@@ -643,32 +579,29 @@ export class DirectIndexedIndirect implements IAddressingMode {
         let loaddr: Address = result.getLow();
         let hiaddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = context.bus.readByte(hiaddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.word(value, cycles);
+        let value: number = Bit.toUint16(hiByte, loByte);
+        return Read.word(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: Read = context.getOperand(0);
+        let LL: number = context.getOperand(0);
         let d: number = context.registers.d.get();
 
-        let loPointer: number = (d + LL.get() + 0) & 0xFFFF;
-        let miPointer: number = (d + LL.get() + 1) & 0xFFFF;
-        let hiPointer: number = (d + LL.get() + 2) & 0xFFFF;
+        let loPointer: number = (d + LL + 0) & 0xFFFF;
+        let miPointer: number = (d + LL + 1) & 0xFFFF;
+        let hiPointer: number = (d + LL + 2) & 0xFFFF;
 
-        let ll: Read = context.bus.readByte(Address.create(loPointer));
-        let mm: Read = context.bus.readByte(Address.create(miPointer));
-        let hh: Read = context.bus.readByte(Address.create(hiPointer));
+        let ll: number = context.bus.readByte(Address.create(loPointer));
+        let mm: number = context.bus.readByte(Address.create(miPointer));
+        let hh: number = context.bus.readByte(Address.create(hiPointer));
 
-        let loaddr: number = Bit.toUint24(hh.get(), mm.get(), ll.get());
-        let hiaddr: number = loaddr + 1;
+        let loaddr: number = Bit.toUint24(hh, mm, ll);
+        let hiaddr: number = (loaddr + 1) % 0xFFFFFF;
 
-        let cycles = LL.getCycles() + ll.getCycles() + mm.getCycles() + hh.getCycles();
-        return Addressing.toWord(loaddr, hiaddr, cycles);
+        return Addressing.toWord(loaddr, hiaddr);
     }
 }
 
@@ -681,29 +614,28 @@ export class DirectIndirectIndexedLong implements IAddressingMode {
         let loaddr: Address = result.getLow();
         let hiaddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = context.bus.readByte(hiaddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.byte(value, cycles);
+        let value: number = Bit.toUint16(hiByte, loByte);
+        return Read.byte(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: number = context.getOperand(0).get();
+        let LL: number = context.getOperand(0);
         let y: number = context.registers.y.get();
         let d: number = context.registers.d.get();
 
         let base: number = (d + LL) & 0xFFFF;
 
-        let loPointer: Read = context.bus.readByte(Address.create(base + 0));
-        let midPointer: Read = context.bus.readByte(Address.create(base + 1));
-        let hiPointer: Read = context.bus.readByte(Address.create(base + 2));
+        let loPointer: number = context.bus.readByte(Address.create(base + 0));
+        let midPointer: number = context.bus.readByte(Address.create(base + 1));
+        let hiPointer: number = context.bus.readByte(Address.create(base + 2));
 
-        let addr: number = Bit.toUint24(hiPointer.get(), midPointer.get(), loPointer.get());
-        let loaddr: number = addr + y;
-        let hiaddr: number = addr + y + 1;
+        let addr: number = Bit.toUint24(hiPointer, midPointer, loPointer);
+
+        let loaddr: number = (addr + y + 0) % 0xFFFFFF;
+        let hiaddr: number = (addr + y + 1) % 0xFFFFFF;
 
         return Addressing.toWord(loaddr, hiaddr, 0);
     }
@@ -711,7 +643,7 @@ export class DirectIndirectIndexedLong implements IAddressingMode {
 
 export class ImmediateX implements IAddressingMode {
 
-    public label: string = "Immediate X";
+    public label: string = "IMMEDIATE X";
     public immediate8: Immediate8 = new Immediate8();
     public immediate16: Immediate16 = new Immediate16();
 
@@ -735,7 +667,7 @@ export class ImmediateX implements IAddressingMode {
 
 export class ImmediateM implements IAddressingMode {
 
-    public label: string = "Immediate M";
+    public label: string = "IMMEDIATE M";
     public immediate8: Immediate8 = new Immediate8();
     public immediate16: Immediate16 = new Immediate16();
 
@@ -759,16 +691,15 @@ export class ImmediateM implements IAddressingMode {
 
 export class Immediate8 implements IAddressingMode {
 
-    public label: string = "Immediate 8";
+    public label: string = "IMMEDIATE 8";
 
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);
 
         let loaddr: Address = result.getLow();
-        let lodata: Read = context.bus.readByte(loaddr);
+        let lodata: number = context.bus.readByte(loaddr);
 
-        let cycles: number = result.getCycles() + lodata.getCycles();
-        return Read.byte(lodata.get(), cycles);
+        return Read.byte(lodata);
     }
 
     public getAddressing(context: OpContext): Addressing {
@@ -779,18 +710,17 @@ export class Immediate8 implements IAddressingMode {
 
 export class Immediate16 implements IAddressingMode {
 
-    public label: string = "Immediate 16";
+    public label: string = "IMMEDIATE 16";
 
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);
         let loaddr: Address = result.getLow();
         let hiaddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + hiByte.getCycles() + loByte.getCycles();
-        return Read.word(loByte.get(), hiByte.get(), cycles);
+        return Read.word(loByte, hiByte);
     }
 
     public getAddressing(context: OpContext): Addressing {
@@ -802,7 +732,7 @@ export class Immediate16 implements IAddressingMode {
 
 export class Implied implements IAddressingMode {
 
-    public label: string = "Implied";
+    public label: string = "IMPLIED";
 
     public getValue(context: OpContext): Read {
         let opaddr: number = context.opaddr.toValue();
@@ -824,26 +754,24 @@ export class Long implements IAddressingMode {
         let loaddr: Address = result.getLow();
         let hiaddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = context.bus.readByte(hiaddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-        return Read.byte(value, cycles);
+        let value: number = Bit.toUint16(hiByte, loByte);
+        return Read.word(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: Read = context.getOperand(0);
-        let MM: Read = context.getOperand(1);
-        let HH: Read = context.getOperand(2);
+        let LL: number = context.getOperand(0);
+        let MM: number = context.getOperand(1);
+        let HH: number = context.getOperand(2);
 
-        let addr: number = Bit.toUint24(HH.get(), MM.get(), LL.get());
+        let addr: number = Bit.toUint24(HH, MM, LL);
 
         let loaddr: number = addr;
         let hiaddr: number = addr + 1;
 
-        let cycles: number = LL.getCycles() + MM.getCycles() + HH.getCycles();
-        return Addressing.toWord(loaddr, hiaddr, cycles);
+        return Addressing.toWord(loaddr, hiaddr);
     }
 }
 
@@ -856,26 +784,23 @@ export class LongX implements IAddressingMode {
         let loaddr: Address = result.getLow();
         let hiaddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = context.bus.readByte(hiaddr);
 
-        let cycles: number = result.getCycles() + hiByte.getCycles() + loByte.getCycles();
-
-        return Read.word(loByte.get(), hiByte.get(), cycles);
+        return Read.word(loByte, hiByte);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: Read = context.getOperand(0);
-        let MM: Read = context.getOperand(1);
-        let HH: Read = context.getOperand(2);
+        let LL: number = context.getOperand(0);
+        let MM: number = context.getOperand(1);
+        let HH: number = context.getOperand(2);
 
-        let addr: number = Bit.toUint24(HH.get(), MM.get(), LL.get());
+        let addr: number = Bit.toUint24(HH, MM, LL);
 
         let loaddr: number = addr + context.registers.x.get();
         let hiaddr: number = addr + context.registers.x.get() + 1;
 
-        let cycles: number = LL.getCycles() + MM.getCycles() + HH.getCycles();
-        return Addressing.toWord(loaddr, hiaddr, cycles);
+        return Addressing.toWord(loaddr, hiaddr);
     }
 }
 
@@ -885,16 +810,13 @@ export class Relative8 implements IAddressingMode {
 
     public getValue(context: OpContext): Read {
         throw new Error("Not supported");
-        // let result: Addressing = this.getAddressing(context);
-        // return Read.byte(result.getLow().toValue(), 0);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: number = context.getOperand(0).get();
+        let LL: number = context.getOperand(0);
         let pc: number = context.registers.pc.get();
 
         if (0x00 <= LL && LL <= 0x7F) {
-
             return Addressing.toByte((pc + LL) & 0xFFFF, 0);
         } else {
 
@@ -908,12 +830,12 @@ export class Relative16 implements IAddressingMode {
     public label: string = "RELATIVE 16";
 
     public getValue(context: OpContext): Read {
-        throw new Error("Not implemented!")
+        throw new Error("Not implemented!");
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: number = context.getOperand(0).get();
-        let HH: number = context.getOperand(1).get();
+        let LL: number = context.getOperand(0);
+        let HH: number = context.getOperand(1);
         let pc: number = context.cpu.registers.pc.get();
 
         let base: number = (pc + Bit.toUint16(HH, LL)) & 0xFFFF;
@@ -924,25 +846,23 @@ export class Relative16 implements IAddressingMode {
 
 export class SourceDestination implements IAddressingMode {
 
-    public label: string = " SOURCE,DESTINATION";
+    public label: string = "SOURCE,DESTINATION";
 
     public getValue(context: OpContext): Read {
         let result: Addressing = this.getAddressing(context);
         let loaddr: Address = result.getLow();
         let hiaddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = context.bus.readByte(hiaddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.byte(value, cycles);
+        let value: number = Bit.toUint16(hiByte, loByte);
+        return Read.byte(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let sBank: Read = context.getOperand(1);
-        let dBank: Read = context.getOperand(0);
+        let sBank: number = context.getOperand(1);
+        let dBank: number = context.getOperand(0);
 
         let sPage: number;
         let dPage: number;
@@ -954,11 +874,10 @@ export class SourceDestination implements IAddressingMode {
             dPage = context.registers.y.get();
         }
 
-        let sAddr: number = Bit.toUint24(sBank.get(), 0, sPage);
-        let dAddr: number = Bit.toUint24(dBank.get(), 0, dPage);
+        let sAddr: number = Bit.toUint24(sBank, 0, sPage);
+        let dAddr: number = Bit.toUint24(dBank, 0, dPage);
 
-        let cycles: number = sBank.getCycles() + dBank.getCycles();
-        return Addressing.toWord(sAddr, dAddr, cycles);
+        return Addressing.toWord(sAddr, dAddr);
     }
 }
 
@@ -971,23 +890,20 @@ export class Stack implements IAddressingMode {
         let loaddr: Address = result.getLow();
         let hiaddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = context.bus.readByte(hiaddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.word(value, cycles);
+        let value: number = Bit.toUint16(hiByte, loByte);
+        return Read.word(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: Read = context.getOperand(0);
+        let LL: number = context.getOperand(0);
 
-        let loaddr: number = (LL.get() + context.registers.sp.get() + 0) & 0xFFFF;
-        let hiaddr: number = (LL.get() + context.registers.sp.get() + 1) & 0xFFFF;
+        let loaddr: number = (LL + context.registers.sp.get() + 0) & 0xFFFF;
+        let hiaddr: number = (LL + context.registers.sp.get() + 1) & 0xFFFF;
 
-        let cycles: number = LL.getCycles();
-        return Addressing.toWord(loaddr, hiaddr, cycles);
+        return Addressing.toWord(loaddr, hiaddr);
     }
 }
 
@@ -1000,31 +916,28 @@ export class StackY implements IAddressingMode {
         let loaddr: Address = result.getLow();
         let hiaddr: Address = result.getHigh();
 
-        let loByte: Read = context.bus.readByte(loaddr);
-        let hiByte: Read = context.bus.readByte(hiaddr);
+        let loByte: number = context.bus.readByte(loaddr);
+        let hiByte: number = context.bus.readByte(hiaddr);
 
-        let value: number = Bit.toUint16(hiByte.get(), loByte.get());
-        let cycles: number = result.getCycles() + loByte.getCycles() + hiByte.getCycles();
-
-        return Read.byte(value, cycles);
+        let value: number = Bit.toUint16(hiByte, loByte);
+        return Read.byte(value);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let LL: Read = context.getOperand(0);
+        let LL: number = context.getOperand(0);
 
-        let loPointer: number = (LL.get() + context.registers.sp.get() + 0) & 0xFFFF;
-        let hiPointer: number = (LL.get() + context.registers.sp.get() + 1) & 0xFFFF;
+        let loPointer: number = (LL + context.registers.sp.get() + 0) & 0xFFFF;
+        let hiPointer: number = (LL + context.registers.sp.get() + 1) & 0xFFFF;
 
-        let ll: Read = context.bus.readByte(Address.create(loPointer));
-        let hh: Read = context.bus.readByte(Address.create(hiPointer));
+        let ll: number = context.bus.readByte(Address.create(loPointer));
+        let hh: number = context.bus.readByte(Address.create(hiPointer));
         let rr: number = context.registers.dbr.get();
 
-        let addr: number = Bit.toUint24(rr, hh.get(), ll.get());
+        let addr: number = Bit.toUint24(rr, hh, ll);
         let loaddr: number = addr + context.registers.y.get();
         let hiaddr: number = addr + context.registers.y.get() + 1;
 
-        let cycles: number = LL.getCycles();
-        return Addressing.toWord(loaddr, hiaddr, cycles);
+        return Addressing.toWord(loaddr, hiaddr);
     }
 }
 

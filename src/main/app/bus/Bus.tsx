@@ -5,22 +5,19 @@ import {Write} from "./Write";
 import {Read} from "./Read";
 import {BusA} from "./BusA";
 import {BusB} from "./BusB";
-
-export class NotSupported extends Error {
-    constructor(message? : any) {
-        super(`Not supported! ${message}`);
-        this.name = 'NotSupported';
-    }
-}
+import {Cartridge} from "../cartridge/Cartridge";
+import {Wram} from "../memory/Wram";
+import {Bit} from "../util/Bit";
 
 export class Bus {
-
 
     public busA: BusA;
     public busB: BusB;
 
     public console: Console;
-    public mdr: Read = null;
+    public mdr: number = null;
+    private cartridge: Cartridge;
+    private wram: Wram;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -28,18 +25,8 @@ export class Bus {
         this.console = console;
         this.busA = new BusA(console);
         this.busB = new BusB(console);
-    }
-
-    public readWord(address: Address): Read {
-        let nextAddress = Address.create(address.toValue() + 1);
-
-        let low: Read = this.readByte(address);
-        let high: Read = this.readByte(nextAddress);
-
-        let cycles: number = low.getCycles() + high.getCycles();
-
-        let result: Read = Read.word(low.get(), high.get(), cycles);
-        return result;
+        this.cartridge = console.cartridge;
+        this.wram = console.cpu.wram;
     }
 
     // "Internal" cycles on the CPU, and reads from or writes to "Fast" memory regions,
@@ -52,63 +39,58 @@ export class Bus {
     // when fast memory is not enabled) take 8 master clock cycles.
     //
     // "slow" memory, which is only banks $00-$3F and $80-$BF, pages $40 and $41, take 12 master clock cycles.
-    public readByte(address: Address): Read {
+    public readByte(address: Address): number {
         if (address == null) {
             throw new Error("Invalid readByte at " + address);
         }
 
-        //console.log("reading " + address.toString());
-
-        let read: Read = null;
+        let value: number = this.mdr;
 
         let bank = address.getBank();
         let page = address.getPage();
 
         if (0x00 <= bank && bank < 0x3F) {
             if (0x0000 <= page && page <= 0x1FFF) {
-                read = this.console.cpu.wram.readByte(address);
+                value = this.wram.readByte(address);
             } else if (0x2100 <= page && page <= 0x21FF) {
-                read = this.busB.readByte(address);
+                value = this.busB.readByte(address);
             } else if (0x2200 <= page && page <= 0x3FFF) {
-                read = this.mdr;
+                value = this.mdr;
             } else if (0x4000 <= page && page <= 0x43FF) {
-                read = this.busA.readByte(address);
+                value = this.busA.readByte(address);
             } else if (0x4380 <= page && page <= 0x7FFF) {
-                read = this.mdr;
+                value = this.mdr;
             } else if (0x8000 <= page && page <= 0xFFFF) {
-                read = this.console.cartridge.readByte(address);
+                value = this.cartridge.readByte(address);
             }
         } else if (0x40 <= bank && bank <= 0x7F) {
             if (0x7E <= bank && bank <= 0x7F) {
-                read = this.console.cpu.wram.readByte(address);
+                value = this.wram.readByte(address);
             } else {
-                read = this.console.cartridge.readByte(address);
+                value = this.cartridge.readByte(address);
             }
         } else if (0x80 <= bank && bank <= 0xBF) {
             if (0x0000 <= page && page <= 0x1FFF) {
-                read = this.console.cpu.wram.readByte(address);
+                value = this.wram.readByte(address);
             } else if (0x2100 <= page && page <= 0x21FF) {
-                read = this.busB.readByte(address);
+                value = this.busB.readByte(address);
             } else if (0x2200 <= page && page <= 0x4000) {
-                read = this.mdr;
+                value = this.mdr;
             } else if (0x4000 <= page && page <= 0x43FF) {
-                read = this.busA.readByte(address);
+                value = this.busA.readByte(address);
             } else if (0x4400 <= page && page <= 0x7FFF) {
-                read = this.mdr;
+                value = this.mdr;
             } else if (0x8000 <= page && page <= 0xFFFF) {
-                read = this.console.cartridge.readByte(address);
+                value = this.cartridge.readByte(address);
             }
         } else if (0xC0 <= bank && bank <= 0xFF) {
-            read = this.console.cartridge.readByte(address);
+            value = this.cartridge.readByte(address);
         } else {
-            throw new Error("Invalid bus read at " + address.toValue());
+            throw new Error("Invalid bus value at " + address.toValue());
         }
 
-        if (read == null) {
-            return this.mdr;
-        }
-        this.mdr = read;
-        return read;
+        this.mdr = value;
+        return Bit.toUint8(value);
     }
 
 
@@ -163,6 +145,11 @@ export class Bus {
         }
 
         return null;
+    }
+
+    public reset(): void {
+        this.mdr = 0;
+        this.cartridge = this.console.cartridge;
     }
 
 }

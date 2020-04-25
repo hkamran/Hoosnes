@@ -1,5 +1,12 @@
 export class Bit {
 
+    public static toUint8(value: number) {
+        if (value == null || value < 0 || value > 0xFF) {
+            throw new Error(`Invalid value given ${value}`);
+        }
+        return value;
+    }
+
     public static toUint16(a: number, b?: number): number {
         if (a == null || b == null) {
             return null;

@@ -20,12 +20,14 @@ export class Console {
         this.ppu = new Ppu(this);
         this.apu = new Apu(this);
         this.bus = new Bus(this);
+
     }
 
     public load(romBytes : number[]) : void {
         this.reset();
 
         this.cartridge = new Cartridge(romBytes);
+        this.bus.reset();
         this.log.info("Cartridge is Loaded!", this.cartridge);
         this.cpu.load(this.cartridge);
     }
@@ -34,6 +36,7 @@ export class Console {
         this.cpu.reset();
         this.ppu.reset();
         this.apu.reset();
+        this.bus.reset();
     }
 
     public tick(): void {

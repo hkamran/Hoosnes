@@ -1,9 +1,9 @@
 import {Address} from "../bus/Address";
 import {Write} from "../bus/Write";
 import {Cartridge, ICartridgeMapping} from "./Cartridge";
-import {NotSupported} from "../bus/Bus";
 import {Sram} from "../memory/Sram";
 import {Read} from "../bus/Read";
+import {Bit} from "../util/Bit";
 
 export class CartridgeMapping0 implements ICartridgeMapping {
 
@@ -16,7 +16,7 @@ export class CartridgeMapping0 implements ICartridgeMapping {
         this.cartridge = cartridge;
     }
 
-    public read(address: Address): Read {
+    public read(address: Address): number {
         let bank = address.getBank();
         let page = address.getPage();
 
@@ -25,12 +25,12 @@ export class CartridgeMapping0 implements ICartridgeMapping {
                 let index = ((bank - 0x00) * 0x8000) + (page - 0x0000);
                 let value = this.cartridge.rom[index];
 
-                return Read.byte(value, 0);
+                return value;
             } else if (0xC0 <= bank && bank <= 0xEF) {
                 let index = ((bank - 0x80) * 0x8000) + (page - 0x0000);
                 let value = this.cartridge.rom[index];
 
-                return Read.byte(value, 0);
+                return value;
             } else if (0x70 <= bank && bank <= 0x7F) {
                 let index =(bank - 0x70) + page;
 
@@ -45,11 +45,12 @@ export class CartridgeMapping0 implements ICartridgeMapping {
                 let index = ((bank - 0x80) * 0x8000) + (page - 0x8000);
                 let value = this.cartridge.rom[index];
 
-                return Read.byte(value, 0);
+                return value;
             } else if (0x00 <= bank && bank <= 0x7F) {
                 let index = ((bank - 0x00) * 0x8000) + (page - 0x8000);
                 let value = this.cartridge.rom[index];
-                return Read.byte(value, 0);
+
+                return value;
             }
         }
 
