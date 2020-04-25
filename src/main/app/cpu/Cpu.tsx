@@ -3,15 +3,12 @@ import {Opcodes, OpContext, Operation} from "./Opcodes";
 import {InterruptHandler} from "./Interrupts";
 import {Cartridge} from "../cartridge/Cartridge";
 import {Objects} from "../util/Objects";
-import {Logger, LoggerManager} from "typescript-logger";
 import {Console} from "../Console";
-import {Address} from "../bus/Address";
 import {Stack} from "../memory/Stack";
 import {Wram} from "../memory/Wram";
+import {AddressUtil} from "../util/AddressUtil";
 
 export class Cpu {
-
-    public log : Logger = LoggerManager.create('Cpu');
 
     public registers: Registers;
     public opcodes: Opcodes;
@@ -46,7 +43,7 @@ export class Cpu {
         let bank: number = this.registers.k.get();
         let cycles = this.cycles;
 
-        let opaddr: number = Address.create(pc, bank).toValue();
+        let opaddr: number = AddressUtil.create(pc, bank);
         let opcode: number = this.console.bus.readByte(opaddr);
         let operation: Operation = this.opcodes.get(opcode);
         let context: OpContext = OpContext.create(this, opaddr, operation);

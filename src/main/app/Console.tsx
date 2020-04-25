@@ -20,7 +20,6 @@ export class Console {
         this.ppu = new Ppu(this);
         this.apu = new Apu(this);
         this.bus = new Bus(this);
-
     }
 
     public load(romBytes : number[]) : void {

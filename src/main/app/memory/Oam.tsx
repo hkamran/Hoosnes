@@ -3,9 +3,7 @@
 // bytes of information per sprite, and the last 32 bytes have two more bits of information.  Two or more sprites can
 // share the same set of tiles.
 
-import {Objects} from "../util/Objects";
-import {NumberUtil} from "../util/NumberUtil";
-import {Address} from "../bus/Address";
+import {AddressUtil} from "../util/AddressUtil";
 
 export class Oam {
 
@@ -24,36 +22,30 @@ export class Oam {
         this.high.fill(0, 0, Oam.TABLE_HIGH_SIZE);
     }
 
-    public readByte(address: Address): number {
-        if (address == null) {
-            throw new Error("Invalid write at 0x" + address);
-        }
+    public readByte(address: number): number {
+        AddressUtil.assertValid(address);
 
-        let bank = address.getBank();
-        let offset = address.getPage();
-
-        if (offset < 512) {
-            return this.low[offset];
-        } else if (offset < 544) {
-            return this.high[offset - 512];
+        if (address < 512) {
+            return this.low[address];
+        } else if (address < 544) {
+            return this.high[address - 512];
         }
         throw new Error("Invalid read at " + address.toString());
     }
 
-    public writeByte(address: Address, val: number): void {
-        if (address == null || val == null || val < 0 || val > 0xFF) {
-            throw new Error("Invalid write at 0x" + address + " with " + val);
+    public writeByte(address: number, value: number): void {
+        AddressUtil.assertValid(address);
+
+        if (value == null || value < 0 || value > 0xFF) {
+            throw new Error(`Invalid write given at ${address}=${value}`);
         }
 
-        let bank = address.getBank();
-        let offset = address.getPage();
-
-        if (offset < 512) {
-            this.low[offset] = val;
-        } else if (offset < 544) {
-            this.high[offset - 512] = val;
+        if (address < 512) {
+            this.low[address] = value;
+        } else if (address < 544) {
+            this.high[address - 512] = value;
         } else {
-            throw Error("Invalid write at " + address.toString() + " " + val);
+            throw Error("Invalid write at " + address.toString() + " " + value);
         }
     }
 }

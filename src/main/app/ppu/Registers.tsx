@@ -4,7 +4,6 @@ import {Console} from "../Console";
 import {CGram} from "../memory/CGram";
 import {Bit} from "../util/Bit";
 import {Objects} from "../util/Objects";
-import {Address} from "../bus/Address";
 import {Vram} from "../memory/Vram";
 import {Dimension} from "./Tiles";
 
@@ -160,11 +159,11 @@ export class OamDataWriteRegister extends Register {
         }
         if (addr < 512) {
             if (!isEven) {
-                ppu.oam.writeByte(Address.create(addr - 1), this.buffer);
-                ppu.oam.writeByte(Address.create(addr), val);
+                ppu.oam.writeByte(addr - 1, this.buffer);
+                ppu.oam.writeByte(addr, val);
             }
         } else {
-            ppu.oam.writeByte(Address.create(512 + (addr & 0x1f)), val);
+            ppu.oam.writeByte(512 + (addr & 0x1f), val);
         }
         ppu.registers.oamaddr.setTableAddress(addr + 1);
     }
@@ -699,8 +698,8 @@ export class VRAMDataWriteRegister extends Register {
         let amount = ppu.registers.vportcntrl.getAddressIncrementAmount();
         let type: number = ppu.registers.vportcntrl.getAddressFormation();
         let address: number = VideoPortControlRegister.remap(type, ppu.registers.vaddr.get());
-        if (loByte != null) ppu.vram.writeByte(Address.create(((2 * address) + 0) % Vram.size), loByte);
-        if (hiByte != null) ppu.vram.writeByte(Address.create(((2 * address) + 1) % Vram.size), hiByte);
+        if (loByte != null) ppu.vram.writeByte(((2 * address) + 0) % Vram.size, loByte);
+        if (hiByte != null) ppu.vram.writeByte(((2 * address) + 1) % Vram.size, hiByte);
 
         if (doIncrement) ppu.registers.vaddr.set(ppu.registers.vaddr.get() + amount);
     }
@@ -964,9 +963,9 @@ export class OAMDataReadRegister extends Register {
         ppu.registers.oamaddr.setTableAddress(addr + 1);
 
         if (addr >= 0x512) {
-            return ppu.oam.readByte(Address.create(512 + (addr & 0x1f)));
+            return ppu.oam.readByte(512 + (addr & 0x1f));
         } else {
-            return ppu.oam.readByte(Address.create(addr));
+            return ppu.oam.readByte(addr);
         }
     }
 
@@ -1015,8 +1014,8 @@ export class VRAMDataReadRegister extends Register {
         let address: number = VideoPortControlRegister.remap(type, ppu.registers.vaddr.get());
 
         if (doIncrement) ppu.registers.vaddr.set(ppu.registers.vaddr.get() + amount);
-        if (high) return ppu.vram.readByte(Address.create(address + 0));
-        if (!high) return ppu.vram.readByte(Address.create(address + 1));
+        if (high) return ppu.vram.readByte(address + 0);
+        if (!high) return ppu.vram.readByte(address + 1);
     }
 }
 

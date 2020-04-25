@@ -3,7 +3,6 @@ import * as React from "react";
 import {Card} from "./core/layout/Card";
 import {Tile, TileAttributes} from "../app/ppu/Tiles";
 import {BppType} from "../app/ppu/Palette";
-import {Address} from "../app/bus/Address";
 
 interface ITileCardProps {
     snes: Console;
@@ -125,7 +124,7 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
         while (vramIndex < length) {
 
             let attributes: TileAttributes = TileAttributes.create(8, 8, this.state.bbpType);
-            let tile: Tile = this.props.snes.ppu.tiles.getTile(Address.create(vramIndex), attributes);
+            let tile: Tile = this.props.snes.ppu.tiles.getTile(vramIndex, attributes);
             vramIndex += attributes.getTileSize();
 
             let tileBottomIndex: number = ((this.state.tileHeightSize * this.state.tilePixelSize) * tileYIndex) * totalWidth;

@@ -1,6 +1,5 @@
 import {Registers} from "./Registers";
 import {Console} from "../Console";
-import {Address} from "../bus/Address";
 
 export enum ApuState {
     BOOTING, START, TRANSFER, EXECUTE,
@@ -11,7 +10,6 @@ export class Apu {
     public registers: Registers;
     public state: ApuState = ApuState.BOOTING;
 
-    public address: Address;
     public amount: number = 0;
 
     constructor(console: Console) {

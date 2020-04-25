@@ -2,8 +2,8 @@ import {Ppu} from "./Ppu";
 import {Objects} from "../util/Objects";
 import {BppType} from "./Palette";
 import {Vram} from "../memory/Vram";
-import {Address} from "../bus/Address";
 import {ArrayUtil} from "../util/ArrayUtil";
+import {AddressUtil} from "../util/AddressUtil";
 
 export class Dimension {
 
@@ -137,9 +137,11 @@ export class Tiles {
         this.vram = ppu.vram;
     }
 
-    public getTile(address: Address, attributes: TileAttributes): Tile {
+    public getTile(address: number, attributes: TileAttributes): Tile {
         Objects.requireNonNull(address);
         Objects.requireNonNull(attributes);
+
+        AddressUtil.assertValid(address);
 
         if (attributes.bpp == BppType.Eight) {
             return this.getTile8Bpp(address, attributes);
@@ -148,14 +150,14 @@ export class Tiles {
         }
     }
 
-    private getTile8Bpp(address: Address, attributes: TileAttributes): Tile {
+    private getTile8Bpp(address: number, attributes: TileAttributes): Tile {
         throw new Error("Not implemented!");
     }
 
-    private getTileNon8Bpp(address: Address, attributes: TileAttributes): Tile {
+    private getTileNon8Bpp(address: number, attributes: TileAttributes): Tile {
         let image: number[][] = ArrayUtil.create2dMatrix(attributes.getHeight(), attributes.getWidth());
         let bpp: number = attributes.bpp.valueOf();
-        let index: number = address.toValue();
+        let index: number = address;
 
         let height: number = 8;
         let width: number = 8;

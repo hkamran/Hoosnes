@@ -1,8 +1,6 @@
-
 import {Oam} from "../memory/Oam";
 import {Ppu} from "./Ppu";
 import {Objects} from "../util/Objects";
-import {Address} from "../bus/Address";
 import {Dimension, Orientation, Tile, TileAttributes} from "./Tiles";
 import {BppType} from "./Palette";
 
@@ -68,7 +66,7 @@ export class Sprite {
         return val;
     }
 
-    public getTileAddress(): Address {
+    public getTileAddress(): number {
         let baseTableAddr: number = this.ppu.registers.oamselect.getBaseSelection();
         let secondaryTableOffset: number = this.ppu.registers.oamselect.getNameSelection();
         let secondaryTableAddr: number = baseTableAddr + ((secondaryTableOffset + 1) << 12);
@@ -79,7 +77,8 @@ export class Sprite {
         // Sprites are always 4 bpp
         let baseAddr: number = isSecondaryTable ? secondaryTableAddr : baseTableAddr;
         let tileAddr: number = ((baseAddr + tileNumber) & 0x7fff) * (BppType.Four / 2);
-        return Address.create(tileAddr);
+
+        return tileAddr;
     }
 
     public getTile(): Tile {
@@ -87,7 +86,7 @@ export class Sprite {
         let height: number = this.isBig() ? dimensions.big.height : dimensions.small.height;
         let width: number = this.isBig() ? dimensions.big.width : dimensions.small.width;
         let attributes: TileAttributes = TileAttributes.create(height, width, BppType.Four, this.isYFlipped(), this.isXFlipped());
-        let address: Address = this.getTileAddress();
+        let address: number = this.getTileAddress();
 
         return this.ppu.tiles.getTile(address, attributes);
     }

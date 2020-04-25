@@ -1,12 +1,9 @@
 import {Console} from "../app/Console";
-import {Registers} from "../app/ppu/Registers";
-import {Ppu} from "../app/ppu/Ppu";
 import * as React from "react";
 import {Card} from "./core/layout/Card";
 import {Background} from "../app/ppu/Backgrounds";
 import {Dimension, Tile} from "../app/ppu/Tiles";
 import {BppType, Color} from "../app/ppu/Palette";
-import {Address} from "../app/bus/Address";
 import {TileMap} from "../app/ppu/TileMaps";
 
 interface IBackgroundsCardProps {

@@ -1,10 +1,7 @@
 import {Ppu} from "./Ppu";
-import {Bit} from "../util/Bit";
 import {BppType, Color} from "./Palette";
 import {Screen, ScreenRegion} from "./Screen";
-import {Dimension, Tile, TileAttributes} from "./Tiles";
-import {TileMap} from "./TileMaps";
-import {Address} from "../bus/Address";
+import {Dimension, Tile} from "./Tiles";
 import {Sprite} from "./Sprites";
 
 export class Renderer {

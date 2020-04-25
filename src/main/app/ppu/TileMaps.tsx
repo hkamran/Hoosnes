@@ -1,8 +1,8 @@
 import {Vram} from "../memory/Vram";
-import {Address} from "../bus/Address";
-import {Dimension, Tile} from "./Tiles";
+import {Dimension} from "./Tiles";
 import {Objects} from "../util/Objects";
 import {Bit} from "../util/Bit";
+import {AddressUtil} from "../util/AddressUtil";
 
 /**
  * vhopppcc cccccccc
@@ -58,16 +58,20 @@ export class TileMaps {
         this.dimension = Dimension.get32by32();
     }
 
-    public getTileMap(address: Address): TileMap {
-        let index = address.toValue();
+    public getTileMap(address: number): TileMap {
+        AddressUtil.assertValid(address);
+
+        let index = address;
         let tileMap = TileMap.create(
             this.vram.data[(index + 0) % this.vram.data.length],
             this.vram.data[(index + 1) % this.vram.data.length]);
         return tileMap;
     }
 
-    public getTileMaps(address: Address): TileMap[] {
-        let index = address.toValue();
+    public getTileMaps(address: number): TileMap[] {
+        AddressUtil.assertValid(address);
+
+        let index = address;
         let target = (index + ((this.dimension.width * this.dimension.height) * 2))
             % this.vram.data.length;
 
