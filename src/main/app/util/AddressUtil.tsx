@@ -14,4 +14,7 @@ export class AddressUtil {
         return (value) & 0xFFFF;
     }
 
+    public static create(page: number, bank?: number) {
+        return ((bank || 0) << 16) | (page || 0);
+    }
 }
