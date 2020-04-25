@@ -311,286 +311,286 @@ export class BusA {
     }
 
 
-    public writeByte(address: Address, val: number): Write {
-        if (address == null || val == null || val < 0 || val > 0xFF) {
-            throw new Error("Invalid writeByte at " + address + " with " + val);
-        }
+    public writeByte(address: number, value: number): void {
+        AddressUtil.assertValid(address);
 
-        let bank = address.getBank();
-        let page = address.getPage();
+        let bank = AddressUtil.getBank(address);
+        let page = AddressUtil.getPage(address);
+
+        if (value == null || value < 0 || value > 0xFF) {
+            throw new Error(`Invalid write given at ${address}=${value}`);
+        }
 
         if (page < 0x2100 || page > 0x43FF) {
             throw new Error("Invalid writeByte at " + address);
         }
 
         if (page == 0x4016) {
-            this.registers.joy1l.set(val);
+            this.registers.joy1l.set(value);
         } else if (page == 0x4017) {
-            this.registers.joy2l.set(val);
+            this.registers.joy2l.set(value);
         } else if (page == 0x4200) {
-            this.registers.nmitimen.set(val);
+            this.registers.nmitimen.set(value);
         } else if (page == 0x4201) {
-            this.registers.wrio.set(val);
+            this.registers.wrio.set(value);
         } else if (page == 0x4202) {
-            this.registers.wrmpya.set(val);
+            this.registers.wrmpya.set(value);
         } else if (page == 0x4203) {
-            this.registers.wrmpyb.set(val);
+            this.registers.wrmpyb.set(value);
         } else if (page == 0x4204) {
-            this.registers.wrdivl.set(val);
+            this.registers.wrdivl.set(value);
         } else if (page == 0x4205) {
-            this.registers.wrdivh.set(val);
+            this.registers.wrdivh.set(value);
         } else if (page == 0x4206) {
-            this.registers.wrdivb.set(val);
+            this.registers.wrdivb.set(value);
         } else if (page == 0x4207) {
-            this.registers.htime.setLower(val);
+            this.registers.htime.setLower(value);
         } else if (page == 0x4208) {
-            this.registers.htime.setUpper(val);
+            this.registers.htime.setUpper(value);
         } else if (page == 0x4209) {
-            this.registers.vtime.setLower(val);
+            this.registers.vtime.setLower(value);
         } else if (page == 0x420A) {
-            this.registers.vtime.setUpper(val);
+            this.registers.vtime.setUpper(value);
         } else if (page == 0x420B) {
-            this.registers.mdmaen.set(val);
+            this.registers.mdmaen.set(value);
         } else if (page == 0x420C) {
-            this.registers.hdmaen.set(val);
+            this.registers.hdmaen.set(value);
         } else if (page == 0x420D) {
-            this.registers.memsel.set(val);
+            this.registers.memsel.set(value);
         } else if (page == 0x4210) {
-            this.registers.rdnmi.set(val);
+            this.registers.rdnmi.set(value);
         } else if (page == 0x4211) {
-            this.registers.timeup.set(val);
+            this.registers.timeup.set(value);
         } else if (page == 0x4212) {
-            this.registers.hvbjoy.set(val);
+            this.registers.hvbjoy.set(value);
         } else if (page == 0x4213) {
-            this.registers.rdio.set(val);
+            this.registers.rdio.set(value);
         } else if (page == 0x4214) {
-            this.registers.rddivl.set(val);
+            this.registers.rddivl.set(value);
         } else if (page == 0x4215) {
-            this.registers.rddivh.set(val);
+            this.registers.rddivh.set(value);
         } else if (page == 0x4216) {
-            this.registers.rdmpyl.set(val);
+            this.registers.rdmpyl.set(value);
         } else if (page == 0x4217) {
-            this.registers.rdmpyh.set(val);
+            this.registers.rdmpyh.set(value);
         } else if (page == 0x4218) {
-            this.registers.joy1l.set(val);
+            this.registers.joy1l.set(value);
         } else if (page == 0x4219) {
-            this.registers.joy1h.set(val);
+            this.registers.joy1h.set(value);
         } else if (page == 0x421A) {
-            this.registers.joy2l.set(val);
+            this.registers.joy2l.set(value);
         } else if (page == 0x421B) {
-            this.registers.joy2h.set(val);
+            this.registers.joy2h.set(value);
         } else if (page == 0x421C) {
-            this.registers.joy3l.set(val);
+            this.registers.joy3l.set(value);
         } else if (page == 0x421D) {
-            this.registers.joy3h.set(val);
+            this.registers.joy3h.set(value);
         } else if (page == 0x421E) {
-            this.registers.joy4l.set(val);
+            this.registers.joy4l.set(value);
         } else if (page == 0x421F) {
-            this.registers.joy4h.set(val);
+            this.registers.joy4h.set(value);
         } else if (page == 0x4300) {
             // --------------------------
             // DMA 0
             // --------------------------
-            this.registers.dma0.control.set(val);
+            this.registers.dma0.control.set(value);
         } else if (page == 0x4301) {
-            this.registers.dma0.ppuAddressRegister.set(val);
+            this.registers.dma0.ppuAddressRegister.set(value);
         } else if (page == 0x4302) {
-            this.registers.dma0.cpuAddressRegister.setLower(val);
+            this.registers.dma0.cpuAddressRegister.setLower(value);
         } else if (page == 0x4303) {
-            this.registers.dma0.cpuAddressRegister.setMiddle(val);
+            this.registers.dma0.cpuAddressRegister.setMiddle(value);
         } else if (page == 0x4304) {
-            this.registers.dma0.cpuAddressRegister.setUpper(val);
+            this.registers.dma0.cpuAddressRegister.setUpper(value);
         } else if (page == 0x4305) {
-            this.registers.dma0.transferSize.setLower(val);
+            this.registers.dma0.transferSize.setLower(value);
         } else if (page == 0x4306) {
-            this.registers.dma0.transferSize.setUpper(val);
+            this.registers.dma0.transferSize.setUpper(value);
         } else if (page == 0x4307) {
-            this.registers.dma0.dasbx.set(val);
+            this.registers.dma0.dasbx.set(value);
         } else if (page == 0x4308) {
-            this.registers.dma0.a2axl.set(val);
+            this.registers.dma0.a2axl.set(value);
         } else if (page == 0x4309) {
-            this.registers.dma0.a2axh.set(val);
+            this.registers.dma0.a2axh.set(value);
         } else if (page == 0x430A) {
-            this.registers.dma0.ntlrx.set(val);
+            this.registers.dma0.ntlrx.set(value);
         } else if (page == 0x4310) {
             // --------------------------
             // DMA 1
             // --------------------------
-            this.registers.dma1.control.set(val);
+            this.registers.dma1.control.set(value);
         } else if (page == 0x4311) {
-            this.registers.dma1.ppuAddressRegister.set(val);
+            this.registers.dma1.ppuAddressRegister.set(value);
         } else if (page == 0x4312) {
-            this.registers.dma1.cpuAddressRegister.setLower(val);
+            this.registers.dma1.cpuAddressRegister.setLower(value);
         } else if (page == 0x4313) {
-            this.registers.dma1.cpuAddressRegister.setMiddle(val);
+            this.registers.dma1.cpuAddressRegister.setMiddle(value);
         } else if (page == 0x4314) {
-            this.registers.dma1.cpuAddressRegister.setUpper(val);
+            this.registers.dma1.cpuAddressRegister.setUpper(value);
         } else if (page == 0x4315) {
-            this.registers.dma1.transferSize.setLower(val);
+            this.registers.dma1.transferSize.setLower(value);
         } else if (page == 0x4316) {
-            this.registers.dma1.transferSize.setUpper(val);
+            this.registers.dma1.transferSize.setUpper(value);
         } else if (page == 0x4317) {
-            this.registers.dma1.dasbx.set(val);
+            this.registers.dma1.dasbx.set(value);
         } else if (page == 0x4318) {
-            this.registers.dma1.a2axl.set(val);
+            this.registers.dma1.a2axl.set(value);
         } else if (page == 0x4319) {
-            this.registers.dma1.a2axh.set(val);
+            this.registers.dma1.a2axh.set(value);
         } else if (page == 0x431A) {
-            this.registers.dma1.ntlrx.set(val);
+            this.registers.dma1.ntlrx.set(value);
         } else if (page == 0x4320) {
             // --------------------------
             // DMA 2
             // --------------------------
-            this.registers.dma2.control.set(val);
+            this.registers.dma2.control.set(value);
         } else if (page == 0x4321) {
-            this.registers.dma2.ppuAddressRegister.set(val);
+            this.registers.dma2.ppuAddressRegister.set(value);
         } else if (page == 0x4322) {
-            this.registers.dma2.cpuAddressRegister.setLower(val);
+            this.registers.dma2.cpuAddressRegister.setLower(value);
         } else if (page == 0x4323) {
-            this.registers.dma2.cpuAddressRegister.setMiddle(val);
+            this.registers.dma2.cpuAddressRegister.setMiddle(value);
         } else if (page == 0x4324) {
-            this.registers.dma2.cpuAddressRegister.setUpper(val);
+            this.registers.dma2.cpuAddressRegister.setUpper(value);
         } else if (page == 0x4325) {
-            this.registers.dma2.transferSize.setLower(val);
+            this.registers.dma2.transferSize.setLower(value);
         } else if (page == 0x4326) {
-            this.registers.dma2.transferSize.setUpper(val);
+            this.registers.dma2.transferSize.setUpper(value);
         } else if (page == 0x4327) {
-            this.registers.dma2.dasbx.set(val);
+            this.registers.dma2.dasbx.set(value);
         } else if (page == 0x4328) {
-            this.registers.dma2.a2axl.set(val);
+            this.registers.dma2.a2axl.set(value);
         } else if (page == 0x4329) {
-            this.registers.dma2.a2axh.set(val);
+            this.registers.dma2.a2axh.set(value);
         } else if (page == 0x432A) {
-            this.registers.dma2.ntlrx.set(val);
+            this.registers.dma2.ntlrx.set(value);
         } else if (page == 0x4330) {
             // --------------------------
             // DMA 3
             // --------------------------
-            this.registers.dma3.control.set(val);
+            this.registers.dma3.control.set(value);
         } else if (page == 0x4331) {
-            this.registers.dma3.ppuAddressRegister.set(val);
+            this.registers.dma3.ppuAddressRegister.set(value);
         } else if (page == 0x4332) {
-            this.registers.dma3.cpuAddressRegister.setLower(val);
+            this.registers.dma3.cpuAddressRegister.setLower(value);
         } else if (page == 0x4333) {
-            this.registers.dma3.cpuAddressRegister.setMiddle(val);
+            this.registers.dma3.cpuAddressRegister.setMiddle(value);
         } else if (page == 0x4334) {
-            this.registers.dma3.cpuAddressRegister.setUpper(val);
+            this.registers.dma3.cpuAddressRegister.setUpper(value);
         } else if (page == 0x4335) {
-            this.registers.dma3.transferSize.setLower(val);
+            this.registers.dma3.transferSize.setLower(value);
         } else if (page == 0x4336) {
-            this.registers.dma3.transferSize.setUpper(val);
+            this.registers.dma3.transferSize.setUpper(value);
         } else if (page == 0x4337) {
-            this.registers.dma3.dasbx.set(val);
+            this.registers.dma3.dasbx.set(value);
         } else if (page == 0x4338) {
-            this.registers.dma3.a2axl.set(val);
+            this.registers.dma3.a2axl.set(value);
         } else if (page == 0x4339) {
-            this.registers.dma3.a2axh.set(val);
+            this.registers.dma3.a2axh.set(value);
         } else if (page == 0x433A) {
-            this.registers.dma3.ntlrx.set(val);
+            this.registers.dma3.ntlrx.set(value);
         } else if (page == 0x4340) {
             // --------------------------
             // DMA 4
             // --------------------------
-            this.registers.dma4.control.set(val);
+            this.registers.dma4.control.set(value);
         } else if (page == 0x4341) {
-            this.registers.dma4.ppuAddressRegister.set(val);
+            this.registers.dma4.ppuAddressRegister.set(value);
         } else if (page == 0x4342) {
-            this.registers.dma4.cpuAddressRegister.setLower(val);
+            this.registers.dma4.cpuAddressRegister.setLower(value);
         } else if (page == 0x4343) {
-            this.registers.dma4.cpuAddressRegister.setMiddle(val);
+            this.registers.dma4.cpuAddressRegister.setMiddle(value);
         } else if (page == 0x4344) {
-            this.registers.dma4.cpuAddressRegister.setUpper(val);
+            this.registers.dma4.cpuAddressRegister.setUpper(value);
         } else if (page == 0x4345) {
-            this.registers.dma4.transferSize.setLower(val);
+            this.registers.dma4.transferSize.setLower(value);
         } else if (page == 0x4346) {
-            this.registers.dma4.transferSize.setUpper(val);
+            this.registers.dma4.transferSize.setUpper(value);
         } else if (page == 0x4347) {
-            this.registers.dma4.dasbx.set(val);
+            this.registers.dma4.dasbx.set(value);
         } else if (page == 0x4348) {
-            this.registers.dma4.a2axl.set(val);
+            this.registers.dma4.a2axl.set(value);
         } else if (page == 0x4349) {
-            this.registers.dma4.a2axh.set(val);
+            this.registers.dma4.a2axh.set(value);
         } else if (page == 0x434A) {
-            this.registers.dma4.ntlrx.set(val);
+            this.registers.dma4.ntlrx.set(value);
         } else if (page == 0x4350) {
             // --------------------------
             // DMA 5
             // --------------------------
-            this.registers.dma5.control.set(val);
+            this.registers.dma5.control.set(value);
         } else if (page == 0x4351) {
-            this.registers.dma5.ppuAddressRegister.set(val);
+            this.registers.dma5.ppuAddressRegister.set(value);
         } else if (page == 0x4352) {
-            this.registers.dma5.cpuAddressRegister.setLower(val);
+            this.registers.dma5.cpuAddressRegister.setLower(value);
         } else if (page == 0x4353) {
-            this.registers.dma5.cpuAddressRegister.setMiddle(val);
+            this.registers.dma5.cpuAddressRegister.setMiddle(value);
         } else if (page == 0x4354) {
-            this.registers.dma5.cpuAddressRegister.setUpper(val);
+            this.registers.dma5.cpuAddressRegister.setUpper(value);
         } else if (page == 0x4355) {
-            this.registers.dma5.transferSize.setLower(val);
+            this.registers.dma5.transferSize.setLower(value);
         } else if (page == 0x4356) {
-            this.registers.dma5.transferSize.setUpper(val);
+            this.registers.dma5.transferSize.setUpper(value);
         } else if (page == 0x4357) {
-            this.registers.dma5.dasbx.set(val);
+            this.registers.dma5.dasbx.set(value);
         } else if (page == 0x4358) {
-            this.registers.dma5.a2axl.set(val);
+            this.registers.dma5.a2axl.set(value);
         } else if (page == 0x4359) {
-            this.registers.dma5.a2axh.set(val);
+            this.registers.dma5.a2axh.set(value);
         } else if (page == 0x435A) {
-            this.registers.dma5.ntlrx.set(val);
+            this.registers.dma5.ntlrx.set(value);
         } else if (page == 0x4360) {
             // --------------------------
             // DMA 6
             // --------------------------
-            this.registers.dma6.control.set(val);
+            this.registers.dma6.control.set(value);
         } else if (page == 0x4361) {
-            this.registers.dma6.ppuAddressRegister.set(val);
+            this.registers.dma6.ppuAddressRegister.set(value);
         } else if (page == 0x4362) {
-            this.registers.dma6.cpuAddressRegister.setLower(val);
+            this.registers.dma6.cpuAddressRegister.setLower(value);
         } else if (page == 0x4363) {
-            this.registers.dma6.cpuAddressRegister.setMiddle(val);
+            this.registers.dma6.cpuAddressRegister.setMiddle(value);
         } else if (page == 0x4364) {
-            this.registers.dma6.cpuAddressRegister.setUpper(val);
+            this.registers.dma6.cpuAddressRegister.setUpper(value);
         } else if (page == 0x4365) {
-            this.registers.dma6.transferSize.setLower(val);
+            this.registers.dma6.transferSize.setLower(value);
         } else if (page == 0x4366) {
-            this.registers.dma6.transferSize.setUpper(val);
+            this.registers.dma6.transferSize.setUpper(value);
         } else if (page == 0x4367) {
-            this.registers.dma6.dasbx.set(val);
+            this.registers.dma6.dasbx.set(value);
         } else if (page == 0x4368) {
-            this.registers.dma6.a2axl.set(val);
+            this.registers.dma6.a2axl.set(value);
         } else if (page == 0x4369) {
-            this.registers.dma6.a2axh.set(val);
+            this.registers.dma6.a2axh.set(value);
         } else if (page == 0x436A) {
-            this.registers.dma6.ntlrx.set(val);
+            this.registers.dma6.ntlrx.set(value);
         } else if (page == 0x4370) {
             // --------------------------
             // DMA 7
             // --------------------------
-            this.registers.dma7.control.set(val);
+            this.registers.dma7.control.set(value);
         } else if (page == 0x4371) {
-            this.registers.dma7.ppuAddressRegister.set(val);
+            this.registers.dma7.ppuAddressRegister.set(value);
         } else if (page == 0x4372) {
-            this.registers.dma7.cpuAddressRegister.setLower(val);
+            this.registers.dma7.cpuAddressRegister.setLower(value);
         } else if (page == 0x4373) {
-            this.registers.dma7.cpuAddressRegister.setMiddle(val);
+            this.registers.dma7.cpuAddressRegister.setMiddle(value);
         } else if (page == 0x4374) {
-            this.registers.dma7.cpuAddressRegister.setUpper(val);
+            this.registers.dma7.cpuAddressRegister.setUpper(value);
         } else if (page == 0x4375) {
-            this.registers.dma7.transferSize.setLower(val);
+            this.registers.dma7.transferSize.setLower(value);
         } else if (page == 0x4376) {
-            this.registers.dma7.transferSize.setUpper(val);
+            this.registers.dma7.transferSize.setUpper(value);
         } else if (page == 0x4377) {
-            this.registers.dma7.dasbx.set(val);
+            this.registers.dma7.dasbx.set(value);
         } else if (page == 0x4378) {
-            this.registers.dma7.a2axl.set(val);
+            this.registers.dma7.a2axl.set(value);
         } else if (page == 0x4379) {
-            this.registers.dma7.a2axh.set(val);
+            this.registers.dma7.a2axh.set(value);
         } else if (page == 0x437A) {
-            this.registers.dma7.ntlrx.set(val);
+            this.registers.dma7.ntlrx.set(value);
         } else {
             console.warn("Invalid write on BusA at " + address);
         }
-
-        return null;
     }
 }

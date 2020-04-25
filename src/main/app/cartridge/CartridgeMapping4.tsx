@@ -20,7 +20,7 @@ export class CartridgeMapping4 implements ICartridgeMapping {
         return null;
     }
 
-    public write(address: Address, value: number): Write {
+    public write(address: number, value: number): Write {
         return null;
     }
 

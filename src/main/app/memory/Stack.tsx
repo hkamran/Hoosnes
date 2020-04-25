@@ -32,7 +32,7 @@ export class Stack {
         this.stack.push(byte);
 
         let sp: number = this.console.cpu.registers.sp.get();
-        this.console.bus.writeByte(Address.create(sp), byte);
+        this.console.bus.writeByte(sp, byte);
         this.console.cpu.registers.sp.set((sp - 1) & 0xFFFF);
     }
 

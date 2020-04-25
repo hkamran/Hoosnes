@@ -14,11 +14,11 @@ export class Bus {
 
     public busA: BusA;
     public busB: BusB;
-
+    public cartridge: Cartridge;
+    public wram: Wram;
     public console: Console;
+
     public mdr: number = null;
-    private cartridge: Cartridge;
-    private wram: Wram;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -93,19 +93,21 @@ export class Bus {
     }
 
 
-    public writeByte(address: Address, value: number): Write {
-        if (address == null || value < 0 || value > 0xFF) {
-            throw new Error(`Invalid readByte at ${address} with ${value}`);
+    public writeByte(address: number, value: number): void {
+        AddressUtil.assertValid(address);
+
+        let bank = AddressUtil.getBank(address);
+        let page = AddressUtil.getPage(address);
+
+        if (value == null || value < 0 || value > 0xFF) {
+            throw new Error(`Invalid write given at ${address}=${value}`);
         }
 
-        let write: Write = new Write(address, value, 0);
-
-        let bank = address.getBank();
-        let page = address.getPage();
+        this.mdr = value;
 
         if (0x00 <= bank && bank < 0x3F) {
             if (0x0000 <= page && page <= 0x1FFF) {
-                this.console.cpu.wram.writeByte(address, value);
+                this.wram.writeByte(address, value);
             } else if (0x2100 <= page && page <= 0x21FF) {
                 this.busB.writeByte(address, value);
             } else if (0x2200 <= page && page <= 0x3FFF) {
@@ -115,17 +117,17 @@ export class Bus {
             } else if (0x4380 <= page && page <= 0x7FFF) {
                 console.warn(`Writing ${address}=${value}`);
             } else if (0x8000 <= page && page <= 0xFFFF) {
-                this.console.cartridge.writeByte(address, value);
+                this.cartridge.writeByte(address, value);
             }
         } else if (0x40 <= bank && bank <= 0x7F) {
             if (0x7E <= bank && bank <= 0x7F) {
-                this.console.cpu.wram.writeByte(address, value);
+                this.wram.writeByte(address, value);
             } else {
-                this.console.cartridge.writeByte(address, value);
+                this.cartridge.writeByte(address, value);
             }
         } else if (0x80 <= bank && bank <= 0xBF) {
             if (0x0000 <= page && page <= 0x1FFF) {
-                this.console.cpu.wram.writeByte(address, value);
+                this.wram.writeByte(address, value);
             } else if (0x2100 <= page && page <= 0x21FF) {
                 this.busB.writeByte(address, value);
             } else if (0x2200 <= page && page <= 0x41FF) {
@@ -133,17 +135,13 @@ export class Bus {
             } else if (0x4200 <= page && page <= 0x43FF) {
                 this.busA.writeByte(address, value);
             } else if (0x4400 <= page && page <= 0x7FFF) {
-                this.console.cartridge.writeByte(address, value);
+                this.cartridge.writeByte(address, value);
             } else if (0x8000 <= page && page <= 0xFFFF) {
-                this.console.cartridge.writeByte(address, value);
+                this.cartridge.writeByte(address, value);
             }
         } else if (0xF0 <= bank && bank <= 0xFF) {
-            this.console.cartridge.writeByte(address, value);
-        } else {
-            throw new Error("Invalid bus read at " + address.toValue());
+            this.cartridge.writeByte(address, value);
         }
-
-        return null;
     }
 
     public reset(): void {

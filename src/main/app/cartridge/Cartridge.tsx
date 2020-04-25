@@ -15,7 +15,7 @@ import {Read} from "../bus/Read";
 export interface ICartridgeMapping {
     label: string;
     read(address: number): number;
-    write(address: Address, value: number): Write;
+    write(address: number, value: number): void;
 }
 
 export class InterruptAddresses {
@@ -213,7 +213,7 @@ export class Cartridge {
         return this.mapping.read(address);
     }
 
-    public writeByte(address: Address, value: number): Write {
+    public writeByte(address: number, value: number): void {
         return this.mapping.write(address, value);
     }
 

@@ -238,51 +238,51 @@ export class DmaChannel {
 
             if (writeMode == DmaWriteMode.ONE_BYTE) {
                 if (transferSize-- > 0)this.console.bus.writeByte(
-                    Address.create(destination),
+                    destination,
                     this.console.bus.readByte(source));
                 count += 1;
             } else if (writeMode == DmaWriteMode.TWO_BYTES) {
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 0),
+                    destination + 0,
                     this.console.bus.readByte(source + 0));
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 0),
+                    destination + 0,
                     this.console.bus.readByte(source + 1));
                 count += 2;
             } else if (writeMode == DmaWriteMode.TWO_BYTES_SEQUENCE) {
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 0),
+                    destination + 0,
                     this.console.bus.readByte(source + 0));
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 1),
+                    destination + 1,
                     this.console.bus.readByte(source + 1));
                 count += step * 2;
             } else if (writeMode == DmaWriteMode.TWO_WORDS) {
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 0),
+                    destination + 0,
                     this.console.bus.readByte(source + 0));
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 0),
+                    destination + 0,
                     this.console.bus.readByte(source + 0));
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 1),
+                    destination + 1,
                     this.console.bus.readByte(source + 1));
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 1),
+                    destination + 1,
                     this.console.bus.readByte(source + 1));
                 count += step * 4;
             } else if (writeMode == DmaWriteMode.FOUR_BYTES_SEQUENCE) {
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 0),
+                    destination + 0,
                     this.console.bus.readByte(source + 0));
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 1),
+                    destination + 1,
                     this.console.bus.readByte(source + 1));
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 2),
+                    destination + 2,
                     this.console.bus.readByte(source + 2));
                 if (transferSize-- > 0) this.console.bus.writeByte(
-                    Address.create(destination + 3),
+                    destination + 3,
                     this.console.bus.readByte(source + 3));
                 count += step * 4;
             } else {

@@ -46,30 +46,27 @@ export class Wram {
         }
     }
 
-    public writeByte(address: Address, value: number): Write {
+    public writeByte(address: number, value: number): void {
         Objects.requireNonNull(address);
 
-        let bank = address.getBank();
-        let page = address.getPage();
+        let bank = AddressUtil.getBank(address);
+        let page = AddressUtil.getPage(address);
+
+        if (value == null || value < 0 || value > 0xFF) {
+            throw new Error(`Invalid write given at ${address}=${value}`);
+        }
 
         if (page > 0xFFFF || page < 0) {
             throw new Error("Invalid writeByte on work ram!" + address);
         }
 
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
-            // let remainder: number = page % 0x2000;
-            // let multiplier: number = Math.floor(page/ 0x2000) * 0x2000;
-            // let offset: number = bank == 0x7F ? 0xFFFF : 0x0000;
-            // let index: number = multiplier + remainder + offset;
-
             let base: number = (((bank % 0x80) - 0x7E) << 16);
             let index: number = base | (page % 0xFFFF);
             this.data[index] = value;
-            return new Write(address, value, 0);
         } else {
             let index: number = (page % 0x2000);
             this.data[index] = value;
-            return new Write(address, value, 0);
         }
     }
 }

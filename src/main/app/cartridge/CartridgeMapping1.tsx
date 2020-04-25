@@ -58,7 +58,16 @@ export class CartridgeMapping1 implements ICartridgeMapping {
         throw new Error("Invalid read at " + address.toString());
     }
 
-    public write(address: Address, value: number): Write {
+    public write(address: number, value: number): void {
+        AddressUtil.assertValid(address);
+
+        let bank = AddressUtil.getBank(address);
+        let page = AddressUtil.getPage(address);
+
+        if (value == null || value < 0 || value > 0xFF) {
+            throw new Error(`Invalid write given at ${address}=${value}`);
+        }
+
         throw new Error("Invalid write at " + address.toString());
     }
 }

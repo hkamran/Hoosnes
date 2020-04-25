@@ -197,171 +197,170 @@ export class BusB {
     }
 
 
-    public writeByte(address: Address, val: number): Write {
-        if (address == null || val == null || val < 0 || val > 0xFF) {
-            throw new Error("Invalid writeByte at " + address.toString() + " with " + val);
-        }
+    public writeByte(address: number, value: number): void {
+        AddressUtil.assertValid(address);
 
-        let bank = address.getBank();
-        let page = address.getPage();
+        let bank = AddressUtil.getBank(address);
+        let page = AddressUtil.getPage(address);
+
+        if (value == null || value < 0 || value > 0xFF) {
+            throw new Error(`Invalid write given at ${address}=${value}`);
+        }
 
         if (page < 0x2100 || page > 0x21FF) {
             throw new Error("Invalid writeByte at " + address.toString());
         }
 
         if (page == 0x2100) {
-            this.registers.inidisp.set(val);
+            this.registers.inidisp.set(value);
         } else if (page == 0x2101) {
-            this.registers.oamselect.set(val);
+            this.registers.oamselect.set(value);
         } else if (page == 0x2102) {
-            this.registers.oamaddr.setLower(val);
+            this.registers.oamaddr.setLower(value);
         } else if (page == 0x2103) {
-            this.registers.oamaddr.setUpper(val);
+            this.registers.oamaddr.setUpper(value);
         } else if (page == 0x2104) {
-            this.registers.oamdataw.set(val);
+            this.registers.oamdataw.set(value);
         } else if (page == 0x2105) {
-            this.registers.bgmode.set(val);
+            this.registers.bgmode.set(value);
         } else if (page == 0x2106) {
-            this.registers.mosaic.set(val);
+            this.registers.mosaic.set(value);
         } else if (page == 0x2107) {
-            this.registers.vtilebg1.set(val);
+            this.registers.vtilebg1.set(value);
         } else if (page == 0x2108) {
-            this.registers.vtilebg2.set(val);
+            this.registers.vtilebg2.set(value);
         } else if (page == 0x2109) {
-            this.registers.vtilebg3.set(val);
+            this.registers.vtilebg3.set(value);
         } else if (page == 0x210A) {
-            this.registers.vtilebg4.set(val);
+            this.registers.vtilebg4.set(value);
         } else if (page == 0x210B) {
-            this.registers.vcharlocbg12.set(val);
+            this.registers.vcharlocbg12.set(value);
         } else if (page == 0x210C) {
-            this.registers.vcharlocbg34.set(val);
+            this.registers.vcharlocbg34.set(value);
         } else if (page == 0x210D) {
-            this.registers.bg1hofs.set(val);
+            this.registers.bg1hofs.set(value);
         } else if (page == 0x210E) {
-            this.registers.bg1vofs.set(val);
+            this.registers.bg1vofs.set(value);
         } else if (page == 0x210F) {
-            this.registers.bg2hofs.set(val);
+            this.registers.bg2hofs.set(value);
         } else if (page == 0x2110) {
-            this.registers.bg2vofs.set(val);
+            this.registers.bg2vofs.set(value);
         } else if (page == 0x2111) {
-            this.registers.bg3hofs.set(val);
+            this.registers.bg3hofs.set(value);
         } else if (page == 0x2112) {
-            this.registers.bg3vofs.set(val);
+            this.registers.bg3vofs.set(value);
         } else if (page == 0x2113) {
-            this.registers.bg4hofs.set(val);
+            this.registers.bg4hofs.set(value);
         } else if (page == 0x2114) {
-            this.registers.bg4vofs.set(val);
+            this.registers.bg4vofs.set(value);
         } else if (page == 0x2115) {
-            this.registers.vportcntrl.set(val);
+            this.registers.vportcntrl.set(value);
         } else if (page == 0x2116) {
-            this.registers.vaddr.setLower(val);
+            this.registers.vaddr.setLower(value);
         } else if (page == 0x2117) {
-            this.registers.vaddr.setUpper(val);
+            this.registers.vaddr.setUpper(value);
         } else if (page == 0x2118) {
-            this.registers.vdataw.setLower(val);
+            this.registers.vdataw.setLower(value);
         } else if (page == 0x2119) {
-            this.registers.vdataw.setUpper(val);
+            this.registers.vdataw.setUpper(value);
         } else if (page == 0x211A) {
-            this.registers.m7sel.set(val);
+            this.registers.m7sel.set(value);
         } else if (page == 0x211B) {
-            this.registers.m7a.set(val);
+            this.registers.m7a.set(value);
         } else if (page == 0x211C) {
-            this.registers.m7b.set(val);
+            this.registers.m7b.set(value);
         } else if (page == 0x211D) {
-            this.registers.m7c.set(val);
+            this.registers.m7c.set(value);
         } else if (page == 0x211E) {
-            this.registers.m7d.set(val);
+            this.registers.m7d.set(value);
         } else if (page == 0x211F) {
-            this.registers.m7x.set(val);
+            this.registers.m7x.set(value);
         } else if (page == 0x2120) {
-            this.registers.m7y.set(val);
+            this.registers.m7y.set(value);
         } else if (page == 0x2121) {
-            this.registers.cgramaddr.set(val);
+            this.registers.cgramaddr.set(value);
         } else if (page == 0x2122) {
-            this.registers.cgdataw.set(val);
+            this.registers.cgdataw.set(value);
         } else if (page == 0x2123) {
-            this.registers.w12sel.set(val);
+            this.registers.w12sel.set(value);
         } else if (page == 0x2124) {
-            this.registers.w34sel.set(val);
+            this.registers.w34sel.set(value);
         } else if (page == 0x2125) {
-            this.registers.wobjsel.set(val);
+            this.registers.wobjsel.set(value);
         } else if (page == 0x2126) {
-            this.registers.wh0.set(val);
+            this.registers.wh0.set(value);
         } else if (page == 0x2127) {
-            this.registers.wh1.set(val);
+            this.registers.wh1.set(value);
         } else if (page == 0x2128) {
-            this.registers.wh2.set(val);
+            this.registers.wh2.set(value);
         } else if (page == 0x2129) {
-            this.registers.wh3.set(val);
+            this.registers.wh3.set(value);
         } else if (page == 0x212A) {
-            this.registers.wbglog.set(val);
+            this.registers.wbglog.set(value);
         } else if (page == 0x212B) {
-            this.registers.wobjlog.set(val);
+            this.registers.wobjlog.set(value);
         } else if (page == 0x212C) {
-            this.registers.tm.set(val);
+            this.registers.tm.set(value);
         } else if (page == 0x212D) {
-            this.registers.ts.set(val);
+            this.registers.ts.set(value);
         } else if (page == 0x212E) {
-            this.registers.tmw.set(val);
+            this.registers.tmw.set(value);
         } else if (page == 0x212F) {
-            this.registers.tsw.set(val);
+            this.registers.tsw.set(value);
         } else if (page == 0x2130) {
-            this.registers.cgwsel.set(val);
+            this.registers.cgwsel.set(value);
         } else if (page == 0x2131) {
-            this.registers.cgadsub.set(val);
+            this.registers.cgadsub.set(value);
         } else if (page == 0x2132) {
-            this.registers.coldata.set(val);
+            this.registers.coldata.set(value);
         } else if (page == 0x2133) {
-            this.registers.setini.set(val);
+            this.registers.setini.set(value);
         } else if (page == 0x2134) {
-            this.registers.mpyl.set(val);
+            this.registers.mpyl.set(value);
         } else if (page == 0x2135) {
-            this.registers.mpym.set(val);
+            this.registers.mpym.set(value);
         } else if (page == 0x2136) {
-            this.registers.mpyh.set(val);
+            this.registers.mpyh.set(value);
         } else if (page == 0x2137) {
-            this.registers.slhv.set(val);
+            this.registers.slhv.set(value);
         } else if (page == 0x2138) {
-            this.registers.oamdatar.set(val);
+            this.registers.oamdatar.set(value);
         } else if (page == 0x2139) {
-            this.registers.vdatar.setLower(val);
+            this.registers.vdatar.setLower(value);
         } else if (page == 0x213A) {
-            this.registers.vdatar.setUpper(val);
+            this.registers.vdatar.setUpper(value);
         } else if (page == 0x213B) {
-            this.registers.cgdatar.set(val);
+            this.registers.cgdatar.set(value);
         } else if (page == 0x213C) {
-            this.registers.scanlochort.set(val);
+            this.registers.scanlochort.set(value);
         } else if (page == 0x213D) {
-            this.registers.scanlocvert.set(val);
+            this.registers.scanlocvert.set(value);
         } else if (page == 0x213E) {
-            this.registers.stat77.set(val);
+            this.registers.stat77.set(value);
         } else if (page == 0x213F) {
-            this.registers.stat78.set(val);
+            this.registers.stat78.set(value);
         } else if (page >= 0x2140 && page <= 0x2180) {
             if (page % 4 == 0) {
-                this.console.apu.registers.apuio0.set(val);
+                this.console.apu.registers.apuio0.set(value);
             } else if (page % 4 == 1) {
-                this.console.apu.registers.apuio1.set(val);
+                this.console.apu.registers.apuio1.set(value);
             } else if (page % 4 == 2) {
-                this.console.apu.registers.apuio2.set(val);
+                this.console.apu.registers.apuio2.set(value);
             } else if (page % 4 == 3) {
-                this.console.apu.registers.apuio3.set(val);
+                this.console.apu.registers.apuio3.set(value);
             }
         } else if (page == 0x2180) {
-            this.console.cpu.registers.wmdata.set(val);
+            this.console.cpu.registers.wmdata.set(value);
         } else if (page == 0x2181) {
-            this.console.cpu.registers.wmadd.setLower(val);
+            this.console.cpu.registers.wmadd.setLower(value);
         } else if (page == 0x2182) {
-            this.console.cpu.registers.wmadd.setMiddle(val);
+            this.console.cpu.registers.wmadd.setMiddle(value);
         } else if (page == 0x2183) {
-            this.console.cpu.registers.wmadd.setUpper(val);
+            this.console.cpu.registers.wmadd.setUpper(value);
         } else if (0x2184 <= page && page <= 0x21FF) {
 
         } else {
             throw new Error("Invalid write on BusB at " + address.toString());
         }
-
-
-        return null;
     }
 }
