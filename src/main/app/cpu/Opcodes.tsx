@@ -1,5 +1,4 @@
 import {Objects} from "../util/Objects";
-import {Read} from "../bus/Read";
 import {Console} from "../Console";
 import {Address} from "../bus/Address";
 import {Cpu} from "./Cpu";
@@ -154,7 +153,7 @@ export class ADC extends Operation {
         let size: number = is8Bit ? 0x80 : 0x8000;
 
         let a: number = context.cpu.registers.a.get() & mask;
-        let b: number = this.mode.getValue(context).get() & mask;
+        let b: number = this.mode.getValue(context) & mask;
         let c: number = context.cpu.registers.p.getC();
 
         let result: number = 0;
@@ -205,11 +204,11 @@ export class AND extends Operation {
 
     public execute(context: OpContext): number {
         let a: number = context.cpu.registers.a.get();
-        let b: Read = this.mode.getValue(context);
+        let b: number = this.mode.getValue(context);
 
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
-        let result: number = a & b.get();
+        let result: number = (a & mask) & (b & mask);
 
         if (is8Bit) context.cpu.registers.a.setLower(result & mask);
         if (!is8Bit) context.cpu.registers.a.set(result & mask);
@@ -233,11 +232,11 @@ export class ASL extends Operation {
     public name: string = "ASL";
 
     public execute(context: OpContext): number {
-        let b: Read = this.mode.getValue(context);
-
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
-        let result: number = (b.get() << 1) & mask;
+
+        let b: number = this.mode.getValue(context) & mask;
+        let result: number = (b << 1) & mask;
 
         if (this.mode == AddressingModes.accumulator) {
             if (is8Bit) context.registers.a.setLower(result);
@@ -253,7 +252,7 @@ export class ASL extends Operation {
 
         context.setFlagZ(result, is8Bit);
         context.setFlagN(result, is8Bit);
-        context.registers.p.setC((b.get() >> (is8Bit ? 7 : 15)) & 1);
+        context.registers.p.setC((b >> (is8Bit ? 7 : 15)) & 1);
 
         return this.cycle;
     }
@@ -311,8 +310,8 @@ export class BIT extends Operation {
         let vMask = is8Bit ? 0x40 : 0x4000;
         let nMask = is8Bit ? 0x80 : 0x8000;
 
-        let a: number = is8Bit ? context.registers.a.getLower() : context.registers.a.get();
-        let b: number = this.mode.getValue(context).get();
+        let a: number = context.registers.a.get() & mask;
+        let b: number = this.mode.getValue(context) & mask;
 
         let result = (a & mask) & (b & mask);
 
@@ -390,8 +389,8 @@ class CMP extends Operation {
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let negative: number = is8Bit ? 0x80 : 0x8000;
 
-        let a: number = is8Bit ? context.registers.a.getLower() : context.registers.a.get();
-        let b: number = this.mode.getValue(context).get() & mask;
+        let a: number = context.registers.a.get() & mask;
+        let b: number = this.mode.getValue(context) & mask;
 
         let value: number = (a & mask) - (b & mask);
 
@@ -430,8 +429,8 @@ class CPX extends Operation {
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let size: number = is8Bit ? 7 : 15;
 
-        let a: number = is8Bit ? context.registers.x.getLower() : context.registers.x.get();
-        let b: number = is8Bit ? this.mode.getValue(context).getLow() : this.mode.getValue(context).get();
+        let a: number = context.registers.x.get() & mask;
+        let b: number = this.mode.getValue(context) & mask;
 
         let value: number = (a & mask) - (b & mask);
 
@@ -459,8 +458,8 @@ class CPY extends Operation {
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let size: number = is8Bit ? 7 : 15;
 
-        let a: number = is8Bit ? context.registers.y.getLower() : context.registers.y.get();
-        let b: number = is8Bit ? this.mode.getValue(context).getLow() : this.mode.getValue(context).get();
+        let a: number = context.registers.y.get() & mask;
+        let b: number = this.mode.getValue(context) & mask;
 
         let value: number = (a & mask) - (b & mask);
 
@@ -679,7 +678,7 @@ class EOR extends Operation {
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
 
         let a: number = context.registers.a.get() & mask;
-        let data: number = this.mode.getValue(context).get() & mask;
+        let data: number = this.mode.getValue(context) & mask;
         let result: number = (a ^ data) & mask;
 
         if (is8Bit) context.registers.a.setLower(result);
@@ -1352,7 +1351,7 @@ class LSR extends Operation {
 
         let data = isAccMode ? (is8Bit ?
             this.cpu.registers.a.getLower() : this.cpu.registers.a.get()) :
-            this.mode.getValue(context).get();
+            this.mode.getValue(context);
         this.cpu.registers.p.setC(data & 0x01);
 
         let value: number = ((data & mask) >> 1) & mask;
@@ -1481,8 +1480,8 @@ class PEA extends Operation {
     public name: string = "PEA";
 
     public execute(context: OpContext): number {
-        let value: Read = this.mode.getValue(context);
-        context.cpu.stack.pushWord(value.get());
+        let value: number = this.mode.getValue(context);
+        context.cpu.stack.pushWord(value);
 
         return this.cycle;
     }
@@ -1553,10 +1552,10 @@ class SBC extends Operation {
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
 
         let a: number = context.cpu.registers.a.get();
-        let b: Read = this.mode.getValue(context);
+        let b: number = this.mode.getValue(context);
         let c: number = context.cpu.registers.p.getC();
 
-        let result: number = (a - b.get() - (1 - c)) & mask;
+        let result: number = (a - b - (1 - c)) & mask;
         context.registers.a.set(result & mask);
 
         context.setFlagV(a, c, is8Bit);
@@ -1887,9 +1886,9 @@ class REP extends Operation {
 
     public execute(context: OpContext): number {
         let p: number = context.registers.p.get();
-        let data: Read = this.mode.getValue(context);
+        let data: number = this.mode.getValue(context);
 
-        let result: number = p & (~data.get()>>>0 & 0xFF);
+        let result: number = p & (~data>>>0 & 0xFF);
         context.registers.p.set(result);
 
         return this.cycle;
@@ -2012,9 +2011,10 @@ class SEP extends Operation {
     public name: string = "SEP";
 
     public execute(context: OpContext): number {
-        let value: Read = this.mode.getValue(context);
+        let value: number = this.mode.getValue(context);
         let status: number = context.registers.p.get();
-        let result: number = status | (value.get() & 0xFF);
+        let result: number = status | (value & 0xFF);
+
         context.registers.p.set(result);
 
         if (context.registers.p.getX() == 1) {

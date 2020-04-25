@@ -1,5 +1,3 @@
-import {Read} from "../bus/Read";
-
 export class Sram {
 
     private static readonly  MAX_SRAM_VALUE = 9;

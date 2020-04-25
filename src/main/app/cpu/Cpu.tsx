@@ -1,11 +1,10 @@
 import {Registers} from "./Registers";
 import {Opcodes, OpContext, Operation} from "./Opcodes";
-import {InterruptHandler, InterruptType} from "./Interrupts";
+import {InterruptHandler} from "./Interrupts";
 import {Cartridge} from "../cartridge/Cartridge";
 import {Objects} from "../util/Objects";
 import {Logger, LoggerManager} from "typescript-logger";
 import {Console} from "../Console";
-import {Read} from "../bus/Read";
 import {Address} from "../bus/Address";
 import {Stack} from "../memory/Stack";
 import {Wram} from "../memory/Wram";

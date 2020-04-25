@@ -7,19 +7,19 @@ export class Bit {
         return value;
     }
 
-    public static toUint16(a: number, b?: number): number {
-        if (a == null || b == null) {
+    public static toUint16(high: number, low?: number): number {
+        if (high == null || low == null) {
             return null;
         }
 
         let result = 0;
 
-        if (a) {
-            result = (a << 8) | result;
+        if (high) {
+            result = (high << 8) | result;
         }
 
-        if (b) {
-            result = (b << 0) | result;
+        if (low) {
+            result = (low << 0) | result;
         }
 
         if (result == null || result > 0xFFFF || result < 0) {
