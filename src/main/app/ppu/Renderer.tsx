@@ -61,7 +61,7 @@ export class Renderer {
             let yStart: number = sprite.getYPosition();
             let yEnd: number = sprite.getYPosition() + height;
 
-            if (yStart <= y && y < yEnd) {
+            if (yStart < y && y <= yEnd) {
                 count++;
                 if (count == 31) break;
                 let tile: Tile = sprite.getTile();
