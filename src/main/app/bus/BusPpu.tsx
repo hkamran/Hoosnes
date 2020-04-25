@@ -7,7 +7,7 @@ import {AddressUtil} from "../util/AddressUtil";
 /**
  * Bus for IO registers in the PPU
  */
-export class BusB {
+export class BusPpu {
 
     public console: Console;
     public registers: Registers;

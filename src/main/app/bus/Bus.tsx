@@ -1,7 +1,7 @@
 import {Objects} from "../util/Objects";
 import {Console} from "../Console";
-import {BusA} from "./BusA";
-import {BusB} from "./BusB";
+import {BusCpu} from "./BusCpu";
+import {BusPpu} from "./BusPpu";
 import {Cartridge} from "../cartridge/Cartridge";
 import {Wram} from "../memory/Wram";
 import {Bit} from "../util/Bit";
@@ -9,8 +9,8 @@ import {AddressUtil} from "../util/AddressUtil";
 
 export class Bus {
 
-    public busA: BusA;
-    public busB: BusB;
+    public busCpu: BusCpu;
+    public busPpu: BusPpu;
     public cartridge: Cartridge;
     public wram: Wram;
     public console: Console;
@@ -21,8 +21,8 @@ export class Bus {
         Objects.requireNonNull(console);
 
         this.console = console;
-        this.busA = new BusA(console);
-        this.busB = new BusB(console);
+        this.busCpu = new BusCpu(console);
+        this.busPpu = new BusPpu(console);
         this.cartridge = console.cartridge;
         this.wram = console.cpu.wram;
     }
@@ -49,11 +49,11 @@ export class Bus {
             if (0x0000 <= page && page <= 0x1FFF) {
                 value = this.wram.readByte(address);
             } else if (0x2100 <= page && page <= 0x21FF) {
-                value = this.busB.readByte(address);
+                value = this.busPpu.readByte(address);
             } else if (0x2200 <= page && page <= 0x3FFF) {
                 value = this.mdr;
             } else if (0x4000 <= page && page <= 0x43FF) {
-                value = this.busA.readByte(address);
+                value = this.busCpu.readByte(address);
             } else if (0x4380 <= page && page <= 0x7FFF) {
                 value = this.mdr;
             } else if (0x8000 <= page && page <= 0xFFFF) {
@@ -69,11 +69,11 @@ export class Bus {
             if (0x0000 <= page && page <= 0x1FFF) {
                 value = this.wram.readByte(address);
             } else if (0x2100 <= page && page <= 0x21FF) {
-                value = this.busB.readByte(address);
+                value = this.busPpu.readByte(address);
             } else if (0x2200 <= page && page <= 0x4000) {
                 value = this.mdr;
             } else if (0x4000 <= page && page <= 0x43FF) {
-                value = this.busA.readByte(address);
+                value = this.busCpu.readByte(address);
             } else if (0x4400 <= page && page <= 0x7FFF) {
                 value = this.mdr;
             } else if (0x8000 <= page && page <= 0xFFFF) {
@@ -106,11 +106,11 @@ export class Bus {
             if (0x0000 <= page && page <= 0x1FFF) {
                 this.wram.writeByte(address, value);
             } else if (0x2100 <= page && page <= 0x21FF) {
-                this.busB.writeByte(address, value);
+                this.busPpu.writeByte(address, value);
             } else if (0x2200 <= page && page <= 0x3FFF) {
                 console.warn(`Writing ${address}=${value}`);
             } else if (0x4000 <= page && page <= 0x43FF) {
-                this.busA.writeByte(address, value);
+                this.busCpu.writeByte(address, value);
             } else if (0x4380 <= page && page <= 0x7FFF) {
                 console.warn(`Writing ${address}=${value}`);
             } else if (0x8000 <= page && page <= 0xFFFF) {
@@ -126,11 +126,11 @@ export class Bus {
             if (0x0000 <= page && page <= 0x1FFF) {
                 this.wram.writeByte(address, value);
             } else if (0x2100 <= page && page <= 0x21FF) {
-                this.busB.writeByte(address, value);
+                this.busPpu.writeByte(address, value);
             } else if (0x2200 <= page && page <= 0x41FF) {
                 //this.console.cartridge.writeByte(address, value);
             } else if (0x4200 <= page && page <= 0x43FF) {
-                this.busA.writeByte(address, value);
+                this.busCpu.writeByte(address, value);
             } else if (0x4400 <= page && page <= 0x7FFF) {
                 this.cartridge.writeByte(address, value);
             } else if (0x8000 <= page && page <= 0xFFFF) {

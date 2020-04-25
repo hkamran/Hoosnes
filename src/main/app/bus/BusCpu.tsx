@@ -6,7 +6,7 @@ import {AddressUtil} from "../util/AddressUtil";
 /**
  * Bus for IO registers in the CPU
  */
-export class BusA {
+export class BusCpu {
 
     private console: Console;
     private registers: Registers;
