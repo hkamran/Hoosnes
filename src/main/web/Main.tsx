@@ -2,18 +2,11 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Console} from "../app/Console";
 import {ScreenCard} from "./ScreenCard";
-import {PaletteCard} from "./PaletteCard";
-import {CartridgeCard} from "./CartridgeCard";
-import {SpriteCard} from "./SpriteCards";
-import {CpuCard} from "./CpuCard";
-import {DebuggerCard} from "./DebuggerCard";
 import {Operation} from "../app/cpu/Opcodes";
-import {PpuCard} from "./PpuCard";
-import {TileCard} from "./TileCard";
-import {BackgroundsCard} from "./BackgroundsCard";
 import {AddressUtil} from "../app/util/AddressUtil";
+import ReactTooltip from "react-tooltip";
 
-declare let window : any;
+declare let window: any;
 window.snes = new Console();
 
 interface IMainStates {
@@ -42,7 +35,7 @@ export class TickEvent {
 
 export class Main extends React.Component<IMainProps, IMainStates> {
 
-    constructor(props : IMainProps) {
+    constructor(props: IMainProps) {
         super(props);
         this.state = {
             fetches: [],
@@ -77,30 +70,70 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         fetches.push(fetch);
 
         this.setState({
-           fetches,
+            fetches,
         });
     }
 
     public render() {
         return (
-            <div style={{display: 'flex', flexDirection: 'column'}}>
-                <div style={{display: 'flex', flexDirection: 'column'}}>
-                    <div style={{display: 'flex', flexDirection: 'row'}}>
-                        <ScreenCard snes={window.snes} />
-                        <SpriteCard snes={window.snes} />
-                        <TileCard snes={window.snes} />
-                    </div>
-                    <div style={{display: 'flex', flexDirection: 'row'}}>
-                        <BackgroundsCard snes={window.snes} />
-                        <PaletteCard snes={window.snes} />
-                        <CartridgeCard snes={window.snes} cartridge={window.snes.cartridge} />
-                    </div>
-                </div>
+            <div style={{display: 'flex', flexDirection: 'column', margin: '0 auto'}}>
                 <div style={{display: 'flex', flexDirection: 'row'}}>
-                    <PpuCard snes={window.snes} addFetchFunction={this.addFetchFunction.bind(this)} />
-                    <CpuCard snes={window.snes} addFetchFunction={this.addFetchFunction.bind(this)} />
-                    <DebuggerCard snes={window.snes} tick={this.tick.bind(this)} logs={this.state.logs} />
+                    <div className={"logo"} style={{width: "100px", marginRight: "10px"}}>
+                        <div className={"header"}>
+                            HOOSNES
+                        </div>
+                        <h2 className={"line"}>
+                            EMULATOR
+                        </h2>
+                    </div>
+                    <div style={{flexGrow: 1}} />
+                    <a className={"menu-button green"} data-tip="Load Game" >
+                        <div>
+                            <i className="fas fa-download"/>
+                        </div>
+                    </a>
+                    <a className={"menu-button blue"} data-tip="Net Play">
+                        <div>
+                            <i className="fas fa-user-friends"/>
+                        </div>
+                    </a>
+                    <a className={"menu-button yellow"} data-tip="Settings">
+                        <div>
+                            <i className="fas fa-cog"/>
+                        </div>
+                    </a>
+                    <a className={"menu-button red"} data-tip="Debugger">
+                        <div>
+                            <i className="fas fa-wrench"/>
+                        </div>
+                    </a>
                 </div>
+                <div className={"screen-container"} >
+                    <ScreenCard snes={window.snes}/>
+                </div>
+                <div style={{display: 'flex', flexDirection: 'row', marginTop: "30px"}}>
+                    <div style={{flexGrow: 1}} />
+                    <div className={"extra-button-wrapper"}>
+                        <a className={"extra-button"} data-tip="Zoom out">
+                            <div>
+                                <i className="fas fa-minus" />
+                            </div>
+                        </a>
+                    </div>
+                    <div className={"extra-button-wrapper"}>
+                        <a className={"extra-button"} data-tip="Zoom in">
+                            <div>
+                                <i className="fas fa-plus" />
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div style={{display: 'flex', flexDirection: 'row', marginTop: "30px"}}>
+                    <div className={"footer"}>
+                        Author: <a href="https://github.com/hkamran">Hooman Kamran</a>
+                    </div>
+                </div>
+                <ReactTooltip />
             </div>
         );
     }
@@ -108,6 +141,6 @@ export class Main extends React.Component<IMainProps, IMainStates> {
 }
 
 ReactDOM.render(
-    <Main snes={window.snes} />,
+    <Main snes={window.snes}/>,
     document.getElementById('main'),
 );

@@ -81,28 +81,17 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
 
     public render() {
         return (
-            <Card title="Screen">
-                <div>
-                    <div>
-                        <canvas ref={this.canvasRef}
-                                width={this.state.width * this.state.zoom}
-                                height={this.state.height * this.state.zoom}
-                                style={{
-                                    width: this.state.width * this.state.zoom + "px",
-                                    borderRadius: "4px",
-                                    border: "1px solid #000",
-                                }}
-                                />
-                    </div>
-                    <div>
-                        <div ref={this.statsRef} />
-                        <div style={{paddingTop: '7px'}}>
-                            <button onClick={this.increaseZoom.bind(this)}>+</button>
-                            <button onClick={this.decreaseZoom.bind(this)}>-</button>
-                        </div>
-                    </div>
-                </div>
-            </Card>
+            <div>
+                <canvas ref={this.canvasRef}
+                        width={this.state.width * this.state.zoom}
+                        height={this.state.height * this.state.zoom}
+                        style={{
+                            width: this.state.width * this.state.zoom + "px",
+                            borderRadius: "4px",
+                        }}
+                        />
+                <div ref={this.statsRef} style={{display: "none"}} />
+            </div>
         );
     }
 
