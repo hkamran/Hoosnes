@@ -75,6 +75,15 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         });
     }
 
+    public async loadCartridge(url: string) {
+        let file = await fetch(url).then((r) => r.blob());
+        let promise = this.readFileDataAsBase64(file);
+        promise.then((value: number[]) => {
+            this.props.snes.load(value);
+            this.props.snes.play();
+        });
+    }
+
     public onChangeFile(event) {
         let file : File = event.target.files[0];
         let promise = this.readFileDataAsBase64(file);
@@ -130,7 +139,11 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         </h2>
                     </div>
                     <div style={{flexGrow: 1}} />
-                    <a className={"menu-button green"} data-tip="Load Game" onClick={()=> this.fileInputRef.current.click()}>
+                    <a className={"menu-button green"} data-tip="Load Game" onClick={async () => {
+                        //this.fileInputRef.current.click();
+                        await this.loadCartridge("./roms/Dr. Mario (Japan) (NP).sfc");
+                    }}>
+
                         <div>
                             <i className="fas fa-download"/>
                         </div>
