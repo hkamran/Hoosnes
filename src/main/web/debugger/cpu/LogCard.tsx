@@ -54,16 +54,17 @@ export class LogCard extends React.Component<IDebuggerCardProps, any> {
             this.divLog.current.innerHTML = '';
             this.counter = 0;
         }
-
-        const newElement = document.createElement('span');
-        newElement.innerText = trace(this.props.snes.cpu);
-        this.divLog.current.appendChild(newElement);
-        this.counter++;
+        if (this.props.snes.cpu && this.props.snes.cpu.context) {
+            const newElement = document.createElement('span');
+            newElement.innerText = trace(this.props.snes.cpu);
+            this.divLog.current.appendChild(newElement);
+            this.counter++;
+        }
     }
     public render() {
         return (
             <Card title="Logs" grow={true}>
-                <div style={{display: "flex", flexDirection: "row", flexGrow: 1, height: "419px"}} >
+                <div style={{display: "flex", flexDirection: "row", flexGrow: 1, height: "475px"}} >
                     <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
                         <div ref={this.divLog} style={{display: "flex", flexDirection: "column", fontSize: "12px", height: "100%", overflowY: "auto"}}>
 

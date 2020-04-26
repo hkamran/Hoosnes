@@ -49,7 +49,7 @@ export class CpuCard extends React.Component<ICpuCardProps, any> {
                     </fieldset>
                 </div>
                 <div style={{display: "flex", flexDirection: "row"}}>
-                    <fieldset style={{border: "1px solid rgb(100, 100, 100)"}}>
+                    <fieldset style={{border: "1px solid rgb(100, 100, 100)", width: "100%"}}>
                         <legend>Registers</legend>
                         <div style={{display: "flex", flexGrow: 1}}>
                             <ul style={{listStyle: "none", width: "100%", padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
@@ -92,7 +92,7 @@ export class CpuCard extends React.Component<ICpuCardProps, any> {
                             </ul>
                         </div>
                     </fieldset>
-                    <fieldset style={{border: "1px solid rgb(100, 100, 100)"}}>
+                    <fieldset style={{border: "1px solid rgb(100, 100, 100)", width: "100%"}}>
                         <legend>Flags</legend>
                         <div style={{display: "flex"}}>
                             <ul style={{listStyle: "none", flexGrow: 1, width: "120px", padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
@@ -166,7 +166,7 @@ export class CpuCard extends React.Component<ICpuCardProps, any> {
                     </fieldset>
                 </div>
                 <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
-                    <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
+                    <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1, height: "100px", maxHeight: "100px", overflowY: "scroll"}}>
                         <legend>Stack</legend>
                         <div style={{display: "block", fontSize: "12px", width: "300px"}}>
                             {stack.map((value, index) => {

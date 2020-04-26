@@ -135,7 +135,7 @@ fieldset {
 }
 
 .header {
-    width: 120px;
+    width: 100%;
 }
 
 .log {
@@ -330,4 +330,8 @@ tr:nth-child(even) {
     margin: 10px;
     padding: 10px 10px 0px;
     cursor: pointer;
+}
+
+li span {
+    white-space: nowrap;
 }

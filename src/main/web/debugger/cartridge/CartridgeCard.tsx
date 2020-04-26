@@ -16,7 +16,7 @@ export class CartridgeCard extends React.Component<ICartridgeCardProps, any> {
         let snes = this.props.snes;
         return (
             <Card title="Cartridge">
-                <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
+                <div style={{display: "flex", flexDirection: "row", flexGrow: 1, width: "300px"}}>
                     <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
                         <div style={{display: "flex"}}>
                             <ul style={{listStyle: "none", flexGrow: 1, padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
