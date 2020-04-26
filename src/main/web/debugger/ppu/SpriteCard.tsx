@@ -1,9 +1,9 @@
 import * as React from "react";
-import {Card} from "./core/layout/Card";
-import {BppType, Color} from "../app/ppu/Palette";
-import {Console} from "../app/Console";
-import {Dimension, Orientation, Tile, TileAttributes} from "../app/ppu/Tiles";
-import {Sprite} from "../app/ppu/Sprites";
+import {Card} from "../../core/layout/Card";
+import {BppType, Color} from "../../../app/ppu/Palette";
+import {Console} from "../../../app/Console";
+import {Dimension, Orientation, Tile} from "../../../app/ppu/Tiles";
+import {Sprite} from "../../../app/ppu/Sprites";
 
 interface ISpriteCardProps {
     snes: Console;
@@ -24,7 +24,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
     public context: CanvasRenderingContext2D;
 
     public state: ISpriteCardState = {
-        selected: null,
+        selected: 0,
         tilePixelSize: 4,
         tileHeightSize: 8,
         tileWidthSize: 8,
@@ -43,6 +43,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
 
     public componentDidMount(): void {
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
+        this.refresh();
     }
 
     public select(index: number) {
@@ -140,7 +141,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
         return (
             <Card title="Sprites">
                 <div style={{flexDirection: "row", display:"flex"}}>
-                    <div style={{border: "1px solid #ddd", width: "490px", height: "300px", marginRight: "15px", overflow: "hidden", overflowY: "scroll"}}>
+                    <div style={{border: "1px solid #646464", width: "490px", height: "300px", marginRight: "15px", overflow: "hidden", overflowY: "scroll"}}>
                         <table style={{width: "100%"}}>
                             <thead>
                                 <tr>
@@ -164,7 +165,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
                                     let style = {cursor: "pointer", background: ""};
 
                                     if (index == this.state.selected) {
-                                        style.background = "#eee";
+                                        style.background = "#111";
                                     }
 
                                     return (

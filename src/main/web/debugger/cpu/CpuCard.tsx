@@ -1,117 +1,30 @@
 import * as React from "react";
-import {Card} from "./core/layout/Card";
-import {Console} from "../app/Console";
-import {Modes} from "../app/Modes";
-import {Register, StatusRegister} from "../app/cpu/Registers";
-import {CSSProperties} from "react";
-import {Operation} from "../app/cpu/Opcodes";
-import {InterruptType} from "../app/cpu/Interrupts";
-import {AddressUtil} from "../app/util/AddressUtil";
+import {Card} from "../../core/layout/Card";
+import {Console} from "../../../app/Console";
+import {InterruptType} from "../../../app/cpu/Interrupts";
+import {AddressUtil} from "../../../app/util/AddressUtil";
 
 interface ICpuCardProps {
     snes: Console;
-    addFetchFunction: (renderer) => void;
+    addFetchFunction?: (renderer) => void;
 }
 
-interface ICpuCardState {
-    pc: number;
-    k: number;
-    a: number;
-    x: number;
-    y: number;
-    sp: number;
-    d: number;
-    dbr: number;
-    p: number;
-
-    emulation: number;
-    break: number;
-    carry: number;
-    zero: number;
-    iqr: number;
-    negative: number;
-    decimal: number;
-    accumulator: number;
-    overflow: number;
-
-    op: Operation;
-
-    cycles: number;
-    interrupts: InterruptType;
-    stack: number[];
-}
-
-
-export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
+export class CpuCard extends React.Component<ICpuCardProps, any> {
 
     public context: CanvasRenderingContext2D;
 
     constructor(props : ICpuCardProps) {
         super(props);
-        this.state = {
-            pc: 0,
-            a: 0,
-            k: 0,
-            x: 0,
-            y: 0,
-            sp: 0,
-            d: 0,
-            dbr: 0,
-            p: 0,
-
-            emulation: 0,
-            break: 0,
-            carry: 0,
-            zero: 0,
-            iqr: 0,
-            negative: 0,
-            decimal: 0,
-            accumulator: 0,
-            overflow: 0,
-
-            op: null,
-
-            cycles: 0,
-            interrupts: InterruptType.NONE,
-            stack: [],
-        };
-    }
-
-    public componentDidMount(): void {
-        this.props.addFetchFunction(this.fetch.bind(this));
-    }
-
-    public fetch() {
-        this.setState({
-            a: this.props.snes.cpu.registers.a.get(),
-            pc: AddressUtil.getPage(this.props.snes.cpu.context.opaddr),
-            k: AddressUtil.getBank(this.props.snes.cpu.context.opaddr),
-            x: this.props.snes.cpu.registers.x.get(),
-            y: this.props.snes.cpu.registers.y.get(),
-            sp: this.props.snes.cpu.registers.sp.get(),
-            d: this.props.snes.cpu.registers.d.get(),
-            dbr: this.props.snes.cpu.registers.dbr.get(),
-            p: this.props.snes.cpu.registers.p.get(),
-
-            emulation: this.props.snes.cpu.registers.p.getE(),
-            break: this.props.snes.cpu.registers.p.getX(),
-            carry: this.props.snes.cpu.registers.p.getC(),
-            zero: this.props.snes.cpu.registers.p.getZ(),
-            negative: this.props.snes.cpu.registers.p.getN(),
-            iqr: this.props.snes.cpu.registers.p.getI(),
-            decimal: this.props.snes.cpu.registers.p.getD(),
-            accumulator: this.props.snes.cpu.registers.p.getM(),
-            overflow: this.props.snes.cpu.registers.p.getV(),
-
-            op: this.props.snes.cpu.context.op,
-
-            cycles: this.props.snes.cpu.cycles,
-            interrupts: this.props.snes.cpu.interrupts.interrupt,
-            stack: this.props.snes.cpu.stack.stack,
-        });
     }
 
     public render() {
+        let cpu = this.props.snes.cpu;
+        let op = cpu.context && cpu.context.op ? cpu.context.op : null;
+        let stack = cpu.stack.stack;
+
+        let pc = cpu.context ? AddressUtil.getPage(cpu.context.opaddr) : 0;
+        let k = cpu.context ? AddressUtil.getBank(cpu.context.opaddr): 0;
+
         return (
             <Card title="CPU">
                 <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
@@ -121,11 +34,11 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                             <ul style={{listStyle: "none", flexGrow: 1, padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Cycles:</span>
-                                    <span>{this.state.cycles}</span>
+                                    <span>{cpu.cycles}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Interrupt:</span>
-                                    <span>{InterruptType[this.state.interrupts]}</span>
+                                    <span>{InterruptType[cpu.interrupts.interrupt]}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Ticks:</span>
@@ -139,42 +52,42 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                     <fieldset style={{border: "1px solid rgb(100, 100, 100)"}}>
                         <legend>Registers</legend>
                         <div style={{display: "flex", flexGrow: 1}}>
-                            <ul style={{listStyle: "none", width: "130px", padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
+                            <ul style={{listStyle: "none", width: "100%", padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">PC:</span>
-                                    <span>0x{this.state.pc.toString(16).toUpperCase()}</span>
+                                    <span>0x{pc.toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">K:</span>
-                                    <span>0x{this.state.k.toString(16).toUpperCase()}</span>
+                                    <span>0x{k.toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">A:</span>
-                                    <span>0x{this.state.a.toString(16).toUpperCase()}</span>
+                                    <span>0x{cpu.registers.a.get().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">X:</span>
-                                    <span>0x{this.state.x.toString(16).toUpperCase()}</span>
+                                    <span>0x{cpu.registers.x.get().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Y:</span>
-                                    <span>0x{this.state.y.toString(16).toUpperCase()}</span>
+                                    <span>0x{cpu.registers.y.get().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">SP:</span>
-                                    <span>0x{this.state.sp.toString(16).toUpperCase()}</span>
+                                    <span>0x{cpu.registers.sp.get().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">D:</span>
-                                    <span>0x{this.state.d.toString(16).toUpperCase()}</span>
+                                    <span>0x{cpu.registers.d.get().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">DBR:</span>
-                                    <span>0x{this.state.dbr.toString(16).toUpperCase()}</span>
+                                    <span>0x{cpu.registers.dbr.get().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">P:</span>
-                                    <span>0x{this.state.p.toString(16).toUpperCase()}</span>
+                                    <span>0x{cpu.registers.p.get().toString(16).toUpperCase()}</span>
                                 </li>
                             </ul>
                         </div>
@@ -185,39 +98,39 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                             <ul style={{listStyle: "none", flexGrow: 1, width: "120px", padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Emulation:</span>
-                                    <span>{this.state.emulation.toString(16).toUpperCase()}</span>
+                                    <span>{cpu.registers.p.getE().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Break:</span>
-                                    <span>{this.state.break.toString(16).toUpperCase()}</span>
+                                    <span>{cpu.registers.p.getX().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Carry:</span>
-                                    <span>{this.state.carry.toString(16).toUpperCase()}</span>
+                                    <span>{cpu.registers.p.getC().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Zero:</span>
-                                    <span>{this.state.zero.toString(16).toUpperCase()}</span>
+                                    <span>{cpu.registers.p.getZ().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">IQR:</span>
-                                    <span>{this.state.iqr.toString(16).toUpperCase()}</span>
+                                    <span>{cpu.registers.p.getI().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Decimal:</span>
-                                    <span>{this.state.decimal.toString(16).toUpperCase()}</span>
+                                    <span>{cpu.registers.p.getD().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Negative:</span>
-                                    <span>{this.state.negative.toString(16).toUpperCase()}</span>
+                                    <span>{cpu.registers.p.getN().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Accumulator:</span>
-                                    <span>{this.state.accumulator.toString(16).toUpperCase()}</span>
+                                    <span>{cpu.registers.p.getM().toString(16).toUpperCase()}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Overflow:</span>
-                                    <span>{this.state.overflow.toString(16).toUpperCase()}</span>
+                                    <span>{cpu.registers.p.getV().toString(16).toUpperCase()}</span>
                                 </li>
                             </ul>
                         </div>
@@ -230,44 +143,39 @@ export class CpuCard extends React.Component<ICpuCardProps, ICpuCardState> {
                             <ul style={{listStyle: "none", flexGrow: 1, padding: "0px", margin: "0px", paddingRight: "0px", fontSize: "12px"}}>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Code:</span>
-                                    <span>{this.state.op != null ? "0x" + this.state.op.code.toString(16).toUpperCase() : ""}</span>
+                                    <span>{op != null ? "0x" +op.code.toString(16).toUpperCase() : ""}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Name:</span>
-                                    <span>{this.state.op != null ? this.state.op.name.toUpperCase() : ""}</span>
+                                    <span>{op != null ? op.name.toUpperCase() : ""}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Mode:</span>
-                                    <span>{this.state.op != null ? this.state.op.mode.label : ""}</span>
+                                    <span>{op != null ? op.mode.label : ""}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Cycles:</span>
-                                    <span>{this.state.op != null ? this.state.op.cycle : ""}</span>
+                                    <span>{op != null ? op.cycle : ""}</span>
                                 </li>
                                 <li style={{display: "flex"}}>
                                     <span style={{flexGrow: 1}} className="header">Size:</span>
-                                    <span>{this.state.op != null ? this.state.op.getSize() : ""}</span>
+                                    <span>{op != null ? op.getSize() : ""}</span>
                                 </li>
                             </ul>
                         </div>
                     </fieldset>
                 </div>
-                <div style={{display: "flex", flexDirection: "row", flexGrow: 1, width: "310px"}}>
+                <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
                     <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
                         <legend>Stack</legend>
                         <div style={{display: "block", fontSize: "12px"}}>
-                            {this.state.stack.map((value, index) => {
+                            {stack.map((value, index) => {
                                 return (
                                     <span key={index}>0x{value.toString(16).toUpperCase() + ", "}</span>
                                 );
                             })}
                         </div>
                     </fieldset>
-                </div>
-                <div>
-                    <div style={{paddingTop: '7px'}}>
-                        <button onClick={this.fetch.bind(this)}>Render</button>
-                    </div>
                 </div>
             </Card>
         );

@@ -38,7 +38,7 @@ export class Card extends React.Component<ICardProps, any> {
 
     public render() {
         return (
-            <div style={{...screenStyle, flexGrow: this.props.grow ? 1 : 0}}>
+            <div className="debug-card" style={{...screenStyle, flexGrow: this.props.grow ? 1 : 0}}>
                 <div style={{marginBottom: "5px"}}>{this.props.title}</div>
                 {this.props.children}
             </div>

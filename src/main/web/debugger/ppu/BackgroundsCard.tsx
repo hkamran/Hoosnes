@@ -1,10 +1,10 @@
-import {Console} from "../app/Console";
+import {Console} from "../../../app/Console";
 import * as React from "react";
-import {Card} from "./core/layout/Card";
-import {Background} from "../app/ppu/Backgrounds";
-import {Dimension, Tile} from "../app/ppu/Tiles";
-import {BppType, Color} from "../app/ppu/Palette";
-import {TileMap} from "../app/ppu/TileMaps";
+import {Card} from "../../core/layout/Card";
+import {Background} from "../../../app/ppu/Backgrounds";
+import {Dimension, Tile} from "../../../app/ppu/Tiles";
+import {BppType, Color} from "../../../app/ppu/Palette";
+import {TileMap} from "../../../app/ppu/TileMaps";
 
 interface IBackgroundsCardProps {
     snes: Console;
@@ -51,6 +51,10 @@ export class BackgroundsCard extends React.Component<IBackgroundsCardProps, IBac
     }
 
     public componentDidUpdate(prevProps: Readonly<IBackgroundsCardProps>, prevState: Readonly<IBackgroundsCardState>, snapshot?: any): void {
+        this.refresh();
+    }
+
+    public componentDidMount(): void {
         this.refresh();
     }
 
@@ -128,11 +132,12 @@ export class BackgroundsCard extends React.Component<IBackgroundsCardProps, IBac
     public render() {
         return (
             <Card title="Backgrounds">
-                <div style={{maxHeight: "300px", maxWidth: "512px", overflow: "scroll"}}>
+                <div style={{maxHeight: "300px", backgroundColor: "#000000", border: "1px solid #646464", maxWidth: "512px", overflow: "scroll"}}>
                     <canvas ref={this.canvasRef}
                             style={{
                                 border: "2px solid #000",
                                 borderRadius: "2px",
+                                minHeight: "256px",
                             }}
                     />
                 </div>

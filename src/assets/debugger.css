@@ -1,0 +1,206 @@
+#debugger {
+    font-family: Arial, sans-serif;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    left: 0px;
+    bottom: 0px;
+    background: #252525;
+    opacity: 0.75;
+    color: #ffffff;
+    display : flex;
+    flex-direction: column;
+    z-index: 99;
+}
+
+#debugger button {
+    background: #646464;
+    border: 0px;
+    color: #ffffff;
+    padding: 5px;
+    margin: 2px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+#debugger button:hover {
+    background: #333333;
+}
+
+#debugger button:active {
+    background: #333333;
+}
+
+.debug-title {
+    padding: 10px;
+    margin: 10px;
+    line-height: 90%;
+    font-size: 22px;
+    text-transform: uppercase;
+}
+
+.debug-input {
+    background: #111;
+    margin-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-right: 10px;
+    padding-top: 10px;
+}
+
+.debug-tab-button {
+    background: #171717;;
+    user-select: none;
+    margin-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-right: 10px;
+    padding-top: 10px;
+    cursor: pointer;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.debug-tab-button:hover {
+    background: #000;
+}
+
+.debug-card {
+    background: #161616;;
+}
+
+.debug-button {
+    background: #171717;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    padding: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin: 10px;
+    margin-right: 0px;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.debug-button:hover {
+    background: #090909;
+}
+
+.active {
+    background: #090909;
+}
+
+.debug-tab {
+    position: relative;
+    background: #090909;
+    display: none;
+    overflow-y: auto;
+    flex-direction: column;
+    margin-left: 20px;
+    margin-right: 20px;
+
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 30px;
+    padding-top: 30px;
+    border-radius: 4px;
+}
+
+.debug-menu {
+    position : relative;
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px solid #000000;
+    margin-left: 24px;
+    margin-right: 24px;
+}
+
+.debugger ul {
+    margin: 0;
+    padding: 0;
+    color: #b4b4b4;
+    font: 12px "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.debugger .block {
+    display: flex;
+    flex-direction: row;
+}
+
+fieldset {
+    box-sizing: border-box;
+}
+
+.header {
+    width: 120px;
+}
+
+.log {
+    width: 100%;
+    height: 410px;
+    overflow: auto;
+}
+
+.log ul {
+    list-style: none;
+}
+
+.log .error {
+    color: #ff3119;
+}
+
+.controllerRow {
+    display: inline-flex;
+    flex-direction: row;
+    margin: 10px;
+    flex:none;
+}
+
+.controllerCol {
+    display : flex;
+    flex-direction:column;
+    margin-right: 10px;
+}
+
+.controllerCol div {
+    margin-bottom: 5px;
+    display:flex;
+}
+
+#memory {
+}
+
+table {
+    color: #fff;
+    width: 100%;
+}
+
+tr {
+    padding-left: 100px;
+}
+
+td {
+    margin: auto;
+    padding: 5px 20px 5px 30px;
+}
+
+tr:nth-child(odd) {
+    background-color: #444;
+}
+
+tr:nth-child(even) {
+    background-color: #222;
+}
+
+#debugger th {
+    position: sticky;
+    background: #7c7c7c;
+    top: 0px;
+}

@@ -1,8 +1,8 @@
-import {Console} from "../app/Console";
+import {Console} from "../../../app/Console";
 import * as React from "react";
-import {Card} from "./core/layout/Card";
-import {Tile, TileAttributes} from "../app/ppu/Tiles";
-import {BppType} from "../app/ppu/Palette";
+import {Card} from "../../core/layout/Card";
+import {Tile, TileAttributes} from "../../../app/ppu/Tiles";
+import {BppType} from "../../../app/ppu/Palette";
 
 interface ITileCardProps {
     snes: Console;
@@ -221,10 +221,11 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
     public render() {
         return (
             <Card title="Tiles">
-                <div style={{height: "272px", width: "270px", overflow: "scroll"}}>
+                <div style={{height: "272px", backgroundColor: "#000000", border: "1px solid #646464", padding: "5px", width: "350px", overflow: "scroll"}}>
                     <canvas ref={this.canvasRef}
                             style={{
-                                border: "2px solid #000",
+                                borderRight: "1px solid #CB2A30",
+                                borderBottom: "1px solid #CB2A30",
                                 borderRadius: "2px",
                             }}
                     />

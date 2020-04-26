@@ -5,13 +5,14 @@ import {ScreenCard} from "./ScreenCard";
 import {Operation} from "../app/cpu/Opcodes";
 import {AddressUtil} from "../app/util/AddressUtil";
 import ReactTooltip from "react-tooltip";
+import {Debugger} from "./debugger/Debugger";
 
 declare let window: any;
 window.snes = new Console();
 
 interface IMainStates {
-    fetches: Array<() => void>;
-    logs: TickEvent[];
+    snes: Console;
+    viewDebugger: boolean;
 }
 
 interface IMainProps {
@@ -35,48 +36,78 @@ export class TickEvent {
 
 export class Main extends React.Component<IMainProps, IMainStates> {
 
+    public fileInputRef: React.RefObject<HTMLInputElement>;
+
     constructor(props: IMainProps) {
         super(props);
         this.state = {
-            fetches: [],
-            logs: [],
+            snes: props.snes,
+            viewDebugger: false,
         };
+
+        this.fileInputRef = React.createRef<HTMLInputElement>();
     }
 
     public componentDidMount(): void {
 
     }
 
-    public tick() {
-        try {
-            this.props.snes.tick();
-        } catch (e) {
-            console.error(e);
-        }
-
-        this.state.logs.push(new TickEvent(this.props.snes));
-
-        for (let fetch of this.state.fetches) {
-            fetch();
-        }
-
+    public openDebugger(): void {
         this.setState({
-            logs: this.state.logs,
+            viewDebugger: true,
+            snes: this.state.snes,
         });
     }
 
-    public addFetchFunction(fetch: () => void) {
-        let fetches = this.state.fetches;
-        fetches.push(fetch);
-
+    public closeDebugger(): void {
         this.setState({
-            fetches,
+            viewDebugger: false,
+        });
+    }
+
+    public onChangeFile(event) {
+        let file : File = event.target.files[0];
+        let promise = this.readFileDataAsBase64(file);
+        promise.then((value: number[]) => {
+            this.props.snes.load(value);
+        });
+    }
+
+    public readFileDataAsBase64(file : Blob) {
+
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = (event : any) => {
+                let str : string = event.target.result;
+                window.raw = str;
+                let bytes : number[] = [];
+                for (let i = 0; i < str.length; ++i) {
+                    let charCode = str.charCodeAt(i);
+                    bytes.push(charCode & 0xFF);
+                }
+                resolve(bytes);
+            };
+
+            reader.onerror = (err) => {
+                reject(err);
+            };
+
+            reader.readAsBinaryString(file);
+        });
+    }
+
+    private tickSnes() {
+        this.state.snes.tick();
+        this.setState({
+            snes: this.state.snes,
         });
     }
 
     public render() {
         return (
             <div style={{display: 'flex', flexDirection: 'column', margin: '0 auto'}}>
+                <Debugger snes={this.state.snes} display={this.state.viewDebugger} closeDebugger={this.closeDebugger.bind(this)} tickSnes={this.tickSnes.bind(this)} />
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                     <div className={"logo"} style={{width: "100px", marginRight: "10px"}}>
                         <div className={"header"}>
@@ -87,7 +118,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         </h2>
                     </div>
                     <div style={{flexGrow: 1}} />
-                    <a className={"menu-button green"} data-tip="Load Game" >
+                    <a className={"menu-button green"} data-tip="Load Game" onClick={()=> this.fileInputRef.current.click()}>
                         <div>
                             <i className="fas fa-download"/>
                         </div>
@@ -102,7 +133,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                             <i className="fas fa-cog"/>
                         </div>
                     </a>
-                    <a className={"menu-button red"} data-tip="Debugger">
+                    <a className={"menu-button red"} data-tip="Debugger" onClick={this.openDebugger.bind(this)}>
                         <div>
                             <i className="fas fa-wrench"/>
                         </div>
@@ -133,6 +164,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         Author: <a href="https://github.com/hkamran">Hooman Kamran</a>
                     </div>
                 </div>
+                <input type="file" id="file" ref={this.fileInputRef} onChange={this.onChangeFile.bind(this)} style={{display: "none"}}/>
                 <ReactTooltip />
             </div>
         );

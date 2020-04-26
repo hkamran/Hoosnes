@@ -125,7 +125,7 @@ export class Cartridge {
     public aux: number[] = [];
 
     public smc: SmcHeader; // header
-    public title: string; // xFC0
+    public title: string = ""; // xFC0
     public mapping: ICartridgeMapping; // xFD5
     public type: CartridgeType; // xFD6
     public size: number; // xFD7

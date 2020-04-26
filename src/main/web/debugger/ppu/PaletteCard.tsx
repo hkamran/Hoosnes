@@ -1,7 +1,7 @@
 import * as React from "react";
-import {Card} from "./core/layout/Card";
-import {BppType, Color} from "../app/ppu/Palette";
-import {Console} from "../app/Console";
+import {Card} from "../../core/layout/Card";
+import {BppType, Color} from "../../../app/ppu/Palette";
+import {Console} from "../../../app/Console";
 
 declare let window : any;
 
@@ -78,7 +78,7 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
     public render() {
         return (
             <Card title="Palette">
-                <div>
+                <div style={{border: "1px solid #646464"}}>
                     <canvas ref={this.canvasRef}
                             style={{
                                 borderRadius: "2px",
