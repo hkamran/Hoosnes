@@ -4,6 +4,13 @@ import {Logger, LoggerManager} from 'typescript-logger';
 import {Bus} from "./bus/Bus";
 import {Ppu} from "./ppu/Ppu";
 import {Apu} from "./apu/Apu";
+import {animateFrames} from "../web/Main";
+
+export enum ConsoleState {
+    RUNNING, PAUSED, RESET,
+}
+
+export const TICKS_PER_FRAME: number = 29780;
 
 export class Console {
 
@@ -14,6 +21,7 @@ export class Console {
     public ppu: Ppu;
     public bus: Bus;
     public cartridge : Cartridge;
+    public state: ConsoleState;
 
     constructor() {
         this.cpu = new Cpu(this);
@@ -23,6 +31,7 @@ export class Console {
     }
 
     public load(romBytes : number[]) : void {
+        this.state = ConsoleState.PAUSED;
         this.reset();
 
         this.cartridge = new Cartridge(romBytes);
@@ -31,7 +40,13 @@ export class Console {
         this.cpu.load(this.cartridge);
     }
 
+    public play(): void {
+        this.state = ConsoleState.RUNNING;
+        animateFrames();
+    }
+
     public reset(): void {
+        this.state = ConsoleState.RESET;
         this.cpu.reset();
         this.ppu.reset();
         this.apu.reset();
@@ -45,6 +60,10 @@ export class Console {
         for (let i = 0; i < cycles; i++) {
             this.ppu.tick();
         }
+    }
+
+    public stop(): void {
+        this.state = ConsoleState.PAUSED;
     }
 
     public ticks(count: number) {

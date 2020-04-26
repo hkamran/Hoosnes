@@ -168,7 +168,7 @@ export class CpuCard extends React.Component<ICpuCardProps, any> {
                 <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
                     <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
                         <legend>Stack</legend>
-                        <div style={{display: "block", fontSize: "12px"}}>
+                        <div style={{display: "block", fontSize: "12px", width: "300px"}}>
                             {stack.map((value, index) => {
                                 return (
                                     <span key={index}>0x{value.toString(16).toUpperCase() + ", "}</span>

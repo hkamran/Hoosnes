@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {Console} from "../app/Console";
+import {Console, ConsoleState, TICKS_PER_FRAME} from "../app/Console";
 import {ScreenCard} from "./ScreenCard";
 import {Operation} from "../app/cpu/Opcodes";
 import {AddressUtil} from "../app/util/AddressUtil";
@@ -9,6 +9,16 @@ import {Debugger} from "./debugger/Debugger";
 
 declare let window: any;
 window.snes = new Console();
+
+export function animateFrames(): void {
+    let execution = function() {
+        if (window.snes.state == ConsoleState.RUNNING) {
+            window.snes.ticks(TICKS_PER_FRAME);
+            this.animateFrames.bind(this)();
+        }
+    }.bind(this);
+    requestAnimationFrame(execution);
+}
 
 interface IMainStates {
     snes: Console;
@@ -70,6 +80,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         let promise = this.readFileDataAsBase64(file);
         promise.then((value: number[]) => {
             this.props.snes.load(value);
+            this.props.snes.play();
         });
     }
 
@@ -97,17 +108,10 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         });
     }
 
-    private tickSnes() {
-        this.state.snes.tick();
-        this.setState({
-            snes: this.state.snes,
-        });
-    }
-
     public render() {
         return (
             <div style={{display: 'flex', flexDirection: 'column', margin: '0 auto'}}>
-                <Debugger snes={this.state.snes} display={this.state.viewDebugger} closeDebugger={this.closeDebugger.bind(this)} tickSnes={this.tickSnes.bind(this)} />
+                <Debugger snes={this.state.snes} display={this.state.viewDebugger} closeDebugger={this.closeDebugger.bind(this)} />
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                     <div className={"logo"} style={{width: "100px", marginRight: "10px"}}>
                         <div className={"header"}>

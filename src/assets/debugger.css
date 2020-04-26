@@ -14,7 +14,7 @@
 }
 
 #debugger button {
-    background: #646464;
+    background: #1a1a1a;
     border: 0px;
     color: #ffffff;
     padding: 5px;
@@ -30,7 +30,7 @@
 }
 
 #debugger button:active {
-    background: #333333;
+    background: #090909;
 }
 
 .debug-title {
