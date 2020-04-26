@@ -5,7 +5,7 @@ import {ScreenCard} from "./ScreenCard";
 import {Operation} from "../app/cpu/Opcodes";
 import {AddressUtil} from "../app/util/AddressUtil";
 import ReactTooltip from "react-tooltip";
-import {Debugger} from "./debugger/Debugger";
+import {debugCallback, Debugger} from "./debugger/Debugger";
 
 declare let window: any;
 window.snes = new Console();
@@ -13,8 +13,9 @@ window.snes = new Console();
 export function animateFrames(): void {
     let execution = function() {
         if (window.snes.state == ConsoleState.RUNNING) {
-            window.snes.ticks(TICKS_PER_FRAME);
-            this.animateFrames.bind(this)();
+            window.snes.ticks(window.snes.tpf);
+            debugCallback();
+            animateFrames.bind(this)();
         }
     }.bind(this);
     requestAnimationFrame(execution);
@@ -58,10 +59,6 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         this.fileInputRef = React.createRef<HTMLInputElement>();
     }
 
-    public componentDidMount(): void {
-
-    }
-
     public openDebugger(): void {
         this.setState({
             viewDebugger: true,
@@ -81,6 +78,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         promise.then((value: number[]) => {
             this.props.snes.load(value);
             this.props.snes.play();
+            animateFrames();
         });
     }
 

@@ -1,9 +1,11 @@
 import * as React from "react";
 import ReactTooltip from "react-tooltip";
-import {Console, ConsoleState} from "../../app/Console";
+import {Console, ConsoleState, TICKS_PER_FRAME} from "../../app/Console";
 import {DebuggerTabCpu} from "./DebuggerTabCpu";
 import {DebuggerTabPpu} from "./DebuggerTabPpu";
 import {DebuggerTabCartridge} from "./DebuggerTabCartridge";
+import Toggle from 'react-toggle';
+import {animateFrames} from "../Main";
 
 enum Tab {
     CPU, PPU, APU, CARTRIDGE,
@@ -13,6 +15,7 @@ interface IDebuggerStates {
     tab: Tab;
     snes: Console;
     ticks: string;
+    trace: boolean;
 }
 
 interface IDebuggerProps {
@@ -20,6 +23,8 @@ interface IDebuggerProps {
     display: boolean;
     closeDebugger: () => {};
 }
+
+export let debugCallback = () => {};
 
 export class Debugger extends React.Component<IDebuggerProps, IDebuggerStates> {
 
@@ -29,11 +34,23 @@ export class Debugger extends React.Component<IDebuggerProps, IDebuggerStates> {
             tab: Tab.CPU,
             snes: props.snes,
             ticks: "1",
+            trace: false,
+        };
+    }
+
+    public componentDidMount(): void {
+        debugCallback = () => {
+            if (this.state.trace) {
+                this.setState({
+                    snes: this.state.snes,
+                });
+            }
         };
     }
 
     private play() {
         this.props.snes.play();
+        animateFrames();
         this.setState({
             snes: this.state.snes,
         });
@@ -74,6 +91,19 @@ export class Debugger extends React.Component<IDebuggerProps, IDebuggerStates> {
         });
     }
 
+    public toggleTrace() {
+        let result: boolean = !this.state.trace;
+        if (result) {
+            this.props.snes.setTpf(1);
+        } else {
+            this.props.snes.setTpf(TICKS_PER_FRAME);
+        }
+
+        this.setState({
+           trace: !this.state.trace,
+        });
+    }
+
     public render() {
         return (
             !this.props.display ? null :
@@ -95,6 +125,12 @@ export class Debugger extends React.Component<IDebuggerProps, IDebuggerStates> {
                     <div className={"debug-button" + (this.props.snes.state == ConsoleState.RESET ? " active" : "")} data-tip="Reset" onClick={this.reset.bind(this)}>
                         <i className="fas fa-undo-alt" />
                     </div>
+                    <div className={"debugger-button-item"} data-tip="Toggle Tracing" onClick={this.toggleTrace.bind(this)}>
+                      <Toggle
+                          checked={this.state.trace}
+                          icons={false}
+                          onChange={this.toggleTrace.bind(this)} />
+                    </div>
                     <div style={{flexGrow: 1}} />
                     <div className={"debug-tab-button " + (this.state.tab == Tab.CPU ? "active": "")} onClick={() => this.setTab(Tab.CPU)}>CPU</div>
                     <div className={"debug-tab-button " + (this.state.tab == Tab.PPU ? "active": "")} onClick={() => this.setTab(Tab.PPU)}>PPU</div>
@@ -104,7 +140,7 @@ export class Debugger extends React.Component<IDebuggerProps, IDebuggerStates> {
                     </div>
                 </span>
                 <div className="debug-tab" style={{display: "inline-block"}}>
-                    {this.state.tab == Tab.CPU ? <DebuggerTabCpu snes={this.props.snes} /> : null}
+                    {this.state.tab == Tab.CPU ? <DebuggerTabCpu snes={this.props.snes} trace={this.state.trace} /> : null}
                     {this.state.tab == Tab.PPU ? <DebuggerTabPpu snes={this.props.snes} /> : null}
                     {this.state.tab == Tab.CARTRIDGE ? <DebuggerTabCartridge snes={this.props.snes} /> : null}
                 </div>

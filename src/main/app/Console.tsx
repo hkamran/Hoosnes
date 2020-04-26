@@ -4,7 +4,6 @@ import {Logger, LoggerManager} from 'typescript-logger';
 import {Bus} from "./bus/Bus";
 import {Ppu} from "./ppu/Ppu";
 import {Apu} from "./apu/Apu";
-import {animateFrames} from "../web/Main";
 
 export enum ConsoleState {
     RUNNING, PAUSED, RESET, OFF,
@@ -22,6 +21,7 @@ export class Console {
     public bus: Bus;
     public cartridge : Cartridge;
     public state: ConsoleState = ConsoleState.OFF;
+    public tpf: number = TICKS_PER_FRAME;
 
     constructor() {
         this.cpu = new Cpu(this);
@@ -42,7 +42,6 @@ export class Console {
 
     public play(): void {
         this.state = ConsoleState.RUNNING;
-        animateFrames();
     }
 
     public reset(): void {
@@ -70,5 +69,9 @@ export class Console {
         for (let i = 0; i < (count || 0); i++) {
             this.tick();
         }
+    }
+
+    public setTpf(tpf: number): void {
+        this.tpf = tpf;
     }
 }

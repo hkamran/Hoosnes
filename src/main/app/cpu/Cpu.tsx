@@ -60,31 +60,6 @@ export class Cpu {
         return duration;
     }
 
-    private trace(): void {
-        let pc = this.console.cpu.registers.k.get().toString(16).padStart(2, "0")
-            + this.console.cpu.registers.pc.get().toString(16).padStart(4, "0");
-        let opcode = this.console.cpu.context.op.name.toLowerCase();
-        let a = this.console.cpu.registers.a.get().toString(16).padStart(4, "0");
-        let x = this.console.cpu.registers.x.get().toString(16).padStart(4, "0");
-        let y = this.console.cpu.registers.y.get().toString(16).padStart(4, "0");
-        let s = this.console.cpu.registers.sp.get().toString(16).padStart(4, "0");
-        let d = this.console.cpu.registers.d.get().toString(16).padStart(4, "0");
-        let db = this.console.cpu.registers.dbr.get().toString(16).padStart(2, "0");
-
-        let nFlag = this.console.cpu.registers.p.getN() == 1 ? "N" : "n";
-        let vFlag = this.console.cpu.registers.p.getV() == 1 ? "V" : "v";
-        let mFlag = this.console.cpu.registers.p.getM() == 1 ? "M" : "m";
-        let xFlag = this.console.cpu.registers.p.getX() == 1 ? "X" : "x";
-        let dFlag = this.console.cpu.registers.p.getD() == 1 ? "D" : "d";
-        let iFlag = this.console.cpu.registers.p.getI() == 1 ? "I" : "i";
-        let zFlag = this.console.cpu.registers.p.getZ() == 1 ? "Z" : "z";
-        let cFlag = this.console.cpu.registers.p.getC() == 1 ? "C" : "c";
-
-        let p = nFlag + vFlag + mFlag + xFlag + dFlag + iFlag + zFlag + cFlag;
-
-        console.log(`${pc} ${opcode} A:${a} X:${x} Y:${y} S:${s} D:${d} DB:${db} ${p}`);
-    }
-
     public reset(): void {
         this.registers.p.setE(0x1);
 

@@ -5,6 +5,7 @@ import {LogCard} from "./cpu/LogCard";
 
 interface IDebuggerCpuProps {
     snes: Console;
+    trace: boolean;
 }
 
 export class DebuggerTabCpu extends React.Component<IDebuggerCpuProps, any> {
@@ -13,7 +14,7 @@ export class DebuggerTabCpu extends React.Component<IDebuggerCpuProps, any> {
         return (
             <div className="debugger block" style={{display: "flex", flexDirection: "row"}}>
                 <CpuCard snes={this.props.snes} />
-                <LogCard snes={this.props.snes} />
+                <LogCard snes={this.props.snes} trace={this.props.trace}/>
             </div>
         );
     }
