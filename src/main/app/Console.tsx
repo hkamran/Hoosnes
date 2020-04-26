@@ -7,7 +7,7 @@ import {Apu} from "./apu/Apu";
 import {animateFrames} from "../web/Main";
 
 export enum ConsoleState {
-    RUNNING, PAUSED, RESET,
+    RUNNING, PAUSED, RESET, OFF,
 }
 
 export const TICKS_PER_FRAME: number = 29780;
@@ -21,7 +21,7 @@ export class Console {
     public ppu: Ppu;
     public bus: Bus;
     public cartridge : Cartridge;
-    public state: ConsoleState;
+    public state: ConsoleState = ConsoleState.OFF;
 
     constructor() {
         this.cpu = new Cpu(this);

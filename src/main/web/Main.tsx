@@ -84,6 +84,14 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         });
     }
 
+    public zoomIn() {
+        this.props.snes.ppu.screen.zoomIn();
+    }
+
+    public zoomOut() {
+        this.props.snes.ppu.screen.zoomOut();
+    }
+
     public readFileDataAsBase64(file : Blob) {
 
         return new Promise((resolve, reject) => {
@@ -149,14 +157,14 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                 <div style={{display: 'flex', flexDirection: 'row', marginTop: "30px"}}>
                     <div style={{flexGrow: 1}} />
                     <div className={"extra-button-wrapper"}>
-                        <a className={"extra-button"} data-tip="Zoom out">
+                        <a className={"extra-button"} data-tip="Zoom out" onClick={this.zoomIn.bind(this)}>
                             <div>
                                 <i className="fas fa-minus" />
                             </div>
                         </a>
                     </div>
                     <div className={"extra-button-wrapper"}>
-                        <a className={"extra-button"} data-tip="Zoom in">
+                        <a className={"extra-button"} data-tip="Zoom in"  onClick={this.zoomOut.bind(this)}>
                             <div>
                                 <i className="fas fa-plus" />
                             </div>

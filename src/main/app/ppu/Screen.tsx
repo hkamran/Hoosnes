@@ -43,9 +43,13 @@ export class Screen {
     public static readonly WIDTH: number = 256;
     public static readonly HEIGHT: number = 224;
 
+    public static readonly MAX_ZOOM: number = 4;
+    public static readonly MIN_ZOOM: number = 1;
     // Note PAL is 256x240
 
     public buffer: ImageData;
+    public zoom: number = 1;
+    private canvas: HTMLCanvasElement;
 
     public setContext(context: CanvasRenderingContext2D): void {
         this.context = context;
@@ -66,8 +70,44 @@ export class Screen {
     }
 
     public render(): void {
-        this.context.putImageData(this.buffer, 0, 0);
+        this.context.putImageData(this.scale(this.buffer, this.zoom), 0, 0);
         this.buffer = this.context.createImageData(Screen.WIDTH, Screen.HEIGHT);
     }
 
+    public zoomIn(): void {
+        this.zoom = Math.min(Screen.MAX_ZOOM, this.zoom++);
+    }
+
+    public zoomOut(): void {
+        this.zoom = Math.max(Screen.MIN_ZOOM, this.zoom--);
+    }
+
+    public reset(): void {
+        if (!this.canvas) return;
+        this.context = this.canvas.getContext('2d');
+    }
+
+    private scale(imageData: ImageData, scale: number) {
+        if (scale == 1) return imageData;
+
+        let scaled = this.context.createImageData(imageData.width * scale, imageData.height * scale);
+        let subLine = this.context.createImageData(scale, 1).data;
+        for (let row = 0; row < imageData.height; row++) {
+            for (let col = 0; col < imageData.width; col++) {
+                let sourcePixel = imageData.data.subarray(
+                    (row * imageData.width + col) * 4,
+                    (row * imageData.width + col) * 4 + 4,
+                );
+                for (let x = 0; x < scale; x++) subLine.set(sourcePixel, x*4);
+                for (let y = 0; y < scale; y++) {
+                    let destRow = row * scale + y;
+                    let destCol = col * scale;
+                    scaled.data.set(subLine, (destRow * scaled.width + destCol) * 4);
+                }
+            }
+        }
+
+        return scaled;
+    }
 }
+

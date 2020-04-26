@@ -14,7 +14,7 @@
 }
 
 #debugger button {
-    background: #1a1a1a;
+    background: #434343;
     border: 0px;
     color: #ffffff;
     padding: 5px;
@@ -73,18 +73,10 @@
 
 .debug-button {
     background: #171717;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
 
-    padding: 10px;
-    padding-left: 12px;
-    padding-right: 12px;
-    margin: 10px;
-    margin-right: 0px;
+    padding: 10px 12px;
+    margin: 10px 0px 10px 10px;
     border-radius: 2px;
     cursor: pointer;
 }

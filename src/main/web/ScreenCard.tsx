@@ -1,9 +1,7 @@
 import * as React from "react";
-import {CSSProperties} from "react";
 import {RefObject} from "react";
 import Stats from 'stats.js';
-import {Card} from "./core/layout/Card";
-import {Console} from "../app/Console";
+import {Console, ConsoleState} from "../app/Console";
 
 
 declare let window : any;
@@ -43,12 +41,15 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
             window.canvas = this.canvasRef;
             window.context = this.context;
         }
-        // this.drawStatic();
+        if (this.props.snes.state == ConsoleState.OFF) this.drawStatic();
         this.props.snes.ppu.screen.setContext(this.context);
+        //this.props.snes.ppu.screen.setCanvas(this.canvasRef.current);
     }
 
     private drawStatic(): void {
         if (!this.animateStatic) return;
+        if (this.props.snes.state != ConsoleState.OFF) return;
+
         this.stats.begin();
 
         let image: ImageData = window.context.createImageData(

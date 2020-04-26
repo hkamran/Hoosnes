@@ -21,10 +21,12 @@ export class DebuggerTabPpu extends React.Component<IDebuggerTabPpuProps, any> {
                         <SpriteCard snes={this.props.snes}/>
                     </div>
                     <div style={{display: "flex", flexDirection: "row"}}>
-                        <TileCard snes={this.props.snes}/>
                         <BackgroundsCard snes={this.props.snes}/>
                     </div>
-                    <PaletteCard snes={this.props.snes}/>
+                    <div style={{display: "flex", flexDirection: "row"}}>
+                        <TileCard snes={this.props.snes}/>
+                        <PaletteCard snes={this.props.snes}/>
+                    </div>
                 </div>
             </div>
         );
