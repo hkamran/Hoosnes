@@ -166,14 +166,16 @@ export class CpuCard extends React.Component<ICpuCardProps, any> {
                     </fieldset>
                 </div>
                 <div style={{display: "flex", flexDirection: "row", flexGrow: 1}}>
-                    <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1, height: "100px", maxHeight: "100px", overflowY: "scroll"}}>
+                    <fieldset style={{border: "1px solid rgb(100, 100, 100)", flexGrow: 1}}>
                         <legend>Stack</legend>
-                        <div style={{display: "block", fontSize: "12px", width: "300px"}}>
-                            {stack.map((value, index) => {
-                                return (
-                                    <span key={index}>0x{value.toString(16).toUpperCase() + ", "}</span>
-                                );
-                            })}
+                        <div style={{height: "70px", maxHeight: "70px", overflowY: "scroll"}}>
+                            <div style={{display: "block", fontSize: "12px", width: "300px"}}>
+                                {stack.map((value, index) => {
+                                    return (
+                                        <span key={index}>0x{value.toString(16).toUpperCase() + ", "}</span>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </fieldset>
                 </div>
