@@ -42,7 +42,7 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
             window.context = this.context;
         }
         if (this.props.snes.state == ConsoleState.OFF) this.drawStatic();
-        this.props.snes.ppu.screen.setContext(this.context);
+        this.props.snes.ppu.screen.setCanvas(this.canvasRef.current);
         //this.props.snes.ppu.screen.setCanvas(this.canvasRef.current);
     }
 
@@ -53,8 +53,8 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
         this.stats.begin();
 
         let image: ImageData = window.context.createImageData(
-            this.state.width * this.state.zoom,
-            this.state.height * this.state.zoom);
+            this.props.snes.ppu.screen.getWidth(),
+            this.props.snes.ppu.screen.getHeight());
 
         let len = image.data.length - 1;
 
@@ -84,10 +84,8 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
         return (
             <div>
                 <canvas ref={this.canvasRef}
-                        width={this.state.width * this.state.zoom}
-                        height={this.state.height * this.state.zoom}
                         style={{
-                            width: this.state.width * this.state.zoom + "px",
+                            backgroundColor: "#000000",
                             borderRadius: "4px",
                         }}
                         />

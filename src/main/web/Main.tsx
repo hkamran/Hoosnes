@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {Console, ConsoleState, TICKS_PER_FRAME} from "../app/Console";
+import {Console, ConsoleState} from "../app/Console";
 import {ScreenCard} from "./ScreenCard";
 import {Operation} from "../app/cpu/Opcodes";
 import {AddressUtil} from "../app/util/AddressUtil";
@@ -76,9 +76,12 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         let file = await fetch(url).then((r) => r.blob());
         let promise = this.readFileDataAsBase64(file);
         promise.then((value: number[]) => {
+            if (value == null || value.length == 0) return;
             this.props.snes.load(value);
-            this.props.snes.play();
-            animateFrames();
+            if (this.props.snes.state != ConsoleState.RUNNING) {
+                this.props.snes.play();
+                animateFrames();
+            }
         });
     }
 
@@ -86,8 +89,12 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         let file : File = event.target.files[0];
         let promise = this.readFileDataAsBase64(file);
         promise.then((value: number[]) => {
+            if (value == null || value.length == 0) return;
             this.props.snes.load(value);
-            this.props.snes.play();
+            if (this.props.snes.state != ConsoleState.RUNNING) {
+                this.props.snes.play();
+                animateFrames();
+            }
         });
     }
 
@@ -138,8 +145,8 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                     </div>
                     <div style={{flexGrow: 1}} />
                     <a className={"menu-button green"} data-tip="Load Game" onClick={async () => {
-                        //this.fileInputRef.current.click();
-                        await this.loadCartridge("./roms/Dr. Mario (Japan) (NP).sfc");
+                        this.fileInputRef.current.click();
+                        //await this.loadCartridge("./roms/Dr. Mario (Japan) (NP).sfc");
                     }}>
 
                         <div>
@@ -168,14 +175,14 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                 <div style={{display: 'flex', flexDirection: 'row', marginTop: "30px"}}>
                     <div style={{flexGrow: 1}} />
                     <div className={"extra-button-wrapper"}>
-                        <a className={"extra-button"} data-tip="Zoom out" onClick={this.zoomIn.bind(this)}>
+                        <a className={"extra-button"} data-tip="Zoom out" onClick={this.zoomOut.bind(this)}>
                             <div>
                                 <i className="fas fa-minus" />
                             </div>
                         </a>
                     </div>
                     <div className={"extra-button-wrapper"}>
-                        <a className={"extra-button"} data-tip="Zoom in"  onClick={this.zoomOut.bind(this)}>
+                        <a className={"extra-button"} data-tip="Zoom in"  onClick={this.zoomIn.bind(this)}>
                             <div>
                                 <i className="fas fa-plus" />
                             </div>
