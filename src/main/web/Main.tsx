@@ -177,18 +177,16 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         } else if (value == "select") {
             return;
         } else {
-            await this.loadCartridgeRemotely(value);
+            this.loadCartridgeRemotely(value);
         }
+
         this.closeCartridge();
     }
 
     public render() {
         return (
             <div style={{display: 'flex', flexDirection: 'column', margin: '0 auto'}}>
-                <Modal
-                    isOpen={this.state.viewCartridge}
-                    style={customStyles}
-                >
+                <Modal isOpen={this.state.viewCartridge} style={customStyles} >
                     <div style={{display: 'flex', flexDirection: 'column'}} >
                         <div style={{display: 'flex', flexDirection: 'row'}}>
                             <div className={"cartridge-title"}>Select Cartridge</div>
