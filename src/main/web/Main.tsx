@@ -6,9 +6,28 @@ import {Operation} from "../app/cpu/Opcodes";
 import {AddressUtil} from "../app/util/AddressUtil";
 import ReactTooltip from "react-tooltip";
 import {debugCallback, Debugger} from "./debugger/Debugger";
+import {CartridgeModal} from "./CartridgeModal";
+import Modal from 'react-modal';
 
 declare let window: any;
 window.snes = new Console();
+
+const customStyles = {
+    content : {
+        top: '20%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: "rgb(222, 222, 222)",
+        border: "1px solid #dedede",
+    },
+    overlay: {
+        backgroundColor: 'rgba(26,26,26,0.76)',
+    },
+};
+Modal.setAppElement('#main');
 
 export function animateFrames(): void {
     let execution = function() {
@@ -24,6 +43,7 @@ export function animateFrames(): void {
 interface IMainStates {
     snes: Console;
     viewDebugger: boolean;
+    viewCartridge: boolean;
 }
 
 interface IMainProps {
@@ -54,6 +74,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         this.state = {
             snes: props.snes,
             viewDebugger: false,
+            viewCartridge: false,
         };
 
         this.fileInputRef = React.createRef<HTMLInputElement>();
@@ -72,13 +93,29 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         });
     }
 
-    public async loadCartridge(url: string) {
+    public async loadCartridgeRemotely(url: string) {
         let file = await fetch(url).then((r) => r.blob());
         let promise = this.readFileDataAsBase64(file);
         promise.then((value: number[]) => {
             if (value == null || value.length == 0) return;
             this.props.snes.load(value);
             this.play();
+        });
+    }
+
+    public loadCartridgeLocally(): void {
+        this.fileInputRef.current.click();
+    }
+
+    public closeCartridge(): void {
+        this.setState({
+            viewCartridge: false,
+        });
+    }
+
+    public openCartridge(): void {
+        this.setState({
+            viewCartridge: true,
         });
     }
 
@@ -131,10 +168,46 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         });
     }
 
+    public async selectCartridge(event) {
+        let selectElement = event.target;
+        let value: string = selectElement.value;
+
+        if (value == "other") {
+            this.loadCartridgeLocally();
+        } else if (value == "select") {
+            return;
+        } else {
+            await this.loadCartridgeRemotely(value);
+        }
+        this.closeCartridge();
+    }
+
     public render() {
         return (
             <div style={{display: 'flex', flexDirection: 'column', margin: '0 auto'}}>
-                <Debugger snes={this.state.snes} display={this.state.viewDebugger} closeDebugger={this.closeDebugger.bind(this)} />
+                <Modal
+                    isOpen={this.state.viewCartridge}
+                    style={customStyles}
+                >
+                    <div style={{display: 'flex', flexDirection: 'column'}} >
+                        <div style={{display: 'flex', flexDirection: 'row'}}>
+                            <div className={"cartridge-title"}>Select Cartridge</div>
+                            <div style={{flexGrow: 1, width: "70px"}} />
+                            <a style={{color: "#656565", cursor: "pointer"}} onClick={this.closeCartridge.bind(this)} >
+                                <i className="fas fa-times" />
+                            </a>
+                        </div>
+                        <hr />
+                        <div style={{display: 'flex', flexDirection: 'row'}}>
+                            <select className={"cartridge-select"} defaultValue={"select"} onChange={this.selectCartridge.bind(this)}>
+                                <option value="select">Select</option>
+                                <option value="./roms/Dr. Mario (Japan) (NP).sfc">Dr Mario</option>
+                                <option value="other">Load my own...</option>
+                            </select>
+                        </div>
+                    </div>
+                </Modal>
+                <Debugger snes={this.state.snes} display={this.state.viewDebugger} closeCallback={this.closeDebugger.bind(this)} />
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                     <div className={"logo"} style={{width: "100px", marginRight: "10px"}}>
                         <div className={"header"}>
@@ -146,7 +219,8 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                     </div>
                     <div style={{flexGrow: 1}} />
                     <a className={"menu-button green"} data-tip="Load Game" onClick={async () => {
-                        this.fileInputRef.current.click();
+                        this.openCartridge();
+                        //this.fileInputRef.current.click();
                         //await this.loadCartridge("./roms/Dr. Mario (Japan) (NP).sfc");
                     }}>
 

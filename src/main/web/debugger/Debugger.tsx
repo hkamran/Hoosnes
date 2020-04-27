@@ -21,7 +21,7 @@ interface IDebuggerStates {
 interface IDebuggerProps {
     snes: Console;
     display: boolean;
-    closeDebugger: () => {};
+    closeCallback: () => {};
 }
 
 export let debugCallback = () => {};
@@ -135,7 +135,7 @@ export class Debugger extends React.Component<IDebuggerProps, IDebuggerStates> {
                     <div className={"debug-tab-button " + (this.state.tab == Tab.CPU ? "active": "")} onClick={() => this.setTab(Tab.CPU)}>CPU</div>
                     <div className={"debug-tab-button " + (this.state.tab == Tab.PPU ? "active": "")} onClick={() => this.setTab(Tab.PPU)}>PPU</div>
                     <div className={"debug-tab-button " + (this.state.tab == Tab.CARTRIDGE ? "active": "")} onClick={() => this.setTab(Tab.CARTRIDGE)}>CARTRIDGE</div>
-                    <div className={"debug-button"} data-tip="Close" onClick={this.props.closeDebugger}>
+                    <div className={"debug-button"} data-tip="Close" onClick={this.props.closeCallback}>
                         <i className="fas fa-times" />
                     </div>
                 </span>

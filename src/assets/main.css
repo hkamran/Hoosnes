@@ -183,3 +183,26 @@ canvas {
     font-size: 12px !important;
     text-transform: uppercase;
 }
+
+.cartridge-title {
+    color: #ffffff;
+    font-family: 'AgencyFB', sans-serif;
+    font-style: italic;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.2rem;
+    background: #6e539c;
+    padding: 5px 10px;
+}
+
+.cartridge-select {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #5e5e5e;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.cartridge-select option {
+    padding: 5px;
+}
