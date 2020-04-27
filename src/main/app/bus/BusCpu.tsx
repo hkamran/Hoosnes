@@ -2,6 +2,7 @@ import {Console} from "../Console";
 import {Objects} from "../util/Objects";
 import {Registers} from "../cpu/Registers";
 import {AddressUtil} from "../util/AddressUtil";
+import {Bit} from "../util/Bit";
 
 /**
  * Bus for IO registers in the CPU
@@ -28,283 +29,283 @@ export class BusCpu {
         let bank = AddressUtil.getBank(address);
         let page = AddressUtil.getPage(address);
 
-        let read = this.mdr;
+        let value = this.mdr;
 
         if (page < 0x2100 || page > 0x43FF) {
             throw new Error("Invalid readByte at " + address);
         }
 
         if (page == 0x4016) {
-            read = this.registers.joy1l.get();
+            value = this.registers.joy1l.get();
         } else if (page == 0x4017) {
-            read = this.registers.joy2l.get();
+            value = this.registers.joy2l.get();
         } else if (page == 0x4200) {
-            read = this.registers.nmitimen.get();
+            value = this.registers.nmitimen.get();
         } else if (page == 0x4201) {
-            read = this.registers.wrio.get();
+            value = this.registers.wrio.get();
         } else if (page == 0x4202) {
-            read = this.registers.wrmpya.get();
+            value = this.registers.wrmpya.get();
         } else if (page == 0x4203) {
-            read = this.registers.wrmpyb.get();
+            value = this.registers.wrmpyb.get();
         } else if (page == 0x4204) {
-            read = this.registers.wrdivl.get();
+            value = this.registers.wrdivl.get();
         } else if (page == 0x4205) {
-            read = this.registers.wrdivh.get();
+            value = this.registers.wrdivh.get();
         } else if (page == 0x4206) {
-            read = this.registers.wrdivb.get();
+            value = this.registers.wrdivb.get();
         } else if (page == 0x4207) {
-            read = this.registers.htime.getLower();
+            value = this.registers.htime.getLower();
         } else if (page == 0x4208) {
-            read = this.registers.htime.getUpper();
+            value = this.registers.htime.getUpper();
         } else if (page == 0x4209) {
-            read = this.registers.vtime.getLower();
+            value = this.registers.vtime.getLower();
         } else if (page == 0x4210) {
-            read = this.registers.rdnmi.get();
+            value = this.registers.rdnmi.get();
         } else if (page == 0x420A) {
-            read = this.registers.vtime.getUpper();
+            value = this.registers.vtime.getUpper();
         } else if (page == 0x420B) {
-            read = this.registers.mdmaen.get();
+            value = this.registers.mdmaen.get();
         } else if (page == 0x420C) {
-            read = this.registers.hdmaen.get();
+            value = this.registers.hdmaen.get();
         } else if (page == 0x420D) {
-            read = this.registers.memsel.get();
+            value = this.registers.memsel.get();
         } else if (page == 0x4210) {
-            read = this.registers.rdnmi.get();
+            value = this.registers.rdnmi.get();
         } else if (page == 0x4211) {
-            read = this.registers.timeup.get();
+            value = this.registers.timeup.get();
         } else if (page == 0x4212) {
-            read = this.registers.hvbjoy.get();
+            value = this.registers.hvbjoy.get();
         } else if (page == 0x4213) {
-            read = this.registers.rdio.get();
+            value = this.registers.rdio.get();
         } else if (page == 0x4214) {
-            read = this.registers.rddivl.get();
+            value = this.registers.rddivl.get();
         } else if (page == 0x4215) {
-            read = this.registers.rddivh.get();
+            value = this.registers.rddivh.get();
         } else if (page == 0x4216) {
-            read = this.registers.rdmpyl.get();
+            value = this.registers.rdmpyl.get();
         } else if (page == 0x4217) {
-            read = this.registers.rdmpyh.get();
+            value = this.registers.rdmpyh.get();
         } else if (page == 0x4218) {
-            read = this.registers.joy1l.get();
+            value = this.registers.joy1l.get();
         } else if (page == 0x4219) {
-            read = this.registers.joy1h.get();
+            value = this.registers.joy1h.get();
         } else if (page == 0x421A) {
-            read = this.registers.joy2l.get();
+            value = this.registers.joy2l.get();
         } else if (page == 0x421B) {
-            read = this.registers.joy2h.get();
+            value = this.registers.joy2h.get();
         } else if (page == 0x421C) {
-            read = this.registers.joy3l.get();
+            value = this.registers.joy3l.get();
         } else if (page == 0x421D) {
-            read = this.registers.joy3h.get();
+            value = this.registers.joy3h.get();
         } else if (page == 0x421E) {
-            read = this.registers.joy4l.get();
+            value = this.registers.joy4l.get();
         } else if (page == 0x421F) {
-            read = this.registers.joy4h.get();
+            value = this.registers.joy4h.get();
         } else if (page == 0x4300) {
             // --------------------------
             // DMA 0
             // --------------------------
-            read = this.registers.dma0.control.get();
+            value = this.registers.dma0.control.get();
         } else if (page == 0x4301) {
-            read = this.registers.dma0.ppuAddressRegister.get();
+            value = this.registers.dma0.ppuAddressRegister.get();
         } else if (page == 0x4302) {
-            read = this.registers.dma0.cpuAddressRegister.getLower();
+            value = this.registers.dma0.cpuAddressRegister.getLower();
         } else if (page == 0x4303) {
-            read = this.registers.dma0.cpuAddressRegister.getMiddle();
+            value = this.registers.dma0.cpuAddressRegister.getMiddle();
         } else if (page == 0x4304) {
-            read = this.registers.dma0.cpuAddressRegister.getUpper();
+            value = this.registers.dma0.cpuAddressRegister.getUpper();
         } else if (page == 0x4305) {
-            read = this.registers.dma0.transferSize.getLower();
+            value = this.registers.dma0.transferSize.getLower();
         } else if (page == 0x4306) {
-            read = this.registers.dma0.transferSize.getUpper();
+            value = this.registers.dma0.transferSize.getUpper();
         } else if (page == 0x4307) {
-            read = this.registers.dma0.dasbx.get();
+            value = this.registers.dma0.dasbx.get();
         } else if (page == 0x4308) {
-            read = this.registers.dma0.a2axl.get();
+            value = this.registers.dma0.a2axl.get();
         } else if (page == 0x4309) {
-            read = this.registers.dma0.a2axh.get();
+            value = this.registers.dma0.a2axh.get();
         } else if (page == 0x430A) {
-            read = this.registers.dma0.ntlrx.get();
+            value = this.registers.dma0.ntlrx.get();
         } else if (page == 0x4310) {
             // --------------------------
             // DMA 1
             // --------------------------
-            read = this.registers.dma1.control.get();
+            value = this.registers.dma1.control.get();
         } else if (page == 0x4311) {
-            read = this.registers.dma1.ppuAddressRegister.get();
+            value = this.registers.dma1.ppuAddressRegister.get();
         } else if (page == 0x4312) {
-            read = this.registers.dma1.cpuAddressRegister.getLower();
+            value = this.registers.dma1.cpuAddressRegister.getLower();
         } else if (page == 0x4313) {
-            read = this.registers.dma1.cpuAddressRegister.getMiddle();
+            value = this.registers.dma1.cpuAddressRegister.getMiddle();
         } else if (page == 0x4314) {
-            read = this.registers.dma1.cpuAddressRegister.getUpper();
+            value = this.registers.dma1.cpuAddressRegister.getUpper();
         } else if (page == 0x4315) {
-            read = this.registers.dma1.transferSize.getLower();
+            value = this.registers.dma1.transferSize.getLower();
         } else if (page == 0x4316) {
-            read = this.registers.dma1.transferSize.getUpper();
+            value = this.registers.dma1.transferSize.getUpper();
         } else if (page == 0x4317) {
-            read = this.registers.dma1.dasbx.get();
+            value = this.registers.dma1.dasbx.get();
         } else if (page == 0x4318) {
-            read = this.registers.dma1.a2axl.get();
+            value = this.registers.dma1.a2axl.get();
         } else if (page == 0x4319) {
-            read = this.registers.dma1.a2axh.get();
+            value = this.registers.dma1.a2axh.get();
         } else if (page == 0x431A) {
-            read = this.registers.dma1.ntlrx.get();
+            value = this.registers.dma1.ntlrx.get();
         } else if (page == 0x4320) {
             // --------------------------
             // DMA 2
             // --------------------------
-            read = this.registers.dma2.control.get();
+            value = this.registers.dma2.control.get();
         } else if (page == 0x4321) {
-            read = this.registers.dma2.ppuAddressRegister.get();
+            value = this.registers.dma2.ppuAddressRegister.get();
         } else if (page == 0x4322) {
-            read = this.registers.dma2.cpuAddressRegister.getLower();
+            value = this.registers.dma2.cpuAddressRegister.getLower();
         } else if (page == 0x4323) {
-            read = this.registers.dma2.cpuAddressRegister.getMiddle();
+            value = this.registers.dma2.cpuAddressRegister.getMiddle();
         } else if (page == 0x4324) {
-            read = this.registers.dma2.cpuAddressRegister.getUpper();
+            value = this.registers.dma2.cpuAddressRegister.getUpper();
         } else if (page == 0x4325) {
-            read = this.registers.dma2.transferSize.getLower();
+            value = this.registers.dma2.transferSize.getLower();
         } else if (page == 0x4326) {
-            read = this.registers.dma2.transferSize.getUpper();
+            value = this.registers.dma2.transferSize.getUpper();
         } else if (page == 0x4327) {
-            read = this.registers.dma2.dasbx.get();
+            value = this.registers.dma2.dasbx.get();
         } else if (page == 0x4328) {
-            read = this.registers.dma2.a2axl.get();
+            value = this.registers.dma2.a2axl.get();
         } else if (page == 0x4329) {
-            read = this.registers.dma2.a2axh.get();
+            value = this.registers.dma2.a2axh.get();
         } else if (page == 0x432A) {
-            read = this.registers.dma2.ntlrx.get();
+            value = this.registers.dma2.ntlrx.get();
         } else if (page == 0x4330) {
             // --------------------------
             // DMA 3
             // --------------------------
-            read = this.registers.dma3.control.get();
+            value = this.registers.dma3.control.get();
         } else if (page == 0x4331) {
-            read = this.registers.dma3.ppuAddressRegister.get();
+            value = this.registers.dma3.ppuAddressRegister.get();
         } else if (page == 0x4332) {
-            read = this.registers.dma3.cpuAddressRegister.getLower();
+            value = this.registers.dma3.cpuAddressRegister.getLower();
         } else if (page == 0x4333) {
-            read = this.registers.dma3.cpuAddressRegister.getMiddle();
+            value = this.registers.dma3.cpuAddressRegister.getMiddle();
         } else if (page == 0x4334) {
-            read = this.registers.dma3.cpuAddressRegister.getUpper();
+            value = this.registers.dma3.cpuAddressRegister.getUpper();
         } else if (page == 0x4335) {
-            read = this.registers.dma3.transferSize.getLower();
+            value = this.registers.dma3.transferSize.getLower();
         } else if (page == 0x4336) {
-            read = this.registers.dma3.transferSize.getUpper();
+            value = this.registers.dma3.transferSize.getUpper();
         } else if (page == 0x4337) {
-            read = this.registers.dma3.dasbx.get();
+            value = this.registers.dma3.dasbx.get();
         } else if (page == 0x4338) {
-            read = this.registers.dma3.a2axl.get();
+            value = this.registers.dma3.a2axl.get();
         } else if (page == 0x4339) {
-            read = this.registers.dma3.a2axh.get();
+            value = this.registers.dma3.a2axh.get();
         } else if (page == 0x433A) {
-            read = this.registers.dma3.ntlrx.get();
+            value = this.registers.dma3.ntlrx.get();
         } else if (page == 0x4340) {
             // --------------------------
             // DMA 4
             // --------------------------
-            read = this.registers.dma4.control.get();
+            value = this.registers.dma4.control.get();
         } else if (page == 0x4341) {
-            read = this.registers.dma4.ppuAddressRegister.get();
+            value = this.registers.dma4.ppuAddressRegister.get();
         } else if (page == 0x4342) {
-            read = this.registers.dma4.cpuAddressRegister.getLower();
+            value = this.registers.dma4.cpuAddressRegister.getLower();
         } else if (page == 0x4343) {
-            read = this.registers.dma4.cpuAddressRegister.getMiddle();
+            value = this.registers.dma4.cpuAddressRegister.getMiddle();
         } else if (page == 0x4344) {
-            read = this.registers.dma4.cpuAddressRegister.getUpper();
+            value = this.registers.dma4.cpuAddressRegister.getUpper();
         } else if (page == 0x4345) {
-            read = this.registers.dma4.transferSize.getLower();
+            value = this.registers.dma4.transferSize.getLower();
         } else if (page == 0x4346) {
-            read = this.registers.dma4.transferSize.getUpper();
+            value = this.registers.dma4.transferSize.getUpper();
         } else if (page == 0x4347) {
-            read = this.registers.dma4.dasbx.get();
+            value = this.registers.dma4.dasbx.get();
         } else if (page == 0x4348) {
-            read = this.registers.dma4.a2axl.get();
+            value = this.registers.dma4.a2axl.get();
         } else if (page == 0x4349) {
-            read = this.registers.dma4.a2axh.get();
+            value = this.registers.dma4.a2axh.get();
         } else if (page == 0x434A) {
-            read = this.registers.dma4.ntlrx.get();
+            value = this.registers.dma4.ntlrx.get();
         } else if (page == 0x4350) {
             // --------------------------
             // DMA 5
             // --------------------------
-            read = this.registers.dma5.control.get();
+            value = this.registers.dma5.control.get();
         } else if (page == 0x4351) {
-            read = this.registers.dma5.ppuAddressRegister.get();
+            value = this.registers.dma5.ppuAddressRegister.get();
         } else if (page == 0x4352) {
-            read = this.registers.dma5.cpuAddressRegister.getLower();
+            value = this.registers.dma5.cpuAddressRegister.getLower();
         } else if (page == 0x4353) {
-            read = this.registers.dma5.cpuAddressRegister.getMiddle();
+            value = this.registers.dma5.cpuAddressRegister.getMiddle();
         } else if (page == 0x4354) {
-            read = this.registers.dma5.cpuAddressRegister.getUpper();
+            value = this.registers.dma5.cpuAddressRegister.getUpper();
         } else if (page == 0x4355) {
-            read = this.registers.dma5.transferSize.getLower();
+            value = this.registers.dma5.transferSize.getLower();
         } else if (page == 0x4356) {
-            read = this.registers.dma5.transferSize.getUpper();
+            value = this.registers.dma5.transferSize.getUpper();
         } else if (page == 0x4357) {
-            read = this.registers.dma5.dasbx.get();
+            value = this.registers.dma5.dasbx.get();
         } else if (page == 0x4358) {
-            read = this.registers.dma5.a2axl.get();
+            value = this.registers.dma5.a2axl.get();
         } else if (page == 0x4359) {
-            read = this.registers.dma5.a2axh.get();
+            value = this.registers.dma5.a2axh.get();
         } else if (page == 0x435A) {
-            read = this.registers.dma5.ntlrx.get();
+            value = this.registers.dma5.ntlrx.get();
         } else if (page == 0x4360) {
             // --------------------------
             // DMA 6
             // --------------------------
-            read = this.registers.dma6.control.get();
+            value = this.registers.dma6.control.get();
         } else if (page == 0x4361) {
-            read = this.registers.dma6.ppuAddressRegister.get();
+            value = this.registers.dma6.ppuAddressRegister.get();
         } else if (page == 0x4362) {
-            read = this.registers.dma6.cpuAddressRegister.getLower();
+            value = this.registers.dma6.cpuAddressRegister.getLower();
         } else if (page == 0x4363) {
-            read = this.registers.dma6.cpuAddressRegister.getMiddle();
+            value = this.registers.dma6.cpuAddressRegister.getMiddle();
         } else if (page == 0x4364) {
-            read = this.registers.dma6.cpuAddressRegister.getUpper();
+            value = this.registers.dma6.cpuAddressRegister.getUpper();
         } else if (page == 0x4365) {
-            read = this.registers.dma6.transferSize.getLower();
+            value = this.registers.dma6.transferSize.getLower();
         } else if (page == 0x4366) {
-            read = this.registers.dma6.transferSize.getUpper();
+            value = this.registers.dma6.transferSize.getUpper();
         } else if (page == 0x4367) {
-            read = this.registers.dma6.dasbx.get();
+            value = this.registers.dma6.dasbx.get();
         } else if (page == 0x4368) {
-            read = this.registers.dma6.a2axl.get();
+            value = this.registers.dma6.a2axl.get();
         } else if (page == 0x4369) {
-            read = this.registers.dma6.a2axh.get();
+            value = this.registers.dma6.a2axh.get();
         } else if (page == 0x436A) {
-            read = this.registers.dma6.ntlrx.get();
+            value = this.registers.dma6.ntlrx.get();
         } else if (page == 0x4370) {
             // --------------------------
             // DMA 7
             // --------------------------
-            read = this.registers.dma7.control.get();
+            value = this.registers.dma7.control.get();
         } else if (page == 0x4371) {
-            read = this.registers.dma7.ppuAddressRegister.get();
+            value = this.registers.dma7.ppuAddressRegister.get();
         } else if (page == 0x4372) {
-            read = this.registers.dma7.cpuAddressRegister.getLower();
+            value = this.registers.dma7.cpuAddressRegister.getLower();
         } else if (page == 0x4373) {
-            read = this.registers.dma7.cpuAddressRegister.getMiddle();
+            value = this.registers.dma7.cpuAddressRegister.getMiddle();
         } else if (page == 0x4374) {
-            read = this.registers.dma7.cpuAddressRegister.getUpper();
+            value = this.registers.dma7.cpuAddressRegister.getUpper();
         } else if (page == 0x4375) {
-            read = this.registers.dma7.transferSize.getLower();
+            value = this.registers.dma7.transferSize.getLower();
         } else if (page == 0x4376) {
-            read = this.registers.dma7.transferSize.getUpper();
+            value = this.registers.dma7.transferSize.getUpper();
         } else if (page == 0x4377) {
-            read = this.registers.dma7.dasbx.get();
+            value = this.registers.dma7.dasbx.get();
         } else if (page == 0x4378) {
-            read = this.registers.dma7.a2axl.get();
+            value = this.registers.dma7.a2axl.get();
         } else if (page == 0x4379) {
-            read = this.registers.dma7.a2axh.get();
+            value = this.registers.dma7.a2axh.get();
         } else if (page == 0x437A) {
-            read = this.registers.dma7.ntlrx.get();
+            value = this.registers.dma7.ntlrx.get();
         } else {
             console.warn("Invalid read on BusA at " + address);
         }
 
-        return read;
+        return Bit.toUint8(value);
     }
 
 

@@ -7,6 +7,7 @@ import {Console} from "../Console";
 import {Stack} from "../memory/Stack";
 import {Wram} from "../memory/Wram";
 import {AddressUtil} from "../util/AddressUtil";
+import {trace} from "../../web/debugger/cpu/LogCard";
 
 export class Cpu {
 
@@ -49,7 +50,7 @@ export class Cpu {
         let context: OpContext = OpContext.create(this, opaddr, operation);
 
         this.context = context;
-        // this.trace();
+        //console.log(trace(this));
         this.registers.pc.set(pc + operation.getSize());
         this.registers.k.set(bank);
         this.cycles += operation.execute(context);

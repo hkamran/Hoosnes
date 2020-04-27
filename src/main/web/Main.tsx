@@ -78,10 +78,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         promise.then((value: number[]) => {
             if (value == null || value.length == 0) return;
             this.props.snes.load(value);
-            if (this.props.snes.state != ConsoleState.RUNNING) {
-                this.props.snes.play();
-                animateFrames();
-            }
+            this.play();
         });
     }
 
@@ -91,11 +88,15 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         promise.then((value: number[]) => {
             if (value == null || value.length == 0) return;
             this.props.snes.load(value);
-            if (this.props.snes.state != ConsoleState.RUNNING) {
-                this.props.snes.play();
-                animateFrames();
-            }
+            this.play();
         });
+    }
+
+    private play() {
+        if (this.props.snes.state != ConsoleState.RUNNING) {
+            this.props.snes.play();
+            animateFrames();
+        }
     }
 
     public zoomIn() {

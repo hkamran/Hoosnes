@@ -1,5 +1,6 @@
 import {Cartridge, ICartridgeMapping} from "./Cartridge";
 import {AddressUtil} from "../util/AddressUtil";
+import {Bit} from "../util/Bit";
 
 export class CartridgeMapping0 implements ICartridgeMapping {
 
@@ -20,35 +21,37 @@ export class CartridgeMapping0 implements ICartridgeMapping {
 
         if (0x0000 <= page && page <= 0x7FFF) {
             if (0x40 <= bank && bank <= 0x6F) {
-                let index = ((bank - 0x00) * 0x8000) + (page - 0x0000);
-                let value = this.cartridge.rom[index];
+                let index = ((bank % 0x80) * 0x8000) + (page % 0x8000);
+                let value = this.cartridge.rom[index % this.cartridge.rom.length];
 
-                return value;
+                return Bit.toUint8(value);
             } else if (0xC0 <= bank && bank <= 0xEF) {
-                let index = ((bank - 0x80) * 0x8000) + (page - 0x0000);
-                let value = this.cartridge.rom[index];
+                let index = ((bank % 0x80) * 0x8000) + (page % 0x8000);
+                let value = this.cartridge.rom[index % this.cartridge.rom.length];
 
-                return value;
+                return Bit.toUint8(value);
             } else if (0x70 <= bank && bank <= 0x7F) {
-                let index =(bank - 0x70) + page;
+                let index = (bank - 0x70) + page;
+                let value = this.cartridge.sram.read(index);
 
-                return this.cartridge.sram.read(index);
+                return Bit.toUint8(value);
             } else if (0xF0 <= bank && bank <= 0xFF) {
                 let index = (bank - 0xF0) + page;
+                let value = this.cartridge.sram.read(index);
 
-                return this.cartridge.sram.read(index);
+                return Bit.toUint8(value);
             }
         } else if (0x8000 <= page && page <= 0xFFFF) {
             if (0x80 <= bank && bank <= 0xFF) {
-                let index = ((bank - 0x80) * 0x8000) + (page - 0x8000);
-                let value = this.cartridge.rom[index];
+                let index = ((bank % 0x80) * 0x8000) + (page % 0x8000);
+                let value = this.cartridge.rom[index % this.cartridge.rom.length];
 
-                return value;
+                return Bit.toUint8(value);
             } else if (0x00 <= bank && bank <= 0x7F) {
-                let index = ((bank - 0x00) * 0x8000) + (page - 0x8000);
-                let value = this.cartridge.rom[index];
+                let index = ((bank % 0x80) * 0x8000) + (page % 0x8000);
+                let value = this.cartridge.rom[index % this.cartridge.rom.length];
 
-                return value;
+                return Bit.toUint8(value);
             }
         }
 

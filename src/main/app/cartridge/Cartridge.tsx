@@ -7,6 +7,7 @@ import {CartridgeMapping4} from "./CartridgeMapping4";
 import {CartridgeMapping2} from "./CartridgeMapping2";
 import {Sram} from "../memory/Sram";
 import {CartridgeMapping3} from "./CartridgeMapping3";
+import {Bit} from "../util/Bit";
 
 export interface ICartridgeMapping {
     label: string;
@@ -206,7 +207,7 @@ export class Cartridge {
     }
 
     public readByte(address: number): number {
-        return this.mapping.read(address);
+        return Bit.toUint8(this.mapping.read(address));
     }
 
     public writeByte(address: number, value: number): void {
