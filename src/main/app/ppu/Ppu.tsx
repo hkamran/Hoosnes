@@ -11,6 +11,7 @@ import {InterruptType} from "../cpu/Interrupts";
 import {Renderer} from "./Renderer";
 import {Tiles} from "./Tiles";
 import {Backgrounds} from "./Backgrounds";
+import {joy1, joy2} from "../controller/Controller";
 
 
 export class Ppu {
@@ -112,8 +113,13 @@ export class Ppu {
             if (this.console.cpu.registers.nmitimen.isNMIEnabled()) {
                 this.console.cpu.interrupts.set(InterruptType.NMI);
             }
-            if (this.console.cpu.registers.nmitimen.isJoypadEnabled()) {
-                this.console.cpu.registers.hvbjoy.setJoypadFlag(true);
+            if (this.console.cpu.registers.nmitimen.isAutoJoypadEnabled()) {
+                this.console.cpu.registers.hvbjoy.setJoypadFlag(false);
+                console.log(`${joy1.readByte(1).toString(2)} ${joy1.readByte(0).toString(2)}`);
+                this.console.cpu.registers.joy1.setLower(joy1.readByte(0));
+                this.console.cpu.registers.joy1.setUpper(joy1.readByte(1));
+                this.console.cpu.registers.joy2.setLower(joy2.readByte(0));
+                this.console.cpu.registers.joy2.setUpper(joy2.readByte(1));
             }
         }
 

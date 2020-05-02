@@ -8,6 +8,8 @@ import ReactTooltip from "react-tooltip";
 import {debugCallback, Debugger} from "./debugger/Debugger";
 import {CartridgeModal} from "./CartridgeModal";
 import Modal from 'react-modal';
+import {Keyboard} from "./Keyboard";
+import {joy1} from "../app/controller/Controller";
 
 declare let window: any;
 window.snes = new Console();
@@ -279,3 +281,5 @@ ReactDOM.render(
     <Main snes={window.snes}/>,
     document.getElementById('main'),
 );
+
+Keyboard.initialize(joy1);

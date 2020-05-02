@@ -7,6 +7,7 @@ import {ScreenRegion} from "../ppu/Screen";
 import {
     HdmaEnableRegister,
 } from "./Hdma";
+import {joy1, joy2} from "../controller/Controller";
 
 /**
  * +---------------------------+---------+-----------------------------------+-------------------+-------------------------------------------+
@@ -300,7 +301,7 @@ export class InterruptEnableFlagsRegister extends Register {
         return (this.val & 0x10) > 0;
     }
 
-    public isJoypadEnabled() {
+    public isAutoJoypadEnabled() {
         return (this.val & 0x1) > 0;
     }
 
@@ -490,6 +491,86 @@ export class HvBStatusRegister extends Register {
 
 }
 
+export class OldJoy1Register extends Register {
+
+    public address: string = "0x4016";
+    public name: string = "JOY1";
+
+    public get(): number {
+        return joy1.readByte();
+    }
+
+    public set(value: number): void {
+        joy1.writeByte(0, value);
+    }
+
+}
+
+export class OldJoy2Register extends Register {
+
+    public address: string = "0x4017";
+    public name: string = "JOY2";
+
+    public get(): number {
+        return joy2.readByte();
+    }
+
+    public set(value: number): void {
+        joy2.writeByte(0, value);
+    }
+
+}
+
+export class Joy1Register extends Register {
+
+    public address: string = "0x4218-0x4219";
+    public name: string = "JOY1";
+
+    public value: number = 0;
+
+    public getLower(): number {
+        return Bit.getUint16Lower(this.value);
+    }
+
+    public getUpper(): number {
+        return Bit.getUint16Upper(this.value);
+    }
+
+    public setUpper(value: number) {
+        this.value = Bit.setUint16Upper(this.value, value);
+    }
+
+    public setLower(value: number) {
+        this.value = Bit.setUint16Lower(this.value, value);
+    }
+
+}
+
+export class Joy2Register extends Register {
+
+    public address: string = "0x421A-0x421B";
+    public name: string = "JOY2";
+
+    public value: number = 0;
+
+    public getLower(): number {
+        return Bit.getUint16Lower(this.value);
+    }
+
+    public getUpper(): number {
+        return Bit.getUint16Upper(this.value);
+    }
+
+    public setUpper(value: number) {
+        this.value = Bit.setUint16Upper(this.value, value);
+    }
+
+    public setLower(value: number) {
+        this.value = Bit.setUint16Lower(this.value, value);
+    }
+
+}
+
 export class Registers {
 
     public a : Register;
@@ -522,10 +603,13 @@ export class Registers {
     public rddivh : Register;
     public rdmpyl : Register;
     public rdmpyh : Register;
-    public joy1l : Register;
-    public joy1h : Register;
-    public joy2l : Register;
-    public joy2h : Register;
+
+
+    public oldJoy1 : OldJoy1Register;
+    public oldJoy2 : OldJoy2Register;
+
+    public joy1 : Joy1Register;
+    public joy2 : Joy2Register;
     public joy3l : Register;
     public joy3h : Register;
     public joy4l : Register;
@@ -578,10 +662,12 @@ export class Registers {
         this.rddivh = new Register();
         this.rdmpyl = new Register();
         this.rdmpyh = new Register();
-        this.joy1l = new Register();
-        this.joy1h = new Register();
-        this.joy2l = new Register();
-        this.joy2h = new Register();
+
+        this.oldJoy1 = new OldJoy1Register();
+        this.oldJoy2 = new OldJoy2Register();
+
+        this.joy1 = new Joy1Register();
+        this.joy2 = new Joy2Register();
         this.joy3l = new Register();
         this.joy3h = new Register();
         this.joy4l = new Register();

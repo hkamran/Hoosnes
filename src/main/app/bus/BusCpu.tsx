@@ -36,9 +36,9 @@ export class BusCpu {
         }
 
         if (page == 0x4016) {
-            value = this.registers.joy1l.get();
+            value = this.registers.oldJoy1.get();
         } else if (page == 0x4017) {
-            value = this.registers.joy2l.get();
+            value = this.registers.oldJoy2.get();
         } else if (page == 0x4200) {
             value = this.registers.nmitimen.get();
         } else if (page == 0x4201) {
@@ -86,13 +86,13 @@ export class BusCpu {
         } else if (page == 0x4217) {
             value = this.registers.rdmpyh.get();
         } else if (page == 0x4218) {
-            value = this.registers.joy1l.get();
+            value = this.registers.joy1.getLower();
         } else if (page == 0x4219) {
-            value = this.registers.joy1h.get();
+            value = this.registers.joy1.getUpper();
         } else if (page == 0x421A) {
-            value = this.registers.joy2l.get();
+            value = this.registers.joy2.getLower();
         } else if (page == 0x421B) {
-            value = this.registers.joy2h.get();
+            value = this.registers.joy2.getUpper();
         } else if (page == 0x421C) {
             value = this.registers.joy3l.get();
         } else if (page == 0x421D) {
@@ -324,9 +324,9 @@ export class BusCpu {
         }
 
         if (page == 0x4016) {
-            this.registers.joy1l.set(value);
+            this.registers.oldJoy1.set(value);
         } else if (page == 0x4017) {
-            this.registers.joy2l.set(value);
+            this.registers.oldJoy2.set(value);
         } else if (page == 0x4200) {
             this.registers.nmitimen.set(value);
         } else if (page == 0x4201) {
@@ -372,13 +372,13 @@ export class BusCpu {
         } else if (page == 0x4217) {
             this.registers.rdmpyh.set(value);
         } else if (page == 0x4218) {
-            this.registers.joy1l.set(value);
+            this.registers.joy1.setLower(value);
         } else if (page == 0x4219) {
-            this.registers.joy1h.set(value);
+            this.registers.joy1.setUpper(value);
         } else if (page == 0x421A) {
-            this.registers.joy2l.set(value);
+            this.registers.joy2.setLower(value);
         } else if (page == 0x421B) {
-            this.registers.joy2h.set(value);
+            this.registers.joy2.setUpper(value);
         } else if (page == 0x421C) {
             this.registers.joy3l.set(value);
         } else if (page == 0x421D) {
