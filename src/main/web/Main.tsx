@@ -16,7 +16,7 @@ window.snes = new Console();
 
 const customStyles = {
     content: {
-        top: '20%',
+        top: '350px',
         left: '50%',
         right: 'auto',
         bottom: 'auto',
@@ -234,7 +234,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         <hr/>
                         <div className={"modal-content"} style={{display: 'flex', flexDirection: 'row'}}>
                             <div style={{border: "2px outset #ffffff", display: 'flex', flexDirection: 'row'}}>
-                                <table>
+                                <table style={{width: "150px"}}>
                                     <thead>
                                     <tr>
                                         <th style={{width: "50%"}}>Button</th>
@@ -264,8 +264,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                                     </tr>
                                     </tbody>
                                 </table>
-
-                                <table>
+                                <table style={{width: "150px"}}>
                                     <thead>
                                     <tr>
                                         <th style={{width: "50%"}}>Button</th>
