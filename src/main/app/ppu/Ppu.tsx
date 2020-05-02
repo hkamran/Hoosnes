@@ -115,7 +115,6 @@ export class Ppu {
             }
             if (this.console.cpu.registers.nmitimen.isAutoJoypadEnabled()) {
                 this.console.cpu.registers.hvbjoy.setJoypadFlag(false);
-                console.log(`${joy1.readByte(1).toString(2)} ${joy1.readByte(0).toString(2)}`);
                 this.console.cpu.registers.joy1.setLower(joy1.readByte(0));
                 this.console.cpu.registers.joy1.setUpper(joy1.readByte(1));
                 this.console.cpu.registers.joy2.setLower(joy2.readByte(0));
