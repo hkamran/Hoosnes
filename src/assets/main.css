@@ -209,3 +209,33 @@ canvas {
 .cartridge-select option {
     padding: 5px;
 }
+
+
+
+.modal-content td {
+    padding-left: 10px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.modal-content th {
+    padding-left: 10px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    text-transform: uppercase;
+    background: #d5d5d5;
+}
+
+.modal-content tr:nth-child(even) {
+    background-color: #eaeaea;
+}
+
+.modal-content tr:nth-child(odd) {
+    background-color: #fefefe;
+}
+
+.modal-content table {
+    color: #373737;
+}

@@ -8,14 +8,14 @@ import ReactTooltip from "react-tooltip";
 import {debugCallback, Debugger} from "./debugger/Debugger";
 import {CartridgeModal} from "./CartridgeModal";
 import Modal from 'react-modal';
-import {Keyboard} from "./Keyboard";
-import {joy1} from "../app/controller/Controller";
+import {Keyboard, KeyboardMapping} from "./Keyboard";
+import {joy1, Key} from "../app/controller/Controller";
 
 declare let window: any;
 window.snes = new Console();
 
 const customStyles = {
-    content : {
+    content: {
         top: '20%',
         left: '50%',
         right: 'auto',
@@ -46,6 +46,7 @@ interface IMainStates {
     snes: Console;
     viewDebugger: boolean;
     viewCartridge: boolean;
+    viewSettings: boolean;
 }
 
 interface IMainProps {
@@ -77,6 +78,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
             snes: props.snes,
             viewDebugger: false,
             viewCartridge: false,
+            viewSettings: false,
         };
 
         this.fileInputRef = React.createRef<HTMLInputElement>();
@@ -121,8 +123,20 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         });
     }
 
+    public openSettings(): void {
+        this.setState({
+            viewSettings: true,
+        });
+    }
+
+    public closeSettings(): void {
+        this.setState({
+            viewSettings: false,
+        });
+    }
+
     public onChangeFile(event) {
-        let file : File = event.target.files[0];
+        let file: File = event.target.files[0];
         let promise = this.readFileDataAsBase64(file);
         promise.then((value: number[]) => {
             if (value == null || value.length == 0) return;
@@ -146,15 +160,15 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         this.props.snes.ppu.screen.zoomOut();
     }
 
-    public readFileDataAsBase64(file : Blob) {
+    public readFileDataAsBase64(file: Blob) {
 
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
 
-            reader.onload = (event : any) => {
-                let str : string = event.target.result;
+            reader.onload = (event: any) => {
+                let str: string = event.target.result;
                 window.raw = str;
-                let bytes : number[] = [];
+                let bytes: number[] = [];
                 for (let i = 0; i < str.length; ++i) {
                     let charCode = str.charCodeAt(i);
                     bytes.push(charCode & 0xFF);
@@ -188,18 +202,19 @@ export class Main extends React.Component<IMainProps, IMainStates> {
     public render() {
         return (
             <div style={{display: 'flex', flexDirection: 'column', margin: '0 auto'}}>
-                <Modal isOpen={this.state.viewCartridge} style={customStyles} >
-                    <div style={{display: 'flex', flexDirection: 'column'}} >
+                <Modal isOpen={this.state.viewCartridge} style={customStyles}>
+                    <div style={{display: 'flex', flexDirection: 'column'}}>
                         <div style={{display: 'flex', flexDirection: 'row'}}>
                             <div className={"cartridge-title"}>Select Cartridge</div>
-                            <div style={{flexGrow: 1, width: "70px"}} />
-                            <a style={{color: "#656565", cursor: "pointer"}} onClick={this.closeCartridge.bind(this)} >
-                                <i className="fas fa-times" />
+                            <div style={{flexGrow: 1, width: "70px"}}/>
+                            <a style={{color: "#656565", cursor: "pointer"}} onClick={this.closeCartridge.bind(this)}>
+                                <i className="fas fa-times"/>
                             </a>
                         </div>
-                        <hr />
-                        <div style={{display: 'flex', flexDirection: 'row'}}>
-                            <select className={"cartridge-select"} defaultValue={"select"} onChange={this.selectCartridge.bind(this)}>
+                        <hr/>
+                        <div className={"modal-content"} style={{display: 'flex', flexDirection: 'row'}}>
+                            <select className={"cartridge-select"} defaultValue={"select"}
+                                    onChange={this.selectCartridge.bind(this)}>
                                 <option value="select">Select</option>
                                 <option value="./roms/Dr. Mario (Japan) (NP).sfc">Dr Mario</option>
                                 <option value="other">Load my own...</option>
@@ -207,7 +222,85 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         </div>
                     </div>
                 </Modal>
-                <Debugger snes={this.state.snes} display={this.state.viewDebugger} closeCallback={this.closeDebugger.bind(this)} />
+                <Modal isOpen={this.state.viewSettings} style={customStyles}>
+                    <div style={{display: 'flex', flexDirection: 'column'}}>
+                        <div style={{display: 'flex', flexDirection: 'row'}}>
+                            <div className={"cartridge-title"}>Controller</div>
+                            <div style={{flexGrow: 1, width: "70px"}}/>
+                            <a style={{color: "#656565", cursor: "pointer"}} onClick={this.closeSettings.bind(this)}>
+                                <i className="fas fa-times"/>
+                            </a>
+                        </div>
+                        <hr/>
+                        <div className={"modal-content"} style={{display: 'flex', flexDirection: 'row'}}>
+                            <div style={{border: "2px outset #ffffff", display: 'flex', flexDirection: 'row'}}>
+                                <table>
+                                    <thead>
+                                    <tr>
+                                        <th style={{width: "50%"}}>Button</th>
+                                        <th style={{minWidth: "50px"}}>Key</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>Up</td>
+                                        <td>{KeyboardMapping.UP}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Down</td>
+                                        <td>{KeyboardMapping.DOWN}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Left</td>
+                                        <td>{KeyboardMapping.LEFT}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Right</td>
+                                        <td>{KeyboardMapping.RIGHT}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>START</td>
+                                        <td>{KeyboardMapping.START}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+                                <table>
+                                    <thead>
+                                    <tr>
+                                        <th style={{width: "50%"}}>Button</th>
+                                        <th style={{minWidth: "50px"}}>Key</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>X</td>
+                                        <td>{KeyboardMapping.X}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Y</td>
+                                        <td>{KeyboardMapping.Y}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>A</td>
+                                        <td>{KeyboardMapping.A}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>B</td>
+                                        <td>{KeyboardMapping.B}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>SELECT</td>
+                                        <td>{KeyboardMapping.SELECT}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </Modal>
+                <Debugger snes={this.state.snes} display={this.state.viewDebugger}
+                          closeCallback={this.closeDebugger.bind(this)}/>
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                     <div className={"logo"} style={{width: "100px", marginRight: "10px"}}>
                         <div className={"header"}>
@@ -217,13 +310,12 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                             EMULATOR
                         </h2>
                     </div>
-                    <div style={{flexGrow: 1}} />
+                    <div style={{flexGrow: 1}}/>
                     <a className={"menu-button green"} data-tip="Load Game" onClick={async () => {
                         this.openCartridge();
                         //this.fileInputRef.current.click();
                         //await this.loadCartridge("./roms/Dr. Mario (Japan) (NP).sfc");
                     }}>
-
                         <div>
                             <i className="fas fa-download"/>
                         </div>
@@ -233,9 +325,9 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                             <i className="fas fa-user-friends"/>
                         </div>
                     </a>
-                    <a className={"menu-button yellow"} data-tip="Settings">
+                    <a className={"menu-button yellow"} data-tip="Controller" onClick={this.openSettings.bind(this)}>
                         <div>
-                            <i className="fas fa-cog"/>
+                            <i className="fas fa-gamepad"/>
                         </div>
                     </a>
                     <a className={"menu-button red"} data-tip="Debugger" onClick={this.openDebugger.bind(this)}>
@@ -244,22 +336,22 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         </div>
                     </a>
                 </div>
-                <div className={"screen-container"} >
+                <div className={"screen-container"}>
                     <ScreenCard snes={window.snes}/>
                 </div>
                 <div style={{display: 'flex', flexDirection: 'row', marginTop: "30px"}}>
-                    <div style={{flexGrow: 1}} />
+                    <div style={{flexGrow: 1}}/>
                     <div className={"extra-button-wrapper"}>
                         <a className={"extra-button"} data-tip="Zoom out" onClick={this.zoomOut.bind(this)}>
                             <div>
-                                <i className="fas fa-minus" />
+                                <i className="fas fa-minus"/>
                             </div>
                         </a>
                     </div>
                     <div className={"extra-button-wrapper"}>
-                        <a className={"extra-button"} data-tip="Zoom in"  onClick={this.zoomIn.bind(this)}>
+                        <a className={"extra-button"} data-tip="Zoom in" onClick={this.zoomIn.bind(this)}>
                             <div>
-                                <i className="fas fa-plus" />
+                                <i className="fas fa-plus"/>
                             </div>
                         </a>
                     </div>
@@ -269,8 +361,9 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         Author: <a href="https://github.com/hkamran">Hooman Kamran</a>
                     </div>
                 </div>
-                <input type="file" id="file" ref={this.fileInputRef} onChange={this.onChangeFile.bind(this)} style={{display: "none"}}/>
-                <ReactTooltip />
+                <input type="file" id="file" ref={this.fileInputRef} onChange={this.onChangeFile.bind(this)}
+                       style={{display: "none"}}/>
+                <ReactTooltip/>
             </div>
         );
     }
