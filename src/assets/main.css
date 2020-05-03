@@ -210,10 +210,8 @@ canvas {
     padding: 5px;
 }
 
-
-
 .modal-content td {
-    padding-left: 10px;
+    padding-left: 15px;
     padding-top: 15px;
     padding-bottom: 15px;
     text-align: left;
@@ -221,7 +219,7 @@ canvas {
 }
 
 .modal-content th {
-    padding-left: 10px;
+    padding-left: 15px;
     padding-top: 15px;
     padding-bottom: 15px;
     text-transform: uppercase;

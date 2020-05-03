@@ -233,68 +233,48 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         </div>
                         <hr/>
                         <div className={"modal-content"} style={{display: 'flex', flexDirection: 'row'}}>
-                            <div style={{border: "1px solid #9f9f9f", paddingTop: "1px", borderRadius: "2px", display: 'flex', flexDirection: 'row'}}>
-                                <table style={{width: "150px"}}>
-                                    <thead>
-                                    <tr>
-                                        <th style={{width: "50%"}}>Button</th>
-                                        <th style={{minWidth: "50px"}}>Key</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <td>Up</td>
-                                        <td>{KeyboardMapping.UP}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Down</td>
-                                        <td>{KeyboardMapping.DOWN}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Left</td>
-                                        <td>{KeyboardMapping.LEFT}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Right</td>
-                                        <td>{KeyboardMapping.RIGHT}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>START</td>
-                                        <td>{KeyboardMapping.START}</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                                <table style={{width: "150px"}}>
-                                    <thead>
-                                    <tr>
-                                        <th style={{width: "50%"}}>Button</th>
-                                        <th style={{minWidth: "50px"}}>Key</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <td>X</td>
-                                        <td>{KeyboardMapping.X}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Y</td>
-                                        <td>{KeyboardMapping.Y}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>A</td>
-                                        <td>{KeyboardMapping.A}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>B</td>
-                                        <td>{KeyboardMapping.B}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>SELECT</td>
-                                        <td>{KeyboardMapping.SELECT}</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <table style={{border: "1px solid #9f9f9f"}}>
+                                <thead>
+                                <tr>
+                                    <th style={{width: "70px"}}>Button</th>
+                                    <th style={{width: "50px"}}>Key</th>
+                                    <th style={{width: "70px"}}>Button</th>
+                                    <th style={{width: "50px"}}>Key</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>Up</td>
+                                    <td>{KeyboardMapping.UP}</td>
+                                    <td>X</td>
+                                    <td>{KeyboardMapping.X}</td>
+                                </tr>
+                                <tr>
+                                    <td>Down</td>
+                                    <td>{KeyboardMapping.DOWN}</td>
+                                    <td>Y</td>
+                                    <td>{KeyboardMapping.Y}</td>
+                                </tr>
+                                <tr>
+                                    <td>Left</td>
+                                    <td>{KeyboardMapping.LEFT}</td>
+                                    <td>A</td>
+                                    <td>{KeyboardMapping.A}</td>
+                                </tr>
+                                <tr>
+                                    <td>Right</td>
+                                    <td>{KeyboardMapping.RIGHT}</td>
+                                    <td>B</td>
+                                    <td>{KeyboardMapping.B}</td>
+                                </tr>
+                                <tr>
+                                    <td>START</td>
+                                    <td>{KeyboardMapping.START}</td>
+                                    <td>SELECT</td>
+                                    <td>{KeyboardMapping.SELECT}</td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </Modal>
