@@ -225,7 +225,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                 <Modal isOpen={this.state.viewSettings} style={customStyles}>
                     <div style={{display: 'flex', flexDirection: 'column'}}>
                         <div style={{display: 'flex', flexDirection: 'row'}}>
-                            <div className={"cartridge-title"}>Controller</div>
+                            <div className={"cartridge-title"}>Settings</div>
                             <div style={{flexGrow: 1, width: "70px"}}/>
                             <a style={{color: "#656565", cursor: "pointer"}} onClick={this.closeSettings.bind(this)}>
                                 <i className="fas fa-times"/>
@@ -233,7 +233,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         </div>
                         <hr/>
                         <div className={"modal-content"} style={{display: 'flex', flexDirection: 'row'}}>
-                            <div style={{border: "2px outset #ffffff", display: 'flex', flexDirection: 'row'}}>
+                            <div style={{border: "1px solid #9f9f9f", paddingTop: "1px", borderRadius: "2px", display: 'flex', flexDirection: 'row'}}>
                                 <table style={{width: "150px"}}>
                                     <thead>
                                     <tr>
@@ -312,8 +312,6 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                     <div style={{flexGrow: 1}}/>
                     <a className={"menu-button green"} data-tip="Load Game" onClick={async () => {
                         this.openCartridge();
-                        //this.fileInputRef.current.click();
-                        //await this.loadCartridge("./roms/Dr. Mario (Japan) (NP).sfc");
                     }}>
                         <div>
                             <i className="fas fa-download"/>
@@ -324,9 +322,9 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                             <i className="fas fa-user-friends"/>
                         </div>
                     </a>
-                    <a className={"menu-button yellow"} data-tip="Controller" onClick={this.openSettings.bind(this)}>
+                    <a className={"menu-button yellow"} data-tip="Settings" onClick={this.openSettings.bind(this)}>
                         <div>
-                            <i className="fas fa-gamepad"/>
+                            <i className="fas fa-cog" />
                         </div>
                     </a>
                     <a className={"menu-button red"} data-tip="Debugger" onClick={this.openDebugger.bind(this)}>
