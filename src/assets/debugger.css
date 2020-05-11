@@ -6,7 +6,7 @@
     left: 0px;
     bottom: 0px;
     background: #252525;
-    opacity: 0.75;
+    opacity: 0.90;
     color: #ffffff;
     display : flex;
     flex-direction: column;
@@ -30,7 +30,7 @@
 }
 
 #debugger button:active {
-    background: #090909;
+    background: #191919;
 }
 
 .debug-title {
@@ -63,10 +63,6 @@
     border-top-right-radius: 5px;
 }
 
-.debug-tab-button:hover {
-    background: #000;
-}
-
 .debug-card {
     background: #161616;;
 }
@@ -81,21 +77,25 @@
     cursor: pointer;
 }
 
+.debug-tab-button:hover {
+    background: #191919;
+}
+
 .debug-button.active {
-     background: #090909;
+     background: #191919;
  }
 
 .debug-button:hover {
-    background: #090909;
+    background: #191919;
 }
 
 .debug-tab-button.active {
-    background: #090909;
+    background: #191919;
 }
 
 .debug-tab {
     position: relative;
-    background: #090909;
+    background: #191919;
     display: none;
     overflow-y: auto;
     flex-direction: column;
@@ -113,7 +113,6 @@
     position : relative;
     display: flex;
     flex-direction: row;
-    border-bottom: 1px solid #000000;
     margin-left: 24px;
     margin-right: 24px;
 }

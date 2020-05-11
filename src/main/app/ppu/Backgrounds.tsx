@@ -61,12 +61,19 @@ export abstract class Background {
 
     public getTileMap(x: number, y: number): TileMap {
         let tileMapAddress: number = this.getTileMapAddress();
-        let isVerticallyExtended: boolean = this.isVerticallyExtended();
+        let dimension: Dimension = this.getBackgroundDimension();
+        let tileMapSize = 2;
+        let totalTileMaps: number = 32;
+        let mapIndex: number = 0;
+        if (x > 31 && this.isHorizontallyExtended()) mapIndex = 1;
+        if (y > 31 && this.isVerticallyExtended()) mapIndex = 2;
+        if (x > 31 && y > 31 && this.isHorizontallyExtended() && this.isVerticallyExtended()) mapIndex = 3;
 
-        let yOffset: number = y * (0x40 * (isVerticallyExtended ? 2 : 1));
-        let xOffset: number = x * 2;
+        let mapOffset: number = mapIndex * (totalTileMaps * totalTileMaps) * tileMapSize;
+        let yOffset: number = (y % totalTileMaps) * (totalTileMaps * tileMapSize);
+        let xOffset: number = (x % totalTileMaps) * tileMapSize;
 
-        let index: number = tileMapAddress + yOffset + xOffset;
+        let index: number = tileMapAddress + yOffset + xOffset + mapOffset;
 
         let tileMap: TileMap = this.ppu.tileMaps.getTileMap(index);
         return tileMap;
@@ -77,24 +84,27 @@ export abstract class Background {
         let backgroundDimension: Dimension = this.getBackgroundDimension();
         let bpp: number = this.getBpp().valueOf();
         let vertScrollOffset: number = this.getVerticalScrollOffset();
+        let hortScrollOffset: number = this.getHorizontalScrollOffset();
 
-        let yStart: number = (y + vertScrollOffset);
-        let yHarse: number = Math.floor((yStart) / characterDimension.height) % backgroundDimension.height;
-        let yCoarse: number = (yStart) % characterDimension.height;
+        let yPos: number = y + vertScrollOffset;
+        let yHarse: number = Math.floor(yPos / characterDimension.width);
+        let yCoarse: number = yPos % characterDimension.height;
 
-        let xStart: number = this.getHorizontalScrollOffset() % backgroundDimension.width;
-        let xEnd: number = xStart + Screen.WIDTH;
+        let xPos: number = hortScrollOffset;
+        let xHarse: number = Math.floor(xPos / characterDimension.width);
+        let xCoarse: number = xHarse % characterDimension.width;
 
         let results: Color[] = [];
-        for (let xHarse: number = Math.floor(xStart / characterDimension.width);
-             xHarse < Math.floor(xEnd / characterDimension.width); xHarse++) {
+        let xHarseEnd: number = xHarse + 32;
+
+        for (;xHarse < xHarseEnd; xHarse++) {
             let tileMap: TileMap = this.getTileMap(xHarse, yHarse);
             let tile: Tile = this.getTile(tileMap);
 
             let colors: Color[] = this.ppu.palette.getPalettesForBppType(tileMap.getPaletteNumber(), bpp);
             let sliver: number[] = tile.data[yCoarse];
-            for (let xCoarse: number = 0; xCoarse < sliver.length; xCoarse++) {
-                let index: number = sliver[xCoarse];
+            for (let xIndex = 0; xIndex < sliver.length; xIndex++) {
+                let index: number = sliver[xIndex];
                 let color: Color = colors[index];
                 if (index == 0) color.opacity = 0;
                 results.push(color);
@@ -246,11 +256,13 @@ export abstract class Background {
                     }
                 }
                 xIndex += characterDimension.width;
-                if (xIndex >= characterDimension.width * backgroundDimension.width) {
+                if (xIndex >= (characterDimension.width * 32)) {
                     yIndex += characterDimension.height;
                     xIndex = 0;
                 }
             }
+            xIndex = characterDimension.width * 32;
+            yIndex = 0;
         }
 
         if (topRight) {
@@ -261,8 +273,13 @@ export abstract class Background {
                     }
                 }
                 xIndex += characterDimension.width;
+                if (xIndex >= (characterDimension.width * 64)) {
+                    yIndex += characterDimension.height;
+                    xIndex = characterDimension.width * 32;
+                }
             }
-            yIndex += characterDimension.height;
+            xIndex = 0;
+            yIndex = characterDimension.height * 32;
         }
 
         if (bottomLeft) {
@@ -274,8 +291,13 @@ export abstract class Background {
                     }
                 }
                 xIndex += characterDimension.width;
+                if (xIndex >= (characterDimension.width * 32)) {
+                    yIndex += characterDimension.height;
+                    xIndex = 0;
+                }
             }
-            yIndex += characterDimension.height;
+            xIndex = characterDimension.width * 32;
+            yIndex = characterDimension.height * 32;
         }
 
         if (bottomRight) {
@@ -286,8 +308,13 @@ export abstract class Background {
                     }
                 }
                 xIndex += characterDimension.width;
+                if (xIndex >= (characterDimension.width * 64)) {
+                    yIndex += characterDimension.height;
+                    xIndex = characterDimension.width * 32;
+                }
             }
-            yIndex += characterDimension.height;
+            xIndex = characterDimension.width * 32;
+            yIndex = characterDimension.height * 32;
         }
 
         return new Tile(data, TileAttributes.create(

@@ -6,7 +6,6 @@ import {Operation} from "../app/cpu/Opcodes";
 import {AddressUtil} from "../app/util/AddressUtil";
 import ReactTooltip from "react-tooltip";
 import {debugCallback, Debugger} from "./debugger/Debugger";
-import {CartridgeModal} from "./CartridgeModal";
 import Modal from 'react-modal';
 import {Keyboard, KeyboardMapping} from "./Keyboard";
 import {joy1, Key} from "../app/controller/Controller";
@@ -53,21 +52,6 @@ interface IMainProps {
     snes: Console;
 }
 
-export class TickEvent {
-    public op: Operation;
-    public cycle: number;
-    public registerK: number;
-    public registerPC: number;
-
-    constructor(snes: Console) {
-        this.cycle = snes.cpu.cycles;
-        this.op = snes.cpu.context.op;
-
-        this.registerK = AddressUtil.getBank(snes.cpu.context.opaddr);
-        this.registerPC = AddressUtil.getPage(snes.cpu.context.opaddr);
-    }
-}
-
 export class Main extends React.Component<IMainProps, IMainStates> {
 
     public fileInputRef: React.RefObject<HTMLInputElement>;
@@ -107,7 +91,17 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         });
     }
 
-    public loadCartridgeLocally(): void {
+    public loadCartridgeLocally(event) {
+        let file: File = event.target.files[0];
+        let promise = this.readFileDataAsBase64(file);
+        promise.then((value: number[]) => {
+            if (value == null || value.length == 0) return;
+            this.props.snes.load(value);
+            //this.play();
+        });
+    }
+
+    public openFileInput(): void {
         this.fileInputRef.current.click();
     }
 
@@ -132,16 +126,6 @@ export class Main extends React.Component<IMainProps, IMainStates> {
     public closeSettings(): void {
         this.setState({
             viewSettings: false,
-        });
-    }
-
-    public onChangeFile(event) {
-        let file: File = event.target.files[0];
-        let promise = this.readFileDataAsBase64(file);
-        promise.then((value: number[]) => {
-            if (value == null || value.length == 0) return;
-            this.props.snes.load(value);
-            this.play();
         });
     }
 
@@ -189,7 +173,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         let value: string = selectElement.value;
 
         if (value == "other") {
-            this.loadCartridgeLocally();
+            this.openFileInput();
         } else if (value == "select") {
             return;
         } else {
@@ -338,7 +322,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         Author: <a href="https://github.com/hkamran">Hooman Kamran</a>
                     </div>
                 </div>
-                <input type="file" id="file" ref={this.fileInputRef} onChange={this.onChangeFile.bind(this)}
+                <input type="file" id="file" ref={this.fileInputRef} onChange={this.loadCartridgeLocally.bind(this)}
                        style={{display: "none"}}/>
                 <ReactTooltip/>
             </div>
