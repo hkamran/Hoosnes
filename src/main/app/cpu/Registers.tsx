@@ -315,7 +315,7 @@ export class NmiFlagRegister extends Register {
     public val: number = 0x42;
 
     public set(val: number): void {
-        // ignore
+        this.val &= 0x7F;
     }
 
     public setVBlankFlag(flag: boolean) {

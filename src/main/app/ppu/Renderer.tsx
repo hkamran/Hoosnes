@@ -29,21 +29,22 @@ export class Renderer {
 
      */
     public tick(): void {
+        let mode: number = this.ppu.registers.bgmode.getMode();
         let base: Color = this.ppu.palette.getPalette(0);
         let y: number = this.ppu.scanline - ScreenRegion.VERT_PRELINE.end;
 
         let bg1Colors: Color[] = this.ppu.backgrounds.bg1.getLineImage(y);
         let bg2Colors: Color[] = this.ppu.backgrounds.bg2.getLineImage(y);
-        let bg3Colors: Color[] = this.ppu.backgrounds.bg3.getLineImage(y);
+        let bg3Colors: Color[] = mode < 5 ? this.ppu.backgrounds.bg3.getLineImage(y) : [];
 
         for (let x: number = 0; x < Screen.WIDTH; x++) {
-            let bg1Color: Color = bg1Colors[x];
-            let bg2Color: Color = bg2Colors[x];
-            let bg3Color: Color = bg3Colors[x];
-
             let color: Color = base;
-            if (bg2Color.opacity > 0) color = bg2Color;
+            let bg1Color: Color = bg1Colors.length > x ? bg1Colors[x]: base;
+            let bg2Color: Color = bg2Colors.length > x ? bg2Colors[x]: base;
+            let bg3Color: Color = bg3Colors.length > x ? bg3Colors[x]: base;
+
             if (bg3Color.opacity > 0) color = bg3Color;
+            if (bg2Color.opacity > 0) color = bg2Color;
             if (bg1Color.opacity > 0) color = bg1Color;
             this.screen.setPixel(x, y, color);
         }

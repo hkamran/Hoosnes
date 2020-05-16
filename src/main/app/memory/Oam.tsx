@@ -35,7 +35,6 @@ export class Oam {
 
     public writeByte(address: number, value: number): void {
         AddressUtil.assertValid(address);
-
         if (value == null || value < 0 || value > 0xFF) {
             throw new Error(`Invalid write given at ${address}=${value}`);
         }

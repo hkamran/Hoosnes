@@ -201,6 +201,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                                     onChange={this.selectCartridge.bind(this)}>
                                 <option value="select">Select</option>
                                 <option value="./roms/Dr. Mario (Japan) (NP).sfc">Dr Mario</option>
+                                <option value="./roms/SNES Test Program.sfc">Snes Test Program</option>
                                 <option value="other">Load my own...</option>
                             </select>
                         </div>

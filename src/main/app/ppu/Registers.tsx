@@ -129,6 +129,10 @@ export class OamAddressRegister extends Register {
         return Bit.toUint16(this.getUpper() & 0x7F, this.getLower());
     }
 
+    public getTableIndex(): number {
+        return this.getUpper() & 1;
+    }
+
     public setTableAddress(value: number) {
         this.val = (this.getPriority() << 14) | ((value) % 544);
     }
@@ -199,7 +203,7 @@ export class BhModeAndCharacterSizeRegister extends Register {
     }
 
     public getMode(): number {
-        return ((this.val >> 0) & 3);
+        return ((this.val >> 0) & 7);
     }
 
 }
@@ -378,11 +382,11 @@ export class CharacterAddressForBG1And2Register extends Register {
     public label: string = "BG12NBA";
 
     public getBaseAddressForBG1(): number {
-       return ((this.val >> 4) & 0xF) << 13;
+       return ((this.val >> 0) & 0xF) << 13;
     }
 
     public getBaseAddressForBG2(): number {
-        return ((this.val >> 0) & 0xF) << 13;
+        return ((this.val >> 4) & 0xF) << 13;
     }
 
 }
@@ -392,12 +396,12 @@ export class CharacterAddressForBG3And4Register extends Register {
     public address: string = "0x210C";
     public label: string = "BG34NBA";
 
-    public getBaseAddressForBG4(): number {
-        return ((this.val >> 4) & 0xF) << 13;
-    }
-
     public getBaseAddressForBG3(): number {
         return ((this.val >> 0) & 0xF) << 13;
+    }
+
+    public getBaseAddressForBG4(): number {
+        return ((this.val >> 4) & 0xF) << 13;
     }
 }
 
