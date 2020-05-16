@@ -105,6 +105,8 @@ export class OamAddressRegister extends Register {
     public address: string = "0x2102-0x2103";
     public label: string = "OAMADD";
 
+    public counter: number = 0;
+
     constructor(console: Console) {
         super(console);
     }
@@ -114,6 +116,7 @@ export class OamAddressRegister extends Register {
     }
 
     public setLower(val: number): void {
+        this.counter = 0;
         this.val = Bit.setUint16Lower(this.val, val);
     }
 
@@ -125,20 +128,40 @@ export class OamAddressRegister extends Register {
         return Bit.getUint16Lower(this.val);
     }
 
-    public getTableAddress(): number {
-        return Bit.toUint16(this.getUpper() & 0x7F, this.getLower());
+    public getTableIndex(): number {
+        return this.getLower();
     }
 
-    public getTableIndex(): number {
+    public setTableIndex(index: number): void {
+        this.val = Bit.setUint16Lower(this.val, index % 256);
+    }
+
+    public getTableSelection(): number {
         return this.getUpper() & 1;
     }
 
-    public setTableAddress(value: number) {
-        this.val = (this.getPriority() << 14) | ((value) % 544);
+    public setTableSelection(index: number): void {
+        const high = Bit.getUint16Upper(this.val);
+        this.val = Bit.setUint16Upper(this.val, (high & 0xFE) | index);
     }
 
     public getPriority(): number {
         return (this.getUpper() >> 7) & 0x1;
+    }
+
+    public setTableAddress(value : number) {
+        if (value >= 512) this.setTableSelection(1);
+        if (value >= 544) this.setTableSelection(0);
+        let index: number = value < 512 ? Math.floor(value / 2) : value - 512;
+        this.counter = value % 2;
+        this.setTableIndex(index % 256);
+    }
+
+    public getTableAddress(): number {
+        let index: number = this.getTableIndex();
+        let selection: number = this.getTableSelection();
+        let addr: number = (selection == 1) ? (512 + index) : (index * 2) + this.counter;
+        return addr;
     }
 
 }
@@ -167,7 +190,7 @@ export class OamDataWriteRegister extends Register {
                 ppu.oam.writeByte(addr, val);
             }
         } else {
-            ppu.oam.writeByte(512 + (addr & 0x1f), val);
+            ppu.oam.writeByte(addr, val);
         }
         ppu.registers.oamaddr.setTableAddress(addr + 1);
     }
@@ -965,12 +988,7 @@ export class OAMDataReadRegister extends Register {
         let addr: number = ppu.registers.oamaddr.getTableAddress();
 
         ppu.registers.oamaddr.setTableAddress(addr + 1);
-
-        if (addr >= 0x512) {
-            return ppu.oam.readByte(512 + (addr & 0x1f));
-        } else {
-            return ppu.oam.readByte(addr);
-        }
+        return ppu.oam.readByte(addr);
     }
 
 }

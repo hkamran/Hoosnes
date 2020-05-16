@@ -86,9 +86,13 @@ export class PpuCard extends React.Component<IPpuCardProps, any> {
                                             <span style={{flexGrow: 1}} className="header">Priority:</span>
                                             <span>{registers.oamaddr.getPriority()}</span>
                                         </li>
-                                        <li style={{display: "flex"}}>
-                                            <span style={{flexGrow: 1}} className="header">Table Address:</span>
-                                            <span>{registers.oamaddr.getTableAddress()}</span>
+                                        <li style={{display: "flex"}} >
+                                            <span style={{flexGrow: 1}} className="header">Table Selection:</span>
+                                            <span>{registers.oamaddr.getTableSelection()}</span>
+                                        </li>
+                                        <li style={{display: "flex"}} >
+                                            <span style={{flexGrow: 1}} className="header">Table Index:</span>
+                                            <span>{registers.oamaddr.getTableIndex()}</span>
                                         </li>
                                     </ul>
                                 </li>
