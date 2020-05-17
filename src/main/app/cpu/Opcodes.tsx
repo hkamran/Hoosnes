@@ -955,6 +955,10 @@ class TCD extends Operation {
 
     public execute(context: OpContext): number {
         let a: number = context.cpu.registers.a.get();
+        let is8Bit: boolean = false;
+
+        context.setFlagN(a, is8Bit);
+        context.setFlagZ(a, is8Bit);
 
         context.cpu.registers.d.set(a);
         return this.cycle;
@@ -972,9 +976,15 @@ class TCS extends Operation {
             let a: number = context.registers.a.getLower();
             let value = 0x0100 | (a & 0xFF);
 
+            context.setFlagN(a, is8Bit);
+            context.setFlagZ(a, is8Bit);
+
             context.registers.sp.set(value);
         } else {
             let a: number = context.registers.a.get();
+
+            context.setFlagN(a, is8Bit);
+            context.setFlagZ(a, is8Bit);
 
             context.registers.sp.set(a);
         }
@@ -989,7 +999,11 @@ class TDC extends Operation {
 
     public execute(context: OpContext): number {
         let d: number = context.registers.d.get();
+        let is8Bit: boolean = false;
         context.registers.a.set(d);
+
+        context.setFlagN(d, is8Bit);
+        context.setFlagZ(d, is8Bit);
 
         return this.cycle;
     }
@@ -1087,7 +1101,7 @@ class TXA extends Operation {
 
     public execute(context: OpContext): number {
         let x: number = context.cpu.registers.x.get();
-        let is8Bit: boolean = context.registers.p.getX() == 1;
+        let is8Bit: boolean = context.registers.p.getM() == 1;
         let mask: number = is8Bit ? 0xFF: 0xFFFF;
 
         let value = x & mask;
@@ -1108,7 +1122,7 @@ class TSX extends Operation {
     public name: string = "TSX";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.cpu.registers.p.getX() == 0;
+        let is8Bit: boolean = context.cpu.registers.p.getX() == 1;
         if (is8Bit) {
             let lowData: number = context.cpu.stack.popByte();
             let value: number = lowData;
@@ -1133,7 +1147,11 @@ class TSC extends Operation {
 
     public execute(context: OpContext): number {
         let value: number = context.cpu.registers.sp.get();
+        let is8Bit: boolean = false;
         context.cpu.registers.a.set(value);
+
+        context.setFlagN(value, is8Bit);
+        context.setFlagZ(value, is8Bit);
 
         return this.cycle;
     }
@@ -1830,7 +1848,7 @@ class PLD extends Operation {
     public name: string = "PLD";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.registers.p.getM() == 1;
+        let is8Bit: boolean = false;
         let value: number = context.cpu.stack.popWord();
 
         context.registers.d.set(value);

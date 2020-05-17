@@ -59,14 +59,14 @@ export class Renderer {
             let yStart: number = sprite.getYPosition();
             let yEnd: number = sprite.getYPosition() + height;
 
-            if (yStart < y && y <= yEnd) {
+            if (yStart <= y && y < yEnd) {
                 count++;
                 if (count == 31) break;
                 let tile: Tile = sprite.getTile();
                 let colors: Color[] = this.ppu.palette.getPalettesForBppType(sprite.getPaletteIndex(), BppType.Four);
 
                 for (let x: number = 0; x < width; x++) {
-                    let index: number = tile.data[y % height][x];
+                    let index: number = tile.data[y - yStart][x];
                     if (index == 0) continue;
                     let color: Color = colors[index];
                     let xIndex: number = ((sprite.isXWrapped() ? 0x100 : 0x0) + sprite.getXPosition() + x) % 0x1FF;

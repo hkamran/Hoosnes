@@ -171,7 +171,7 @@ export class OamDataWriteRegister extends Register {
     public address: string = "0x2104";
     public label: string = "OAMDATA";
 
-    public buffer: number;
+    public buffer: number = 0;
 
     public set(val: number): void {
         this.val = val;
@@ -440,9 +440,8 @@ export class HorizontalScrollForBG1Register extends Register {
     }
 
     public getBG1HortOffset(): number {
-        let result = (this.val << 8) | this.prev;
-        this.prev = this.val;
-        return result;
+        let offset = (this.val << 8) | (this.prev & ~7) | (this.prev & 7);
+        return offset & 1023;
     }
 
     public getBG1Mode7HortOffset(): number {
@@ -487,9 +486,8 @@ export class HorizontalScrollForBG2Register extends Register {
     }
 
     public getBG2HortOffset(): number {
-        let result = (this.val << 8) | this.prev;
-        this.prev = this.val;
-        return result;
+        let offset = (this.val << 8) | (this.prev & ~7) | (this.prev & 7);
+        return offset & 1023;
     }
 
 }
@@ -526,9 +524,8 @@ export class HorizontalScrollForBG3Register extends Register {
     }
 
     public getBG3HortOffset(): number {
-        let result = (this.val << 8) | this.prev;
-        this.prev = this.val;
-        return result;
+        let offset = (this.val << 8) | (this.prev & ~7) | (this.prev & 7);
+        return offset & 1023;
     }
 }
 
@@ -564,9 +561,8 @@ export class HorizontalScrollForBG4Register extends Register {
     }
 
     public getBG4HortOffset(): number {
-        let result = (this.val << 8) | this.prev;
-        this.prev = this.val;
-        return result;
+        let offset = (this.val << 8) | (this.prev & ~7) | (this.prev & 7);
+        return offset & 1023;
     }
 }
 
