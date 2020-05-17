@@ -23,29 +23,29 @@ export class CartridgeMapping1 implements ICartridgeMapping {
         const length = this.cartridge.rom.length;
 
         if (0xC0 <= bank && bank <= 0xFF) {
-            let base: number = (bank - 0xC0) * 0xFFFF;
-            let offset: number = page % 0xFFFF;
+            let base: number = (bank - 0xC0) * 0x10000;
+            let offset: number = page % 0x10000;
+
+            let index = (base + offset) % length;
+            let value = this.cartridge.rom[index];
+            return value;
+        } else if (0x80 <= bank && bank <= 0xBF) {
+            let base: number = (bank - 0x80) * 0x10000;
+            let offset: number = page % 0x10000;
 
             let index = (base + offset) % length;
             let value = this.cartridge.rom[index];
             return value;
         } else if (0x40 <= bank && bank <= 0x7D) {
-            let base: number = (bank - 0x40) * 0xFFFF;
-            let offset: number = page % 0xFFFF;
+            let base: number = (bank - 0x40) * 0x10000;
+            let offset: number = page % 0x10000;
 
             let index = (base + offset) % length;
             let value = this.cartridge.rom[index];
             return value;
-        } else if (0x00 <= bank && bank < 0x40) {
-            let base: number = (bank - 0x00) * 0xFFFF;
-            let offset: number = page % 0xFFFF;
-
-            let index = (base + offset) % length;
-            let value = this.cartridge.rom[index];
-            return value;
-        } else if (0x80 <= bank && bank < 0xC0) {
-            let base: number = (bank - 0x80) * 0xFFFF;
-            let offset: number = page % 0xFFFF;
+        } else if (0x00 <= bank && bank <= 0x3F) {
+            let base: number = (bank % 0x3F) * 0x10000;
+            let offset: number = page % 0x10000;
 
             let index = (base + offset) % length;
             let value = this.cartridge.rom[index];

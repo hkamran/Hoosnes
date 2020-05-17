@@ -149,7 +149,6 @@ export class Cartridge {
         let offset: number = this.getHeaderOffset(mappingType);
 
         // Begin extraction
-
         this.mapping = this.getMapping(mappingType);
         this.title = this.getTitle(offset, offset + SNES_OFFSET_TITLE);
         this.type = this.getType(offset + SNES_OFFSET_ROM_TYPE);

@@ -15,7 +15,7 @@ export class Bus {
     public wram: Wram;
     public console: Console;
 
-    public mdr: number = null;
+    public mdr: number = 0x0;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -47,46 +47,46 @@ export class Bus {
 
         if (0x00 <= bank && bank < 0x3F) {
             if (0x0000 <= page && page <= 0x1FFF) {
-                value = this.wram.readByte(address);
+                value = Bit.toUint8(this.wram.readByte(address));
             } else if (0x2100 <= page && page <= 0x21FF) {
-                value = this.busPpu.readByte(address);
+                value = Bit.toUint8(this.busPpu.readByte(address));
             } else if (0x2200 <= page && page <= 0x3FFF) {
-                value = this.mdr;
+                value = Bit.toUint8(this.mdr);
             } else if (0x4000 <= page && page <= 0x43FF) {
-                value = this.busCpu.readByte(address);
+                value = Bit.toUint8(this.busCpu.readByte(address));
             } else if (0x4380 <= page && page <= 0x7FFF) {
-                value = this.mdr;
+                value = Bit.toUint8(this.mdr);
             } else if (0x8000 <= page && page <= 0xFFFF) {
-                value = this.cartridge.readByte(address);
+                value = Bit.toUint8(this.cartridge.readByte(address));
             }
         } else if (0x40 <= bank && bank <= 0x7F) {
             if (0x7E <= bank && bank <= 0x7F) {
-                value = this.wram.readByte(address);
+                value = Bit.toUint8(this.wram.readByte(address));
             } else {
-                value = this.cartridge.readByte(address);
+                value = Bit.toUint8(this.cartridge.readByte(address));
             }
         } else if (0x80 <= bank && bank <= 0xBF) {
             if (0x0000 <= page && page <= 0x1FFF) {
-                value = this.wram.readByte(address);
+                value = Bit.toUint8(this.wram.readByte(address));
             } else if (0x2100 <= page && page <= 0x21FF) {
-                value = this.busPpu.readByte(address);
+                value = Bit.toUint8(this.busPpu.readByte(address));
             } else if (0x2200 <= page && page <= 0x4000) {
-                value = this.mdr;
+                value = Bit.toUint8(this.mdr);
             } else if (0x4000 <= page && page <= 0x43FF) {
-                value = this.busCpu.readByte(address);
+                value = Bit.toUint8(this.busCpu.readByte(address));
             } else if (0x4400 <= page && page <= 0x7FFF) {
-                value = this.mdr;
+                value = Bit.toUint8(this.mdr);
             } else if (0x8000 <= page && page <= 0xFFFF) {
-                value = this.cartridge.readByte(address);
+                value = Bit.toUint8(this.cartridge.readByte(address));
             }
         } else if (0xC0 <= bank && bank <= 0xFF) {
-            value = this.cartridge.readByte(address);
+            value = Bit.toUint8(this.cartridge.readByte(address));
         } else {
             throw new Error("Invalid bus value at " + address.toString(16));
         }
 
         this.mdr = value;
-        return Bit.toUint8(value);
+        return value;
     }
 
 
