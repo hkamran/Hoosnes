@@ -47,6 +47,11 @@ export class DmaControlRegister extends Register {
         if (type == 1) return DmaTransferType.PPU_TO_CPU;
     }
 
+    public set(val: number): void {
+        if (val > 0xFF) throw new Error();
+        super.set(val);
+    }
+
     /*
      * HDMA Addressing Mode (0==Absolute, 1==Indirect)
      */
@@ -106,12 +111,8 @@ export class DmaPpuAddressRegister extends Register {
     public address: string = "0x43x1";
     public label: string = "BBADx";
 
-    public set(val: number): void {
-        super.set(0x2100 | (val & 0xFF));
-    }
-
     public getBbusAddress(): number {
-        return this.val;
+        return 0x2100 | (this.val & 0xFF);
     }
 
 }

@@ -537,6 +537,7 @@ class BRK extends Operation {
 
     public execute(context: OpContext): number {
         context.cpu.interrupts.set(InterruptType.BRK);
+        throw new Error("BRK");
 
         return this.cycle;
     }
@@ -1594,21 +1595,46 @@ class ROL extends Operation {
     public name: string = "ROL";
 
     public execute(context: OpContext): number {
+        let addressing: Addressing = this.mode.getAddressing(context);
         let is8Bit: boolean = context.registers.p.getM() == 1;
-        let mask: number = is8Bit ? 0xFF : 0xFFFF;
-
         let c: number = context.registers.p.getC();
-        let a: number = is8Bit ?
-            context.registers.a.getLower() :
-            context.registers.a.get();
-        let result: number = ((a << 1) | c) & mask;
+        let shift: number = is8Bit ? 7 : 15;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let isAcc: boolean = this.mode == AddressingModes.accumulator;
 
-        if (is8Bit) context.registers.a.setLower(result);
-        if (!is8Bit) context.registers.a.set(result);
+        if (isAcc) {
+            let loData: number = context.registers.a.getLower();
+            let hiData: number = context.registers.a.getUpper();
 
-        context.setFlagC(a, is8Bit);
-        context.setFlagN(result, is8Bit);
-        context.setFlagZ(result, is8Bit);
+            let data: number = Bit.toUint16(hiData, loData);
+            let value: number = ((data << 1) & mask) | c;
+
+            context.registers.p.setC(((data >> shift) & 0x1) != 0 ? 1 : 0);
+            context.setFlagN(value);
+            context.setFlagZ(value);
+
+            let lowVal: number = Bit.getUint16Lower(value);
+            let highVal: number = Bit.getUint16Upper(value);
+
+            context.registers.a.setLower(lowVal);
+            if (!is8Bit) context.registers.a.setUpper(highVal);
+        } else {
+            let loData: number = context.bus.readByte(addressing.toLow());
+            let hiData: number = is8Bit ? 0 : context.bus.readByte(addressing.toHigh());
+
+            let data: number = Bit.toUint16(hiData, loData);
+            let value: number = ((data << 1) & mask) | c;
+
+            context.registers.p.setC(((data >> shift) & 0x1) != 0 ? 1 : 0);
+            context.setFlagN(value);
+            context.setFlagZ(value);
+
+            let lowVal: number = Bit.getUint16Lower(value);
+            let highVal: number = Bit.getUint16Upper(value);
+
+            context.bus.writeByte(addressing.toLow(), lowVal);
+            if (!is8Bit) context.bus.writeByte(addressing.toHigh(), highVal);
+        }
 
         return this.cycle;
     }
@@ -1623,48 +1649,41 @@ class ROR extends Operation {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let c: number = context.registers.p.getC();
         let shift: number = is8Bit ? 7 : 15;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let isAcc: boolean = this.mode == AddressingModes.accumulator;
 
         if (isAcc) {
-            let a: number = is8Bit ?
-                context.registers.a.getLower() :
-                context.registers.a.get();
-            let value: number = (a >> 1) | (c << shift);
+            let loData: number = context.registers.a.getLower();
+            let hiData: number = context.registers.a.getUpper();
 
-            if (is8Bit) context.registers.a.setLower(value);
-            if (!is8Bit) context.registers.a.set(value);
+            let data: number = Bit.toUint16(hiData, loData);
+            let value: number = ((data >> 1) & mask) | (c << shift);
 
-            context.registers.p.setC((a & 0x01) != 0 ? 1 : 0);
+            context.registers.p.setC(((data >> 0) & 0x1) != 0 ? 1 : 0);
             context.setFlagN(value);
             context.setFlagZ(value);
+
+            let lowVal: number = Bit.getUint16Lower(value);
+            let highVal: number = Bit.getUint16Upper(value);
+
+            context.registers.a.setLower(lowVal);
+            if (!is8Bit) context.registers.a.setUpper(highVal);
         } else {
-            if (is8Bit) {
-                let loData: number = context.bus.readByte(addressing.toLow());
+            let loData: number = context.bus.readByte(addressing.toLow());
+            let hiData: number = is8Bit ? 0 : context.bus.readByte(addressing.toHigh());
 
-                let value: number = (loData >> 1) | (c << shift);
+            let data: number = Bit.toUint16(hiData, loData);
+            let value: number = ((data >> 1) & mask) | (c << shift);
 
-                context.registers.p.setC((loData & 0x01) != 0 ? 1 : 0);
-                context.setFlagN(value);
-                context.setFlagZ(value);
+            context.registers.p.setC(((data >> 0) & 0x1) != 0 ? 1 : 0);
+            context.setFlagN(value);
+            context.setFlagZ(value);
 
-                context.bus.writeByte(addressing.toLow(), value);
-            } else {
-                let loData: number = context.bus.readByte(addressing.toLow());
-                let hiData: number = context.bus.readByte(addressing.toHigh());
+            let lowVal: number = Bit.getUint16Lower(value);
+            let highVal: number = Bit.getUint16Upper(value);
 
-                let data: number = Bit.toUint16(hiData, loData);
-                let value: number = (data >> 1) | (c << shift);
-
-                let lowVal: number = Bit.getUint16Lower(value);
-                let highVal: number = Bit.getUint16Upper(value);
-
-                context.registers.p.setC((loData & 0x0001) != 0 ? 1 : 0);
-                context.setFlagN(value);
-                context.setFlagZ(value);
-
-                context.bus.writeByte(addressing.toHigh(), highVal);
-                context.bus.writeByte(addressing.toLow(), lowVal);
-            }
+            context.bus.writeByte(addressing.toLow(), lowVal);
+            if (!is8Bit) context.bus.writeByte(addressing.toHigh(), highVal);
         }
 
         return this.cycle;

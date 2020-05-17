@@ -43,8 +43,8 @@ export class Renderer {
             let bg2Color: Color = bg2Colors.length > x ? bg2Colors[x]: base;
             let bg3Color: Color = bg3Colors.length > x ? bg3Colors[x]: base;
 
-            if (bg3Color.opacity > 0) color = bg3Color;
             if (bg2Color.opacity > 0) color = bg2Color;
+            if (bg3Color.opacity > 0) color = bg3Color;
             if (bg1Color.opacity > 0) color = bg1Color;
             this.screen.setPixel(x, y, color);
         }
