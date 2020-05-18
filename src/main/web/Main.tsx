@@ -252,6 +252,12 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                                     <td>{KeyboardMapping.B}</td>
                                 </tr>
                                 <tr>
+                                    <td>L</td>
+                                    <td>{KeyboardMapping.L}</td>
+                                    <td>R</td>
+                                    <td>{KeyboardMapping.R}</td>
+                                </tr>
+                                <tr>
                                     <td>START</td>
                                     <td>{KeyboardMapping.START}</td>
                                     <td>SELECT</td>
