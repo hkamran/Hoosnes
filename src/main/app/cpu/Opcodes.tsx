@@ -1024,11 +1024,11 @@ class TRB extends Operation {
         let highData: number = !is8Bit ? context.bus.readByte(addressing.toHigh()): 0;
         let data: number = Bit.toUint16(highData, lowData) & mask;
 
-        let value: number = data ^ (data & a);
-        context.setFlagZ(data & mask);
+        let value: number = (data ^ (data & a)) & mask;
+        context.setFlagZ(data & a, is8Bit);
 
-        context.bus.writeByte(addressing.toLow(), value);
-        if (!is8Bit) context.bus.writeByte(addressing.toLow(), value);
+        context.bus.writeByte(addressing.toLow(), Bit.getUint16Lower(value));
+        if (!is8Bit) context.bus.writeByte(addressing.toHigh(), Bit.getUint16Upper(value));
         return this.cycle;
     }
 
@@ -1070,11 +1070,11 @@ class TSB extends Operation {
         let highData: number = !is8Bit ? context.bus.readByte(addressing.toHigh()): 0;
         let data: number = Bit.toUint16(highData, lowData) & mask;
 
-        let value: number = (data | a);
-        context.setFlagZ(data & mask);
+        let value: number = (data | a) & mask;
+        context.setFlagZ(data & a, is8Bit);
 
-        context.bus.writeByte(addressing.toLow(), value);
-        if (!is8Bit) context.bus.writeByte(addressing.toLow(), value);
+        context.bus.writeByte(addressing.toLow(), Bit.getUint16Lower(value));
+        if (!is8Bit) context.bus.writeByte(addressing.toHigh(), Bit.getUint16Upper(value));
         return this.cycle;
     }
 
