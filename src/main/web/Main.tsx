@@ -87,7 +87,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         promise.then((value: number[]) => {
             if (value == null || value.length == 0) return;
             this.props.snes.load(value);
-            this.play();
+            //this.play();
         });
     }
 
@@ -97,7 +97,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         promise.then((value: number[]) => {
             if (value == null || value.length == 0) return;
             this.props.snes.load(value);
-            this.play();
+            //this.play();
         });
     }
 
