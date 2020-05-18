@@ -68,6 +68,7 @@ export class BackgroundsCard extends React.Component<IBackgroundsCardProps, IBac
         if (background) {
             let tile: Tile = background.getImage();
             let tileMaps: TileMap[][] = background.getTileMaps();
+            if (tileMaps.length == 0) return;
             this.context = this.canvasRef.current.getContext("2d", {alpha: false});
 
             let characterDimension: Dimension = background.getCharacterDimension();

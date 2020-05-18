@@ -239,7 +239,7 @@ export class AbsoluteLongIndexed implements IAddressingMode {
         let LL: number = context.getOperand(0);
         let HH: number = context.getOperand(1);
 
-        let base: number = Bit.toUint16(LL, HH);
+        let base: number = Bit.toUint16(HH, LL);
 
         let lowAddr: number = base + 0;
         let midAddr: number = base + 1;

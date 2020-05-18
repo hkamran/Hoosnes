@@ -35,7 +35,7 @@ export class Renderer {
 
         let bg1Colors: Color[] = this.ppu.backgrounds.bg1.getLineImage(y);
         let bg2Colors: Color[] = this.ppu.backgrounds.bg2.getLineImage(y);
-        let bg3Colors: Color[] = mode < 5 ? this.ppu.backgrounds.bg3.getLineImage(y) : [];
+        let bg3Colors: Color[] = (mode <= 2) ? this.ppu.backgrounds.bg3.getLineImage(y) : [];
 
         for (let x: number = 0; x < Screen.WIDTH; x++) {
             let color: Color = base;

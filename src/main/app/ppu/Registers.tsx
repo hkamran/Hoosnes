@@ -285,7 +285,7 @@ export class TileAddressForBG1Register extends Register {
     public label: string = "BG1SC";
 
     public getTileMapAddress(): number {
-        return (((this.val >> 2) & 0x3F) * 0x800);
+        return (((this.val >> 2) & 0x3F) * 0x800) & 0xFFFF;
     }
 
     public isExtendedHorizontally() {
@@ -315,7 +315,7 @@ export class TileAddressForBG2Register extends Register {
     public label: string = "BG2SC";
 
     public getTileMapAddress(): number {
-        return (((this.val >> 2) & 0x3F) * 0x800);
+        return (((this.val >> 2) & 0x3F) * 0x800) & 0xFFFF;
     }
 
     public isExtendedHorizontally() {
@@ -345,7 +345,7 @@ export class TileAddressForBG3Register extends Register {
     public label: string = "BG3SC";
 
     public getTileMapAddress(): number {
-        return (((this.val >> 2) & 0x3F) * 0x800);
+        return (((this.val >> 2) & 0x3F) * 0x800) & 0xFFFF;
     }
 
     public isExtendedHorizontally() {
@@ -375,7 +375,7 @@ export class TileAddressForBG4Register extends Register {
     public label: string = "BG4SC";
 
     public getTileAddress(): number {
-        return (((this.val >> 2) & 0x3F) * 0x800);
+        return (((this.val >> 2) & 0x3F) * 0x800) & 0xFFFF;
     }
 
     public isExtendedHorizontally() {

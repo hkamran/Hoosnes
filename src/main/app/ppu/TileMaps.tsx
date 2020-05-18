@@ -70,15 +70,14 @@ export class TileMaps {
 
     public getTileMaps(address: number): TileMap[] {
         AddressUtil.assertValid(address);
-
-        let index = address;
-        let target = (index + ((this.dimension.width * this.dimension.height) * 2))
-            % this.vram.data.length;
-
         let entries: TileMap[] = [];
-        while (index < target) {
-            entries.push(TileMap.create(this.vram.data[index], this.vram.data[index + 1]));
-            index += TileMap.SIZE_IN_BYTES;
+
+        let amount = ((this.dimension.width * this.dimension.height) * 2);
+        for (let offset = 0; offset < amount; offset += TileMap.SIZE_IN_BYTES) {
+            const lowIndex = (address + offset) % this.vram.data.length;
+            const highIndex = (lowIndex + 1) % this.vram.data.length;
+            const tilemap = TileMap.create(this.vram.data[lowIndex], this.vram.data[highIndex]);
+            entries.push(tilemap);
         }
 
         return entries;
