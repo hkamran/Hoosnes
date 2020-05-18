@@ -1383,6 +1383,7 @@ class MVN extends Operation {
         let destBank: number = AddressUtil.getBank(addressing.toHigh());
         let destPage: number = AddressUtil.getPage(addressing.toHigh());
 
+        let counter = 0;
         while (amount != 0xFFFF) {
             let src: number = AddressUtil.create(srcPage, srcBank);
             let dest: number = AddressUtil.create(destPage, destBank);
@@ -1390,10 +1391,15 @@ class MVN extends Operation {
             let val : number = context.bus.readByte(src);
             context.bus.writeByte(dest, val);
 
-            srcPage = (srcPage + 1) & 0xFFFF;
-            destPage = (destPage + 1) & 0xFFFF;
+            srcPage = ((srcPage + 1) % 0xFFFF) & 0xFFFF;
+            destPage = ((destPage + 1) % 0xFFFF) & 0xFFFF;
             amount = (amount - 1) & 0xFFFF;
+            counter++;
         }
+
+        this.cpu.registers.x.set(((this.cpu.registers.x.get() + counter) % 0xFFFF) & 0xFFFF);
+        this.cpu.registers.y.set(((this.cpu.registers.y.get() + counter) % 0xFFFF) & 0xFFFF);
+        this.cpu.registers.a.set(0xFFFF);
 
         return this.cycle;
     }
@@ -1412,6 +1418,7 @@ class MVP extends Operation {
         let destBank: number = AddressUtil.getBank(addressing.toHigh());
         let destPage: number = AddressUtil.getPage(addressing.toHigh());
 
+        let counter = 0;
         while (amount != 0xFFFF) {
             let src: number = AddressUtil.create(srcPage, srcBank);
             let dest: number = AddressUtil.create(destPage, destBank);
@@ -1419,10 +1426,15 @@ class MVP extends Operation {
             let val : number = context.bus.readByte(src);
             context.bus.writeByte(dest, val);
 
-            srcPage = (srcPage - 1) & 0xFFFF;
-            destPage = (destPage - 1) & 0xFFFF;
+            srcPage = ((srcPage - 1) % 0xFFFF) & 0xFFFF;
+            destPage = ((destPage - 1) % 0xFFFF) & 0xFFFF;
             amount = (amount - 1) & 0xFFFF;
+            counter++;
         }
+
+        this.cpu.registers.x.set(((this.cpu.registers.x.get() - amount) % 0xFFFF) & 0xFFFF);
+        this.cpu.registers.y.set(((this.cpu.registers.y.get() - amount) % 0xFFFF) & 0xFFFF);
+        this.cpu.registers.a.set(0xFFFF);
 
         return this.cycle;
     }
@@ -1489,9 +1501,7 @@ class PEI extends Operation {
     public name: string = "PEI";
 
     public execute(context: OpContext): number {
-        let addressing: Addressing = this.mode.getAddressing(context);
-        let value = addressing.toLow();
-
+        let value = this.mode.getValue(context);
         context.cpu.stack.pushWord(value);
 
         return this.cycle;
@@ -1503,10 +1513,9 @@ class PER extends Operation {
     public name: string = "PER";
 
     public execute(context: OpContext): number {
-        let addressing: Addressing = this.mode.getAddressing(context);
-        let value = addressing.toLow();
-
-        context.cpu.stack.pushWord(value);
+        let address = context.getOperandAddress(2);
+        let value = this.mode.getValue(context);
+        context.cpu.stack.pushWord((address + value) & 0xFFFF);
 
         return this.cycle;
     }
@@ -2270,7 +2279,7 @@ export class Opcodes {
         this.opcodes[0x1F] = new ORA(cpu,0x1F, 5, 4, AddressingModes.longX);
 
         this.opcodes[0xF4] = new PEA(cpu,0xF4, 5, 3, AddressingModes.immediate16);
-        this.opcodes[0xD4] = new PEI(cpu,0xD4, 6, 6, AddressingModes.direct);
+        this.opcodes[0xD4] = new PEI(cpu,0xD4, 6, 2, AddressingModes.direct);
         this.opcodes[0x62] = new PER(cpu,0x62, 6, 3, AddressingModes.immediate16);
 
         this.opcodes[0x48] = new PHA(cpu,0x48, 3, 1, AddressingModes.implied);

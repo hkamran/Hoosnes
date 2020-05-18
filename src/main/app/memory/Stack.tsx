@@ -38,9 +38,10 @@ export class Stack {
         if (this.stack.length <= 0) {
             return 0;
         }
-        let sp: number = this.console.cpu.registers.sp.get();
-        let value: number = this.stack.pop();
-        this.console.cpu.registers.sp.set((sp + 1) & 0xFFFF);
+        this.stack.pop();
+        let sp: number = (this.console.cpu.registers.sp.get() + 1) & 0xFFFF;
+        let value: number = this.console.bus.readByte(sp);
+        this.console.cpu.registers.sp.set(sp);
 
         return value;
     }
