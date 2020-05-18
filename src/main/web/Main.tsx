@@ -83,16 +83,15 @@ export class Main extends React.Component<IMainProps, IMainStates> {
 
     public async loadCartridgeRemotely(url: string) {
         let file = await fetch(url).then((r) => r.blob());
-        let promise = this.readFileDataAsBase64(file);
-        promise.then((value: number[]) => {
-            if (value == null || value.length == 0) return;
-            this.props.snes.load(value);
-            this.play();
-        });
+        this.loadCartridge(file);
     }
 
     public loadCartridgeLocally(event) {
         let file: File = event.target.files[0];
+        this.loadCartridge(file);
+    }
+
+    public loadCartridge(file: Blob) {
         let promise = this.readFileDataAsBase64(file);
         promise.then((value: number[]) => {
             if (value == null || value.length == 0) return;
