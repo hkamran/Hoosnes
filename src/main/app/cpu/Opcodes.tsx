@@ -1016,24 +1016,19 @@ class TRB extends Operation {
     public execute(context: OpContext): number {
         let addressing: Addressing = this.mode.getAddressing(context);
         let is8Bit: boolean = context.cpu.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
 
-        if (is8Bit) {
-            let lowData: number = context.bus.readByte(addressing.toLow());
+        let a: number = context.registers.a.get() & mask;
 
-            let a: number = context.registers.a.getLower();
-            let value: number = lowData & a;
+        let lowData: number = context.bus.readByte(addressing.toLow());
+        let highData: number = !is8Bit ? context.bus.readByte(addressing.toHigh()): 0;
+        let data: number = Bit.toUint16(highData, lowData) & mask;
 
-            context.setFlagZ(value);
-        } else {
-            let lowData: number = context.bus.readByte(addressing.toLow());
-            let highData: number = context.bus.readByte(addressing.toHigh());
+        let value: number = data ^ (data & a);
+        context.setFlagZ(data & mask);
 
-            let a: number = context.registers.a.get();
-            let value: number = Bit.toUint16(highData, lowData) & a;
-
-            context.setFlagZ(value);
-        }
-
+        context.bus.writeByte(addressing.toLow(), value);
+        if (!is8Bit) context.bus.writeByte(addressing.toLow(), value);
         return this.cycle;
     }
 
@@ -1067,29 +1062,19 @@ class TSB extends Operation {
     public execute(context: OpContext): number {
         let addressing: Addressing = this.mode.getAddressing(context);
         let is8Bit: boolean = context.cpu.registers.p.getM() == 1;
+        let mask: number = is8Bit ? 0xFF : 0xFFFF;
 
-        if (is8Bit) {
-            let lowData: number = context.bus.readByte(addressing.toLow());
+        let a: number = context.registers.a.get() & mask;
 
-            let a: number = context.registers.a.getLower();
-            let value: number = lowData & a;
+        let lowData: number = context.bus.readByte(addressing.toLow());
+        let highData: number = !is8Bit ? context.bus.readByte(addressing.toHigh()): 0;
+        let data: number = Bit.toUint16(highData, lowData) & mask;
 
-            context.setFlagZ(value);
+        let value: number = (data | a);
+        context.setFlagZ(data & mask);
 
-            context.bus.writeByte(addressing.toLow(), value & 0xFF);
-        } else {
-            let lowData: number = context.bus.readByte(addressing.toLow());
-            let highData: number = context.bus.readByte(addressing.toHigh());
-
-            let a: number = context.registers.a.get();
-            let value: number = Bit.toUint16(highData, lowData) & a;
-
-            context.setFlagZ(value);
-
-            context.bus.writeByte(addressing.toLow(), Bit.getUint16Lower(value));
-            context.bus.writeByte(addressing.toHigh(), Bit.getUint16Upper(value));
-        }
-
+        context.bus.writeByte(addressing.toLow(), value);
+        if (!is8Bit) context.bus.writeByte(addressing.toLow(), value);
         return this.cycle;
     }
 
