@@ -502,20 +502,34 @@ export class DirectIndirectIndexed implements IAddressingMode {
             let dh: number = context.registers.d.getUpper();
             let x: number = context.registers.x.get();
 
-            let loPointer: number = (LL + x + 0) & 0xFF;
-            let hiPointer: number = (LL + x + 1) & 0xFF;
+            let loPointer: number = Bit.toUint16(dh, (LL + x + 0) % 0xFF);
+            let hiPointer: number = Bit.toUint16(dh, (LL + x + 1) % 0xFF);
 
-            return Addressing.toWord(
-                Bit.toUint24(0, dh, loPointer),
-                Bit.toUint24(0, dh, hiPointer));
+            let ll: number = context.bus.readByte(loPointer);
+            let hh: number = context.bus.readByte(hiPointer);
+            let rr: number = 0;
+
+            let addr: number = Bit.toUint24(rr, hh, ll);
+            let loaddr: number = addr;
+            let hiaddr: number = (addr + 1) % 0xFFFFFF;
+
+            return Addressing.toWord(loaddr, hiaddr);
         } else {
-            let d: number = context.registers.d.getUpper();
+            let d: number = context.registers.d.get();
             let x: number = context.registers.x.get();
 
-            let loPointer: number = (d + LL + x + 0) % 0xFFFFFF;
-            let hiPointer: number = (d + LL + x + 1) % 0xFFFFFF;
+            let loPointer: number = (d + LL + x + 0) % 0xFFFF;
+            let hiPointer: number = (d + LL + x + 1) % 0xFFFF;
 
-            return Addressing.toWord(loPointer, hiPointer);
+            let ll: number = context.bus.readByte(loPointer);
+            let hh: number = context.bus.readByte(hiPointer);
+            let rr: number = 0;
+
+            let addr: number = Bit.toUint24(rr, hh, ll);
+            let loaddr: number = addr;
+            let hiaddr: number = (addr + 1) % 0xFFFFFF;
+
+            return Addressing.toWord(loaddr, hiaddr);
         }
     }
 }
