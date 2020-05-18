@@ -13,7 +13,7 @@ export class BusPpu {
     public registers: Registers;
 
     // Memory Data Register
-    public mdr: number;
+    public mdr: number = 0x0;
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -38,153 +38,153 @@ export class BusPpu {
         }
 
         if (page == 0x2100) {
-            value = this.registers.inidisp.get();
+            value = Bit.toUint8(this.registers.inidisp.get());
         } else if (page == 0x2101) {
-            value = this.registers.oamselect.get();
+            value = Bit.toUint8(this.registers.oamselect.get());
         } else if (page == 0x2102) {
-            value = this.registers.oamaddr.getLower();
+            value = Bit.toUint8(this.registers.oamaddr.getLower());
         } else if (page == 0x2103) {
-            value = this.registers.oamaddr.getUpper();
+            value = Bit.toUint8(this.registers.oamaddr.getUpper());
         } else if (page == 0x2104) {
-            value = this.registers.oamdataw.get();
+            value = Bit.toUint8(this.registers.oamdataw.get());
         } else if (page == 0x2105) {
-            value = this.registers.bgmode.get();
+            value = Bit.toUint8(this.registers.bgmode.get());
         } else if (page == 0x2106) {
-            value = this.registers.mosaic.get();
+            value = Bit.toUint8(this.registers.mosaic.get());
         } else if (page == 0x2107) {
-            value = this.registers.vtilebg1.get();
+            value = Bit.toUint8(this.registers.vtilebg1.get());
         } else if (page == 0x2108) {
-            value = this.registers.vtilebg2.get();
+            value = Bit.toUint8(this.registers.vtilebg2.get());
         } else if (page == 0x2109) {
-            value = this.registers.vtilebg3.get();
+            value = Bit.toUint8(this.registers.vtilebg3.get());
         } else if (page == 0x210A) {
-            value = this.registers.vtilebg4.get();
+            value = Bit.toUint8(this.registers.vtilebg4.get());
         } else if (page == 0x210B) {
-            value = this.registers.vcharlocbg12.get();
+            value = Bit.toUint8(this.registers.vcharlocbg12.get());
         } else if (page == 0x210C) {
-            value = this.registers.vcharlocbg34.get();
+            value = Bit.toUint8(this.registers.vcharlocbg34.get());
         } else if (page == 0x210D) {
-            value = this.registers.bg1hofs.get();
+            value = Bit.toUint8(this.registers.bg1hofs.get());
         } else if (page == 0x210E) {
-            value = this.registers.bg1vofs.get();
+            value = Bit.toUint8(this.registers.bg1vofs.get());
         } else if (page == 0x210F) {
-            value = this.registers.bg2hofs.get();
+            value = Bit.toUint8(this.registers.bg2hofs.get());
         } else if (page == 0x2110) {
-            value = this.registers.bg2vofs.get();
+            value = Bit.toUint8(this.registers.bg2vofs.get());
         } else if (page == 0x2111) {
-            value = this.registers.bg3hofs.get();
+            value = Bit.toUint8(this.registers.bg3hofs.get());
         } else if (page == 0x2112) {
-            value = this.registers.bg3vofs.get();
+            value = Bit.toUint8(this.registers.bg3vofs.get());
         } else if (page == 0x2113) {
-            value = this.registers.bg4hofs.get();
+            value = Bit.toUint8(this.registers.bg4hofs.get());
         } else if (page == 0x2114) {
-            value = this.registers.bg4vofs.get();
+            value = Bit.toUint8(this.registers.bg4vofs.get());
         } else if (page == 0x2115) {
-            value = this.registers.vportcntrl.get();
+            value = Bit.toUint8(this.registers.vportcntrl.get());
         } else if (page == 0x2116) {
-            value = this.registers.vaddr.getLower();
+            value = Bit.toUint8(this.registers.vaddr.getLower());
         } else if (page == 0x2117) {
-            value = this.registers.vaddr.getUpper();
+            value = Bit.toUint8(this.registers.vaddr.getUpper());
         } else if (page == 0x2118) {
-            value = this.registers.vdataw.getLower();
+            value = Bit.toUint8(this.registers.vdataw.getLower());
         } else if (page == 0x2119) {
-            value = this.registers.vdataw.getUpper();
+            value = Bit.toUint8(this.registers.vdataw.getUpper());
         } else if (page == 0x211A) {
-            value = this.registers.m7sel.get();
+            value = Bit.toUint8(this.registers.m7sel.get());
         } else if (page == 0x211B) {
-            value = this.registers.m7a.get();
+            value = Bit.toUint8(this.registers.m7a.get());
         } else if (page == 0x211C) {
-            value = this.registers.m7b.get();
+            value = Bit.toUint8(this.registers.m7b.get());
         } else if (page == 0x211D) {
-            value = this.registers.m7c.get();
+            value = Bit.toUint8(this.registers.m7c.get());
         } else if (page == 0x211E) {
-            value = this.registers.m7d.get();
+            value = Bit.toUint8(this.registers.m7d.get());
         } else if (page == 0x211F) {
-            value = this.registers.m7x.get();
+            value = Bit.toUint8(this.registers.m7x.get());
         } else if (page == 0x2120) {
-            value = this.registers.m7y.get();
+            value = Bit.toUint8(this.registers.m7y.get());
         } else if (page == 0x2121) {
-            value = this.registers.cgramaddr.get();
+            value = Bit.toUint8(this.registers.cgramaddr.get());
         } else if (page == 0x2122) {
-            value = this.registers.cgdataw.get();
+            value = Bit.toUint8(this.registers.cgdataw.get());
         } else if (page == 0x2123) {
-            value = this.registers.w12sel.get();
+            value = Bit.toUint8(this.registers.w12sel.get());
         } else if (page == 0x2124) {
-            value = this.registers.w34sel.get();
+            value = Bit.toUint8(this.registers.w34sel.get());
         } else if (page == 0x2125) {
-            value = this.registers.wobjsel.get();
+            value = Bit.toUint8(this.registers.wobjsel.get());
         } else if (page == 0x2126) {
-            value = this.registers.wh0.get();
+            value = Bit.toUint8(this.registers.wh0.get());
         } else if (page == 0x2127) {
-            value = this.registers.wh1.get();
+            value = Bit.toUint8(this.registers.wh1.get());
         } else if (page == 0x2128) {
-            value = this.registers.wh2.get();
+            value = Bit.toUint8(this.registers.wh2.get());
         } else if (page == 0x2129) {
-            value = this.registers.wh3.get();
+            value = Bit.toUint8(this.registers.wh3.get());
         } else if (page == 0x212A) {
-            value = this.registers.wbglog.get();
+            value = Bit.toUint8(this.registers.wbglog.get());
         } else if (page == 0x212B) {
-            value = this.registers.wobjlog.get();
+            value = Bit.toUint8(this.registers.wobjlog.get());
         } else if (page == 0x212C) {
-            value = this.registers.tm.get();
+            value = Bit.toUint8(this.registers.tm.get());
         } else if (page == 0x212D) {
-            value = this.registers.ts.get();
+            value = Bit.toUint8(this.registers.ts.get());
         } else if (page == 0x212E) {
-            value = this.registers.tmw.get();
+            value = Bit.toUint8(this.registers.tmw.get());
         } else if (page == 0x212F) {
-            value = this.registers.tsw.get();
+            value = Bit.toUint8(this.registers.tsw.get());
         } else if (page == 0x2130) {
-            value = this.registers.cgwsel.get();
+            value = Bit.toUint8(this.registers.cgwsel.get());
         } else if (page == 0x2131) {
-            value = this.registers.cgadsub.get();
+            value = Bit.toUint8(this.registers.cgadsub.get());
         } else if (page == 0x2132) {
-            value = this.registers.coldata.get();
+            value = Bit.toUint8(this.registers.coldata.get());
         } else if (page == 0x2133) {
-            value = this.registers.setini.get();
+            value = Bit.toUint8(this.registers.setini.get());
         } else if (page == 0x2134) {
-            value = this.registers.mpyl.get();
+            value = Bit.toUint8(this.registers.mpyl.get());
         } else if (page == 0x2135) {
-            value = this.registers.mpym.get();
+            value = Bit.toUint8(this.registers.mpym.get());
         } else if (page == 0x2136) {
-            value = this.registers.mpyh.get();
+            value = Bit.toUint8(this.registers.mpyh.get());
         } else if (page == 0x2137) {
-            value = this.registers.slhv.get();
+            value = Bit.toUint8(this.registers.slhv.get());
         } else if (page == 0x2138) {
-            value = this.registers.oamdatar.get();
+            value = Bit.toUint8(this.registers.oamdatar.get());
         } else if (page == 0x2139) {
-            value = this.registers.vdatar.getLower();
+            value = Bit.toUint8(this.registers.vdatar.getLower());
         } else if (page == 0x213A) {
-            value = this.registers.vdatar.getUpper();
+            value = Bit.toUint8(this.registers.vdatar.getUpper());
         } else if (page == 0x213B) {
-            value = this.registers.cgdatar.get();
+            value = Bit.toUint8(this.registers.cgdatar.get());
         } else if (page == 0x213C) {
-            value = this.registers.scanlochort.get();
+            value = Bit.toUint8(this.registers.scanlochort.get());
         } else if (page == 0x213D) {
-            value = this.registers.scanlocvert.get();
+            value = Bit.toUint8(this.registers.scanlocvert.get());
         } else if (page == 0x213E) {
-            value = this.registers.stat77.get();
+            value = Bit.toUint8(this.registers.stat77.get());
         } else if (page == 0x213F) {
-            value = this.registers.stat78.get();
+            value = Bit.toUint8(this.registers.stat78.get());
         } else if (page >= 0x2140 && page <= 0x2180) {
             if (page % 4 == 0) {
-                value = this.console.apu.registers.apuio0.get();
+                value = Bit.toUint8(this.console.apu.registers.apuio0.get());
             } else if (page % 4 == 1) {
-                value = this.console.apu.registers.apuio1.get();
+                value = Bit.toUint8(this.console.apu.registers.apuio1.get());
             } else if (page % 4 == 2) {
-                value = this.console.apu.registers.apuio2.get();
+                value = Bit.toUint8(this.console.apu.registers.apuio2.get());
             } else if (page % 4 == 3) {
-                value = this.console.apu.registers.apuio3.get();
+                value = Bit.toUint8(this.console.apu.registers.apuio3.get());
             }
         } else if (page == 0x2180) {
-            value = this.console.cpu.registers.wmdata.get();
+            value = Bit.toUint8(this.console.cpu.registers.wmdata.get());
         } else if (page == 0x2181) {
-            value = this.console.cpu.registers.wmadd.getLower();
+            value = Bit.toUint8(this.console.cpu.registers.wmadd.getLower());
         } else if (page == 0x2182) {
-            value = this.console.cpu.registers.wmadd.getMiddle();
+            value = Bit.toUint8(this.console.cpu.registers.wmadd.getMiddle());
         } else if (page == 0x2183) {
-            value = this.console.cpu.registers.wmadd.getUpper();
+            value = Bit.toUint8(this.console.cpu.registers.wmadd.getUpper());
         } else if (page <= 0x21FF) {
-
+            console.warn("Invalid read on BusB at " + address);
         } else {
             throw new Error("Invalid value on BusB at " + address);
         }
@@ -355,7 +355,7 @@ export class BusPpu {
         } else if (page == 0x2183) {
             this.console.cpu.registers.wmadd.setUpper(value);
         } else if (0x2184 <= page && page <= 0x21FF) {
-
+            console.warn("Invalid write on BusB at " + address);
         } else {
             throw new Error("Invalid write on BusB at " + address.toString());
         }
