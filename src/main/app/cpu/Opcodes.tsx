@@ -793,6 +793,14 @@ class XCE extends Operation {
         context.registers.p.setE(c);
         context.registers.p.setC(e);
 
+        if (e == 0x1) {
+            context.registers.sp.setUpper(0x01);
+            context.registers.x.setUpper(0x00);
+            context.registers.y.setUpper(0x00);
+            context.registers.p.setM(1);
+            context.registers.p.setX(1);
+        }
+
         return this.cycle;
     }
 
@@ -970,25 +978,8 @@ class TCS extends Operation {
     public name: string = "TCS";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.registers.p.getE() == 1;
-
-        if (is8Bit) {
-            let a: number = context.registers.a.getLower();
-            let value = 0x0100 | (a & 0xFF);
-
-            context.setFlagN(a, is8Bit);
-            context.setFlagZ(a, is8Bit);
-
-            context.registers.sp.set(value);
-        } else {
-            let a: number = context.registers.a.get();
-
-            context.setFlagN(a, is8Bit);
-            context.setFlagZ(a, is8Bit);
-
-            context.registers.sp.set(a);
-        }
-
+        let value: number = context.registers.a.get();
+        context.registers.sp.set(value);
         return this.cycle;
     }
 
@@ -1000,10 +991,11 @@ class TDC extends Operation {
     public execute(context: OpContext): number {
         let d: number = context.registers.d.get();
         let is8Bit: boolean = false;
-        context.registers.a.set(d);
 
         context.setFlagN(d, is8Bit);
         context.setFlagZ(d, is8Bit);
+
+        context.registers.a.set(d);
 
         return this.cycle;
     }
@@ -1038,20 +1030,9 @@ class TXS extends Operation {
     public name: string = "TXS";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.cpu.registers.p.getE() == 1;
-
-        if (is8Bit) {
-            let x: number = context.registers.x.get();
-            let value: number = 0x0100 | (x & 0xFF);
-
-            context.registers.sp.set(value);
-        } else {
-            let x: number = context.registers.x.get();
-            let value: number = x;
-
-            context.registers.sp.set(value);
-        }
-
+        let is8Bit: boolean = context.cpu.registers.p.getX() == 1;
+        let data = context.cpu.registers.x.get();
+        context.cpu.registers.sp.set(data);
         return this.cycle;
     }
 }
@@ -1108,20 +1089,8 @@ class TSX extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.cpu.registers.p.getX() == 1;
-        if (is8Bit) {
-            let lowData: number = context.cpu.stack.popByte();
-            let value: number = lowData;
-
-            context.cpu.registers.x.set(value);
-        } else {
-            let lowData: number = context.cpu.stack.popByte();
-            let highData: number = context.cpu.stack.popByte();
-
-            let value: number = Bit.toUint16(highData, lowData);
-
-            context.cpu.registers.x.set(value);
-        }
-
+        let data = context.cpu.registers.sp.get();
+        context.cpu.registers.x.set(data);
         return this.cycle;
     }
 
