@@ -149,42 +149,62 @@ export class ADC extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
+        let isBcdMode: boolean = context.registers.p.getD() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let size: number = is8Bit ? 0x80 : 0x8000;
+        let overflow: number = is8Bit ? 0x9F : 0x9FFF;
 
         let a: number = context.cpu.registers.a.get() & mask;
         let b: number = this.mode.getValue(context) & mask;
         let c: number = context.cpu.registers.p.getC();
 
         let result: number = 0;
+        if (isBcdMode) {
+            let an0 = a & 0x000f;
+            let an1 = a & 0x00f0;
+            let an2 = a & 0x0f00;
+            let an3 = a & 0xf000;
 
-        if (context.registers.p.getD() == 1) {
+            let bn0 = b & 0x000f;
+            let bn1 = b & 0x00f0;
+            let bn2 = b & 0x0f00;
+            let bn3 = b & 0xf000;
+
+            an0 = an0 + c;
+
+            an0 = an0 + bn0;
+            an1 = an1 + bn1;
+            an2 = an2 + bn2;
+            an3 = an3 + bn3;
+
+            if (an0 > 0x9) an0 = an0 + 0x6;
+            if (an0 > 0xf) an1 = an1 + 0x10;
+            an0 = an0 & 0x000f;
+
             if (!is8Bit) {
-                let res0 = (a & 0x000f) + (b & 0x000f) + c;
-                if (res0 > 0x0009) res0 += 0x0006;
-                let res1 = (a & 0x00f0) + (b & 0x00f0) + (res0 & 0x000f) + (res0 > 0x000f ? 0x0010 : 0x0000);
-                if (res1 > 0x009f) res1 += 0x0060;
+                if (an1 > 0x9f) an1 = an1 + 0x60;
+                if (an1 > 0xff) an2 = an2 + 0x100;
+                an1 = an1 & 0x00f0;
 
-                let res2 = (a & 0x0f00) + (b & 0x0f00) + (res1 & 0x00ff) + (res1 > 0x00ff ? 0x0100 : 0x0000);
-                if (res2 > 0x09ff) res2 += 0x0600;
-                result = (a & 0xf000) + (b & 0xf000) + (res2 & 0x0fff) + (res2 > 0x0fff ? 0x1000 : 0x0000);
-            } else {
-                let low = (a & 0xf) + (b & 0xf) + c;
-                if (low > 9) low += 6;
-
-                result = (a & 0xf0) + (b & 0xf0) + (low & 0x0f) + ((low > 0x0f) ? 0x10 : 0);
+                if (an2 > 0x9ff) an2 = an2 + 0x600;
+                if (an2 > 0xfff) an3 = an3 + 0x1000;
+                an2 = an2 & 0x0f00;
             }
+
+            result = an0 + an1 + an2 + an3;
+            context.registers.p.setV((!(((a ^ b) & size)!=0) && (((a ^ result) & size)) !=0)? 1:0);
+            if (result > overflow) result = result + (is8Bit ? 0x60: 0x6000);
         } else {
             result = a + b + c;
+            context.registers.p.setV((!(((a ^ b) & size)!=0) && (((a ^ result) & size)) !=0)? 1:0);
         }
 
         if (is8Bit) context.registers.a.setLower(result & mask);
         if (!is8Bit) context.registers.a.set(result & mask);
 
+        context.registers.p.setC(result > mask ? 1: 0);
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
-        context.registers.p.setV((!(((a ^ b) & size)!=0) && (((a ^ result) & size)) !=0)? 1:0);
-        context.registers.p.setC(result > mask ? 1: 0);
 
         return this.cycle;
     }
@@ -537,7 +557,6 @@ class BRK extends Operation {
 
     public execute(context: OpContext): number {
         context.cpu.interrupts.set(InterruptType.BRK);
-        throw new Error("BRK");
 
         return this.cycle;
     }
@@ -1525,19 +1544,61 @@ class SBC extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
+        let isBcdMode: boolean = context.registers.p.getD() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let overflow: number = is8Bit ? 0x100 : 0x10000;
 
-        let a: number = context.cpu.registers.a.get();
-        let b: number = this.mode.getValue(context);
+        let a: number = context.cpu.registers.a.get() & mask;
+        let b: number = (this.mode.getValue(context) ^ mask) & mask;
         let c: number = context.cpu.registers.p.getC();
 
-        let result: number = (a - b - (1 - c)) & mask;
-        context.registers.a.set(result & mask);
+        let result: number = 0;
+        if (isBcdMode) {
+            let an0 = a & 0x000f;
+            let an1 = a & 0x00f0;
+            let an2 = a & 0x0f00;
+            let an3 = a & 0xf000;
 
-        context.setFlagV(a, c, is8Bit);
+            let bn0 = b & 0x000f;
+            let bn1 = b & 0x00f0;
+            let bn2 = b & 0x0f00;
+            let bn3 = b & 0xf000;
+
+            an0 = an0 + c;
+
+            an0 = an0 + bn0;
+            an1 = an1 + bn1;
+            an2 = an2 + bn2;
+            an3 = an3 + bn3;
+
+            if (an0 < 0x0010) an0 = an0 - 0x0006;
+            if (an0 > 0x000f) an1 = an1 + 0x0010;
+            an0 = an0 & 0x000f;
+
+            if (!is8Bit) {
+                if (an1 < 0x0100) an1 = an1 - 0x0060;
+                if (an1 > 0x00ff) an2 = an2 + 0x0100;
+                an1 = an1 & 0x00f0;
+
+                if (an2 < 0x1000) an2 = an2 - 0x0600;
+                if (an2 > 0x0fff) an3 = an3 + 0x1000;
+                an2 = an2 & 0x0f00;
+            }
+
+            result = an0 + an1 + an2 + an3;
+            context.registers.p.setV((!(((a ^ b) & mask) != 0) && (((a ^ result) & mask)) != 0) ? 1 : 0);
+            if (result < overflow) result = result - (is8Bit ? 0x60 : 0x6000);
+        } else {
+            result = a + b + c;
+            context.registers.p.setV((!(((a ^ b) & mask) != 0) && (((a ^ result) & mask)) != 0) ? 1 : 0);
+        }
+
+        if (is8Bit) context.registers.a.setLower(result & mask);
+        if (!is8Bit) context.registers.a.set(result & mask);
+
+        context.registers.p.setC(result > mask ? 1: 0);
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
-        context.registers.p.setC(result >= 0 ? 1 : 0);
 
         return this.cycle;
     }
