@@ -24,6 +24,8 @@ export class Cpu {
     public cycles: number = 0;
     public ticks: number = 0;
 
+    public trace: boolean = false;
+
     constructor(console: Console) {
         Objects.requireNonNull(console);
 
@@ -50,7 +52,7 @@ export class Cpu {
         let context: OpContext = OpContext.create(this, opaddr, operation);
 
         this.context = context;
-        //console.log(trace(this));
+        if (this.trace) console.log(trace(this));
         this.registers.pc.set(pc + operation.getSize());
         this.registers.k.set(bank);
         this.cycles += operation.execute(context);

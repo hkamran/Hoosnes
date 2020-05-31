@@ -47,7 +47,7 @@ export class CartridgeMapping0 implements ICartridgeMapping {
                 let value = this.cartridge.rom[index % this.cartridge.rom.length];
 
                 return Bit.toUint8(value);
-            } else if (0x00 <= bank && bank <= 0x7F) {
+            } else if (0x00 <= bank && bank <= 0x7D) {
                 let index = ((bank % 0x80) * 0x8000) + (page % 0x8000);
                 let value = this.cartridge.rom[index % this.cartridge.rom.length];
 

@@ -31,7 +31,7 @@ export class Wram {
 
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
             let base: number = (((bank % 0x80) - 0x7E) << 16);
-            let index: number = base | (page % 0xFFFF);
+            let index: number = base | (page % 0x10000);
 
             let value: number = this.data[index];
             return Bit.toUint8(value);
@@ -59,7 +59,7 @@ export class Wram {
 
         if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
             let base: number = (((bank % 0x80) - 0x7E) << 16);
-            let index: number = base | (page % 0xFFFF);
+            let index: number = base | (page % 0x10000);
             this.data[index] = value;
         } else {
             let index: number = (page % 0x2000);

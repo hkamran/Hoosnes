@@ -193,7 +193,7 @@ export class AbsoluteY implements IAddressingMode {
 
 export class AbsoluteLong implements IAddressingMode {
 
-    public label: string = "( ABSOLUTE )";
+    public label: string = "(ABSOLUTE)";
 
     public getValue(context: OpContext): number {
         let result: Addressing = this.getAddressing(context);
@@ -241,9 +241,9 @@ export class AbsoluteLongIndexed implements IAddressingMode {
 
         let base: number = Bit.toUint16(HH, LL);
 
-        let lowAddr: number = base + 0;
-        let midAddr: number = base + 1;
-        let highAddr: number = base + 2;
+        let lowAddr: number = (base + 0) & 0xFFFF;
+        let midAddr: number = (base + 1) & 0xFFFF;
+        let highAddr: number = (base + 2) & 0xFFFF;
 
         let low: number = context.bus.readByte(lowAddr);
         let mid: number = context.bus.readByte(midAddr);
@@ -271,7 +271,7 @@ export class AbsoluteIndirect implements IAddressingMode {
     public getAddressing(context: OpContext): Addressing {
         let low: number = context.getOperand(0);
         let high: number = context.getOperand(1);
-        let k: number = context.cpu.registers.dbr.get();
+        let k: number = context.cpu.registers.k.get();
         let x: number = context.cpu.registers.x.get();
 
         let offset: number = Bit.toUint16(high, low) + x;
@@ -282,7 +282,7 @@ export class AbsoluteIndirect implements IAddressingMode {
 
         let LL: number = context.bus.readByte(laddr);
         let MM: number = context.bus.readByte(haddr);
-        let HH: number = context.registers.k.get();
+        let HH: number = k;
 
         let address: number = Bit.toUint24(HH, MM, LL);
 
@@ -788,7 +788,7 @@ export class Long implements IAddressingMode {
         let addr: number = Bit.toUint24(HH, MM, LL);
 
         let loaddr: number = addr;
-        let hiaddr: number = addr + 1;
+        let hiaddr: number = (addr + 1) & 0xFFFFFF;
 
         return Addressing.toWord(loaddr, hiaddr);
     }
@@ -817,8 +817,8 @@ export class LongX implements IAddressingMode {
 
         let addr: number = Bit.toUint24(HH, MM, LL);
 
-        let loaddr: number = addr + context.registers.x.get();
-        let hiaddr: number = addr + context.registers.x.get() + 1;
+        let loaddr: number = (addr + context.registers.x.get() + 0) & 0xFFFFFF;
+        let hiaddr: number = (addr + context.registers.x.get() + 1) & 0xFFFFFF;
 
         return Addressing.toWord(loaddr, hiaddr);
     }
@@ -919,9 +919,10 @@ export class Stack implements IAddressingMode {
 
     public getAddressing(context: OpContext): Addressing {
         let LL: number = context.getOperand(0);
+        let s: number = context.registers.sp.get();
 
-        let loaddr: number = (LL + context.registers.sp.get() + 0) & 0xFFFF;
-        let hiaddr: number = (LL + context.registers.sp.get() + 1) & 0xFFFF;
+        let loaddr: number = (LL + s + 0) & 0xFFFF;
+        let hiaddr: number = (LL + s + 1) & 0xFFFF;
 
         return Addressing.toWord(loaddr, hiaddr);
     }
@@ -945,17 +946,18 @@ export class StackY implements IAddressingMode {
 
     public getAddressing(context: OpContext): Addressing {
         let LL: number = context.getOperand(0);
+        let s: number = context.registers.sp.get();
 
-        let loPointer: number = (LL + context.registers.sp.get() + 0) & 0xFFFF;
-        let hiPointer: number = (LL + context.registers.sp.get() + 1) & 0xFFFF;
+        let loPointer: number = (LL + s + 0) & 0xFFFF;
+        let hiPointer: number = (LL + s + 1) & 0xFFFF;
 
         let ll: number = context.bus.readByte(loPointer);
         let hh: number = context.bus.readByte(hiPointer);
         let rr: number = context.registers.dbr.get();
 
         let addr: number = Bit.toUint24(rr, hh, ll);
-        let loaddr: number = addr + context.registers.y.get();
-        let hiaddr: number = addr + context.registers.y.get() + 1;
+        let loaddr: number = (addr + context.registers.y.get() + 0) & 0xFFFFFF;
+        let hiaddr: number = (addr + context.registers.y.get() + 1) & 0xFFFFFF;
 
         return Addressing.toWord(loaddr, hiaddr);
     }

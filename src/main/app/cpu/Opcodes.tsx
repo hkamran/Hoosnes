@@ -557,7 +557,7 @@ class BRK extends Operation {
 
     public execute(context: OpContext): number {
         context.cpu.interrupts.set(InterruptType.BRK);
-
+        throw new Error("BRK");
         return this.cycle;
     }
 
@@ -2013,7 +2013,7 @@ class RTS extends Operation {
     public execute(context: OpContext): number {
         let pc: number = context.cpu.stack.popWord();
 
-        context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
+        context.cpu.registers.pc.set((pc + 1) % 0xFFFF);
 
         return this.cycle;
     }
@@ -2091,21 +2091,21 @@ export class Opcodes {
         this.opcodes[0x7D] = new ADC(cpu,0x7D, 4, 3, AddressingModes.absoluteX);
         this.opcodes[0x7F] = new ADC(cpu,0x7F, 5, 4, AddressingModes.longX);
 
-        this.opcodes[0x21] = new AND(cpu,0x21, 6, 2, AddressingModes.directIndirectIndexed);
-        this.opcodes[0x23] = new AND(cpu,0x23, 4, 2, AddressingModes.stack);
-        this.opcodes[0x25] = new AND(cpu,0x25, 3, 2, AddressingModes.direct);
-        this.opcodes[0x27] = new AND(cpu,0x27, 6, 2, AddressingModes.directIndexedIndirect);
-        this.opcodes[0x29] = new AND(cpu,0x29, 2, 3, AddressingModes.immediateM);
-        this.opcodes[0x2D] = new AND(cpu,0x2D, 4, 3, AddressingModes.absolute);
-        this.opcodes[0x2F] = new AND(cpu,0x2F, 5, 4, AddressingModes.long);
-        this.opcodes[0x31] = new AND(cpu,0x31, 5, 2, AddressingModes.directIndirectLong);
-        this.opcodes[0x32] = new AND(cpu,0x32, 5, 2, AddressingModes.directIndirect);
-        this.opcodes[0x33] = new AND(cpu,0x33, 7, 2, AddressingModes.stackY);
-        this.opcodes[0x35] = new AND(cpu,0x35, 4, 2, AddressingModes.directX);
-        this.opcodes[0x37] = new AND(cpu,0x37, 6, 2, AddressingModes.directIndirectIndexedLong);
-        this.opcodes[0x39] = new AND(cpu,0x39, 4, 3, AddressingModes.absoluteY);
-        this.opcodes[0x3D] = new AND(cpu,0x3D, 4, 3, AddressingModes.absoluteX);
-        this.opcodes[0x3F] = new AND(cpu,0x3F, 5, 4, AddressingModes.longX);
+        this.opcodes[0xE1] = new SBC(cpu,0xE1, 6, 2, AddressingModes.directIndirectIndexed);
+        this.opcodes[0xE3] = new SBC(cpu,0xE3, 4, 2, AddressingModes.stack);
+        this.opcodes[0xE5] = new SBC(cpu,0xE5, 3, 2, AddressingModes.direct);
+        this.opcodes[0xE7] = new SBC(cpu,0xE7, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0xE9] = new SBC(cpu,0xE9, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0xED] = new SBC(cpu,0xED, 4, 3, AddressingModes.absolute);
+        this.opcodes[0xEF] = new SBC(cpu,0xEF, 5, 4, AddressingModes.long);
+        this.opcodes[0xF1] = new SBC(cpu,0xF1, 5, 2, AddressingModes.directIndirectLong);
+        this.opcodes[0xF2] = new SBC(cpu,0xF2, 5, 2, AddressingModes.directIndirect);
+        this.opcodes[0xF3] = new SBC(cpu,0xF3, 7, 2, AddressingModes.stackY);
+        this.opcodes[0xF5] = new SBC(cpu,0xF5, 4, 2, AddressingModes.directX);
+        this.opcodes[0xF7] = new SBC(cpu,0xF7, 6, 2, AddressingModes.directIndirectIndexedLong);
+        this.opcodes[0xF9] = new SBC(cpu,0xF9, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0xFD] = new SBC(cpu,0xFD, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0xFF] = new SBC(cpu,0xFF, 5, 4, AddressingModes.longX);
 
         this.opcodes[0x06] = new ASL(cpu,0x06, 5, 2, AddressingModes.direct);
         this.opcodes[0x0A] = new ASL(cpu,0x0A, 2, 1, AddressingModes.accumulator);
@@ -2182,6 +2182,22 @@ export class Opcodes {
         this.opcodes[0xFE] = new INC(cpu,0xFE, 7, 3, AddressingModes.absoluteX);
         this.opcodes[0xE8] = new INX(cpu,0xE8, 2, 1, AddressingModes.implied);
         this.opcodes[0xC8] = new INY(cpu,0xC8, 2, 1, AddressingModes.implied);
+
+        this.opcodes[0x21] = new AND(cpu,0x21, 6, 2, AddressingModes.directIndirectIndexed);
+        this.opcodes[0x23] = new AND(cpu,0x23, 4, 2, AddressingModes.stack);
+        this.opcodes[0x25] = new AND(cpu,0x25, 3, 2, AddressingModes.direct);
+        this.opcodes[0x27] = new AND(cpu,0x27, 6, 2, AddressingModes.directIndexedIndirect);
+        this.opcodes[0x29] = new AND(cpu,0x29, 2, 3, AddressingModes.immediateM);
+        this.opcodes[0x2D] = new AND(cpu,0x2D, 4, 3, AddressingModes.absolute);
+        this.opcodes[0x2F] = new AND(cpu,0x2F, 5, 4, AddressingModes.long);
+        this.opcodes[0x31] = new AND(cpu,0x31, 5, 2, AddressingModes.directIndirectLong);
+        this.opcodes[0x32] = new AND(cpu,0x32, 5, 2, AddressingModes.directIndirect);
+        this.opcodes[0x33] = new AND(cpu,0x33, 7, 2, AddressingModes.stackY);
+        this.opcodes[0x35] = new AND(cpu,0x35, 4, 2, AddressingModes.directX);
+        this.opcodes[0x37] = new AND(cpu,0x37, 6, 2, AddressingModes.directIndirectIndexedLong);
+        this.opcodes[0x39] = new AND(cpu,0x39, 4, 3, AddressingModes.absoluteY);
+        this.opcodes[0x3D] = new AND(cpu,0x3D, 4, 3, AddressingModes.absoluteX);
+        this.opcodes[0x3F] = new AND(cpu,0x3F, 5, 4, AddressingModes.longX);
 
         this.opcodes[0x41] = new EOR(cpu,0x41, 6, 2, AddressingModes.directIndirectIndexed);
         this.opcodes[0x43] = new EOR(cpu,0x43, 4, 2, AddressingModes.stack);
@@ -2334,22 +2350,6 @@ export class Opcodes {
 
         this.opcodes[0x6B] = new RTL(cpu,0x6B, 6, 1, AddressingModes.implied);
         this.opcodes[0x60] = new RTS(cpu,0x60, 6, 1, AddressingModes.implied);
-
-        this.opcodes[0xE1] = new SBC(cpu,0xE1, 6, 2, AddressingModes.directIndirectIndexed);
-        this.opcodes[0xE3] = new SBC(cpu,0xE3, 4, 2, AddressingModes.stack);
-        this.opcodes[0xE5] = new SBC(cpu,0xE5, 3, 2, AddressingModes.direct);
-        this.opcodes[0xE7] = new SBC(cpu,0xE7, 6, 2, AddressingModes.directIndexedIndirect);
-        this.opcodes[0xE9] = new SBC(cpu,0xE9, 2, 3, AddressingModes.immediateM);
-        this.opcodes[0xED] = new SBC(cpu,0xED, 4, 3, AddressingModes.absolute);
-        this.opcodes[0xEF] = new SBC(cpu,0xEF, 5, 4, AddressingModes.long);
-        this.opcodes[0xF1] = new SBC(cpu,0xF1, 5, 2, AddressingModes.directIndirectLong);
-        this.opcodes[0xF2] = new SBC(cpu,0xF2, 5, 2, AddressingModes.directIndirect);
-        this.opcodes[0xF3] = new SBC(cpu,0xF3, 7, 2, AddressingModes.stackY);
-        this.opcodes[0xF5] = new SBC(cpu,0xF5, 4, 2, AddressingModes.directX);
-        this.opcodes[0xF7] = new SBC(cpu,0xF7, 6, 2, AddressingModes.directIndirectIndexedLong);
-        this.opcodes[0xF9] = new SBC(cpu,0xF9, 4, 3, AddressingModes.absoluteY);
-        this.opcodes[0xFD] = new SBC(cpu,0xFD, 4, 3, AddressingModes.absoluteX);
-        this.opcodes[0xFF] = new SBC(cpu,0xFF, 5, 4, AddressingModes.longX);
 
         this.opcodes[0xAA] = new TAX(cpu,0xAA, 2, 1, AddressingModes.implied);
         this.opcodes[0xA8] = new TAY(cpu,0xA8, 2, 1, AddressingModes.implied);
