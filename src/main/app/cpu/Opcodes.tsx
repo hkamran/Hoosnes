@@ -192,17 +192,19 @@ export class ADC extends Operation {
             }
 
             result = an0 + an1 + an2 + an3;
-            context.registers.p.setV((!(((a ^ b) & size)!=0) && (((a ^ result) & size)) !=0)? 1:0);
+            context.registers.p.setV((~(a ^ b) & (a ^ result) & size) != 0 ? 1 : 0);
             if (result > overflow) result = result + (is8Bit ? 0x60: 0x6000);
         } else {
             result = a + b + c;
-            context.registers.p.setV((!(((a ^ b) & size)!=0) && (((a ^ result) & size)) !=0)? 1:0);
+            context.registers.p.setV((~(a ^ b) & (a ^ result) & size) != 0 ? 1 : 0);
         }
+
+        context.registers.p.setC(result > mask ? 1: 0);
+        result &= mask;
 
         if (is8Bit) context.registers.a.setLower(result & mask);
         if (!is8Bit) context.registers.a.set(result & mask);
 
-        context.registers.p.setC(result > mask ? 1: 0);
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
 
@@ -1546,12 +1548,14 @@ class SBC extends Operation {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let isBcdMode: boolean = context.registers.p.getD() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
+        let size: number = is8Bit ? 0x80 : 0x8000;
         let overflow: number = is8Bit ? 0x100 : 0x10000;
 
         let a: number = context.cpu.registers.a.get() & mask;
-        let b: number = (this.mode.getValue(context) ^ mask) & mask;
+        let b: number = this.mode.getValue(context) & mask;
         let c: number = context.cpu.registers.p.getC();
 
+        b ^= mask;
         let result: number = 0;
         if (isBcdMode) {
             let an0 = a & 0x000f;
@@ -1586,17 +1590,19 @@ class SBC extends Operation {
             }
 
             result = an0 + an1 + an2 + an3;
-            context.registers.p.setV((!(((a ^ b) & mask) != 0) && (((a ^ result) & mask)) != 0) ? 1 : 0);
+            context.registers.p.setV((~(a ^ b) & (a ^ result) & size) != 0 ? 1 : 0);
             if (result < overflow) result = result - (is8Bit ? 0x60 : 0x6000);
         } else {
             result = a + b + c;
-            context.registers.p.setV((!(((a ^ b) & mask) != 0) && (((a ^ result) & mask)) != 0) ? 1 : 0);
+            context.registers.p.setV((~(a ^ b) & (a ^ result) & size) != 0 ? 1 : 0);
         }
 
-        if (is8Bit) context.registers.a.setLower(result & mask);
-        if (!is8Bit) context.registers.a.set(result & mask);
-
         context.registers.p.setC(result > mask ? 1: 0);
+        result &= mask;
+
+        if (is8Bit) context.registers.a.setLower(result);
+        if (!is8Bit) context.registers.a.set(result);
+
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
 
