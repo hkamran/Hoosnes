@@ -765,6 +765,7 @@ class INC extends Operation {
     }
 
 }
+
 class INX extends Operation {
     public name: string = "INX";
 

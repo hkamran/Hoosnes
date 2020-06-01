@@ -238,7 +238,7 @@ export class DmaChannel {
                 if (transferSize-- > 0)this.console.bus.writeByte(
                     destination,
                     this.console.bus.readByte(source));
-                count += 1;
+                count = step;
             } else if (writeMode == DmaWriteMode.TWO_BYTES) {
                 if (transferSize-- > 0) this.console.bus.writeByte(
                     destination + 0,
@@ -246,7 +246,7 @@ export class DmaChannel {
                 if (transferSize-- > 0) this.console.bus.writeByte(
                     destination + 0,
                     this.console.bus.readByte(source + 1));
-                count += 2;
+                count = step * 2;
             } else if (writeMode == DmaWriteMode.TWO_BYTES_SEQUENCE) {
                 if (transferSize-- > 0) this.console.bus.writeByte(
                     destination + 0,
@@ -254,7 +254,7 @@ export class DmaChannel {
                 if (transferSize-- > 0) this.console.bus.writeByte(
                     destination + 1,
                     this.console.bus.readByte(source + 1));
-                count += step * 2;
+                count = step * 2;
             } else if (writeMode == DmaWriteMode.TWO_WORDS) {
                 if (transferSize-- > 0) this.console.bus.writeByte(
                     destination + 0,
@@ -268,7 +268,7 @@ export class DmaChannel {
                 if (transferSize-- > 0) this.console.bus.writeByte(
                     destination + 1,
                     this.console.bus.readByte(source + 1));
-                count += step * 4;
+                count = step * 4;
             } else if (writeMode == DmaWriteMode.FOUR_BYTES_SEQUENCE) {
                 if (transferSize-- > 0) this.console.bus.writeByte(
                     destination + 0,
@@ -282,7 +282,7 @@ export class DmaChannel {
                 if (transferSize-- > 0) this.console.bus.writeByte(
                     destination + 3,
                     this.console.bus.readByte(source + 3));
-                count += step * 4;
+                count = step * 4;
             } else {
                 throw new Error("DMA Error");
             }
