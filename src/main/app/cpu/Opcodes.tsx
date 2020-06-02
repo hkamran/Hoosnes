@@ -815,7 +815,7 @@ class XCE extends Operation {
         context.registers.p.setE(c);
         context.registers.p.setC(e);
 
-        if (e == 0x1) {
+        if (c == 0x1) {
             context.registers.sp.setUpper(0x01);
             context.registers.x.setUpper(0x00);
             context.registers.y.setUpper(0x00);
@@ -1709,8 +1709,8 @@ class ROR extends Operation {
             let value: number = ((data >> 1) & mask) | (c << shift);
 
             context.registers.p.setC(((data >> 0) & 0x1) != 0 ? 1 : 0);
-            context.setFlagN(value);
-            context.setFlagZ(value);
+            context.setFlagN(value, is8Bit);
+            context.setFlagZ(value, is8Bit);
 
             let lowVal: number = Bit.getUint16Lower(value);
             let highVal: number = Bit.getUint16Upper(value);
@@ -1725,8 +1725,8 @@ class ROR extends Operation {
             let value: number = ((data >> 1) & mask) | (c << shift);
 
             context.registers.p.setC(((data >> 0) & 0x1) != 0 ? 1 : 0);
-            context.setFlagN(value);
-            context.setFlagZ(value);
+            context.setFlagN(value, is8Bit);
+            context.setFlagZ(value, is8Bit);
 
             let lowVal: number = Bit.getUint16Lower(value);
             let highVal: number = Bit.getUint16Upper(value);

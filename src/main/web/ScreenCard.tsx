@@ -43,7 +43,6 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
         }
         if (this.props.snes.state == ConsoleState.OFF) this.drawStatic();
         this.props.snes.ppu.screen.setCanvas(this.canvasRef.current);
-        //this.props.snes.ppu.screen.setCanvas(this.canvasRef.current);
     }
 
     private drawStatic(): void {
