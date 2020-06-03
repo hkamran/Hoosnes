@@ -68,7 +68,7 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
 
     public render() {
         return (
-            <div>
+            <div style={{flex: "auto"}}>
                 <canvas ref={this.canvasRef}
                         style={{
                             backgroundColor: "#000000",
