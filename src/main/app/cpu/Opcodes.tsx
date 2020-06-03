@@ -1111,8 +1111,12 @@ class TSX extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.cpu.registers.p.getX() == 1;
-        let data = context.cpu.registers.sp.get();
-        context.cpu.registers.x.set(data);
+        let value = context.cpu.registers.sp.get();
+        context.cpu.registers.x.set(value);
+
+        context.setFlagN(value, is8Bit);
+        context.setFlagZ(value, is8Bit);
+
         return this.cycle;
     }
 
@@ -1122,8 +1126,8 @@ class TSC extends Operation {
     public name: string = "TSC";
 
     public execute(context: OpContext): number {
-        let value: number = context.cpu.registers.sp.get();
         let is8Bit: boolean = false;
+        let value: number = context.cpu.registers.sp.get();
         context.cpu.registers.a.set(value);
 
         context.setFlagN(value, is8Bit);
@@ -1338,15 +1342,15 @@ class LSR extends Operation {
         let is8Bit: boolean = this.cpu.registers.p.getM() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
 
-        let data = isAccMode ? (is8Bit ?
-            this.cpu.registers.a.getLower() : this.cpu.registers.a.get()) :
-            this.mode.getValue(context);
-        this.cpu.registers.p.setC(data & 0x01);
+        let data = (isAccMode ? this.cpu.registers.a.get() :
+            this.mode.getValue(context)) & mask;
 
         let value: number = ((data & mask) >> 1) & mask;
 
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
+        this.cpu.registers.p.setC(data & 0x01);
+
         if (isAccMode) {
             if (is8Bit) this.cpu.registers.a.setLower(value);
             if (!is8Bit) this.cpu.registers.a.set(value);
@@ -1451,7 +1455,7 @@ class ORA extends Operation {
         let loData: number = context.bus.readByte(addressing.toLow());
         let hiData: number = is8Bit ? 0 : context.bus.readByte(addressing.toHigh());
 
-        let data: number = Bit.toUint16(hiData, loData);
+        let data: number = Bit.toUint16(hiData, loData) & mask;
         let a: number = context.registers.a.get() & mask;
 
         let result: number = (data | a) & mask;
@@ -1652,15 +1656,12 @@ class ROL extends Operation {
         let isAcc: boolean = this.mode == AddressingModes.accumulator;
 
         if (isAcc) {
-            let loData: number = context.registers.a.getLower();
-            let hiData: number = context.registers.a.getUpper();
-
-            let data: number = Bit.toUint16(hiData, loData);
+            let data: number = context.registers.a.get() & mask;
             let value: number = ((data << 1) & mask) | c;
 
             context.registers.p.setC(((data >> shift) & 0x1) != 0 ? 1 : 0);
-            context.setFlagN(value);
-            context.setFlagZ(value);
+            context.setFlagN(value, is8Bit);
+            context.setFlagZ(value, is8Bit);
 
             let lowVal: number = Bit.getUint16Lower(value);
             let highVal: number = Bit.getUint16Upper(value);
@@ -1671,12 +1672,12 @@ class ROL extends Operation {
             let loData: number = context.bus.readByte(addressing.toLow());
             let hiData: number = is8Bit ? 0 : context.bus.readByte(addressing.toHigh());
 
-            let data: number = Bit.toUint16(hiData, loData);
+            let data: number = Bit.toUint16(hiData, loData) & mask;
             let value: number = ((data << 1) & mask) | c;
 
             context.registers.p.setC(((data >> shift) & 0x1) != 0 ? 1 : 0);
-            context.setFlagN(value);
-            context.setFlagZ(value);
+            context.setFlagN(value, is8Bit);
+            context.setFlagZ(value, is8Bit);
 
             let lowVal: number = Bit.getUint16Lower(value);
             let highVal: number = Bit.getUint16Upper(value);
@@ -1702,10 +1703,7 @@ class ROR extends Operation {
         let isAcc: boolean = this.mode == AddressingModes.accumulator;
 
         if (isAcc) {
-            let loData: number = context.registers.a.getLower();
-            let hiData: number = context.registers.a.getUpper();
-
-            let data: number = Bit.toUint16(hiData, loData);
+            let data: number = context.registers.a.get() & mask;
             let value: number = ((data >> 1) & mask) | (c << shift);
 
             context.registers.p.setC(((data >> 0) & 0x1) != 0 ? 1 : 0);
@@ -1721,7 +1719,7 @@ class ROR extends Operation {
             let loData: number = context.bus.readByte(addressing.toLow());
             let hiData: number = is8Bit ? 0 : context.bus.readByte(addressing.toHigh());
 
-            let data: number = Bit.toUint16(hiData, loData);
+            let data: number = Bit.toUint16(hiData, loData) & mask;
             let value: number = ((data >> 1) & mask) | (c << shift);
 
             context.registers.p.setC(((data >> 0) & 0x1) != 0 ? 1 : 0);
