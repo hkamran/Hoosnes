@@ -61,9 +61,9 @@ export class DebuggerStats extends React.Component<IDebuggerStatsProps, IDebugge
                 textTransform: "uppercase",
                 marginTop: "22px",
                 marginRight: "30px",
-                marginLeft: "10px"
+                whiteSpace: "nowrap",
             }}>
-                {this.state.fps} fps
+                {Math.min(this.state.fps, 99)} fps
             </div>
         );
     }
