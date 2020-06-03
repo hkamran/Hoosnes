@@ -54,21 +54,9 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
         window.requestAnimationFrame(this.drawStatic.bind(this));
     }
 
-    private increaseZoom(): void {
-        this.setState({
-            zoom: this.state.zoom + 1,
-        });
-    }
-
-    private decreaseZoom(): void {
-        this.setState({
-            zoom: Math.max(1, this.state.zoom - 1),
-        });
-    }
-
     public render() {
         return (
-            <div style={{flex: "auto"}}>
+            <div style={{display: "flex"}}>
                 <canvas ref={this.canvasRef}
                         style={{
                             backgroundColor: "#000000",
