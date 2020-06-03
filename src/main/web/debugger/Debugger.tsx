@@ -6,6 +6,7 @@ import {DebuggerTabPpu} from "./DebuggerTabPpu";
 import {DebuggerTabCartridge} from "./DebuggerTabCartridge";
 import Toggle from 'react-toggle';
 import {animateFrames} from "../Main";
+import {DebuggerStats} from "./DebuggerStats";
 
 enum Tab {
     CPU, PPU, APU, CARTRIDGE,
@@ -131,7 +132,8 @@ export class Debugger extends React.Component<IDebuggerProps, IDebuggerStates> {
                           icons={false}
                           onChange={this.toggleTrace.bind(this)} />
                     </div>
-                    <div style={{flexGrow: 1}} />
+                    <DebuggerStats />
+                    <div style={{flexGrow: 1}} ></div>
                     <div className={"debug-tab-button " + (this.state.tab == Tab.CPU ? "active": "")} onClick={() => this.setTab(Tab.CPU)}>CPU</div>
                     <div className={"debug-tab-button " + (this.state.tab == Tab.PPU ? "active": "")} onClick={() => this.setTab(Tab.PPU)}>PPU</div>
                     <div className={"debug-tab-button " + (this.state.tab == Tab.CARTRIDGE ? "active": "")} onClick={() => this.setTab(Tab.CARTRIDGE)}>CARTRIDGE</div>

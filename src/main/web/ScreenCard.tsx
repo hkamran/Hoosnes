@@ -1,6 +1,5 @@
 import * as React from "react";
 import {RefObject} from "react";
-import Stats from 'stats.js';
 import {Console, ConsoleState} from "../app/Console";
 
 
@@ -17,26 +16,18 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
         height: 224,
         zoom: 1,
     };
-
-    public stats: Stats = new Stats();
     public animateStatic: boolean = true;
-
     public canvasRef: RefObject<HTMLCanvasElement>;
-    public statsRef: RefObject<HTMLDivElement>;
 
     public context: CanvasRenderingContext2D;
 
     constructor(props : any) {
         super(props);
         this.canvasRef = React.createRef<HTMLCanvasElement>();
-        this.statsRef = React.createRef<HTMLDivElement>();
     }
 
     public componentDidMount(): void {
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
-        this.statsRef.current.appendChild(this.stats.dom);
-        this.statsRef.current.children[0].setAttribute("style", "position: inherit;");
-
         if (window) {
             window.canvas = this.canvasRef;
             window.context = this.context;
@@ -48,8 +39,6 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
     private drawStatic(): void {
         if (!this.animateStatic) return;
         if (this.props.snes.state != ConsoleState.OFF) return;
-
-        this.stats.begin();
 
         let image: ImageData = window.context.createImageData(
             this.props.snes.ppu.screen.getWidth(),
@@ -63,8 +52,6 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
 
         window.context.putImageData(image, 0, 0);
         window.requestAnimationFrame(this.drawStatic.bind(this));
-
-        this.stats.end();
     }
 
     private increaseZoom(): void {
@@ -88,7 +75,6 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
                             borderRadius: "4px",
                         }}
                         />
-                <div ref={this.statsRef} style={{display: "none"}} />
             </div>
         );
     }

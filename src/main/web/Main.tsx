@@ -2,13 +2,11 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Console, ConsoleState} from "../app/Console";
 import {ScreenCard} from "./ScreenCard";
-import {Operation} from "../app/cpu/Opcodes";
-import {AddressUtil} from "../app/util/AddressUtil";
 import ReactTooltip from "react-tooltip";
 import {debugCallback, Debugger} from "./debugger/Debugger";
 import Modal from 'react-modal';
 import {Keyboard, KeyboardMapping} from "./Keyboard";
-import {joy1, Key} from "../app/controller/Controller";
+import {joy1} from "../app/controller/Controller";
 
 declare let window: any;
 window.snes = new Console();
@@ -304,7 +302,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                     </a>
                 </div>
                 <div className={"screen-container"}>
-                    <ScreenCard snes={window.snes}/>
+                    <ScreenCard snes={window.snes} />
                 </div>
                 <div style={{display: 'flex', flexDirection: 'row', marginTop: "30px"}}>
                     <div style={{flexGrow: 1}}/>
@@ -324,7 +322,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                     </div>
                 </div>
                 <div style={{display: 'flex', flexDirection: 'row', marginTop: "30px"}}>
-                    <div className={"footer"}>
+                    <div className={"box footer"}>
                         Author: <a href="https://github.com/hkamran">Hooman Kamran</a>
                     </div>
                 </div>
