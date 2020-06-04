@@ -56,14 +56,17 @@ export class DebuggerStats extends React.Component<IDebuggerStatsProps, IDebugge
     }
 
     public render() {
+        const fps = (this.state.fps > 99 ? "99+" : this.state.fps);
         return (
             <div style={{
                 textTransform: "uppercase",
-                marginTop: "22px",
+                marginTop: "25px",
                 marginRight: "30px",
                 whiteSpace: "nowrap",
+                marginLeft: "5px",
+                fontSize: "14px",
             }}>
-                {Math.min(this.state.fps, 99)} fps
+                {"FPS: " + fps}
             </div>
         );
     }
