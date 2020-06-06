@@ -784,6 +784,9 @@ export class CGRAMAddressRegister extends Register {
 
     public set(val: number): void {
         this.val = val & 0xFF;
+        if (val == 0) {
+            this.console.ppu.registers.cgdataw.reset();
+        }
     }
 
     public increment(): void {
@@ -804,6 +807,12 @@ export class CGRAMDataWriteRegister extends Register {
     public counter: number = 0;
     public low: number = 0;
     public high: number = 0;
+
+    public reset(): void {
+        this.low = 0;
+        this.high = 0;
+        this.counter = 0;
+    }
 
     public set(val: number): void {
         this.low = this.high & 0xFF;
@@ -972,6 +981,14 @@ export class SoftwareLatchRegister extends Register {
     public address: string = "0x2137";
     public label: string = "SLHV";
 
+    public get(): number {
+        this.console.ppu.status.hCounterLatch = this.console.ppu.cycle;
+        this.console.ppu.status.vCounterLatch = this.console.ppu.scanline;
+        this.console.ppu.status.latchedData = true;
+
+        return 0;
+    }
+
 }
 
 export class OAMDataReadRegister extends Register {
@@ -1064,12 +1081,35 @@ export class ScanlineLocationHorizontalRegister extends Register {
     public address: string = "0x213C";
     public label: string = "OPHCT";
 
+    public get(): number {
+        let result = this.console.ppu.status.hCounterLatch;
+        if (this.console.ppu.status.opHctFlip) {
+            result = Bit.getUint16Upper(result);
+        } else {
+            result = result & 0xFF;
+        }
+        this.console.ppu.status.opHctFlip = !this.console.ppu.status.opHctFlip;
+        return result;
+    }
+
 }
 
 export class ScanlineLocationVerticalRegister extends Register {
 
     public address: string = "0x213D";
     public label: string = "OPVCT";
+
+    public get(): number {
+        let result = this.console.ppu.status.vCounterLatch;
+        if (this.console.ppu.status.opVctFlip) {
+            result = Bit.getUint16Upper(result);
+        } else {
+            result = result & 0xFF;
+        }
+        this.console.ppu.status.opVctFlip = !this.console.ppu.status.opVctFlip;
+        return result;
+    }
+
 
 }
 
@@ -1097,23 +1137,23 @@ export class PPUStatus78Register extends Register {
     public address: string = "213F";
     public label: string = "STAT78";
 
-    public getField(): boolean {
-        return ((this.val >> 7) & 0x1) == 1;
+    public get(): number {
+        let result = 0x2;
+        if (this.console.ppu.status.palMode) {
+            result += 0x10;
+        }
+        if (this.console.ppu.status.latchedData) {
+            result += 0x40;
+        }
+        if (this.console.ppu.status.interlaceFrame) {
+            result += 0x80;
+        }
 
-    }
+        this.console.ppu.status.latchedData = false;
+        this.console.ppu.status.opHctFlip = false;
+        this.console.ppu.status.opVctFlip = false;
 
-    public getCountersLatched(): boolean {
-        return ((this.val >> 6) & 0x1) == 1;
-
-    }
-
-    public getRegion(): number {
-        return ((this.val >> 4) & 0x1);
-
-    }
-
-    public getVersion(): number {
-        return ((this.val >> 4) & 0xF);
+        return result;
     }
 
 }
@@ -1123,27 +1163,9 @@ export class WRAMDataRegister extends Register {
     public address: string = "2180";
     public label: string = "WMDATA";
 
-}
-
-export class WRAMAddressLowRegister extends Register {
-
-    public address: string = "2181";
-    public label: string = "WMADDL";
-
-}
-
-export class WRAMAddressMidRegister extends Register {
-
-    public address: string = "2182";
-    public label: string = "WMADDM";
-
-}
-
-export class WRAMAddressHighRegister extends Register {
-
-    public address: string = "2183";
-    public label: string = "WMADDH";
-
+    public set(val: number) {
+        throw new Error("Not Implemented");
+    }
 }
 
 export class Registers {

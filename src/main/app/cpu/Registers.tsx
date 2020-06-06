@@ -426,6 +426,20 @@ export class WramMemoryAddressRegister extends Register {
     }
 }
 
+export class WramMemoryDataRegister extends Register {
+
+    public address: string = "0x2180";
+    public name: string = "WMDATA";
+
+    public set(val: number) {
+        throw new Error("Not Implemented!");
+    }
+
+    public get(): number {
+        throw new Error("Not Implemented!");
+    }
+
+}
 
 export class HvBStatusRegister extends Register {
 
@@ -615,7 +629,7 @@ export class Registers {
     public joy4l : Register;
     public joy4h : Register;
 
-    public wmdata : Register;
+    public wmdata : WramMemoryDataRegister;
     public wmadd : WramMemoryAddressRegister;
 
     public dma0: DmaChannel;
@@ -673,7 +687,7 @@ export class Registers {
         this.joy4l = new Register();
         this.joy4h = new Register();
 
-        this.wmdata = new Register();
+        this.wmdata = new WramMemoryDataRegister();
         this.wmadd = new WramMemoryAddressRegister();
 
         this.dma0 = new DmaChannel(console, 0);

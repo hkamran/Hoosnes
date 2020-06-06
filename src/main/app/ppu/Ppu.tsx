@@ -13,6 +13,20 @@ import {Tiles} from "./Tiles";
 import {Backgrounds} from "./Backgrounds";
 import {joy1, joy2} from "../controller/Controller";
 
+export class Status {
+    public hCounterLatch: number = 0;
+    public vCounterLatch: number = 0;
+
+    public opHctFlip: boolean = false;
+    public opVctFlip: boolean = false;
+
+    public timeOver: boolean = false;
+    public rangeOver: boolean = false;
+
+    public palMode: boolean = false;
+    public latchedData: boolean = false;
+    public interlaceFrame: boolean = false;
+}
 
 export class Ppu {
 
@@ -21,6 +35,7 @@ export class Ppu {
     public frames: number = 0;
 
     public console: Console;
+    public status: Status;
 
     public registers: Registers;
     public cgram: CGram;
@@ -42,6 +57,7 @@ export class Ppu {
         this.cgram = new CGram();
         this.oam = new Oam();
         this.vram = new Vram();
+        this.status = new Status();
 
         this.registers = new Registers(console);
 

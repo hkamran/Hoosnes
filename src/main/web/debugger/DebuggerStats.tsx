@@ -1,8 +1,5 @@
 import * as React from "react";
 
-interface IDebuggerStatsProps {
-}
-
 interface IDebuggerStatsState {
     fps: number;
     lastCalledTime: number;
@@ -10,14 +7,14 @@ interface IDebuggerStatsState {
 
 let isRunning: boolean = false;
 
-export class DebuggerStats extends React.Component<IDebuggerStatsProps, IDebuggerStatsState> {
+export class DebuggerStats extends React.Component<any, IDebuggerStatsState> {
 
-    state = {
+    public state = {
         fps: 0,
         lastCalledTime: 0,
-    }
+    };
 
-    constructor(props: IDebuggerStatsProps) {
+    constructor(props: any) {
         super(props);
     }
 
@@ -45,7 +42,7 @@ export class DebuggerStats extends React.Component<IDebuggerStatsProps, IDebugge
             this.setState({
                 lastCalledTime: performance.now(),
                 fps: 0,
-            })
+            });
         } else {
             let delta = (performance.now() - this.state.lastCalledTime) / 1000;
             this.setState({

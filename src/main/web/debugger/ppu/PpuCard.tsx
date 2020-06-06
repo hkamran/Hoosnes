@@ -387,27 +387,6 @@ export class PpuCard extends React.Component<IPpuCardProps, any> {
                                         </li>
                                     </ul>
                                 </li>
-                                <li style={{display: "flex", flexDirection: "column"}}>
-                                    <span style={{flexGrow: 1}} className="header">{registers.stat78.label} ({registers.stat78.address})</span>
-                                    <ul style={{margin: "5px"}}>
-                                        <li style={{display: "flex"}}>
-                                            <span style={{flexGrow: 1}} className="header">Field:</span>
-                                            <span>{registers.stat78.getField().toString().toUpperCase()}</span>
-                                        </li>
-                                        <li style={{display: "flex"}}>
-                                            <span style={{flexGrow: 1}} className="header">Counters Latched:</span>
-                                            <span>{registers.stat78.getCountersLatched().toString().toUpperCase()}</span>
-                                        </li>
-                                        <li style={{display: "flex"}}>
-                                            <span style={{flexGrow: 1}} className="header">Region:</span>
-                                            <span>{registers.stat78.getRegion().toString()}</span>
-                                        </li>
-                                        <li style={{display: "flex"}}>
-                                            <span style={{flexGrow: 1}} className="header">Version:</span>
-                                            <span>{registers.stat78.getVersion().toString()}</span>
-                                        </li>
-                                    </ul>
-                                </li>
                             </ul>
                         </div>
                     </fieldset>

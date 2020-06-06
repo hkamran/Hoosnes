@@ -165,7 +165,7 @@ export class BusPpu {
             value = Bit.toUint8(this.registers.stat77.get());
         } else if (page == 0x213F) {
             value = Bit.toUint8(this.registers.stat78.get());
-        } else if (page >= 0x2140 && page <= 0x2180) {
+        } else if (page >= 0x2140 && page <= 0x2179) {
             if (page % 4 == 0) {
                 value = Bit.toUint8(this.console.apu.registers.apuio0.get());
             } else if (page % 4 == 1) {
