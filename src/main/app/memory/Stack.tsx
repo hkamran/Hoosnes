@@ -27,22 +27,19 @@ export class Stack {
 
     public pushByte(value : number) {
         let byte = value & 0xFF;
-        this.stack.push(byte);
-
         let sp: number = this.console.cpu.registers.sp.get();
         this.console.bus.writeByte(sp, byte);
         this.console.cpu.registers.sp.set((sp - 1) & 0xFFFF);
+
+        this.stack.push(byte);
     }
 
     public popByte() : number {
-        if (this.stack.length <= 0) {
-            return 0;
-        }
-        this.stack.pop();
         let sp: number = (this.console.cpu.registers.sp.get() + 1) & 0xFFFF;
         let value: number = this.console.bus.readByte(sp);
         this.console.cpu.registers.sp.set(sp);
 
+        this.stack.pop();
         return value;
     }
 }

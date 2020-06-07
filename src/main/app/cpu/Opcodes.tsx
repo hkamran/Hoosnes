@@ -1399,6 +1399,7 @@ class MVN extends Operation {
 
         this.cpu.registers.x.set(((this.cpu.registers.x.get() + counter) % 0xFFFF) & 0xFFFF);
         this.cpu.registers.y.set(((this.cpu.registers.y.get() + counter) % 0xFFFF) & 0xFFFF);
+        this.cpu.registers.dbr.set(destBank);
         this.cpu.registers.a.set(0xFFFF);
 
         return this.cycle;
@@ -1434,6 +1435,7 @@ class MVP extends Operation {
 
         this.cpu.registers.x.set(((this.cpu.registers.x.get() - amount) % 0xFFFF) & 0xFFFF);
         this.cpu.registers.y.set(((this.cpu.registers.y.get() - amount) % 0xFFFF) & 0xFFFF);
+        this.cpu.registers.dbr.set(destBank);
         this.cpu.registers.a.set(0xFFFF);
 
         return this.cycle;
