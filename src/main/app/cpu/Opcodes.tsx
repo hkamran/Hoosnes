@@ -2244,7 +2244,7 @@ export class Opcodes {
 
         this.opcodes[0x22] = new JSL(cpu,0x22, 8, 4, AddressingModes.long);
         this.opcodes[0x20] = new JSR(cpu,0x20, 6, 3, AddressingModes.absolute);
-        this.opcodes[0xFC] = new JSR(cpu,0xFC, 8, 3, AddressingModes.absoluteLongIndexed);
+        this.opcodes[0xFC] = new JSR(cpu,0xFC, 8, 3, AddressingModes.absoluteIndirect);
 
         this.opcodes[0xA1] = new LDA(cpu,0xA1, 6, 2, AddressingModes.directIndirectIndexed);
         this.opcodes[0xA3] = new LDA(cpu,0xA3, 4, 2, AddressingModes.stack);
