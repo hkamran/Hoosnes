@@ -50,47 +50,6 @@ export class InterruptVectors {
 
 const SMC_HEADER_SIZE: number = 512;
 
-export class SmcHeader {
-
-    public size: number;
-    public flags: number;
-    public offset: number;
-
-    public static parse(rom: number[]) {
-        let hasSms: boolean = this.checkForSms(rom);
-        let sms: SmcHeader = new SmcHeader();
-        if (hasSms) {
-            sms.size = (rom[1] << 4) | rom[0];
-            sms.flags = rom[2];
-            return sms;
-        } else {
-            sms.size = 0;
-            sms.flags = 0;
-        }
-        sms.offset = (sms.size * SMC_HEADER_SIZE);
-        return sms;
-    }
-
-    private static checkForSms(rom: number[]): boolean {
-        let size: number = rom.length;
-        let remainder = size % 1024;
-        if (remainder == 0) {
-            return false;
-        }
-        if (remainder == 512) {
-            return true;
-        }
-        throw new Error("Error is malformed!");
-    }
-
-    public readByte(bank: number, offset: number): number {
-        return 0;
-    }
-
-    public writeByte(bank: number, offset: number, byte: number): void {
-    }
-}
-
 export enum CartridgeMappingType {
     LOROM = 0x20,
     HIROM = 0x21,
@@ -125,12 +84,12 @@ export class Cartridge {
     public rom: number[];
     public aux: number[] = [];
 
-    public smc: SmcHeader; // header
     public title: string = ""; // xFC0
     public mapping: ICartridgeMapping; // xFD5
     public type: CartridgeType; // xFD6
     public size: number; // xFD7
     public sram: Sram; // xFD8
+    public smcSize: number = 0;
     public license: number; // xFD9
     public version: number; // xFDB
     public complement: number; // xFDC
@@ -142,9 +101,16 @@ export class Cartridge {
 
         this.rom = bytes;
 
-        // Determine the offset
+        // SMC header
+        let romLength: number = this.rom.length;
+        this.smcSize = romLength % 1024;
+        if (this.smcSize != 0 && this.smcSize != 512) {
+            throw new Error(`SMC is malformed! ${this.smcSize}`);
+        }
 
-        this.smc = SmcHeader.parse(this.rom);
+        this.rom = this.rom.slice(this.smcSize);
+
+        // Determine the offset
         let mappingType: CartridgeMappingType = this.getLayoutType();
         let offset: number = this.getHeaderOffset(mappingType);
 
@@ -165,10 +131,10 @@ export class Cartridge {
         let value: number;
         let layout: CartridgeMappingType;
 
-        value = ByteReader.readByte(this.rom, SNES_OFFSET_LOROM + SNES_OFFSET_MAP_TYPE + this.smc.offset);
+        value = ByteReader.readByte(this.rom, SNES_OFFSET_LOROM + SNES_OFFSET_MAP_TYPE);
         layout = CartridgeMappingType[value as unknown as keyof typeof CartridgeMappingType];
         if (layout == null) {
-            value = ByteReader.readByte(this.rom, SNES_OFFSET_HIROM + SNES_OFFSET_MAP_TYPE + this.smc.offset);
+            value = ByteReader.readByte(this.rom, SNES_OFFSET_HIROM + SNES_OFFSET_MAP_TYPE);
             layout = CartridgeMappingType[value as unknown as keyof typeof CartridgeMappingType];
         }
         Objects.requireNonNull(layout, "Unable to parse mappingType type: 0x" + value.toString(16));
@@ -177,16 +143,16 @@ export class Cartridge {
 
     private getHeaderOffset(layout: CartridgeMappingType): number {
         if (CartridgeMappingType[CartridgeMappingType.HIROM] === layout.toString()) {
-            return SNES_OFFSET_HIROM + this.smc.offset;
+            return SNES_OFFSET_HIROM;
         }
         if (CartridgeMappingType[CartridgeMappingType.HIROM_FASTROM] === layout.toString()) {
-            return SNES_OFFSET_HIROM + this.smc.offset;
+            return SNES_OFFSET_HIROM;
         }
         if (CartridgeMappingType[CartridgeMappingType.LOROM] === layout.toString()) {
-            return SNES_OFFSET_LOROM + this.smc.offset;
+            return SNES_OFFSET_LOROM;
         }
         if (CartridgeMappingType[CartridgeMappingType.LOROM_FASTROM] === layout.toString()) {
-            return SNES_OFFSET_LOROM + this.smc.offset;
+            return SNES_OFFSET_LOROM;
         }
         throw Error("Unable to parse header offset from " + layout);
     }

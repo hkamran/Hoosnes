@@ -1052,9 +1052,11 @@ class TXS extends Operation {
     public name: string = "TXS";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = context.cpu.registers.p.getX() == 1;
+        let is8Bit: boolean = context.cpu.registers.p.getE() == 1;
         let data = context.cpu.registers.x.get();
-        context.cpu.registers.sp.set(data);
+        let mask = is8Bit ? 0xFF : 0xFFFF;
+        if (is8Bit) context.cpu.registers.sp.setLower(data & mask);
+        if (!is8Bit) context.cpu.registers.sp.set(data);
         return this.cycle;
     }
 }
@@ -1111,8 +1113,11 @@ class TSX extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.cpu.registers.p.getX() == 1;
-        let value = context.cpu.registers.sp.get();
-        context.cpu.registers.x.set(value);
+        let mask = is8Bit ? 0xFF : 0xFFFF;
+        let value = context.cpu.registers.sp.get() & mask;
+
+        if (is8Bit) context.cpu.registers.x.setLower(value);
+        if (!is8Bit) context.cpu.registers.x.set(value);
 
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
@@ -1877,7 +1882,7 @@ class PLD extends Operation {
     public name: string = "PLD";
 
     public execute(context: OpContext): number {
-        let is8Bit: boolean = false;
+        let is8Bit: boolean = true;
         let value: number = context.cpu.stack.popWord();
 
         context.registers.d.set(value);
@@ -1939,11 +1944,19 @@ class REP extends Operation {
     public name: string = "REP";
 
     public execute(context: OpContext): number {
+        let xFlag = context.registers.p.getX() == 1;
         let p: number = context.registers.p.get();
         let data: number = this.mode.getValue(context);
 
         let result: number = p & (~data>>>0 & 0xFF);
         context.registers.p.set(result);
+
+        if (context.registers.p.getE() == 0) {
+            if (xFlag && (context.registers.p.getX() == 0)) {
+                context.registers.x.set(context.registers.x.get() & 0x00FF);
+                context.registers.y.set(context.registers.y.get() & 0x00FF);
+            }
+        }
 
         return this.cycle;
     }
@@ -2059,15 +2072,18 @@ class SEP extends Operation {
     public name: string = "SEP";
 
     public execute(context: OpContext): number {
+        let xFlag: boolean = context.registers.p.getX() == 1;
         let value: number = this.mode.getValue(context);
         let status: number = context.registers.p.get();
         let result: number = status | (value & 0xFF);
 
         context.registers.p.set(result);
 
-        if (context.registers.p.getX() == 1) {
-            context.registers.x.set(context.registers.x.get() & 0x00FF);
-            context.registers.y.set(context.registers.y.get() & 0x00FF);
+        if (context.registers.p.getE() == 0) {
+            if (xFlag || (context.registers.p.getX() == 1)) {
+                context.registers.x.set(context.registers.x.get() & 0x00FF);
+                context.registers.y.set(context.registers.y.get() & 0x00FF);
+            }
         }
 
         return this.cycle;
