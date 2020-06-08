@@ -1990,7 +1990,7 @@ class STP extends Operation {
     public name: string = "STP";
 
     public execute(context: OpContext): number {
-        throw new Error("Stop the clock!");
+        return this.cycle;
     }
 }
 
@@ -2304,7 +2304,7 @@ export class Opcodes {
         this.opcodes[0x9C] = new STZ(cpu,0x9C, 4, 3, AddressingModes.absolute);
         this.opcodes[0x9E] = new STZ(cpu,0x9E, 5, 3, AddressingModes.absoluteX);
 
-        this.opcodes[0xDB] = new STP(cpu,0xDB, 3, 1, AddressingModes.implied);
+        this.opcodes[0xDB] = new STP(cpu,0xDB, 3, 0, AddressingModes.implied);
         this.opcodes[0xCB] = new WAI(cpu,0xCB, 3, 1, AddressingModes.implied);
 
         this.opcodes[0x46] = new LSR(cpu,0x46, 5, 2, AddressingModes.direct);

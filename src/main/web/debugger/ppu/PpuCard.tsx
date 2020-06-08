@@ -370,23 +370,6 @@ export class PpuCard extends React.Component<IPpuCardProps, any> {
                                         </li>
                                     </ul>
                                 </li>
-                                <li style={{display: "flex", flexDirection: "column"}}>
-                                    <span style={{flexGrow: 1}} className="header">{registers.stat77.label} ({registers.stat77.address})</span>
-                                    <ul style={{margin: "5px"}}>
-                                        <li style={{display: "flex"}}>
-                                            <span style={{flexGrow: 1}} className="header">Range over:</span>
-                                            <span>{registers.stat77.getRangeOver().toString().toUpperCase()}</span>
-                                        </li>
-                                        <li style={{display: "flex"}}>
-                                            <span style={{flexGrow: 1}} className="header">Time over:</span>
-                                            <span>{registers.stat77.getTimeOver().toString().toUpperCase()}</span>
-                                        </li>
-                                        <li style={{display: "flex"}}>
-                                            <span style={{flexGrow: 1}} className="header">Version:</span>
-                                            <span>{registers.stat77.getVersion().toString().toUpperCase()}</span>
-                                        </li>
-                                    </ul>
-                                </li>
                             </ul>
                         </div>
                     </fieldset>

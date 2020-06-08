@@ -982,9 +982,10 @@ export class SoftwareLatchRegister extends Register {
     public label: string = "SLHV";
 
     public get(): number {
-        this.console.ppu.status.hCounterLatch = this.console.ppu.cycle;
-        this.console.ppu.status.vCounterLatch = this.console.ppu.scanline;
-        this.console.ppu.status.latchedData = true;
+        let status = this.console.ppu.status;
+        status.setLatchCounter(
+            this.console.ppu.cycle,
+            this.console.ppu.scanline);
 
         return 0;
     }
@@ -1082,13 +1083,13 @@ export class ScanlineLocationHorizontalRegister extends Register {
     public label: string = "OPHCT";
 
     public get(): number {
-        let result = this.console.ppu.status.hCounterLatch;
-        if (this.console.ppu.status.opHctFlip) {
+        let result = this.console.ppu.status.latchedHCounter;
+        if (this.console.ppu.status.opHCounterToggle) {
             result = Bit.getUint16Upper(result);
         } else {
             result = result & 0xFF;
         }
-        this.console.ppu.status.opHctFlip = !this.console.ppu.status.opHctFlip;
+        this.console.ppu.status.opHCounterToggle = !this.console.ppu.status.opHCounterToggle;
         return result;
     }
 
@@ -1100,13 +1101,13 @@ export class ScanlineLocationVerticalRegister extends Register {
     public label: string = "OPVCT";
 
     public get(): number {
-        let result = this.console.ppu.status.vCounterLatch;
-        if (this.console.ppu.status.opVctFlip) {
+        let result = this.console.ppu.status.latchedVCounter;
+        if (this.console.ppu.status.opVCounterToggle) {
             result = Bit.getUint16Upper(result);
         } else {
             result = result & 0xFF;
         }
-        this.console.ppu.status.opVctFlip = !this.console.ppu.status.opVctFlip;
+        this.console.ppu.status.opVCounterToggle = !this.console.ppu.status.opVCounterToggle;
         return result;
     }
 
@@ -1118,16 +1119,15 @@ export class PPUStatus77Register extends Register {
     public address: string = "213E";
     public label: string = "STAT77";
 
-    public getRangeOver(): boolean {
-        return ((this.val >> 7) & 0x1) == 1;
-    }
+    public get(): number {
+        let status = this.console.ppu.status;
+        let result = status.chip5C77Version;
 
-    public getTimeOver(): boolean {
-        return ((this.val >> 6) & 0x1) == 1;
-    }
+        result |= (status.timeOver ? 1 : 0) << 7;
+        result |= (status.rangeOver ? 1 : 0) << 6;
+        result |= (status.masterSlaveToggle ? 1 : 0) << 5;
 
-    public getVersion(): number {
-        return ((this.val >> 0) & 0xF);
+        return result;
     }
 
 }
@@ -1138,20 +1138,14 @@ export class PPUStatus78Register extends Register {
     public label: string = "STAT78";
 
     public get(): number {
-        let result = 0x2;
-        if (this.console.ppu.status.palMode) {
-            result += 0x10;
-        }
-        if (this.console.ppu.status.latchedData) {
-            result += 0x40;
-        }
-        if (this.console.ppu.status.interlaceFrame) {
-            result += 0x80;
-        }
+        let status = this.console.ppu.status;
+        let result = status.chip5C78Version;
 
-        this.console.ppu.status.latchedData = false;
-        this.console.ppu.status.opHctFlip = false;
-        this.console.ppu.status.opVctFlip = false;
+        result |= (status.interlaceFrame ? 1 : 0) << 7;
+        result |= (status.externalLatchFlag ? 1 : 0) << 6;
+        result |= (status.palMode ? 1 : 0) << 4;
+
+        status.clearLatchCounter();
 
         return result;
     }

@@ -293,12 +293,8 @@ export class InterruptEnableFlagsRegister extends Register {
         return (this.val & 0x80) > 0;
     }
 
-    public isHorizontalCounterEnabled() {
-        return (this.val & 0x20) > 0;
-    }
-
-    public isVerticalCounterEnabled() {
-        return (this.val & 0x10) > 0;
+    public getIRQ(): number {
+        return (this.val & 0x30) >> 4;
     }
 
     public isAutoJoypadEnabled() {
@@ -312,19 +308,18 @@ export class NmiFlagRegister extends Register {
     public address: string = "4210";
     public name: string = "RDNMI";
 
-    public val: number = 0x42;
+    public nmiFlag: boolean = false;
 
-    public set(val: number): void {
-        this.val &= 0x7F;
-    }
-
-    public setVBlankFlag(flag: boolean) {
-        this.val &= ~(1 << 7);
-        this.val |= (flag ? 1 : 0) << 7;
+    public setNMIFlag(flag: boolean) {
+        this.nmiFlag = flag;
     }
 
     public get(): number {
-        return this.val;
+        let result = 2; // 5A22 Version
+        result |= (this.nmiFlag ? 1 : 0) << 7;
+
+        this.setNMIFlag(false);
+        return result;
     }
 
 }
@@ -361,7 +356,7 @@ export class VerticalTimeRegister extends Register {
     }
 
     public setUpper(val: number) {
-        this.val = Bit.setUint16Upper(this.val, val);
+        this.val = Bit.setUint16Upper(this.val, val & 0x100);
     }
 
     public getLower(): number {
@@ -379,19 +374,23 @@ export class TimeUpRegister extends Register {
     public name: string = "TIMEUP";
     private console: Console;
 
+    public irqFlag: boolean = false;
+
     constructor(console: Console) {
         super();
         this.console = console;
     }
 
-    public set(val: number) {
-
+    public setIRQFlag(flag: boolean) {
+        this.irqFlag = flag;
     }
 
     public get(): number {
-        let val = this.console.cpu.interrupts.irq ? 0x80 : 0x0;
-        this.console.cpu.interrupts.irq = false;
-        return val;
+        let result = 0;
+        result |= (this.irqFlag ? 1 : 0) << 7;
+
+        this.irqFlag = false;
+        return result;
     }
 
 }

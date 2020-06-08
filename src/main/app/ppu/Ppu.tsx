@@ -14,18 +14,44 @@ import {Backgrounds} from "./Backgrounds";
 import {joy1, joy2} from "../controller/Controller";
 
 export class Status {
-    public hCounterLatch: number = 0;
-    public vCounterLatch: number = 0;
+    public latchedHCounter: number = 0;
+    public latchedVCounter: number = 0;
+    public externalLatchFlag: boolean = false;
 
-    public opHctFlip: boolean = false;
-    public opVctFlip: boolean = false;
+    public opHCounterToggle: boolean = false;
+    public opVCounterToggle: boolean = false;
 
     public timeOver: boolean = false;
+    // If more than 34 sprite-tiles  were encountered on a single line
+    // The flag is reset at the end of V-Blank
+
     public rangeOver: boolean = false;
+    // If more than 32 sprites were encountered on a single line
+    // The flag is reset at the end of V-Blank
+
+    public masterSlaveToggle = false;
+
+    public chip5C77Version: number = 1;
+    public chip5C78Version: number = 2;
 
     public palMode: boolean = false;
-    public latchedData: boolean = false;
     public interlaceFrame: boolean = false;
+
+    public toggleInterlaceFrame() {
+        this.interlaceFrame = !this.interlaceFrame;
+    }
+
+    public setLatchCounter(hCounter: number, vCounter: number) {
+        this.latchedHCounter = hCounter;
+        this.latchedVCounter = vCounter;
+        this.externalLatchFlag = true;
+    }
+
+    public clearLatchCounter() {
+        this.externalLatchFlag = false;
+        this.opHCounterToggle = false;
+        this.opVCounterToggle = false;
+    }
 }
 
 export class Ppu {
@@ -73,14 +99,14 @@ export class Ppu {
     }
 
     public tick(): void {
-        let isScreenFinished: boolean =
+        let isVblankEnd: boolean =
             ScreenRegion.VERT_BLANK.end == this.scanline &&
             ScreenRegion.HORT_BLANK.end == this.cycle;
 
         let isCycleFinished: boolean =
             ScreenRegion.HORT_BLANK.end <= this.cycle;
 
-        let isScanlineFinished: boolean =
+        let isFrameFinished: boolean =
             ScreenRegion.VERT_BLANK.end <= this.scanline;
 
         let isVBlankStart: boolean =
@@ -105,7 +131,7 @@ export class Ppu {
         if (isCycleFinished) {
             this.cycle = 0;
             this.scanline++;
-            if (isScanlineFinished) {
+            if (isFrameFinished) {
                 this.scanline = 0;
             }
         }
@@ -114,21 +140,33 @@ export class Ppu {
             this.screen.state = ScreenState.RENDER;
             if (ScreenRegion.HORT_RENDERLINE.end == this.cycle) {
                 this.renderer.tick();
+                this.triggerIRQ();
             }
         }
 
-        if (isScreenFinished) {
+        if (isVblankEnd) {
             this.frames++;
             this.screen.render();
+            this.status.toggleInterlaceFrame();
+            this.status.rangeOver = false;
+            this.status.timeOver = false;
+
+            this.console.cpu.registers.hvbjoy.setVBlankFlag(false);
+            this.console.cpu.registers.hvbjoy.setJoypadFlag(false);
+
+            this.console.cpu.registers.rdnmi.setNMIFlag(false);
+            this.console.cpu.registers.timeup.setIRQFlag(false);
         }
 
         if (isVBlankStart) {
             this.screen.state = ScreenState.VBLANK;
             this.console.cpu.registers.hvbjoy.setVBlankFlag(false);
-            this.console.cpu.registers.rdnmi.setVBlankFlag(true);
+            this.console.cpu.registers.rdnmi.setNMIFlag(true);
+
             if (this.console.cpu.registers.nmitimen.isNMIEnabled()) {
                 this.console.cpu.interrupts.set(InterruptType.NMI);
             }
+
             if (this.console.cpu.registers.nmitimen.isAutoJoypadEnabled()) {
                 this.console.cpu.registers.hvbjoy.setJoypadFlag(false);
                 this.console.cpu.registers.joy1.setLower(joy1.readByte(0));
@@ -138,25 +176,6 @@ export class Ppu {
             }
         }
 
-        if (this.console.cpu.registers.nmitimen.isVerticalCounterEnabled() && isScanlineFinished) {
-            if (this.console.cpu.registers.vtime.get() == this.scanline) {
-                this.console.cpu.interrupts.set(InterruptType.IRQ);
-                this.console.cpu.interrupts.irq = true;
-            }
-        }
-
-        if (this.console.cpu.registers.nmitimen.isHorizontalCounterEnabled()) {
-            if (this.console.cpu.registers.htime.get() == this.cycle) {
-                this.console.cpu.interrupts.set(InterruptType.IRQ);
-                this.console.cpu.interrupts.irq = true;
-            }
-        }
-
-        if (isVBlankEnd) {
-            this.console.cpu.registers.hvbjoy.setVBlankFlag(false);
-            this.console.cpu.registers.rdnmi.set(0x00);
-            this.console.cpu.registers.hvbjoy.setJoypadFlag(false);
-        }
         if (isHBlank) {
             this.console.cpu.registers.hvbjoy.setHBlankFlag(true);
             this.screen.state = ScreenState.HBLANK;
@@ -173,5 +192,20 @@ export class Ppu {
     public reset():  void {
         this.screen.state = ScreenState.PRELINE;
 
+    }
+
+    private triggerIRQ(): void {
+        const mode = this.console.cpu.registers.nmitimen.getIRQ();
+        if (mode == 0) {
+            // Do nothing
+        } else if (mode == 1) {
+            this.console.cpu.interrupts.set(InterruptType.IRQ);
+        } else if (mode == 2 || mode == 3) {
+            if (this.console.ppu.scanline == this.console.cpu.registers.vtime.get()) {
+                this.console.cpu.interrupts.set(InterruptType.IRQ);
+            }
+        } else {
+            throw new Error(`Invalid IRQ mode: ${mode}`);
+        }
     }
 }
