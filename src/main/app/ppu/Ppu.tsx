@@ -32,7 +32,7 @@ export class Status {
     public masterSlaveToggle = false;
 
     public chip5C77Version: number = 1;
-    public chip5C78Version: number = 2;
+    public chip5C78Version: number = 3;
 
     public palMode: boolean = false;
     public interlaceFrame: boolean = false;
@@ -160,14 +160,14 @@ export class Ppu {
 
         if (isVBlankStart) {
             this.screen.state = ScreenState.VBLANK;
-            this.console.cpu.registers.hvbjoy.setVBlankFlag(false);
+            this.console.cpu.registers.hvbjoy.setVBlankFlag(true);
             this.console.cpu.registers.rdnmi.setNMIFlag(true);
 
-            if (this.console.cpu.registers.nmitimen.isNMIEnabled()) {
+            if (this.console.cpu.registers.nmitimen.nmiEnable) {
                 this.console.cpu.interrupts.set(InterruptType.NMI);
             }
 
-            if (this.console.cpu.registers.nmitimen.isAutoJoypadEnabled()) {
+            if (this.console.cpu.registers.nmitimen.autoJoypadEnable) {
                 this.console.cpu.registers.hvbjoy.setJoypadFlag(false);
                 this.console.cpu.registers.joy1.setLower(joy1.readByte(0));
                 this.console.cpu.registers.joy1.setUpper(joy1.readByte(1));
@@ -195,7 +195,7 @@ export class Ppu {
     }
 
     private triggerIRQ(): void {
-        const mode = this.console.cpu.registers.nmitimen.getIRQ();
+        const mode = this.console.cpu.registers.nmitimen.irqMode;
         if (mode == 0) {
             // Do nothing
         } else if (mode == 1) {

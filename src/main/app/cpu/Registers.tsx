@@ -289,16 +289,16 @@ export class InterruptEnableFlagsRegister extends Register {
     public address: string = "4200";
     public name: string = "NMITIMEN";
 
-    public isNMIEnabled(): boolean {
-        return (this.val & 0x80) > 0;
-    }
+    public nmiEnable: boolean = false;
+    public irqMode: number = 0;
+    public autoJoypadEnable: boolean = false;
 
-    public getIRQ(): number {
-        return (this.val & 0x30) >> 4;
-    }
+    public set(val: number) {
+        super.set(val);
 
-    public isAutoJoypadEnabled() {
-        return (this.val & 0x1) > 0;
+        this.nmiEnable = (this.val & 0x80) > 0;
+        this.irqMode = (this.val & 0x30) >> 4;
+        this.autoJoypadEnable = (this.val & 0x1) > 0;
     }
 
 }

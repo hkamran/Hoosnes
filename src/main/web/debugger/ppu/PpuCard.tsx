@@ -54,11 +54,11 @@ export class PpuCard extends React.Component<IPpuCardProps, any> {
                                     <ul style={{margin: "5px"}}>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Brightness:</span>
-                                            <span>{registers.inidisp.getBrightness() / 17}</span>
+                                            <span>{registers.inidisp.brightness / 17}</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Display:</span>
-                                            <span>{registers.inidisp.getDisplayOff().toString().toUpperCase()}</span>
+                                            <span>{registers.inidisp.forceBlankEnable.toString().toUpperCase()}</span>
                                         </li>
                                     </ul>
                                 </li>

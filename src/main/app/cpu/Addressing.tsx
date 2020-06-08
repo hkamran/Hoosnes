@@ -523,7 +523,7 @@ export class DirectIndirectIndexed implements IAddressingMode {
 
             let ll: number = context.bus.readByte(loPointer);
             let hh: number = context.bus.readByte(hiPointer);
-            let rr: number = 0;
+            let rr: number = context.registers.dbr.get();
 
             let addr: number = Bit.toUint24(rr, hh, ll);
             let loaddr: number = addr;
@@ -839,8 +839,7 @@ export class Relative8 implements IAddressingMode {
         if (0x00 <= LL && LL <= 0x7F) {
             return Addressing.toByte((pc + LL) & 0xFFFF, 0);
         } else {
-
-            return Addressing.toByte((pc - 0x100 + LL) & 0xFFFF, 0);
+            return Addressing.toByte((pc + LL - 0x100) & 0xFFFF, 0);
         }
     }
 }

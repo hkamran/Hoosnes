@@ -48,13 +48,14 @@ export class ScreenDisplayRegister extends Register {
 
     public val: number = 0x8F;
 
-    public getDisplayOff(): boolean {
-        return ((this.val >> 7) & 0x1) == 0;
-    }
+    public forceBlankEnable: boolean = false;
+    public brightness: number = 15;
 
-    public getBrightness(): number {
-        let val: number = this.val & 0xF;
-        return val * 17;
+    public set(val: number) {
+        super.set(val);
+
+        this.forceBlankEnable = ((this.val >> 7) & 0x1) == 0;
+        this.brightness = (this.val & 0xF) * 17;
     }
 
 }
