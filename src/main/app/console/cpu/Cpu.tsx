@@ -2,12 +2,12 @@ import {Registers} from "./Registers";
 import {Opcodes, OpContext, Operation} from "./Opcodes";
 import {InterruptHandler} from "./Interrupts";
 import {Cartridge} from "../cartridge/Cartridge";
-import {Objects} from "../util/Objects";
+import {Objects} from "../../util/Objects";
 import {Console} from "../Console";
 import {Stack} from "../memory/Stack";
 import {Wram} from "../memory/Wram";
-import {AddressUtil} from "../util/AddressUtil";
-import {trace} from "../../web/debugger/cpu/LogCard";
+import {AddressUtil} from "../../util/AddressUtil";
+import {trace} from "../../../web/debugger/cpu/LogCard";
 
 export class Cpu {
 

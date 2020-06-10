@@ -3,7 +3,7 @@
 // bytes of information per sprite, and the last 32 bytes have two more bits of information.  Two or more sprites can
 // share the same set of tiles.
 
-import {AddressUtil} from "../util/AddressUtil";
+import {AddressUtil} from "../../util/AddressUtil";
 
 export class Oam {
 

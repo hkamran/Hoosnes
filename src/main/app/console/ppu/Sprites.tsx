@@ -1,6 +1,6 @@
 import {Oam} from "../memory/Oam";
 import {Ppu} from "./Ppu";
-import {Objects} from "../util/Objects";
+import {Objects} from "../../util/Objects";
 import {Dimension, Orientation, Tile, TileAttributes} from "./Tiles";
 import {BppType} from "./Palette";
 

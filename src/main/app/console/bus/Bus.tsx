@@ -1,11 +1,11 @@
-import {Objects} from "../util/Objects";
+import {Objects} from "../../util/Objects";
 import {Console} from "../Console";
 import {BusCpu} from "./BusCpu";
 import {BusPpu} from "./BusPpu";
 import {Cartridge} from "../cartridge/Cartridge";
 import {Wram} from "../memory/Wram";
-import {Bit} from "../util/Bit";
-import {AddressUtil} from "../util/AddressUtil";
+import {Bit} from "../../util/Bit";
+import {AddressUtil} from "../../util/AddressUtil";
 
 export class Bus {
 
@@ -102,20 +102,20 @@ export class Bus {
                 return this.wram.writeByte(address, value);
             } else if (0x2000 <= page && page <= 0x20FF) {
                 this.mdr = value;
-                return
+                return;
             } else if (0x2000 <= page && page <= 0x21FF) {
                 return this.busPpu.writeByte(address, value);
             } else if (0x2200 <= page && page <= 0x2FFF) {
                 this.mdr = value;
-                return
+                return;
             } else if (0x3000 <= page && page <= 0x3FFF) {
                 this.mdr = value;
-                return
+                return;
             } else if (0x4000 <= page && page <= 0x44FF) {
                 return this.busCpu.writeByte(address, value);
             } else if (0x4500 <= page && page <= 0x7FFF) {
                 this.mdr = value;
-                return
+                return;
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 return this.cartridge.writeByte(address, value);
             }

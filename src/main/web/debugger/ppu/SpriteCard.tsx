@@ -1,9 +1,9 @@
 import * as React from "react";
 import {Card} from "../../core/layout/Card";
-import {BppType, Color} from "../../../app/ppu/Palette";
-import {Console} from "../../../app/Console";
-import {Dimension, Orientation, Tile} from "../../../app/ppu/Tiles";
-import {Sprite} from "../../../app/ppu/Sprites";
+import {BppType, Color} from "../../../app/console/ppu/Palette";
+import {Console} from "../../../app/console/Console";
+import {Dimension, Orientation, Tile} from "../../../app/console/ppu/Tiles";
+import {Sprite} from "../../../app/console/ppu/Sprites";
 
 interface ISpriteCardProps {
     snes: Console;

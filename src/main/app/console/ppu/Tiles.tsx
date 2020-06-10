@@ -1,9 +1,9 @@
 import {Ppu} from "./Ppu";
-import {Objects} from "../util/Objects";
+import {Objects} from "../../util/Objects";
 import {BppType} from "./Palette";
 import {Vram} from "../memory/Vram";
-import {ArrayUtil} from "../util/ArrayUtil";
-import {AddressUtil} from "../util/AddressUtil";
+import {ArrayUtil} from "../../util/ArrayUtil";
+import {AddressUtil} from "../../util/AddressUtil";
 
 export class Dimension {
 

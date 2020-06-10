@@ -1,7 +1,7 @@
 import {Cartridge, ICartridgeMapping} from "./Cartridge";
-import {AddressUtil} from "../util/AddressUtil";
-import {Bit} from "../util/Bit";
-import {Objects} from "../util/Objects";
+import {AddressUtil} from "../../util/AddressUtil";
+import {Bit} from "../../util/Bit";
+import {Objects} from "../../util/Objects";
 
 export class CartridgeMapping0 implements ICartridgeMapping {
 

@@ -2,8 +2,8 @@ import {Dimension, Tile, TileAttributes} from "./Tiles";
 import {Ppu} from "./Ppu";
 import {BppType, Color} from "./Palette";
 import {TileMap} from "./TileMaps";
-import {ArrayUtil} from "../util/ArrayUtil";
-import {Objects} from "../util/Objects";
+import {ArrayUtil} from "../../util/ArrayUtil";
+import {Objects} from "../../util/Objects";
 import {Screen} from "./Screen";
 
 /**

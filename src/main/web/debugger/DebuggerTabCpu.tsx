@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Console} from "../../app/Console";
+import {Console} from "../../app/console/Console";
 import {CpuCard} from "./cpu/CpuCard";
 import {LogCard} from "./cpu/LogCard";
 

@@ -1,8 +1,8 @@
-import {Console} from "../../../app/Console";
+import {Console} from "../../../app/console/Console";
 import * as React from "react";
 import {Card} from "../../core/layout/Card";
-import {Tile, TileAttributes} from "../../../app/ppu/Tiles";
-import {BppType} from "../../../app/ppu/Palette";
+import {Tile, TileAttributes} from "../../../app/console/ppu/Tiles";
+import {BppType} from "../../../app/console/ppu/Palette";
 
 interface ITileCardProps {
     snes: Console;

@@ -1,8 +1,8 @@
 import {Vram} from "../memory/Vram";
 import {Dimension} from "./Tiles";
-import {Objects} from "../util/Objects";
-import {Bit} from "../util/Bit";
-import {AddressUtil} from "../util/AddressUtil";
+import {Objects} from "../../util/Objects";
+import {Bit} from "../../util/Bit";
+import {AddressUtil} from "../../util/AddressUtil";
 
 /**
  * vhopppcc cccccccc

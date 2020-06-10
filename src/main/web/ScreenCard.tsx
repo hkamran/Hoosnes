@@ -1,6 +1,6 @@
 import * as React from "react";
 import {RefObject} from "react";
-import {Console, ConsoleState} from "../app/Console";
+import {Console, ConsoleState} from "../app/console/Console";
 
 
 declare let window : any;

@@ -1,4 +1,4 @@
-import {AddressUtil} from "../util/AddressUtil";
+import {AddressUtil} from "../../util/AddressUtil";
 
 export class Vram {
 

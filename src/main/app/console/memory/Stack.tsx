@@ -1,4 +1,4 @@
-import {Bit} from "../util/Bit";
+import {Bit} from "../../util/Bit";
 import {Console} from "../Console";
 
 export class Stack {

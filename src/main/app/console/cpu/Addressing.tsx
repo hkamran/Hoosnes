@@ -1,7 +1,7 @@
 import {OpContext} from "./Opcodes";
-import {Bit} from "../util/Bit";
+import {Bit} from "../../util/Bit";
 import {Registers} from "./Registers";
-import {Objects} from "../util/Objects";
+import {Objects} from "../../util/Objects";
 
 /**
  *  Fetches the address of the first data that will be used by the instruction.

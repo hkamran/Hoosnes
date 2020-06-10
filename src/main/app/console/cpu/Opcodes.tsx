@@ -1,12 +1,12 @@
-import {Objects} from "../util/Objects";
+import {Objects} from "../../util/Objects";
 import {Console} from "../Console";
 import {Cpu} from "./Cpu";
 import {Bus} from "../bus/Bus";
 import {Registers} from "./Registers";
 import {Addressing, AddressingModes, IAddressingMode} from "./Addressing";
-import {Bit} from "../util/Bit";
+import {Bit} from "../../util/Bit";
 import {InterruptType} from "./Interrupts";
-import {AddressUtil} from "../util/AddressUtil";
+import {AddressUtil} from "../../util/AddressUtil";
 
 export class OpContext {
 

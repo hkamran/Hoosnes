@@ -1,6 +1,6 @@
 import {Registers} from "./Registers";
 import {Console} from "../Console";
-import {Bit} from "../util/Bit";
+import {Bit} from "../../util/Bit";
 
 export enum ApuState {
     BOOTING, START, BLOCK,TRANSFER, EXECUTE,

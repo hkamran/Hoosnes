@@ -1,6 +1,6 @@
 import {CGram} from "../memory/CGram";
-import {Bit} from "../util/Bit";
-import {Objects} from "../util/Objects";
+import {Bit} from "../../util/Bit";
+import {Objects} from "../../util/Objects";
 
 export enum BppType {
     Eight = 8,

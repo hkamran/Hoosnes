@@ -1,8 +1,8 @@
 import {Console} from "../Console";
-import {Objects} from "../util/Objects";
+import {Objects} from "../../util/Objects";
 import {Registers} from "../ppu/Registers";
-import {Bit} from "../util/Bit";
-import {AddressUtil} from "../util/AddressUtil";
+import {Bit} from "../../util/Bit";
+import {AddressUtil} from "../../util/AddressUtil";
 
 /**
  * Bus for IO registers in the PPU

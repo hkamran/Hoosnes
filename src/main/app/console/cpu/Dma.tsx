@@ -1,7 +1,7 @@
 import {Register} from "../ppu/Registers";
-import {Bit} from "../util/Bit";
+import {Bit} from "../../util/Bit";
 import {Console} from "../Console";
-import {Mode, Modes} from "../Modes";
+import {Mode, Modes} from "../../Modes";
 import {
     HdmaLineCounterRegister,
     HdmaTableAddressHighRegister,

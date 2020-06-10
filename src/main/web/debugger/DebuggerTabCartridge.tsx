@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Console} from "../../app/Console";
+import {Console} from "../../app/console/Console";
 import {BackgroundsCard} from "./ppu/BackgroundsCard";
 import {PaletteCard} from "./ppu/PaletteCard";
 import {SpriteCard} from "./ppu/SpriteCard";

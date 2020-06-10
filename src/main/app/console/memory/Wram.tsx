@@ -1,7 +1,7 @@
-import {Objects} from "../util/Objects";
-import {NumberUtil} from "../util/NumberUtil";
-import {Bit} from "../util/Bit";
-import {AddressUtil} from "../util/AddressUtil";
+import {Objects} from "../../util/Objects";
+import {NumberUtil} from "../../util/NumberUtil";
+import {Bit} from "../../util/Bit";
+import {AddressUtil} from "../../util/AddressUtil";
 
 export class Wram {
     // The SNES includes 128Kbytes of Work RAM, which can be accessed in several ways:

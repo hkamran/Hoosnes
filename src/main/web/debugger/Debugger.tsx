@@ -1,6 +1,6 @@
 import * as React from "react";
 import ReactTooltip from "react-tooltip";
-import {Console, ConsoleState, TICKS_PER_FRAME} from "../../app/Console";
+import {Console, ConsoleState, TICKS_PER_FRAME} from "../../app/console/Console";
 import {DebuggerTabCpu} from "./DebuggerTabCpu";
 import {DebuggerTabPpu} from "./DebuggerTabPpu";
 import {DebuggerTabCartridge} from "./DebuggerTabCartridge";

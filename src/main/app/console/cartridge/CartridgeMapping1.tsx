@@ -1,6 +1,6 @@
 import {Cartridge, ICartridgeMapping} from "./Cartridge";
 import {Sram} from "../memory/Sram";
-import {AddressUtil} from "../util/AddressUtil";
+import {AddressUtil} from "../../util/AddressUtil";
 
 export class CartridgeMapping1 implements ICartridgeMapping {
 

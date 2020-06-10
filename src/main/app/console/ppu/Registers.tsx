@@ -1,9 +1,9 @@
 import {Ppu} from "./Ppu";
-import {Mode, Modes} from "../Modes";
+import {Mode, Modes} from "../../Modes";
 import {Console} from "../Console";
 import {CGram} from "../memory/CGram";
-import {Bit} from "../util/Bit";
-import {Objects} from "../util/Objects";
+import {Bit} from "../../util/Bit";
+import {Objects} from "../../util/Objects";
 import {Vram} from "../memory/Vram";
 import {Dimension} from "./Tiles";
 

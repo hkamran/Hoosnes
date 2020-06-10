@@ -1,5 +1,5 @@
-import {Objects} from "../util/Objects";
-import {ByteReader} from "../util/ByteReader";
+import {Objects} from "../../util/Objects";
+import {ByteReader} from "../../util/ByteReader";
 import {CartridgeMapping0} from "./CartridgeMapping0";
 import {CartridgeMapping1} from "./CartridgeMapping1";
 import {CartridgeMapping5} from "./CartridgeMapping5";
@@ -7,7 +7,7 @@ import {CartridgeMapping4} from "./CartridgeMapping4";
 import {CartridgeMapping2} from "./CartridgeMapping2";
 import {Sram} from "../memory/Sram";
 import {CartridgeMapping3} from "./CartridgeMapping3";
-import {Bit} from "../util/Bit";
+import {Bit} from "../../util/Bit";
 
 export interface ICartridgeMapping {
     label: string;

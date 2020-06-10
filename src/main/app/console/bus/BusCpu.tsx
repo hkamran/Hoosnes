@@ -1,8 +1,8 @@
 import {Console} from "../Console";
-import {Objects} from "../util/Objects";
+import {Objects} from "../../util/Objects";
 import {Registers} from "../cpu/Registers";
-import {AddressUtil} from "../util/AddressUtil";
-import {Bit} from "../util/Bit";
+import {AddressUtil} from "../../util/AddressUtil";
+import {Bit} from "../../util/Bit";
 
 /**
  * Bus for IO registers in the CPU

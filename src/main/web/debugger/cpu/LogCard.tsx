@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Card} from "../../core/layout/Card";
-import {Console} from "../../../app/Console";
-import {Cpu} from "../../../app/cpu/Cpu";
+import {Console} from "../../../app/console/Console";
+import {Cpu} from "../../../app/console/cpu/Cpu";
 
 interface IDebuggerCardProps {
     snes: Console;

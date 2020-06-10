@@ -1,10 +1,10 @@
-import {Console} from "../../../app/Console";
+import {Console} from "../../../app/console/Console";
 import * as React from "react";
 import {Card} from "../../core/layout/Card";
-import {Background} from "../../../app/ppu/Backgrounds";
-import {Dimension, Tile} from "../../../app/ppu/Tiles";
-import {BppType, Color} from "../../../app/ppu/Palette";
-import {TileMap} from "../../../app/ppu/TileMaps";
+import {Background} from "../../../app/console/ppu/Backgrounds";
+import {Dimension, Tile} from "../../../app/console/ppu/Tiles";
+import {BppType, Color} from "../../../app/console/ppu/Palette";
+import {TileMap} from "../../../app/console/ppu/TileMaps";
 
 interface IBackgroundsCardProps {
     snes: Console;

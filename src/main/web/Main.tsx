@@ -1,12 +1,12 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {Console, ConsoleState} from "../app/Console";
+import {Console, ConsoleState} from "../app/console/Console";
 import {ScreenCard} from "./ScreenCard";
 import ReactTooltip from "react-tooltip";
 import {debugCallback, Debugger} from "./debugger/Debugger";
 import Modal from 'react-modal';
 import {Keyboard, KeyboardMapping} from "./Keyboard";
-import {joy1} from "../app/controller/Controller";
+import {joy1} from "../app/console/controller/Controller";
 
 declare let window: any;
 window.snes = new Console();

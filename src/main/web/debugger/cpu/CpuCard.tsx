@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Card} from "../../core/layout/Card";
-import {Console} from "../../../app/Console";
-import {InterruptType} from "../../../app/cpu/Interrupts";
+import {Console} from "../../../app/console/Console";
+import {InterruptType} from "../../../app/console/cpu/Interrupts";
 import {AddressUtil} from "../../../app/util/AddressUtil";
 
 interface ICpuCardProps {

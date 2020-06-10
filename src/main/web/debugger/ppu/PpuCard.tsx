@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Card} from "../../core/layout/Card";
-import {Console} from "../../../app/Console";
-import {ScreenState} from "../../../app/ppu/Screen";
+import {Console} from "../../../app/console/Console";
+import {ScreenState} from "../../../app/console/ppu/Screen";
 
 interface IPpuCardProps {
     snes: Console;
