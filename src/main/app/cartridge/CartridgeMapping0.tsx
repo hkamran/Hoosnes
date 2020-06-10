@@ -1,6 +1,7 @@
 import {Cartridge, ICartridgeMapping} from "./Cartridge";
 import {AddressUtil} from "../util/AddressUtil";
 import {Bit} from "../util/Bit";
+import {Objects} from "../util/Objects";
 
 export class CartridgeMapping0 implements ICartridgeMapping {
 
@@ -16,21 +17,23 @@ export class CartridgeMapping0 implements ICartridgeMapping {
     public read(address: number): number {
         AddressUtil.assertValid(address);
 
+        const length = this.cartridge.rom.length;
+
         let bank = AddressUtil.getBank(address);
         let page = AddressUtil.getPage(address);
 
         if (0x0000 <= page && page <= 0x7FFF) {
             if (0x40 <= bank && bank <= 0x6F) {
                 let index = ((bank % 0x80) * 0x8000) + (page % 0x8000);
-                let value = this.cartridge.rom[index % this.cartridge.rom.length];
+                let value = this.cartridge.rom[index % length];
 
                 return Bit.toUint8(value);
             } else if (0xC0 <= bank && bank <= 0xEF) {
                 let index = ((bank % 0x80) * 0x8000) + (page % 0x8000);
-                let value = this.cartridge.rom[index % this.cartridge.rom.length];
+                let value = this.cartridge.rom[index % length];
 
                 return Bit.toUint8(value);
-            } else if (0x70 <= bank && bank <= 0x7F) {
+            } else if (0x70 <= bank && bank <= 0x7D) {
                 let index = (bank - 0x70) + page;
                 let value = this.cartridge.sram.read(index);
 
@@ -42,17 +45,10 @@ export class CartridgeMapping0 implements ICartridgeMapping {
                 return Bit.toUint8(value);
             }
         } else if (0x8000 <= page && page <= 0xFFFF) {
-            if (0x80 <= bank && bank <= 0xFF) {
-                let index = ((bank % 0x80) * 0x8000) + (page % 0x8000);
-                let value = this.cartridge.rom[index % this.cartridge.rom.length];
+            let index = ((bank % 0x80) * 0x8000) + (page % 0x8000);
+            let value = this.cartridge.rom[index % length];
 
-                return Bit.toUint8(value);
-            } else if (0x00 <= bank && bank <= 0x7D) {
-                let index = ((bank % 0x80) * 0x8000) + (page % 0x8000);
-                let value = this.cartridge.rom[index % this.cartridge.rom.length];
-
-                return Bit.toUint8(value);
-            }
+            return Bit.toUint8(value);
         }
 
         throw new Error(`Invalid read at ${address.toString}`);
@@ -60,6 +56,7 @@ export class CartridgeMapping0 implements ICartridgeMapping {
 
     public write(address: number, value: number): number {
         AddressUtil.assertValid(address);
+        Objects.requireNonNull(value);
 
         let bank = AddressUtil.getBank(address);
         let page = AddressUtil.getPage(address);
@@ -69,18 +66,16 @@ export class CartridgeMapping0 implements ICartridgeMapping {
         }
 
         if (0x70 <= bank && bank <= 0x7D) {
-            let index =(bank - 0x70) + page;
-
+            let index = (bank - 0x70) + page;
             this.cartridge.sram.write(index, value);
             return;
         } else if (0xFE <= bank && bank <= 0xFF) {
             let index = (bank - 0xF0) + page;
-
             this.cartridge.sram.write(index, value);
             return;
         }
 
-        console.warn(`Invalid write at ${address.toString()} ${value}`);
+        throw new Error(`Invalid write at ${address.toString()} ${value}`);
     }
 
 }

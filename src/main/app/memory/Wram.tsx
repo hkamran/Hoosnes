@@ -20,46 +20,31 @@ export class Wram {
     }
 
     public readByte(address: number): number {
-        Objects.requireNonNull(address);
+        AddressUtil.assertValid(address);
 
         let bank = AddressUtil.getBank(address);
         let page = AddressUtil.getPage(address);
 
-        if (page > 0xFFFF || page < 0) {
-            throw new Error("Invalid readByte on work ram!");
-        }
-
-        if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
-            let base: number = (((bank % 0x80) - 0x7E) << 16);
-            let index: number = base | (page % 0x10000);
-
+        if (0x7E <= bank && bank <= 0x7F) {
+            let index: number = ((bank - 0x7E) * 0x10000) + (page % 0x10000);
             let value: number = this.data[index];
             return Bit.toUint8(value);
         } else {
             let index: number = (page % 0x2000);
-
             let value: number = this.data[index];
             return Bit.toUint8(value);
         }
     }
 
     public writeByte(address: number, value: number): void {
-        Objects.requireNonNull(address);
+        AddressUtil.assertValid(address);
+        Objects.requireNonNull(value);
 
         let bank = AddressUtil.getBank(address);
         let page = AddressUtil.getPage(address);
 
-        if (value == null || value < 0 || value > 0xFF) {
-            throw new Error(`Invalid write given at ${address}=${value}`);
-        }
-
-        if (page > 0xFFFF || page < 0) {
-            throw new Error("Invalid writeByte on work ram!" + address);
-        }
-
-        if (NumberUtil.inRange(bank, 0x7E, 0x7F)) {
-            let base: number = (((bank % 0x80) - 0x7E) << 16);
-            let index: number = base | (page % 0x10000);
+        if (0x7E <= bank && bank <= 0x7F) {
+            let index: number = ((bank - 0x7E) * 0x10000) + (page % 0x10000);
             this.data[index] = value;
         } else {
             let index: number = (page % 0x2000);

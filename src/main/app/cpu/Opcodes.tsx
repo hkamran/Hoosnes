@@ -752,7 +752,7 @@ class INC extends Operation {
             } else {
                 let loData: number = context.bus.readByte(address.toLow());
                 let hiData: number = context.bus.readByte(address.toHigh());
-                let value: number = Bit.toUint16(hiData, loData) + 1;
+                let value: number = (Bit.toUint16(hiData, loData) + 1) & mask;
 
                 context.bus.writeByte(address.toLow(), Bit.getUint16Lower(value) & 0xFF);
                 context.bus.writeByte(address.toHigh(), Bit.getUint16Upper(value) & 0xFF);
@@ -1954,7 +1954,7 @@ class REP extends Operation {
         context.registers.p.set(result);
 
         if (context.registers.p.getE() == 0) {
-            if (xFlag && (context.registers.p.getX() == 0)) {
+            if (context.registers.p.getX() == 1) {
                 context.registers.x.set(context.registers.x.get() & 0x00FF);
                 context.registers.y.set(context.registers.y.get() & 0x00FF);
             }
@@ -2082,7 +2082,7 @@ class SEP extends Operation {
         context.registers.p.set(result);
 
         if (context.registers.p.getE() == 0) {
-            if (xFlag || (context.registers.p.getX() == 1)) {
+            if (context.registers.p.getX() == 1) {
                 context.registers.x.set(context.registers.x.get() & 0x00FF);
                 context.registers.y.set(context.registers.y.get() & 0x00FF);
             }

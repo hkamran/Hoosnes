@@ -43,55 +43,49 @@ export class Bus {
         let bank = AddressUtil.getBank(address);
         let page = AddressUtil.getPage(address);
 
-        let value: number = this.mdr;
+        let value: number = null;
 
-        if (0x00 <= bank && bank < 0x3F) {
+        if ((0x00 <= bank && bank <= 0x3F) ||
+            (0x80 <= bank && bank <= 0xBF)) {
             if (0x0000 <= page && page <= 0x1FFF) {
                 value = Bit.toUint8(this.wram.readByte(address));
-            } else if (0x2100 <= page && page <= 0x21FF) {
+            } else if (0x2000 <= page && page <= 0x20FF) {
+                value = this.mdr;
+            } else if (0x2000 <= page && page <= 0x21FF) {
                 value = Bit.toUint8(this.busPpu.readByte(address));
-            } else if (0x2200 <= page && page <= 0x3FFF) {
-                value = Bit.toUint8(this.mdr);
-            } else if (0x4000 <= page && page <= 0x43FF) {
+            } else if (0x2200 <= page && page <= 0x2FFF) {
+                value = this.mdr;
+            } else if (0x3000 <= page && page <= 0x3FFF) {
+                value = this.mdr;
+            } else if (0x4000 <= page && page <= 0x44FF) {
                 value = Bit.toUint8(this.busCpu.readByte(address));
-            } else if (0x4380 <= page && page <= 0x7FFF) {
-                value = Bit.toUint8(this.mdr);
+            } else if (0x4500 <= page && page <= 0x7FFF) {
+                value = this.mdr;
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 value = Bit.toUint8(this.cartridge.readByte(address));
             }
-        } else if (0x40 <= bank && bank <= 0x7F) {
-            if (0x7E <= bank && bank <= 0x7F) {
-                value = Bit.toUint8(this.wram.readByte(address));
-            } else {
+        } else if ((0x40 <= bank && bank <= 0x7D) ||
+            (0xC0 <= bank && bank <= 0xFF)) {
+            if (0x0000 <= page && page <= 0x7FFF) {
                 value = Bit.toUint8(this.cartridge.readByte(address));
-            }
-        } else if (0x80 <= bank && bank <= 0xBF) {
-            if (0x0000 <= page && page <= 0x1FFF) {
-                value = Bit.toUint8(this.wram.readByte(address));
-            } else if (0x2100 <= page && page <= 0x21FF) {
-                value = Bit.toUint8(this.busPpu.readByte(address));
-            } else if (0x2200 <= page && page <= 0x4000) {
-                value = Bit.toUint8(this.mdr);
-            } else if (0x4000 <= page && page <= 0x43FF) {
-                value = Bit.toUint8(this.busCpu.readByte(address));
-            } else if (0x4400 <= page && page <= 0x7FFF) {
-                value = Bit.toUint8(this.mdr);
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 value = Bit.toUint8(this.cartridge.readByte(address));
             }
-        } else if (0xC0 <= bank && bank <= 0xFF) {
-            value = Bit.toUint8(this.cartridge.readByte(address));
-        } else {
-            throw new Error("Invalid bus value at " + address.toString(16));
+        } else if (0x7E <= bank && bank <= 0x7F) {
+            value = Bit.toUint8(this.wram.readByte(address));
         }
 
-        this.mdr = value;
+        if (value == null) {
+            throw new Error("read is undefined!");
+        }
+
         return value;
     }
 
 
     public writeByte(address: number, value: number): void {
         AddressUtil.assertValid(address);
+        Objects.requireNonNull(value);
 
         let bank = AddressUtil.getBank(address);
         let page = AddressUtil.getPage(address);
@@ -102,43 +96,41 @@ export class Bus {
 
         this.mdr = value;
 
-        if (0x00 <= bank && bank < 0x3F) {
+        if ((0x00 <= bank && bank <= 0x3F) ||
+            (0x80 <= bank && bank <= 0xBF)) {
             if (0x0000 <= page && page <= 0x1FFF) {
-                this.wram.writeByte(address, value);
-            } else if (0x2100 <= page && page <= 0x21FF) {
-                this.busPpu.writeByte(address, value);
-            } else if (0x2200 <= page && page <= 0x3FFF) {
-                console.warn(`Writing ${address}=${value}`);
-            } else if (0x4000 <= page && page <= 0x43FF) {
-                this.busCpu.writeByte(address, value);
-            } else if (0x4380 <= page && page <= 0x7FFF) {
-                console.warn(`Writing ${address}=${value}`);
+                return this.wram.writeByte(address, value);
+            } else if (0x2000 <= page && page <= 0x20FF) {
+                this.mdr = value;
+                return
+            } else if (0x2000 <= page && page <= 0x21FF) {
+                return this.busPpu.writeByte(address, value);
+            } else if (0x2200 <= page && page <= 0x2FFF) {
+                this.mdr = value;
+                return
+            } else if (0x3000 <= page && page <= 0x3FFF) {
+                this.mdr = value;
+                return
+            } else if (0x4000 <= page && page <= 0x44FF) {
+                return this.busCpu.writeByte(address, value);
+            } else if (0x4500 <= page && page <= 0x7FFF) {
+                this.mdr = value;
+                return
             } else if (0x8000 <= page && page <= 0xFFFF) {
-                this.cartridge.writeByte(address, value);
+                return this.cartridge.writeByte(address, value);
             }
-        } else if (0x40 <= bank && bank <= 0x7F) {
-            if (0x7E <= bank && bank <= 0x7F) {
-                this.wram.writeByte(address, value);
-            } else {
-                this.cartridge.writeByte(address, value);
-            }
-        } else if (0x80 <= bank && bank <= 0xBF) {
-            if (0x0000 <= page && page <= 0x1FFF) {
-                this.wram.writeByte(address, value);
-            } else if (0x2100 <= page && page <= 0x21FF) {
-                this.busPpu.writeByte(address, value);
-            } else if (0x2200 <= page && page <= 0x41FF) {
-                //this.console.cartridge.writeByte(address, value);
-            } else if (0x4200 <= page && page <= 0x43FF) {
-                this.busCpu.writeByte(address, value);
-            } else if (0x4400 <= page && page <= 0x7FFF) {
-                this.cartridge.writeByte(address, value);
+        } else if ((0x40 <= bank && bank <= 0x7D) ||
+            (0xC0 <= bank && bank <= 0xFF)) {
+            if (0x0000 <= page && page <= 0x7FFF) {
+                return this.cartridge.writeByte(address, value);
             } else if (0x8000 <= page && page <= 0xFFFF) {
-                this.cartridge.writeByte(address, value);
+                return this.cartridge.writeByte(address, value);
             }
-        } else if (0xF0 <= bank && bank <= 0xFF) {
-            this.cartridge.writeByte(address, value);
+        } else if (0x7E <= bank && bank <= 0x7F) {
+            return this.wram.writeByte(address, value);
         }
+
+        throw new Error(`Invalid write at ${address.toString(16)}=${value}`);
     }
 
     public reset(): void {
