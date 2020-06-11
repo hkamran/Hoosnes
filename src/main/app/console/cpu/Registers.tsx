@@ -359,8 +359,6 @@ export class IndirectXRegister extends AbstractRegister {
     }
 }
 
-
-
 export class Registers {
 
     public a : AccumulatorRegister;
@@ -372,10 +370,6 @@ export class Registers {
     public sp : StackPointerRegister;
     public x : IndirectXRegister;
     public y : IndirectYRegister;
-
-    // IO Registers
-
-
 
     constructor(console: Console) {
         Objects.requireNonNull(console);
@@ -389,9 +383,6 @@ export class Registers {
         this.sp = new StackPointerRegister(console);
         this.x = new IndirectXRegister(console);
         this.y = new IndirectYRegister(console);
-
-        // IO Registers
-
     }
 
 }

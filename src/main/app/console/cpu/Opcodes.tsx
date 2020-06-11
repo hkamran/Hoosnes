@@ -286,8 +286,9 @@ export class BCC extends Operation {
 
     public execute(context: OpContext): number {
         if (context.registers.p.getC() == 0) {
-            let result: Addressing = this.mode.getAddressing(context);
-            context.registers.pc.set(result.toLow() & 0xFFFF);
+            let addressing: Addressing = this.mode.getAddressing(context);
+            let pc: number = addressing.toLow();
+            context.registers.pc.set(pc);
 
             return this.cycle;
         }
@@ -300,8 +301,9 @@ export class BCS extends Operation {
 
     public execute(context: OpContext): number {
         if (context.registers.p.getC() == 1) {
-            let result: Addressing = this.mode.getAddressing(context);
-            context.registers.pc.set(result.toLow() & 0xFFFF);
+            let addressing: Addressing = this.mode.getAddressing(context);
+            let pc: number = addressing.toLow();
+            context.registers.pc.set(pc);
 
             return this.cycle;
         }
@@ -314,8 +316,9 @@ export class BEQ extends Operation {
 
     public execute(context: OpContext): number {
         if (context.registers.p.getZ() == 1) {
-            let result: Addressing = this.mode.getAddressing(context);
-            context.registers.pc.set(result.toLow() & 0xFFFF);
+            let addressing: Addressing = this.mode.getAddressing(context);
+            let pc: number = addressing.toLow();
+            context.registers.pc.set(pc);
 
             return this.cycle;
         }
@@ -361,8 +364,9 @@ class BMI extends Operation {
 
     public execute(context: OpContext): number {
         if (context.registers.p.getN() == 1) {
-            let result: Addressing = this.mode.getAddressing(context);
-            context.registers.pc.set(result.toLow() & 0xFFFF);
+            let addressing: Addressing = this.mode.getAddressing(context);
+            let pc: number = addressing.toLow();
+            context.registers.pc.set(pc);
 
             return this.cycle;
         }
@@ -377,8 +381,9 @@ class BNE extends Operation {
 
     public execute(context: OpContext): number {
         if (context.registers.p.getZ() == 0) {
-            let result: Addressing = this.mode.getAddressing(context);
-            context.registers.pc.set(result.toLow() & 0xFFFF);
+            let addressing: Addressing = this.mode.getAddressing(context);
+            let pc: number = addressing.toLow();
+            context.registers.pc.set(pc);
 
             return this.cycle;
         }
@@ -392,8 +397,9 @@ class BPL extends Operation {
 
     public execute(context: OpContext): number {
         if (context.registers.p.getN() == 0) {
-            let result: Addressing = this.mode.getAddressing(context);
-            context.registers.pc.set(result.toLow() & 0xFFFF);
+            let addressing: Addressing = this.mode.getAddressing(context);
+            let pc: number = addressing.toLow();
+            context.registers.pc.set(pc);
 
             return this.cycle;
         }
@@ -546,11 +552,10 @@ class BRA extends Operation {
 
     public execute(context: OpContext): number {
         let addressing: Addressing = this.mode.getAddressing(context);
-        let next: number = addressing.toLow();
+        let pc: number = addressing.toLow();
+        context.registers.pc.set(pc);
 
-        context.registers.pc.set(next & 0xFFFF);
-
-        return this.cycle + (next > 0xFF ? 1 : 0);
+        return this.cycle + (pc > 0xFF ? 1 : 0);
     }
 }
 
@@ -570,8 +575,9 @@ class BVS extends Operation {
 
     public execute(context: OpContext): number {
         if (context.registers.p.getV() == 1) {
-            let result: Addressing = this.mode.getAddressing(context);
-            context.registers.pc.set(result.toLow() & 0xFFFF);
+            let addressing: Addressing = this.mode.getAddressing(context);
+            let pc: number = addressing.toLow();
+            context.registers.pc.set(pc);
 
             return this.cycle;
         }
@@ -585,8 +591,9 @@ class BVC extends Operation {
 
     public execute(context: OpContext): number {
         if (context.registers.p.getV() == 0) {
-            let result: Addressing = this.mode.getAddressing(context);
-            context.registers.pc.set(result.toLow() & 0xFFFF);
+            let addressing: Addressing = this.mode.getAddressing(context);
+            let pc: number = addressing.toLow();
+            context.registers.pc.set(pc);
 
             return this.cycle;
         }
@@ -1219,27 +1226,19 @@ class LDA extends Operation {
         let addressing: Addressing = this.mode.getAddressing(context);
         let is8Bit: boolean = context.registers.p.getM() == 1;
 
-        if (is8Bit) {
-            let loAddr: number = addressing.toLow();
+        let loAddr: number = addressing.toLow();
+        let hiAddr: number = addressing.toHigh();
 
-            let result: number = context.bus.readByte(loAddr);
+        let loData: number = context.bus.readByte(loAddr);
+        let hiData: number = is8Bit ? 0 : context.bus.readByte(hiAddr);
 
-            context.registers.a.setA(result);
-            context.setFlagZ(result, is8Bit);
-            context.setFlagN(result, is8Bit);
-        } else {
-            let loAddr: number = addressing.toLow();
-            let hiAddr: number = addressing.toHigh();
+        let value: number = Bit.toUint16(hiData, loData);
 
-            let loData: number = context.bus.readByte(loAddr);
-            let hiData: number = context.bus.readByte(hiAddr);
+        if (is8Bit) context.registers.a.setA(value);
+        if (!is8Bit) context.registers.a.setC(value);
 
-            let value: number = Bit.toUint16(hiData, loData);
-
-            context.registers.a.setC(value);
-            context.setFlagZ(value, is8Bit);
-            context.setFlagN(value, is8Bit);
-        }
+        context.setFlagZ(value, is8Bit);
+        context.setFlagN(value, is8Bit);
 
         return this.cycle;
     }
@@ -1260,29 +1259,19 @@ class LDX extends Operation {
         let addressing: Addressing = this.mode.getAddressing(context);
         let is8Bit: boolean = context.registers.p.getX() == 1;
 
-        if (is8Bit) {
-            let loAddr: number = addressing.toLow();
+        let loAddr: number = addressing.toLow();
+        let hiAddr: number = addressing.toHigh();
 
-            let result: number = context.bus.readByte(loAddr);
-            let value: number = result;
+        let loData: number = context.bus.readByte(loAddr);
+        let hiData: number = is8Bit ? 0 : context.bus.readByte(hiAddr);
 
-            context.registers.x.setXL(value);
+        let value: number = Bit.toUint16(hiData, loData);
 
-            context.setFlagZ(value, is8Bit);
-            context.setFlagN(value, is8Bit);
-        } else {
-            let loAddr: number = addressing.toLow();
-            let hiAddr: number = addressing.toHigh();
+        if (is8Bit) context.registers.x.setXL(value);
+        if (!is8Bit) context.registers.x.set(value);
 
-            let loData: number = context.bus.readByte(loAddr);
-            let hiData: number = context.bus.readByte(hiAddr);
-
-            let value: number = Bit.toUint16(hiData, loData);
-            context.registers.x.set(value);
-
-            context.setFlagZ(value, is8Bit);
-            context.setFlagN(value, is8Bit);
-        }
+        context.setFlagZ(value, is8Bit);
+        context.setFlagN(value, is8Bit);
 
         return this.cycle;
     }
@@ -1303,29 +1292,19 @@ class LDY extends Operation {
         let addressing: Addressing = this.mode.getAddressing(context);
         let is8Bit: boolean = context.registers.p.getX() == 1;
 
-        if (is8Bit) {
-            let loAddr: number = addressing.toLow();
+        let loAddr: number = addressing.toLow();
+        let hiAddr: number = addressing.toHigh();
 
-            let result: number = context.bus.readByte(loAddr);
-            let value: number = result;
+        let loData: number = context.bus.readByte(loAddr);
+        let hiData: number = is8Bit ? 0 : context.bus.readByte(hiAddr);
 
-            context.registers.y.setYL(value);
+        let value: number = Bit.toUint16(hiData, loData);
 
-            context.setFlagZ(value, is8Bit);
-            context.setFlagN(value, is8Bit);
-        } else {
-            let loAddr: number = addressing.toLow();
-            let hiAddr: number = addressing.toHigh();
+        if (is8Bit) context.registers.y.setYL(value);
+        if (!is8Bit) context.registers.y.set(value);
 
-            let loData: number = context.bus.readByte(loAddr);
-            let hiData: number = context.bus.readByte(hiAddr);
-
-            let value: number = Bit.toUint16(hiData, loData);
-            context.registers.y.set(value);
-
-            context.setFlagZ(value, is8Bit);
-            context.setFlagN(value, is8Bit);
-        }
+        context.setFlagZ(value, is8Bit);
+        context.setFlagN(value, is8Bit);
 
         return this.cycle;
     }
@@ -1955,8 +1934,8 @@ class REP extends Operation {
 
         if (context.registers.p.getE() == 0) {
             if (context.registers.p.getX() == 1) {
-                context.registers.x.set(context.registers.x.get() & 0x00FF);
-                context.registers.y.set(context.registers.y.get() & 0x00FF);
+                context.registers.x.setXH(0x00);
+                context.registers.y.setYH(0x00);
             }
         }
 
@@ -2083,8 +2062,8 @@ class SEP extends Operation {
 
         if (context.registers.p.getE() == 0) {
             if (context.registers.p.getX() == 1) {
-                context.registers.x.set(context.registers.x.get() & 0x00FF);
-                context.registers.y.set(context.registers.y.get() & 0x00FF);
+                context.registers.x.setXH(0x00);
+                context.registers.y.setYH(0x00);
             }
         }
 
