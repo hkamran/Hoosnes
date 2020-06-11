@@ -151,38 +151,38 @@ export class Ppu {
             this.status.rangeOver = false;
             this.status.timeOver = false;
 
-            this.console.cpu.registers.hvbjoy.setVBlankFlag(false);
-            this.console.cpu.registers.hvbjoy.setJoypadFlag(false);
+            this.console.io.registers.hvbjoy.setVBlankFlag(false);
+            this.console.io.registers.hvbjoy.setJoypadFlag(false);
 
-            this.console.cpu.registers.rdnmi.setNMIFlag(false);
-            this.console.cpu.registers.timeup.setIRQFlag(false);
+            this.console.io.registers.rdnmi.setNMIFlag(false);
+            this.console.io.registers.timeup.setIRQFlag(false);
         }
 
         if (isVBlankStart) {
             this.screen.state = ScreenState.VBLANK;
-            this.console.cpu.registers.hvbjoy.setVBlankFlag(true);
-            this.console.cpu.registers.rdnmi.setNMIFlag(true);
+            this.console.io.registers.hvbjoy.setVBlankFlag(true);
+            this.console.io.registers.rdnmi.setNMIFlag(true);
 
-            if (this.console.cpu.registers.nmitimen.nmiEnable) {
+            if (this.console.io.registers.nmitimen.nmiEnable) {
                 this.console.cpu.interrupts.set(InterruptType.NMI);
             }
 
-            if (this.console.cpu.registers.nmitimen.autoJoypadEnable) {
-                this.console.cpu.registers.hvbjoy.setJoypadFlag(false);
-                this.console.cpu.registers.joy1.setLower(joy1.readByte(0));
-                this.console.cpu.registers.joy1.setUpper(joy1.readByte(1));
-                this.console.cpu.registers.joy2.setLower(joy2.readByte(0));
-                this.console.cpu.registers.joy2.setUpper(joy2.readByte(1));
+            if (this.console.io.registers.nmitimen.autoJoypadEnable) {
+                this.console.io.registers.hvbjoy.setJoypadFlag(false);
+                this.console.io.registers.joy1.setLower(joy1.readByte(0));
+                this.console.io.registers.joy1.setUpper(joy1.readByte(1));
+                this.console.io.registers.joy2.setLower(joy2.readByte(0));
+                this.console.io.registers.joy2.setUpper(joy2.readByte(1));
             }
         }
 
         if (isHBlank) {
-            this.console.cpu.registers.hvbjoy.setHBlankFlag(true);
+            this.console.io.registers.hvbjoy.setHBlankFlag(true);
             this.screen.state = ScreenState.HBLANK;
         }
 
         if (isPreline) {
-            this.console.cpu.registers.hvbjoy.setHBlankFlag(false);
+            this.console.io.registers.hvbjoy.setHBlankFlag(false);
             this.screen.state = ScreenState.PRELINE;
         }
 
@@ -195,13 +195,13 @@ export class Ppu {
     }
 
     private triggerIRQ(): void {
-        const mode = this.console.cpu.registers.nmitimen.irqMode;
+        const mode = this.console.io.registers.nmitimen.irqMode;
         if (mode == 0) {
             // Do nothing
         } else if (mode == 1) {
             this.console.cpu.interrupts.set(InterruptType.IRQ);
         } else if (mode == 2 || mode == 3) {
-            if (this.console.ppu.scanline == this.console.cpu.registers.vtime.get()) {
+            if (this.console.ppu.scanline == this.console.io.registers.vtime.get()) {
                 this.console.cpu.interrupts.set(InterruptType.IRQ);
             }
         } else {

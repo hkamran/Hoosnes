@@ -4,6 +4,7 @@ import {Logger, LoggerManager} from 'typescript-logger';
 import {Bus} from "./bus/Bus";
 import {Ppu} from "./ppu/Ppu";
 import {Apu} from "./apu/Apu";
+import {Io} from "./io/Io";
 
 export enum ConsoleState {
     RUNNING, PAUSED, RESET, OFF,
@@ -18,6 +19,7 @@ export class Console {
     public apu: Apu;
     public cpu : Cpu;
     public ppu: Ppu;
+    public io: Io;
     public bus: Bus;
     public cartridge : Cartridge;
     public state: ConsoleState = ConsoleState.OFF;
@@ -27,6 +29,7 @@ export class Console {
         this.cpu = new Cpu(this);
         this.ppu = new Ppu(this);
         this.apu = new Apu(this);
+        this.io = new Io(this);
         this.bus = new Bus(this);
     }
 

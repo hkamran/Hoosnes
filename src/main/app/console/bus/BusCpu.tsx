@@ -1,8 +1,8 @@
 import {Console} from "../Console";
 import {Objects} from "../../util/Objects";
-import {Registers} from "../cpu/Registers";
 import {AddressUtil} from "../../util/AddressUtil";
 import {Bit} from "../../util/Bit";
+import {Registers} from "../io/Registers";
 
 /**
  * Bus for IO registers in the CPU
@@ -20,7 +20,7 @@ export class BusCpu {
         Objects.requireNonNull(console.cpu.registers);
 
         this.console = console;
-        this.registers = console.cpu.registers;
+        this.registers = console.io.registers;
     }
 
     public readByte(address: number): number {

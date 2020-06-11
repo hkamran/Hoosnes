@@ -202,8 +202,8 @@ export class ADC extends Operation {
         context.registers.p.setC(result > mask ? 1: 0);
         result &= mask;
 
-        if (is8Bit) context.registers.a.setLower(result & mask);
-        if (!is8Bit) context.registers.a.set(result & mask);
+        if (is8Bit) context.registers.a.setA(result & mask);
+        if (!is8Bit) context.registers.a.setC(result & mask);
 
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
@@ -232,8 +232,8 @@ export class AND extends Operation {
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let result: number = (a & mask) & (b & mask);
 
-        if (is8Bit) context.cpu.registers.a.setLower(result & mask);
-        if (!is8Bit) context.cpu.registers.a.set(result & mask);
+        if (is8Bit) context.cpu.registers.a.setA(result & mask);
+        if (!is8Bit) context.cpu.registers.a.setC(result & mask);
 
         context.setFlagZ(result, is8Bit);
         context.setFlagN(result, is8Bit);
@@ -261,8 +261,8 @@ export class ASL extends Operation {
         let result: number = (b << 1) & mask;
 
         if (this.mode == AddressingModes.accumulator) {
-            if (is8Bit) context.registers.a.setLower(result);
-            if (!is8Bit) context.registers.a.set(result);
+            if (is8Bit) context.registers.a.setA(result);
+            if (!is8Bit) context.registers.a.setC(result);
         } else {
             let addressing: Addressing = this.mode.getAddressing(context);
             let loData: number = Bit.getUint16Lower(result);
@@ -619,12 +619,12 @@ class DEC extends Operation {
 
         if (isAcc) {
             let data: number = is8Bit ?
-                context.registers.a.getLower() :
+                context.registers.a.getA() :
                 context.registers.a.get();
             let value: number = (data - 1) & mask;
 
-            if (is8Bit) context.registers.a.setLower(value);
-            if (!is8Bit) context.registers.a.set(value);
+            if (is8Bit) context.registers.a.setA(value);
+            if (!is8Bit) context.registers.a.setC(value);
 
             context.setFlagN(value, is8Bit);
             context.setFlagZ(value, is8Bit);
@@ -665,7 +665,7 @@ class DEX extends Operation {
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
 
-        if (is8Bit) context.registers.x.setLower(value);
+        if (is8Bit) context.registers.x.setXL(value);
         if (!is8Bit) context.registers.x.set(value);
 
         return this.cycle;
@@ -684,7 +684,7 @@ class DEY extends Operation {
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
 
-        if (is8Bit) context.registers.y.setLower(value);
+        if (is8Bit) context.registers.y.setYL(value);
         if (!is8Bit) context.registers.y.set(value);
 
         return this.cycle;
@@ -703,8 +703,8 @@ class EOR extends Operation {
         let data: number = this.mode.getValue(context) & mask;
         let result: number = (a ^ data) & mask;
 
-        if (is8Bit) context.registers.a.setLower(result);
-        if (!is8Bit) context.registers.a.set(result);
+        if (is8Bit) context.registers.a.setA(result);
+        if (!is8Bit) context.registers.a.setC(result);
 
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
@@ -731,12 +731,12 @@ class INC extends Operation {
         let isAcc: boolean = this.mode == AddressingModes.accumulator;
         if (isAcc) {
             let data: number = is8Bit ?
-                context.registers.a.getLower() :
+                context.registers.a.getA() :
                 context.registers.a.get();
             let value: number = (data + 1) & mask;
 
-            if (is8Bit) context.registers.a.setLower(value);
-            if (!is8Bit) context.registers.a.set(value);
+            if (is8Bit) context.registers.a.setA(value);
+            if (!is8Bit) context.registers.a.setC(value);
 
             context.setFlagN(value, is8Bit);
             context.setFlagZ(value, is8Bit);
@@ -777,7 +777,7 @@ class INX extends Operation {
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
 
-        if (is8Bit) context.registers.x.setLower(value & 0xFF);
+        if (is8Bit) context.registers.x.setXL(value & 0xFF);
         if (!is8Bit) context.registers.x.set(value & 0xFFFF);
 
         return this.cycle;
@@ -797,7 +797,7 @@ class INY extends Operation {
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
 
-        if (is8Bit) context.registers.y.setLower(value);
+        if (is8Bit) context.registers.y.setYL(value);
         if (!is8Bit) context.registers.y.set(value);
 
         return this.cycle;
@@ -816,9 +816,9 @@ class XCE extends Operation {
         context.registers.p.setC(e);
 
         if (c == 0x1) {
-            context.registers.sp.setUpper(0x01);
-            context.registers.x.setUpper(0x00);
-            context.registers.y.setUpper(0x00);
+            context.registers.sp.setSH(0x01);
+            context.registers.x.setXH(0x00);
+            context.registers.y.setYH(0x00);
             context.registers.p.setM(1);
             context.registers.p.setX(1);
         }
@@ -832,12 +832,12 @@ class XBA extends Operation {
     public name: string = "XBA";
 
     public execute(context: OpContext): number {
-        let hi: number = context.registers.a.getUpper();
-        let lo: number = context.registers.a.getLower();
+        let hi: number = context.registers.a.getB();
+        let lo: number = context.registers.a.getA();
         let is8Bit: boolean = true;
 
         let value: number = Bit.toUint16(lo, hi);
-        context.registers.a.set(value);
+        context.registers.a.setC(value);
 
         context.setFlagN(hi, is8Bit);
         context.setFlagZ(hi, is8Bit);
@@ -882,7 +882,7 @@ class TYX extends Operation {
         context.setFlagZ(value, is8Bit);
 
         if (is8Bit) {
-            context.cpu.registers.x.setLower(value);
+            context.cpu.registers.x.setXL(value);
         } else {
             context.cpu.registers.x.set(value);
         }
@@ -904,9 +904,9 @@ class TYA extends Operation {
         context.setFlagZ(value, is8Bit);
 
         if (is8Bit) {
-            context.cpu.registers.a.setLower(value);
+            context.cpu.registers.a.setA(value);
         } else {
-            context.cpu.registers.a.set(value);
+            context.cpu.registers.a.setC(value);
         }
         return this.cycle;
     }
@@ -926,7 +926,7 @@ class TXY extends Operation {
         context.setFlagZ(value, is8Bit);
 
         if (is8Bit) {
-            context.cpu.registers.y.setLower(value);
+            context.cpu.registers.y.setYL(value);
         } else {
             context.cpu.registers.y.set(value);
         }
@@ -949,7 +949,7 @@ class TAX extends Operation {
         context.setFlagZ(value, is8Bit);
 
         if (is8Bit) {
-            context.cpu.registers.x.setLower(value);
+            context.cpu.registers.x.setXL(value);
         } else {
             context.cpu.registers.x.set(value);
         }
@@ -972,7 +972,7 @@ class TAY extends Operation {
         context.setFlagZ(value, is8Bit);
 
         if (is8Bit) {
-            context.cpu.registers.y.setLower(value);
+            context.cpu.registers.y.setYL(value);
         } else {
             context.cpu.registers.y.set(value);
         }
@@ -1017,7 +1017,7 @@ class TDC extends Operation {
         context.setFlagN(d, is8Bit);
         context.setFlagZ(d, is8Bit);
 
-        context.registers.a.set(d);
+        context.registers.a.setC(d);
 
         return this.cycle;
     }
@@ -1055,7 +1055,7 @@ class TXS extends Operation {
         let is8Bit: boolean = context.cpu.registers.p.getE() == 1;
         let data = context.cpu.registers.x.get();
         let mask = is8Bit ? 0xFF : 0xFFFF;
-        if (is8Bit) context.cpu.registers.sp.setLower(data & mask);
+        if (is8Bit) context.cpu.registers.sp.setSL(data & mask);
         if (!is8Bit) context.cpu.registers.sp.set(data);
         return this.cycle;
     }
@@ -1100,9 +1100,9 @@ class TXA extends Operation {
         context.setFlagZ(value, is8Bit);
 
         if (is8Bit) {
-            context.cpu.registers.a.setLower(value);
+            context.cpu.registers.a.setA(value);
         } else {
-            context.cpu.registers.a.set(value);
+            context.cpu.registers.a.setC(value);
         }
         return this.cycle;
     }
@@ -1116,7 +1116,7 @@ class TSX extends Operation {
         let mask = is8Bit ? 0xFF : 0xFFFF;
         let value = context.cpu.registers.sp.get() & mask;
 
-        if (is8Bit) context.cpu.registers.x.setLower(value);
+        if (is8Bit) context.cpu.registers.x.setXL(value);
         if (!is8Bit) context.cpu.registers.x.set(value);
 
         context.setFlagN(value, is8Bit);
@@ -1133,7 +1133,7 @@ class TSC extends Operation {
     public execute(context: OpContext): number {
         let is8Bit: boolean = false;
         let value: number = context.cpu.registers.sp.get();
-        context.cpu.registers.a.set(value);
+        context.cpu.registers.a.setC(value);
 
         context.setFlagN(value, is8Bit);
         context.setFlagZ(value, is8Bit);
@@ -1224,7 +1224,7 @@ class LDA extends Operation {
 
             let result: number = context.bus.readByte(loAddr);
 
-            context.registers.a.setLower(result);
+            context.registers.a.setA(result);
             context.setFlagZ(result, is8Bit);
             context.setFlagN(result, is8Bit);
         } else {
@@ -1236,7 +1236,7 @@ class LDA extends Operation {
 
             let value: number = Bit.toUint16(hiData, loData);
 
-            context.registers.a.set(value);
+            context.registers.a.setC(value);
             context.setFlagZ(value, is8Bit);
             context.setFlagN(value, is8Bit);
         }
@@ -1266,7 +1266,7 @@ class LDX extends Operation {
             let result: number = context.bus.readByte(loAddr);
             let value: number = result;
 
-            context.registers.x.setLower(value);
+            context.registers.x.setXL(value);
 
             context.setFlagZ(value, is8Bit);
             context.setFlagN(value, is8Bit);
@@ -1309,7 +1309,7 @@ class LDY extends Operation {
             let result: number = context.bus.readByte(loAddr);
             let value: number = result;
 
-            context.registers.y.setLower(value);
+            context.registers.y.setYL(value);
 
             context.setFlagZ(value, is8Bit);
             context.setFlagN(value, is8Bit);
@@ -1357,8 +1357,8 @@ class LSR extends Operation {
         this.cpu.registers.p.setC(data & 0x01);
 
         if (isAccMode) {
-            if (is8Bit) this.cpu.registers.a.setLower(value);
-            if (!is8Bit) this.cpu.registers.a.set(value);
+            if (is8Bit) this.cpu.registers.a.setA(value);
+            if (!is8Bit) this.cpu.registers.a.setC(value);
         } else {
             let addressing: Addressing = this.mode.getAddressing(context);
             context.console.bus.writeByte(addressing.toLow(), Bit.getUint16Lower(value));
@@ -1400,7 +1400,7 @@ class MVN extends Operation {
         this.cpu.registers.x.set(((this.cpu.registers.x.get() + counter) % 0xFFFF) & 0xFFFF);
         this.cpu.registers.y.set(((this.cpu.registers.y.get() + counter) % 0xFFFF) & 0xFFFF);
         this.cpu.registers.dbr.set(destBank);
-        this.cpu.registers.a.set(0xFFFF);
+        this.cpu.registers.a.setC(0xFFFF);
 
         return this.cycle;
     }
@@ -1436,7 +1436,7 @@ class MVP extends Operation {
         this.cpu.registers.x.set(((this.cpu.registers.x.get() - amount) % 0xFFFF) & 0xFFFF);
         this.cpu.registers.y.set(((this.cpu.registers.y.get() - amount) % 0xFFFF) & 0xFFFF);
         this.cpu.registers.dbr.set(destBank);
-        this.cpu.registers.a.set(0xFFFF);
+        this.cpu.registers.a.setC(0xFFFF);
 
         return this.cycle;
     }
@@ -1471,9 +1471,9 @@ class ORA extends Operation {
         context.setFlagZ(result, is8Bit);
 
         if (is8Bit) {
-            context.registers.a.setLower(result);
+            context.registers.a.setA(result);
         } else {
-            context.registers.a.set(result);
+            context.registers.a.setC(result);
         }
 
         return this.cycle;
@@ -1529,7 +1529,7 @@ class PHA extends Operation {
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         if (is8Bit) {
-            let result: number = context.cpu.registers.a.getLower();
+            let result: number = context.cpu.registers.a.getA();
             context.cpu.stack.pushByte(result);
         } else {
             let result: number = context.cpu.registers.a.get();
@@ -1612,8 +1612,8 @@ class SBC extends Operation {
         context.registers.p.setC(result > mask ? 1: 0);
         result &= mask;
 
-        if (is8Bit) context.registers.a.setLower(result);
-        if (!is8Bit) context.registers.a.set(result);
+        if (is8Bit) context.registers.a.setA(result);
+        if (!is8Bit) context.registers.a.setC(result);
 
         context.setFlagN(result, is8Bit);
         context.setFlagZ(result, is8Bit);
@@ -1636,8 +1636,8 @@ class STA extends Operation {
 
     public execute(context: OpContext): number {
         let is8Bit: boolean = context.registers.p.getM() == 1;
-        let loData: number = context.cpu.registers.a.getLower();
-        let hiData: number = context.cpu.registers.a.getUpper();
+        let loData: number = context.cpu.registers.a.getA();
+        let hiData: number = context.cpu.registers.a.getB();
 
         let addresses: Addressing = this.mode.getAddressing(context);
         let loAddr: number = addresses.toLow();
@@ -1673,8 +1673,8 @@ class ROL extends Operation {
             let lowVal: number = Bit.getUint16Lower(value);
             let highVal: number = Bit.getUint16Upper(value);
 
-            context.registers.a.setLower(lowVal);
-            if (!is8Bit) context.registers.a.setUpper(highVal);
+            context.registers.a.setA(lowVal);
+            if (!is8Bit) context.registers.a.setB(highVal);
         } else {
             let loData: number = context.bus.readByte(addressing.toLow());
             let hiData: number = is8Bit ? 0 : context.bus.readByte(addressing.toHigh());
@@ -1720,8 +1720,8 @@ class ROR extends Operation {
             let lowVal: number = Bit.getUint16Lower(value);
             let highVal: number = Bit.getUint16Upper(value);
 
-            context.registers.a.setLower(lowVal);
-            if (!is8Bit) context.registers.a.setUpper(highVal);
+            context.registers.a.setA(lowVal);
+            if (!is8Bit) context.registers.a.setB(highVal);
         } else {
             let loData: number = context.bus.readByte(addressing.toLow());
             let hiData: number = is8Bit ? 0 : context.bus.readByte(addressing.toHigh());
@@ -1748,8 +1748,8 @@ class STY extends Operation {
     public name: string = "STY";
 
     public execute(context: OpContext): number {
-        let loData: number = context.cpu.registers.y.getLower();
-        let hiData: number = context.cpu.registers.y.getUpper();
+        let loData: number = context.cpu.registers.y.getYL();
+        let hiData: number = context.cpu.registers.y.getYH();
         let is8Bit: boolean = context.registers.p.getX() == 1;
 
         let addresses: Addressing = this.mode.getAddressing(context);
@@ -1848,8 +1848,8 @@ class PLA extends Operation {
         let is8Bit: boolean = context.registers.p.getM() == 1;
         let data: number = is8Bit ? context.cpu.stack.popByte() : context.cpu.stack.popWord();
 
-        if (is8Bit) context.registers.a.setLower(data);
-        if (!is8Bit) context.registers.a.set(data);
+        if (is8Bit) context.registers.a.setA(data);
+        if (!is8Bit) context.registers.a.setC(data);
 
         context.setFlagN(data, is8Bit);
         context.setFlagZ(data, is8Bit);
@@ -1917,7 +1917,7 @@ class PLX extends Operation {
         context.setFlagN(data, is8Bit);
         context.setFlagZ(data, is8Bit);
 
-        if (is8Bit) context.registers.x.setLower(data);
+        if (is8Bit) context.registers.x.setXL(data);
         if (!is8Bit) context.registers.x.set(data);
 
         return this.cycle;
@@ -1935,7 +1935,7 @@ class PLY extends Operation {
         context.setFlagN(data, is8Bit);
         context.setFlagZ(data, is8Bit);
 
-        if (is8Bit) context.registers.y.setLower(data);
+        if (is8Bit) context.registers.y.setYL(data);
         if (!is8Bit) context.registers.y.set(data);
 
         return this.cycle;
@@ -1969,8 +1969,8 @@ class STX extends Operation {
     public name: string = "STX";
 
     public execute(context: OpContext): number {
-        let loData: number = context.cpu.registers.x.getLower();
-        let hiData: number = context.cpu.registers.x.getUpper();
+        let loData: number = context.cpu.registers.x.getXL();
+        let hiData: number = context.cpu.registers.x.getXH();
         let is8Bit: boolean = context.registers.p.getX() == 1;
 
         let addresses: Addressing = this.mode.getAddressing(context);

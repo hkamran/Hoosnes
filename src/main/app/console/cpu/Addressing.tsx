@@ -296,15 +296,15 @@ export class Accumulator implements IAddressingMode {
     public label: string = "ACCUMULATOR";
 
     public getValue(context: OpContext): number {
-        let low: number = context.registers.a.getLower();
-        let high: number = context.registers.a.getUpper();
+        let low: number = context.registers.a.getA();
+        let high: number = context.registers.a.getB();
 
         return Bit.toUint16(high, low);
     }
 
     public getAddressing(context: OpContext): Addressing {
-        let low: number = context.registers.a.getLower();
-        let high: number = context.registers.a.getUpper();
+        let low: number = context.registers.a.getA();
+        let high: number = context.registers.a.getB();
 
         return Addressing.toWord(low, high, 0);
     }
@@ -331,9 +331,9 @@ export class Direct implements IAddressingMode {
 
         if (context.op.name == "PEI" &&
             context.registers.p.getE() == 1 &&
-            context.registers.d.getLower() == 0x00) {
+            context.registers.d.getDL() == 0x00) {
             let loAddr: number = low;
-            let hiAddr: number = context.registers.d.getUpper();
+            let hiAddr: number = context.registers.d.getDH();
 
             let result: number = Bit.toUint16(hiAddr, loAddr);
 
@@ -368,9 +368,9 @@ export class DirectX implements IAddressingMode {
         let d = context.registers.d.get();
         let x = context.registers.x.get();
 
-        if (context.registers.p.getE() == 1 && context.registers.d.getLower() == 0x00) {
+        if (context.registers.p.getE() == 1 && context.registers.d.getDL() == 0x00) {
             let loaddr: number = (LL + x) & 0xFF;
-            let hiaddr: number = context.registers.d.getUpper();
+            let hiaddr: number = context.registers.d.getDH();
 
             let addr = Bit.toUint16(hiaddr, loaddr);
 
@@ -407,9 +407,9 @@ export class DirectY implements IAddressingMode {
         let y = context.registers.y.get();
         let d = context.registers.d.get();
 
-        if (context.registers.p.getE() == 1 && context.registers.d.getLower() == 0x00) {
+        if (context.registers.p.getE() == 1 && context.registers.d.getDL() == 0x00) {
             let loaddr: number = (LL + y) & 0xFF;
-            let hiaddr: number = context.registers.d.getUpper();
+            let hiaddr: number = context.registers.d.getDH();
 
             let addr = Bit.toUint16(hiaddr, loaddr);
             return Addressing.toByte(addr, 0);
@@ -446,8 +446,8 @@ export class DirectIndirect implements IAddressingMode {
         let hiPointer: number;
         let cycles: number = 0;
 
-        if (registers.p.getE() == 1 && registers.d.getLower() == 0x00) {
-            let dh: number = registers.d.getUpper();
+        if (registers.p.getE() == 1 && registers.d.getDL() == 0x00) {
+            let dh: number = registers.d.getDH();
 
             loPointer = Bit.toUint16(dh, (LL + 0) & 0xFF);
             hiPointer = Bit.toUint16(dh, (LL + 1) & 0xFF);
@@ -498,8 +498,8 @@ export class DirectIndirectIndexed implements IAddressingMode {
     public getAddressing(context: OpContext): Addressing {
         let LL: number = context.getOperand(0);
 
-        if (context.registers.p.getE() == 1 && context.registers.d.getLower() == 0x00) {
-            let dh: number = context.registers.d.getUpper();
+        if (context.registers.p.getE() == 1 && context.registers.d.getDL() == 0x00) {
+            let dh: number = context.registers.d.getDH();
             let x: number = context.registers.x.get();
 
             let loPointer: number = Bit.toUint16(dh, (LL + x + 0) % 0xFF);
@@ -556,8 +556,8 @@ export class DirectIndirectLong implements IAddressingMode {
         let loPointer: number;
         let hiPointer: number;
 
-        if (context.registers.p.getE() == 1 && context.registers.d.getLower() == 0x00) {
-            let dh: number = context.registers.d.getUpper();
+        if (context.registers.p.getE() == 1 && context.registers.d.getDL() == 0x00) {
+            let dh: number = context.registers.d.getDH();
 
             let lo: number = (LL + 0) & 0xFF;
             let hi: number = (LL + 1) & 0xFF;
@@ -565,7 +565,7 @@ export class DirectIndirectLong implements IAddressingMode {
             loPointer = Bit.toUint24(0, dh, lo);
             hiPointer = Bit.toUint24(0, dh, hi);
         } else {
-            let d: number = context.registers.d.getUpper();
+            let d: number = context.registers.d.getDH();
 
             let lo: number = d + LL;
             let hi: number = d + LL + 1;
@@ -886,8 +886,8 @@ export class SourceDestination implements IAddressingMode {
         let sPage: number;
         let dPage: number;
         if (context.registers.p.getX() == 1) {
-            sPage = context.registers.x.getLower();
-            dPage = context.registers.y.getLower();
+            sPage = context.registers.x.getXL();
+            dPage = context.registers.y.getYL();
         } else {
             sPage = context.registers.x.get();
             dPage = context.registers.y.get();

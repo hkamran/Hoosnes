@@ -176,13 +176,13 @@ export class BusPpu {
                 value = Bit.toUint8(this.console.apu.registers.apuio3.get());
             }
         } else if (page == 0x2180) {
-            value = Bit.toUint8(this.console.cpu.registers.wmdata.get());
+            value = Bit.toUint8(this.console.io.registers.wmdata.get());
         } else if (page == 0x2181) {
-            value = Bit.toUint8(this.console.cpu.registers.wmadd.getLower());
+            value = Bit.toUint8(this.console.io.registers.wmadd.getLower());
         } else if (page == 0x2182) {
-            value = Bit.toUint8(this.console.cpu.registers.wmadd.getMiddle());
+            value = Bit.toUint8(this.console.io.registers.wmadd.getMiddle());
         } else if (page == 0x2183) {
-            value = Bit.toUint8(this.console.cpu.registers.wmadd.getUpper());
+            value = Bit.toUint8(this.console.io.registers.wmadd.getUpper());
         } else if (page <= 0x21FF) {
             console.warn("Invalid read on BusB at " + address);
         } else {
@@ -347,13 +347,13 @@ export class BusPpu {
                 this.console.apu.registers.apuio3.set(value);
             }
         } else if (page == 0x2180) {
-            this.console.cpu.registers.wmdata.set(value);
+            this.console.io.registers.wmdata.set(value);
         } else if (page == 0x2181) {
-            this.console.cpu.registers.wmadd.setLower(value);
+            this.console.io.registers.wmadd.setLower(value);
         } else if (page == 0x2182) {
-            this.console.cpu.registers.wmadd.setMiddle(value);
+            this.console.io.registers.wmadd.setMiddle(value);
         } else if (page == 0x2183) {
-            this.console.cpu.registers.wmadd.setUpper(value);
+            this.console.io.registers.wmadd.setUpper(value);
         } else if (0x2184 <= page && page <= 0x21FF) {
             console.warn("Invalid write on BusB at " + address);
         } else {
