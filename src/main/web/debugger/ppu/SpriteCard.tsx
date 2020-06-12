@@ -66,8 +66,8 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
 
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
 
-        let height: number = tile.attributes.getHeight();
-        let width: number = tile.attributes.getWidth();
+        let height: number = tile.attributes.height;
+        let width: number = tile.attributes.width;
 
         let totalWidth = width * this.state.tilePixelSize;
         let totalHeight = height * this.state.tilePixelSize;

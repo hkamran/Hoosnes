@@ -66,61 +66,29 @@ export enum Orientation {
     NONE,
 }
 
-export class TileAttributes {
+export interface ITileAttributes {
+    height: number;
+    width: number;
+    yFlipped: boolean;
+    xFlipped: boolean;
+    bpp: BppType;
+}
 
-    public dimension: Dimension;
-    public isYFlipped: boolean;
-    public isXFlipped: boolean;
-    public bpp: BppType = BppType.Two;
-
-    constructor(height: number, width: number, vflip: boolean, hflip: boolean, bpp: BppType) {
-        this.dimension = Dimension.create(height, width);
-        this.isYFlipped = vflip;
-        this.isXFlipped = hflip;
-        this.bpp = bpp;
-    }
-
-    public static create(height: number, width: number,  bpp: BppType, vflip?: boolean, hflip?: boolean) {
-        return new TileAttributes(height, width, vflip || false, hflip || false, bpp);
-    }
-
-    public getTileSize(): number {
-        // 2bpp 16
-        // 4bpp 32
-        // 8bpp 64
-        let size: number = 8 * this.bpp.valueOf();
-        return size;
-    }
-
-    public getHeight(): number {
-        return this.dimension.height;
-    }
-
-    public getWidth(): number {
-        return this.dimension.width;
-    }
-
-    public isFlipVertical() {
-        return this.isYFlipped;
-    }
-
-    public isFlipHorizontal() {
-        return this.isXFlipped;
-    }
-
+export function getTileSizeInByte(bpp: BppType): number {
+    return 8 * bpp.valueOf();
 }
 
 export class Tile {
 
-    public attributes: TileAttributes;
+    public attributes: ITileAttributes;
     public data: number[][];
 
-    constructor(data: number[][], attributes: TileAttributes) {
+    constructor(data: number[][], attributes: ITileAttributes) {
         this.data = data;
         this.attributes = attributes;
     }
 
-    public static create(data: number[][], attributes: TileAttributes) {
+    public static create(data: number[][], attributes: ITileAttributes) {
         return new Tile(data, attributes);
     }
 }
@@ -130,6 +98,17 @@ export class Tiles {
     public ppu: Ppu;
     public vram: Vram;
 
+    private tileMatrixFor8By8 = [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0],
+    ];
+
     constructor(ppu: Ppu) {
         Objects.requireNonNull(ppu);
 
@@ -137,7 +116,8 @@ export class Tiles {
         this.vram = ppu.vram;
     }
 
-    public getTile(address: number, attributes: TileAttributes): Tile {
+
+    public getTile(address: number, attributes: ITileAttributes): Tile {
         Objects.requireNonNull(address);
         Objects.requireNonNull(attributes);
 
@@ -150,13 +130,15 @@ export class Tiles {
         }
     }
 
-    private getTile8Bpp(address: number, attributes: TileAttributes): Tile {
+    private getTile8Bpp(address: number, attributes: ITileAttributes): Tile {
         throw new Error("Not implemented!");
     }
 
-    private getTileNon8Bpp(address: number, attributes: TileAttributes): Tile {
-        let image: number[][] = ArrayUtil.create2dMatrix(attributes.getHeight(), attributes.getWidth());
-        let bpp: number = attributes.bpp.valueOf();
+    private getTileNon8Bpp(address: number, attributes: ITileAttributes): Tile {
+        let image: number[][] = ArrayUtil.create2dMatrix(attributes.height, attributes.width);
+        const bpp: number = attributes.bpp.valueOf();
+        const bytesPerRow = getTileSizeInByte(bpp);
+
         let index: number = address;
 
         let height: number = 8;
@@ -164,14 +146,14 @@ export class Tiles {
 
         let tilesPerRow = 16;
 
-        for (let yBase: number = 0; yBase < attributes.getHeight(); yBase += height) {
-            for (let xBase: number = 0; xBase < attributes.getWidth(); xBase += width) {
+        for (let yBase: number = 0; yBase < attributes.height; yBase += height) {
+            for (let xBase: number = 0; xBase < attributes.width; xBase += width) {
 
                 let plane: number = 0;
                 for (let i = 0; i < bpp / 2; i++) {
 
                     // Capture 8x8 tile from vram (8 bytes high, 2 bytes long)
-                    let rows: number[][] = ArrayUtil.create2dMatrix(8, 2);
+                    let rows: number[][] = this.tileMatrixFor8By8;
                     for (let y = 0; y < rows.length; y++) {
                         for (let x = 0; x < rows[y].length; x++) {
                             rows[y][x] = this.vram.data[index++ % this.vram.data.length];
@@ -186,10 +168,10 @@ export class Tiles {
                             let bits: number = cell;
                             for (let bitIndex = 0; bitIndex < 8; bitIndex++) {
                                 let bit = bits & 1;
-                                let xIndex: number = attributes.isFlipHorizontal() ?
-                                    (attributes.getWidth() - width - xBase) + bitIndex : xBase + (width - 1 - bitIndex);
-                                let yIndex: number = attributes.isFlipVertical() ?
-                                    (attributes.getHeight() - height - yBase) + (height - 1 - yOffset) : yBase + yOffset;
+                                let xIndex: number = attributes.xFlipped ?
+                                    (attributes.width - width - xBase) + bitIndex : xBase + (width - 1 - bitIndex);
+                                let yIndex: number = attributes.yFlipped ?
+                                    (attributes.height - height - yBase) + (height - 1 - yOffset) : yBase + yOffset;
                                 image[yIndex][xIndex] |= (bit << shift);
                                 bits = bits >> 1;
                             }
@@ -201,7 +183,7 @@ export class Tiles {
                     plane += 2;
                 }
             }
-            index += attributes.getTileSize() * (tilesPerRow - (attributes.getWidth() / 8));
+            index += bytesPerRow * (tilesPerRow - (attributes.width / 8));
         }
 
 

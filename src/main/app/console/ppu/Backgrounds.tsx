@@ -1,4 +1,4 @@
-import {Dimension, Tile, TileAttributes} from "./Tiles";
+import {Dimension, Tile, ITileAttributes} from "./Tiles";
 import {Ppu} from "./Ppu";
 import {BppType, IColor} from "./Palette";
 import {ITileMap} from "./TileMaps";
@@ -123,13 +123,13 @@ export abstract class Background {
         let characterDimension: Dimension = this.getCharacterDimension();
 
         let address: number = base + (8 * bpp * tileMap.characterNumber);
-        let attribute: TileAttributes = TileAttributes.create(
-            characterDimension.height,
-            characterDimension.width,
-            this.getBpp(),
-            tileMap.yFlipped,
-            tileMap.xFlipped,
-        );
+        let attribute: ITileAttributes = {
+            height: characterDimension.height,
+            width: characterDimension.width,
+            bpp: this.getBpp(),
+            yFlipped: tileMap.yFlipped,
+            xFlipped: tileMap.xFlipped,
+        };
         let tile: Tile = this.ppu.tiles.getTile(address, attribute);
 
         return tile;
@@ -323,9 +323,14 @@ export abstract class Background {
             yIndex = characterDimension.height * 32;
         }
 
-        return new Tile(data, TileAttributes.create(
-            backgroundDimension.height * characterDimension.height,
-            backgroundDimension.width * characterDimension.width, bpp));
+        let attributes: ITileAttributes = {
+            height: backgroundDimension.height * characterDimension.height,
+            width: backgroundDimension.width * characterDimension.width,
+            bpp,
+            yFlipped: false,
+            xFlipped: false,
+        };
+        return new Tile(data, attributes);
     }
 
     public abstract getBpp(): BppType;
