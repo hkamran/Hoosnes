@@ -54,15 +54,15 @@ export class BusCpu {
         } else if (page == 0x4206) {
             value = Bit.toUint8(this.registers.wrdivb.get());
         } else if (page == 0x4207) {
-            value = Bit.toUint8(this.registers.htime.getLower());
+            value = Bit.toUint8(this.registers.htime.get());
         } else if (page == 0x4208) {
-            value = Bit.toUint8(this.registers.htime.getUpper());
+            value = Bit.toUint8(this.registers.htime.get());
         } else if (page == 0x4209) {
-            value = Bit.toUint8(this.registers.vtime.getLower());
+            value = Bit.toUint8(this.registers.vtime.get());
         } else if (page == 0x4210) {
             value = Bit.toUint8(this.registers.rdnmi.get());
         } else if (page == 0x420A) {
-            value = Bit.toUint8(this.registers.vtime.getUpper());
+            value = Bit.toUint8(this.registers.vtime.get());
         } else if (page == 0x420B) {
             value = Bit.toUint8(this.registers.mdmaen.get());
         } else if (page == 0x420C) {
@@ -342,13 +342,13 @@ export class BusCpu {
         } else if (page == 0x4206) {
             this.registers.wrdivb.set(value);
         } else if (page == 0x4207) {
-            this.registers.htime.setLower(value);
+            this.registers.htime.set(value);
         } else if (page == 0x4208) {
-            this.registers.htime.setUpper(value);
+            this.registers.htime.set(value);
         } else if (page == 0x4209) {
-            this.registers.vtime.setLower(value);
+            this.registers.vtime.set(value);
         } else if (page == 0x420A) {
-            this.registers.vtime.setUpper(value);
+            this.registers.vtime.set(value);
         } else if (page == 0x420B) {
             this.registers.mdmaen.set(value);
         } else if (page == 0x420C) {

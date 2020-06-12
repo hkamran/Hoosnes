@@ -36,25 +36,7 @@ export class Controller {
     }
 
     public readByte(address?: number): number {
-        if (address == 1) {
-            return this.data[15] << 7 |
-                this.data[14] << 6 |
-                this.data[13] << 5 |
-                this.data[12] << 4 |
-                this.data[11] << 3 |
-                this.data[10] << 2 |
-                this.data[9] << 1 |
-                this.data[8] << 0;
-        } else if (address == 0) {
-            return this.data[7] << 7 |
-                this.data[6] << 6 |
-                this.data[5] << 5 |
-                this.data[4] << 4 |
-                this.data[3] << 3 |
-                this.data[2] << 2 |
-                this.data[1] << 1 |
-                this.data[0] << 0;
-        } else {
+        if (address == null) {
             let result = 0;
             let size: number = this.data.length;
             if (this.index < size) {
@@ -72,6 +54,12 @@ export class Controller {
                 return 1;
             }
             return result;
+        } else {
+            if (address == 1) {
+                return this.getHigh();
+            } else if (address == 0) {
+                return this.getLow();
+            }
         }
     }
 
@@ -80,6 +68,28 @@ export class Controller {
         if ((this.strobe & 1) == 1) {
             this.index = 0;
         }
+    }
+
+    private getHigh(): number {
+        return this.data[15] << 7 |
+            this.data[14] << 6 |
+            this.data[13] << 5 |
+            this.data[12] << 4 |
+            this.data[11] << 3 |
+            this.data[10] << 2 |
+            this.data[9] << 1 |
+            this.data[8] << 0;
+    }
+
+    private getLow(): number {
+        return this.data[7] << 7 |
+            this.data[6] << 6 |
+            this.data[5] << 5 |
+            this.data[4] << 4 |
+            this.data[3] << 3 |
+            this.data[2] << 2 |
+            this.data[1] << 1 |
+            this.data[0] << 0;
     }
 
 }

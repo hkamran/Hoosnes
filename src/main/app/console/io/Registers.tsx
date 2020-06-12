@@ -4,7 +4,6 @@ import {HdmaEnableRegister} from "../cpu/Hdma";
 import {ScreenRegion} from "../ppu/Screen";
 import {joy1, joy2} from "../controller/Controller";
 import {AbstractRegister} from "../../interfaces/AbstractRegister";
-import {Register} from "../cpu/Registers";
 
 export class InterruptEnableFlagsRegister extends AbstractRegister {
 
@@ -257,34 +256,15 @@ export class Joy2Register extends AbstractRegister {
 
 export class Registers {
     public nmitimen : InterruptEnableFlagsRegister;
-    public wrio : Register;
-    public wrmpya : Register;
-    public wrmpyb : Register;
-    public wrdivl : Register;
-    public wrdivh : Register;
-    public wrdivb : Register;
-    public htime : Register;
-    public vtime : Register;
-    public memsel : Register;
     public rdnmi : NmiFlagRegister;
     public timeup : TimeUpRegister;
     public hvbjoy : HvBStatusRegister;
-    public rdio : Register;
-    public rddivl : Register;
-    public rddivh : Register;
-    public rdmpyl : Register;
-    public rdmpyh : Register;
-
 
     public oldJoy1 : OldJoy1Register;
     public oldJoy2 : OldJoy2Register;
 
     public joy1 : Joy1Register;
     public joy2 : Joy2Register;
-    public joy3l : Register;
-    public joy3h : Register;
-    public joy4l : Register;
-    public joy4h : Register;
 
     public wmdata : WramMemoryDataRegister;
     public wmadd : WramMemoryAddressRegister;
@@ -300,36 +280,38 @@ export class Registers {
     public mdmaen: DmaEnableRegister;
     public hdmaen : HdmaEnableRegister;
 
+    public wrio : AbstractRegister;
+    public wrmpya : AbstractRegister;
+    public wrmpyb : AbstractRegister;
+    public wrdivl : AbstractRegister;
+    public wrdivh : AbstractRegister;
+    public wrdivb : AbstractRegister;
+    public htime : AbstractRegister;
+    public vtime : AbstractRegister;
+    public memsel : AbstractRegister;
+    public rdio : AbstractRegister;
+    public rddivl : AbstractRegister;
+    public rddivh : AbstractRegister;
+    public rdmpyl : AbstractRegister;
+    public rdmpyh : AbstractRegister;
+
+    public joy3l : AbstractRegister;
+    public joy3h : AbstractRegister;
+    public joy4l : AbstractRegister;
+    public joy4h : AbstractRegister;
+
     constructor(console: Console) {
 
         this.nmitimen = new InterruptEnableFlagsRegister(console);
-        this.wrio = new Register();
-        this.wrmpya = new Register();
-        this.wrmpyb = new Register();
-        this.wrdivl = new Register();
-        this.wrdivh = new Register();
-        this.wrdivb = new Register();
-        this.htime = new Register();
-        this.vtime = new Register();
-        this.memsel = new Register();
         this.rdnmi = new NmiFlagRegister(console);
         this.timeup = new TimeUpRegister(console);
         this.hvbjoy = new HvBStatusRegister(console);
-        this.rdio = new Register();
-        this.rddivl = new Register();
-        this.rddivh = new Register();
-        this.rdmpyl = new Register();
-        this.rdmpyh = new Register();
 
         this.oldJoy1 = new OldJoy1Register(console);
         this.oldJoy2 = new OldJoy2Register(console);
 
         this.joy1 = new Joy1Register(console);
         this.joy2 = new Joy2Register(console);
-        this.joy3l = new Register();
-        this.joy3h = new Register();
-        this.joy4l = new Register();
-        this.joy4h = new Register();
 
         this.wmdata = new WramMemoryDataRegister(console);
         this.wmadd = new WramMemoryAddressRegister(console);
@@ -354,6 +336,26 @@ export class Registers {
             this.dma7,
         ]);
         this.hdmaen = new HdmaEnableRegister(console);
+
+        // TODO do it
+        this.wrio = new AbstractRegister(console);
+        this.wrmpya = new AbstractRegister(console);
+        this.wrmpyb = new AbstractRegister(console);
+        this.wrdivl = new AbstractRegister(console);
+        this.wrdivh = new AbstractRegister(console);
+        this.wrdivb = new AbstractRegister(console);
+        this.htime = new AbstractRegister(console);
+        this.vtime = new AbstractRegister(console);
+        this.memsel = new AbstractRegister(console);
+        this.rdio = new AbstractRegister(console);
+        this.rddivl = new AbstractRegister(console);
+        this.rddivh = new AbstractRegister(console);
+        this.rdmpyl = new AbstractRegister(console);
+        this.rdmpyh = new AbstractRegister(console);
+        this.joy3l = new AbstractRegister(console);
+        this.joy3h = new AbstractRegister(console);
+        this.joy4l = new AbstractRegister(console);
+        this.joy4h = new AbstractRegister(console);
     }
 
 }

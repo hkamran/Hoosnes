@@ -54,46 +54,6 @@ import {AbstractRegister} from "../../interfaces/AbstractRegister";
  * +-------------------------------------+------------------------------+----------------------------------+
  */
 
-
-export class Register {
-
-    protected val : number = 0;
-    protected mode : Mode = Modes.bit16;
-
-    constructor() {
-    }
-
-    public set(val : number): void {
-        if (val == null || val < 0) {
-            throw Error("Invalid set " + val + " to register.");
-        }
-        if (this.mode == Modes.bit8 && this.val > 0xFF) throw new Error("value is to big for register");
-        this.val = val;
-    }
-
-    public get(): number {
-        return this.val;
-    }
-
-    public setUpper(val: number) {
-        if (this.mode != Modes.bit16) throw new Error("Cannot set upper on 8 bit register");
-        this.val = Bit.setUint16Upper(this.val, val);
-    }
-
-    public setLower(val: number) {
-        this.val = Bit.setUint16Lower(this.val, val);
-    }
-
-    public getLower(): number {
-        return Bit.getUint16Lower(this.val);
-    }
-
-    public getUpper(): number {
-        return Bit.getUint16Upper(this.val);
-    }
-
-}
-
 // NVMXDIZC
 export class StatusRegister extends AbstractRegister {
 
