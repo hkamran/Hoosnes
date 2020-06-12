@@ -1,6 +1,6 @@
 import {Dimension, Tile, TileAttributes} from "./Tiles";
 import {Ppu} from "./Ppu";
-import {BppType, Color} from "./Palette";
+import {BppType, IColor} from "./Palette";
 import {TileMap} from "./TileMaps";
 import {ArrayUtil} from "../../util/ArrayUtil";
 import {Objects} from "../../util/Objects";
@@ -79,7 +79,7 @@ export abstract class Background {
         return tileMap;
     }
 
-    public getLineImage(y: number): Color[] {
+    public getLineImage(y: number): IColor[] {
         let characterDimension: Dimension = this.getCharacterDimension();
         let backgroundDimension: Dimension = this.getBackgroundDimension();
         let bpp: number = this.getBpp().valueOf();
@@ -94,18 +94,18 @@ export abstract class Background {
         let xHarse: number = Math.floor(xPos / characterDimension.width);
         let xCoarse: number = xHarse % characterDimension.width;
 
-        let results: Color[] = [];
+        let results: IColor[] = [];
         let xHarseEnd: number = xHarse + 32;
 
         for (;xHarse < xHarseEnd; xHarse++) {
             let tileMap: TileMap = this.getTileMap(xHarse, yHarse);
             let tile: Tile = this.getTile(tileMap);
 
-            let colors: Color[] = this.ppu.palette.getPalettesForBppType(tileMap.getPaletteNumber(), bpp);
+            let colors: IColor[] = this.ppu.palette.getPalettesForBppType(tileMap.getPaletteNumber(), bpp);
             let sliver: number[] = tile.data[yCoarse];
             for (let xIndex = 0; xIndex < sliver.length; xIndex++) {
                 let index: number = sliver[xIndex];
-                let color: Color = colors[index];
+                let color: IColor = colors[index];
                 if (index == 0) color.opacity = 0;
                 results.push(color);
             }

@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Card} from "../../core/layout/Card";
-import {BppType, Color} from "../../../app/console/ppu/Palette";
+import {BppType, IColor} from "../../../app/console/ppu/Palette";
 import {Console} from "../../../app/console/Console";
 
 declare let window : any;
@@ -41,7 +41,7 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
         this.canvasRef.current.width = totalWidth;
         this.canvasRef.current.height = totalHeight;
 
-        let colors: Color[] = this.props.snes.ppu.palette.getPalettes(0, 256);
+        let colors: IColor[] = this.props.snes.ppu.palette.getPalettes(0, 256);
         let image: ImageData = this.context.createImageData(totalWidth, totalHeight);
 
         for (let index = 0; index < image.data.length; index += 4) {
@@ -52,7 +52,7 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
         }
 
         for (let i = 0; i < colors.length; i++) {
-            let color: Color = colors[i];
+            let color: IColor = colors[i];
 
             let yIndex: number = (totalWidth * this.borderSize) + (Math.floor(i / this.width) * (totalWidth * (this.pixelSize + this.borderSize)));
             let xIndex: number = this.borderSize + (Math.floor(i % this.height) * (this.pixelSize + this.borderSize));

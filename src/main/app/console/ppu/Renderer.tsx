@@ -1,5 +1,5 @@
 import {Ppu} from "./Ppu";
-import {BppType, Color} from "./Palette";
+import {BppType, IColor} from "./Palette";
 import {Screen, ScreenRegion} from "./Screen";
 import {Dimension, Tile} from "./Tiles";
 import {Sprite} from "./Sprites";
@@ -30,18 +30,18 @@ export class Renderer {
      */
     public tick(): void {
         let mode: number = this.ppu.registers.bgmode.getMode();
-        let base: Color = this.ppu.palette.getPalette(0);
+        let base: IColor = this.ppu.palette.getPalette(0);
         let y: number = this.ppu.scanline - ScreenRegion.VERT_PRELINE.end;
 
-        let bg1Colors: Color[] = this.ppu.backgrounds.bg1.getLineImage(y);
-        let bg2Colors: Color[] = this.ppu.backgrounds.bg2.getLineImage(y);
-        let bg3Colors: Color[] = (mode <= 2) ? this.ppu.backgrounds.bg3.getLineImage(y) : [];
+        let bg1Colors: IColor[] = this.ppu.backgrounds.bg1.getLineImage(y);
+        let bg2Colors: IColor[] = this.ppu.backgrounds.bg2.getLineImage(y);
+        let bg3Colors: IColor[] = (mode <= 2) ? this.ppu.backgrounds.bg3.getLineImage(y) : [];
 
         for (let x: number = 0; x < Screen.WIDTH; x++) {
-            let color: Color = base;
-            let bg1Color: Color = bg1Colors.length > x ? bg1Colors[x]: base;
-            let bg2Color: Color = bg2Colors.length > x ? bg2Colors[x]: base;
-            let bg3Color: Color = bg3Colors.length > x ? bg3Colors[x]: base;
+            let color: IColor = base;
+            let bg1Color: IColor = bg1Colors.length > x ? bg1Colors[x]: base;
+            let bg2Color: IColor = bg2Colors.length > x ? bg2Colors[x]: base;
+            let bg3Color: IColor = bg3Colors.length > x ? bg3Colors[x]: base;
 
             if (bg2Color.opacity > 0) color = bg2Color;
             if (bg3Color.opacity > 0) color = bg3Color;
@@ -63,12 +63,12 @@ export class Renderer {
                 count++;
                 if (count == 31) break;
                 let tile: Tile = sprite.getTile();
-                let colors: Color[] = this.ppu.palette.getPalettesForBppType(sprite.getPaletteIndex(), BppType.Four);
+                let colors: IColor[] = this.ppu.palette.getPalettesForBppType(sprite.getPaletteIndex(), BppType.Four);
 
                 for (let x: number = 0; x < width; x++) {
                     let index: number = tile.data[y - yStart][x];
                     if (index == 0) continue;
-                    let color: Color = colors[index];
+                    let color: IColor = colors[index];
                     let xIndex: number = ((sprite.isXWrapped() ? 0x100 : 0x0) + sprite.getXPosition() + x) % 0x1FF;
                     if (xIndex > Screen.WIDTH) continue;
                     this.screen.setPixel(sprite.getXPosition() + x , y, color);

@@ -1,5 +1,5 @@
 import {Ppu} from "./Ppu";
-import {Color} from "./Palette";
+import {IColor} from "./Palette";
 
 export class ScreenRegion {
 
@@ -59,7 +59,7 @@ export class Screen {
         this.reset();
     }
 
-    public setPixel(x: number, y: number, color: Color) {
+    public setPixel(x: number, y: number, color: IColor) {
         if (color == null) {
             throw Error("Invalid coloring");
         }

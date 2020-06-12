@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Card} from "../../core/layout/Card";
-import {BppType, Color} from "../../../app/console/ppu/Palette";
+import {BppType, IColor} from "../../../app/console/ppu/Palette";
 import {Console} from "../../../app/console/Console";
 import {Dimension, Orientation, Tile} from "../../../app/console/ppu/Tiles";
 import {Sprite} from "../../../app/console/ppu/Sprites";
@@ -87,7 +87,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
         let tileBottomIndex: number = ((this.state.tileHeightSize * this.state.tilePixelSize) * 0) * totalWidth;
         let tileRightIndex: number = (0 * this.state.tilePixelSize * this.state.tileWidthSize);
 
-        let colors: Color[] = this.props.snes.ppu.palette.getPalettesForBppType(sprite.getPaletteIndex(), BppType.Four);
+        let colors: IColor[] = this.props.snes.ppu.palette.getPalettesForBppType(sprite.getPaletteIndex(), BppType.Four);
 
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
@@ -105,7 +105,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
                         index += (xIndex + xOffset);
                         index *= 4;
 
-                        let color: Color = colors[palette];
+                        let color: IColor = colors[palette];
                         if (color == null) {
                             continue;
                         }

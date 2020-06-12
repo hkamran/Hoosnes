@@ -3,7 +3,7 @@ import * as React from "react";
 import {Card} from "../../core/layout/Card";
 import {Background} from "../../../app/console/ppu/Backgrounds";
 import {Dimension, Tile} from "../../../app/console/ppu/Tiles";
-import {BppType, Color} from "../../../app/console/ppu/Palette";
+import {BppType, IColor} from "../../../app/console/ppu/Palette";
 import {TileMap} from "../../../app/console/ppu/TileMaps";
 
 interface IBackgroundsCardProps {
@@ -91,7 +91,7 @@ export class BackgroundsCard extends React.Component<IBackgroundsCardProps, IBac
                 image.data[index + 3] = 255;
             }
 
-            let defaultColor: Color = this.props.snes.ppu.palette.getPalette(0);
+            let defaultColor: IColor = this.props.snes.ppu.palette.getPalette(0);
 
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
@@ -101,8 +101,8 @@ export class BackgroundsCard extends React.Component<IBackgroundsCardProps, IBac
                     let yIndex: number = ((y * this.state.tilePixelSize) * totalWidth);
                     let xIndex: number = (x * this.state.tilePixelSize);
 
-                    let colors: Color[] = this.props.snes.ppu.palette.getPalettesForBppType(tileMap.getPaletteNumber(), bpp);
-                    let color: Color = palette == 0 ? defaultColor: colors[palette];
+                    let colors: IColor[] = this.props.snes.ppu.palette.getPalettesForBppType(tileMap.getPaletteNumber(), bpp);
+                    let color: IColor = palette == 0 ? defaultColor: colors[palette];
 
                     // Write pixel size
                     for (let yOffset = 0; yOffset < this.state.tilePixelSize; yOffset++) {
