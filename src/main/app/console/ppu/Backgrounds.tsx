@@ -1,7 +1,7 @@
 import {Dimension, Tile, TileAttributes} from "./Tiles";
 import {Ppu} from "./Ppu";
 import {BppType, IColor} from "./Palette";
-import {TileMap} from "./TileMaps";
+import {ITileMap} from "./TileMaps";
 import {ArrayUtil} from "../../util/ArrayUtil";
 import {Objects} from "../../util/Objects";
 import {Screen} from "./Screen";
@@ -59,7 +59,7 @@ export abstract class Background {
         this.ppu = ppu;
     }
 
-    public getTileMap(x: number, y: number): TileMap {
+    public getTileMap(x: number, y: number): ITileMap {
         let tileMapAddress: number = this.getTileMapAddress();
         let dimension: Dimension = this.getBackgroundDimension();
         let tileMapSize = 2;
@@ -75,7 +75,7 @@ export abstract class Background {
 
         let index: number = tileMapAddress + yOffset + xOffset + mapOffset;
 
-        let tileMap: TileMap = this.ppu.tileMaps.getTileMap(index);
+        let tileMap: ITileMap = this.ppu.tileMaps.getTileMap(index);
         return tileMap;
     }
 
@@ -98,10 +98,10 @@ export abstract class Background {
         let xHarseEnd: number = xHarse + 32;
 
         for (;xHarse < xHarseEnd; xHarse++) {
-            let tileMap: TileMap = this.getTileMap(xHarse, yHarse);
+            let tileMap: ITileMap = this.getTileMap(xHarse, yHarse);
             let tile: Tile = this.getTile(tileMap);
 
-            let colors: IColor[] = this.ppu.palette.getPalettesForBppType(tileMap.getPaletteNumber(), bpp);
+            let colors: IColor[] = this.ppu.palette.getPalettesForBppType(tileMap.paletteNumber, bpp);
             let sliver: number[] = tile.data[yCoarse];
             for (let xIndex = 0; xIndex < sliver.length; xIndex++) {
                 let index: number = sliver[xIndex];
@@ -114,7 +114,7 @@ export abstract class Background {
         return results;
     }
 
-    public getTile(tileMap: TileMap) {
+    public getTile(tileMap: ITileMap) {
         Objects.requireNonNull(tileMap);
 
         // address_of_character = (base_location_bits << 13) + (8 * color_depth * character_number);
@@ -122,8 +122,14 @@ export abstract class Background {
         let base: number = this.getBaseCharacterAddress();
         let characterDimension: Dimension = this.getCharacterDimension();
 
-        let address: number = base + (8 * bpp * tileMap.getCharacterNumber());
-        let attribute: TileAttributes = TileAttributes.create(characterDimension.height, characterDimension.width, this.getBpp(), tileMap.isYFlipped(), tileMap.isXFlipped());
+        let address: number = base + (8 * bpp * tileMap.characterNumber);
+        let attribute: TileAttributes = TileAttributes.create(
+            characterDimension.height,
+            characterDimension.width,
+            this.getBpp(),
+            tileMap.yFlipped,
+            tileMap.xFlipped,
+        );
         let tile: Tile = this.ppu.tiles.getTile(address, attribute);
 
         return tile;
@@ -142,17 +148,17 @@ export abstract class Background {
         return this.compose(topLeft, topRight, bottomLeft, bottomRight);
     }
 
-    public getTileMaps(): TileMap[][] {
+    public getTileMaps(): ITileMap[][] {
         let tileMapAddress: number = this.getTileMapAddress();
         let isVerticallyExtended: boolean = this.isVerticallyExtended();
         let isHorizontallyExtended: boolean = this.isHorizontallyExtended();
 
-        let topLeft: TileMap[] = this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 0));
-        let topRight: TileMap[] = isHorizontallyExtended ? this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 1)) : null;
-        let bottomLeft: TileMap[] = isVerticallyExtended ? this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 2)) : null;
-        let bottomRight: TileMap[] = isHorizontallyExtended && isVerticallyExtended ? this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 3)) : null;
+        let topLeft: ITileMap[] = this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 0));
+        let topRight: ITileMap[] = isHorizontallyExtended ? this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 1)) : null;
+        let bottomLeft: ITileMap[] = isVerticallyExtended ? this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 2)) : null;
+        let bottomRight: ITileMap[] = isHorizontallyExtended && isVerticallyExtended ? this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 3)) : null;
 
-        let tileMaps: TileMap[][] = [];
+        let tileMaps: ITileMap[][] = [];
 
         let yIndex: number = 0;
         let xIndex: number = 0;
@@ -220,7 +226,7 @@ export abstract class Background {
         return tileMaps;
     }
 
-    private convertToTiles(tileMaps: TileMap[]): Tile[] {
+    private convertToTiles(tileMaps: ITileMap[]): Tile[] {
         let tiles: Tile[] = [];
         for (let tileMap of tileMaps) {
             let tile: Tile = this.getTile(tileMap);

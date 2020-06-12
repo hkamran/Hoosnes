@@ -11,42 +11,34 @@ import {AddressUtil} from "../../util/AddressUtil";
      ppp        = Tile palette. The number of entries in the palette depends on the Mode and the BG.
      cccccccccc = Tile number.
  */
-export class TileMap {
 
-    public static readonly SIZE_IN_BYTES: number = 2;
-    public value: number;
-
-    constructor(low: number, high: number) {
-        this.value = Bit.toUint16(high, low);
-    }
-
-    public getCharacterNumber(): number {
-        return this.value & 0x3FF;
-    }
-
-    public getPaletteNumber(): number {
-        return (this.value >> 10) & 0x7;
-    }
-
-    public isXFlipped(): boolean {
-        return ((this.value >> 14) & 0x1) == 1;
-    }
-
-    public isYFlipped(): boolean {
-        return ((this.value >> 15) & 0x1) == 1;
-    }
-
-    public hasPriority(): boolean {
-        return ((this.value >> 13) & 0x1) == 1;
-    }
-
-    public static create(low: number, high: number) {
-        Objects.requireNonNull(low);
-        Objects.requireNonNull(high);
-
-        return new TileMap(low, high);
-    }
+export interface ITileMap {
+    characterNumber: number;
+    paletteNumber: number;
+    xFlipped: boolean;
+    yFlipped: boolean;
+    hasPriority: boolean;
 }
+
+export function parseTileMap(data): ITileMap {
+    Objects.requireNonNull(data);
+
+    const characterNumber = data & 0x3FF;
+    const paletteNumber = (data >> 10) & 0x7;
+    const xFlipped = ((data >> 14) & 0x1) == 1;
+    const yFlipped = ((data >> 15) & 0x1) == 1;
+    const hasPriority = ((data >> 13) & 0x1) == 1;
+
+    return {
+        characterNumber,
+        paletteNumber,
+        xFlipped,
+        yFlipped,
+        hasPriority,
+    };
+}
+
+const TILE_MAP_SIZE_IN_BYTES = 2;
 
 export class TileMaps {
 
@@ -58,25 +50,26 @@ export class TileMaps {
         this.dimension = Dimension.get32by32();
     }
 
-    public getTileMap(address: number): TileMap {
+    public getTileMap(address: number): ITileMap {
         AddressUtil.assertValid(address);
 
         let index = address;
-        let tileMap = TileMap.create(
-            this.vram.data[(index + 0) % this.vram.data.length],
-            this.vram.data[(index + 1) % this.vram.data.length]);
+
+        const low: number = this.vram.readByte(index + 0);
+        const high: number = this.vram.readByte(index + 1);
+        const data = Bit.toUint16(high, low);
+
+        let tileMap = parseTileMap(data);
         return tileMap;
     }
 
-    public getTileMaps(address: number): TileMap[] {
+    public getTileMaps(address: number): ITileMap[] {
         AddressUtil.assertValid(address);
-        let entries: TileMap[] = [];
+        let entries: ITileMap[] = [];
 
         let amount = ((this.dimension.width * this.dimension.height) * 2);
-        for (let offset = 0; offset < amount; offset += TileMap.SIZE_IN_BYTES) {
-            const lowIndex = (address + offset) % this.vram.data.length;
-            const highIndex = (lowIndex + 1) % this.vram.data.length;
-            const tilemap = TileMap.create(this.vram.data[lowIndex], this.vram.data[highIndex]);
+        for (let offset = 0; offset < amount; offset += TILE_MAP_SIZE_IN_BYTES) {
+            const tilemap = this.getTileMap(address);
             entries.push(tilemap);
         }
 
