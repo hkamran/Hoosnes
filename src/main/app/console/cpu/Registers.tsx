@@ -58,7 +58,7 @@ import {AbstractRegister} from "../../interfaces/AbstractRegister";
 export class Register {
 
     protected val : number = 0;
-    protected mode : Mode = Modes.bit8;
+    protected mode : Mode = Modes.bit16;
 
     constructor() {
     }

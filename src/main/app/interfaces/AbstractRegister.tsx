@@ -1,5 +1,9 @@
 import {Objects} from "../util/Objects";
 import {Console} from "../console/Console";
+import {Ppu} from "../console/ppu/Ppu";
+import {Io} from "../console/io/Io";
+import {Cpu} from "../console/cpu/Cpu";
+import {Bus} from "../console/bus/Bus";
 
 const CLEAR_MASKS: number[] = [0xFFFF00, 0xFF00FF, 0x00FFFF];
 const SHIFTS: number[] = [0, 8, 16];
@@ -9,8 +13,16 @@ export class AbstractRegister {
     private value: number = 0;
     protected console: Console;
 
+    protected cpu: Cpu;
+    protected ppu: Ppu;
+    protected bus: Bus;
+
     constructor(console: Console) {
         this.console = console;
+
+        this.cpu = console.cpu;
+        this.ppu = console.ppu;
+        this.bus = console.bus;
     }
 
     public set(value : number, byteIndex?: number): void {

@@ -1,107 +1,68 @@
 import {Console} from "../Console";
 import {DmaChannel, DmaEnableRegister} from "../cpu/Dma";
 import {HdmaEnableRegister} from "../cpu/Hdma";
-import {Bit} from "../../util/Bit";
 import {ScreenRegion} from "../ppu/Screen";
 import {joy1, joy2} from "../controller/Controller";
+import {AbstractRegister} from "../../interfaces/AbstractRegister";
 import {Register} from "../cpu/Registers";
 
-export class InterruptEnableFlagsRegister extends Register {
+export class InterruptEnableFlagsRegister extends AbstractRegister {
 
     public address: string = "4200";
     public name: string = "NMITIMEN";
 
-    public nmiEnable: boolean = false;
-    public irqMode: number = 0;
-    public autoJoypadEnable: boolean = false;
-
     public set(val: number) {
         super.set(val);
 
-        this.nmiEnable = (this.val & 0x80) > 0;
-        this.irqMode = (this.val & 0x30) >> 4;
-        this.autoJoypadEnable = (this.val & 0x1) > 0;
+        this.console.io.nmiEnable = (val & 0x80) > 0;
+        this.console.io.irqMode = (val & 0x30) >> 4;
+        this.console.io.autoJoypadEnable = (val & 0x1) > 0;
     }
 
+    public getNmiEnable(): boolean {
+        return this.console.io.nmiEnable;
+    }
+
+    public getAutoJoypadEnable(): boolean {
+        return this.console.io.nmiEnable;
+    }
+
+    public getIRQMode(): number {
+        return this.console.io.irqMode;
+    }
 }
 
-export class NmiFlagRegister extends Register {
+export class NmiFlagRegister extends AbstractRegister {
 
     public address: string = "4210";
     public name: string = "RDNMI";
 
-    public nmiFlag: boolean = false;
-
-    public setNMIFlag(flag: boolean) {
-        this.nmiFlag = flag;
+    public setNmiStatus(flag: boolean) {
+        this.console.io.nmiStatus = flag;
     }
 
     public get(): number {
-        let result = 2; // 5A22 Version
-        result |= (this.nmiFlag ? 1 : 0) << 7;
+        let result = this.console.io.chip5A22Version;
+        result |= (this.console.io.nmiStatus ? 1 : 0) << 7;
 
-        this.setNMIFlag(false);
+        this.console.io.nmiStatus = false;
         return result;
     }
 
 }
 
-export class HorizontalTimeRegister extends Register {
-
-    public address: string = "4207-4208";
-    public name: string = "VTIME";
-
-    public setLower(val: number) {
-        this.val = Bit.setUint16Lower(this.val, val);
-    }
-
-    public setUpper(val: number) {
-        this.val = Bit.setUint16Upper(this.val, val);
-    }
-
-    public getLower(): number {
-        return Bit.getUint16Lower(this.val);
-    }
-
-    public getUpper(): number {
-        return Bit.getUint16Upper(this.val);
-    }
-}
-
-export class VerticalTimeRegister extends Register {
-
-    public address: string = "4209-420A";
-    public name: string = "VTIME";
-
-    public setLower(val: number) {
-        this.val = Bit.setUint16Lower(this.val, val);
-    }
-
-    public setUpper(val: number) {
-        this.val = Bit.setUint16Upper(this.val, val & 0x100);
-    }
-
-    public getLower(): number {
-        return Bit.getUint16Lower(this.val);
-    }
-
-    public getUpper(): number {
-        return Bit.getUint16Upper(this.val);
-    }
-}
-
-export class TimeUpRegister extends Register {
+/**
+ * This bit is set just after an IRQ fires (at the moment, it seems to have the same delay as the NMI Flag of $4210 has following NMI),
+ * and is cleared on read or write. Supposedly, it is required that this register be read during the IRQ handler.
+ * If this really is the case, then I suspect that that read is what actually clears the CPU's IRQ line. This register
+ * is marked read/write in another doc, with no explanation. IRQ is cleared on power on or reset.
+ */
+export class TimeUpRegister extends AbstractRegister {
 
     public address: string = "4211";
     public name: string = "TIMEUP";
-    private console: Console;
 
     public irqFlag: boolean = false;
-
-    constructor(console: Console) {
-        super();
-        this.console = console;
-    }
 
     public setIRQFlag(flag: boolean) {
         this.irqFlag = flag;
@@ -117,37 +78,37 @@ export class TimeUpRegister extends Register {
 
 }
 
-export class WramMemoryAddressRegister extends Register {
+export class WramMemoryAddressRegister extends AbstractRegister {
 
     public address: string = "0x2181-0x2183";
     public name: string = "WMADD";
 
-    public setLower(val: number) {
-        this.val = Bit.setUint24Lower(this.val, val);
+    public setLower(val: number): void {
+        this.set(val, 0);
     }
 
     public setMiddle(val: number) {
-        this.val = Bit.setUint24Middle(this.val, val);
+        this.set(val, 1);
     }
 
     public setUpper(val: number) {
-        this.val = Bit.setUint24Upper(this.val, val);
+        this.set(val, 2);
     }
 
     public getLower(): number {
-        return Bit.getUint24Lower(this.val);
+        return this.get(0);
     }
 
     public getMiddle(): number {
-        return Bit.getUint24Middle(this.val);
+        return this.get(1);
     }
 
     public getUpper(): number {
-        return Bit.getUint24Upper(this.val);
+        return this.get(2);
     }
 }
 
-export class WramMemoryDataRegister extends Register {
+export class WramMemoryDataRegister extends AbstractRegister {
 
     public address: string = "0x2180";
     public name: string = "WMDATA";
@@ -162,15 +123,7 @@ export class WramMemoryDataRegister extends Register {
 
 }
 
-export class HvBStatusRegister extends Register {
-
-    private console: Console;
-
-    constructor(console: Console) {
-        super();
-        this.console = console;
-    }
-
+export class HvBStatusRegister extends AbstractRegister {
 
     public address: string = "0x4212";
     public name: string = "HVBJOY";
@@ -226,7 +179,7 @@ export class HvBStatusRegister extends Register {
 
 }
 
-export class OldJoy1Register extends Register {
+export class OldJoy1Register extends AbstractRegister {
 
     public address: string = "0x4016";
     public name: string = "JOY1";
@@ -241,7 +194,7 @@ export class OldJoy1Register extends Register {
 
 }
 
-export class OldJoy2Register extends Register {
+export class OldJoy2Register extends AbstractRegister {
 
     public address: string = "0x4017";
     public name: string = "JOY2";
@@ -256,52 +209,48 @@ export class OldJoy2Register extends Register {
 
 }
 
-export class Joy1Register extends Register {
+export class Joy1Register extends AbstractRegister {
 
     public address: string = "0x4218-0x4219";
     public name: string = "JOY1";
 
-    public value: number = 0;
-
     public getLower(): number {
-        return Bit.getUint16Lower(this.value);
+        return this.get(0);
     }
 
     public getUpper(): number {
-        return Bit.getUint16Upper(this.value);
+        return this.get(1);
     }
 
     public setUpper(value: number) {
-        this.value = Bit.setUint16Upper(this.value, value);
+        this.set(value, 1);
     }
 
     public setLower(value: number) {
-        this.value = Bit.setUint16Lower(this.value, value);
+        this.set(value, 0);
     }
 
 }
 
-export class Joy2Register extends Register {
+export class Joy2Register extends AbstractRegister {
 
     public address: string = "0x421A-0x421B";
     public name: string = "JOY2";
 
-    public value: number = 0;
-
     public getLower(): number {
-        return Bit.getUint16Lower(this.value);
+        return this.get(0);
     }
 
     public getUpper(): number {
-        return Bit.getUint16Upper(this.value);
+        return this.get(1);
     }
 
     public setUpper(value: number) {
-        this.value = Bit.setUint16Upper(this.value, value);
+        this.set(value, 1);
     }
 
     public setLower(value: number) {
-        this.value = Bit.setUint16Lower(this.value, value);
+        this.set(value, 0);
     }
 
 }
@@ -314,8 +263,8 @@ export class Registers {
     public wrdivl : Register;
     public wrdivh : Register;
     public wrdivb : Register;
-    public htime : HorizontalTimeRegister;
-    public vtime : VerticalTimeRegister;
+    public htime : Register;
+    public vtime : Register;
     public memsel : Register;
     public rdnmi : NmiFlagRegister;
     public timeup : TimeUpRegister;
@@ -353,17 +302,17 @@ export class Registers {
 
     constructor(console: Console) {
 
-        this.nmitimen = new InterruptEnableFlagsRegister();
+        this.nmitimen = new InterruptEnableFlagsRegister(console);
         this.wrio = new Register();
         this.wrmpya = new Register();
         this.wrmpyb = new Register();
         this.wrdivl = new Register();
         this.wrdivh = new Register();
         this.wrdivb = new Register();
-        this.htime = new HorizontalTimeRegister();
-        this.vtime = new VerticalTimeRegister();
+        this.htime = new Register();
+        this.vtime = new Register();
         this.memsel = new Register();
-        this.rdnmi = new NmiFlagRegister();
+        this.rdnmi = new NmiFlagRegister(console);
         this.timeup = new TimeUpRegister(console);
         this.hvbjoy = new HvBStatusRegister(console);
         this.rdio = new Register();
@@ -372,18 +321,18 @@ export class Registers {
         this.rdmpyl = new Register();
         this.rdmpyh = new Register();
 
-        this.oldJoy1 = new OldJoy1Register();
-        this.oldJoy2 = new OldJoy2Register();
+        this.oldJoy1 = new OldJoy1Register(console);
+        this.oldJoy2 = new OldJoy2Register(console);
 
-        this.joy1 = new Joy1Register();
-        this.joy2 = new Joy2Register();
+        this.joy1 = new Joy1Register(console);
+        this.joy2 = new Joy2Register(console);
         this.joy3l = new Register();
         this.joy3h = new Register();
         this.joy4l = new Register();
         this.joy4h = new Register();
 
-        this.wmdata = new WramMemoryDataRegister();
-        this.wmadd = new WramMemoryAddressRegister();
+        this.wmdata = new WramMemoryDataRegister(console);
+        this.wmadd = new WramMemoryAddressRegister(console);
 
         this.dma0 = new DmaChannel(console, 0);
         this.dma1 = new DmaChannel(console, 1);

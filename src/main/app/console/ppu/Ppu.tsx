@@ -154,20 +154,20 @@ export class Ppu {
             this.console.io.registers.hvbjoy.setVBlankFlag(false);
             this.console.io.registers.hvbjoy.setJoypadFlag(false);
 
-            this.console.io.registers.rdnmi.setNMIFlag(false);
+            this.console.io.registers.rdnmi.setNmiStatus(false);
             this.console.io.registers.timeup.setIRQFlag(false);
         }
 
         if (isVBlankStart) {
             this.screen.state = ScreenState.VBLANK;
             this.console.io.registers.hvbjoy.setVBlankFlag(true);
-            this.console.io.registers.rdnmi.setNMIFlag(true);
+            this.console.io.registers.rdnmi.setNmiStatus(true);
 
-            if (this.console.io.registers.nmitimen.nmiEnable) {
+            if (this.console.io.registers.nmitimen.getNmiEnable()) {
                 this.console.cpu.interrupts.set(InterruptType.NMI);
             }
 
-            if (this.console.io.registers.nmitimen.autoJoypadEnable) {
+            if (this.console.io.registers.nmitimen.getAutoJoypadEnable()) {
                 this.console.io.registers.hvbjoy.setJoypadFlag(false);
                 this.console.io.registers.joy1.setLower(joy1.readByte(0));
                 this.console.io.registers.joy1.setUpper(joy1.readByte(1));
@@ -195,7 +195,7 @@ export class Ppu {
     }
 
     private triggerIRQ(): void {
-        const mode = this.console.io.registers.nmitimen.irqMode;
+        const mode = this.console.io.registers.nmitimen.getIRQMode();
         if (mode == 0) {
             // Do nothing
         } else if (mode == 1) {
