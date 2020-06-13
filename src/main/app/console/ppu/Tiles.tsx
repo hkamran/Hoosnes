@@ -2,7 +2,6 @@ import {Ppu} from "./Ppu";
 import {Objects} from "../../util/Objects";
 import {BppType} from "./Palette";
 import {Vram} from "../memory/Vram";
-import {ArrayUtil} from "../../util/ArrayUtil";
 import {AddressUtil} from "../../util/AddressUtil";
 
 export class Dimension {
@@ -86,8 +85,6 @@ export interface ITile {
 const TILE_HEIGHT = 8;
 const TILE_WIDTH = 8;
 const BYTES_PER_PIXEL = 2;
-const BYTES_PER_ROW = 8;
-const BYTES_PER_PLANE = 16;
 const rows = [0, 0];
 
 export class Tiles {
@@ -134,7 +131,7 @@ export class Tiles {
 
         for (let yBase: number = 0; yBase < attributes.height; yBase += TILE_WIDTH) {
             for (let yOffset: number = 0; yOffset < TILE_WIDTH; yOffset++) {
-                let row: number[] = this.getTileRowAt(address, yOffset, attributes);
+                let row: number[] = this.getRowAt(address, yOffset, attributes);
                 image.push(row);
             }
             address += bytesPerTile;
@@ -146,15 +143,19 @@ export class Tiles {
         };
     }
 
-    private getTileRowAt(address: number, row: number, attributes: ITileAttributes): number[] {
+    public getRowAt(address: number, row: number, attributes: ITileAttributes): number[] {
+        if (attributes.bpp == BppType.Eight) {
+            throw new Error("Not implemented!");
+        }
+
         const bpp: number = attributes.bpp.valueOf();
         const numOfPlanes = Math.floor(bpp / 2);
 
         const rowIndex = attributes.yFlipped ?
             (attributes.height - 1 - row) * BYTES_PER_PIXEL :
             row * BYTES_PER_PIXEL;
-        const bytesPer8by8 = BYTES_PER_ROW * bpp * (attributes.yFlipped ? -1 : 1);
-        const bytesPerPlane = (BYTES_PER_ROW - 1) * numOfPlanes;
+        const bytesPer8by8 = TILE_WIDTH * bpp * (attributes.yFlipped ? -1 : 1);
+        const bytesPerPlane = (TILE_WIDTH - 1) * numOfPlanes;
 
         let image: number[] = new Array(attributes.width);
         let counter = 0;

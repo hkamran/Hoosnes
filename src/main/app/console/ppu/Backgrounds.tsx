@@ -80,6 +80,7 @@ export abstract class Background {
     }
 
     public getLineImage(y: number): IColor[] {
+        let base: number = this.getBaseCharacterAddress();
         let characterDimension: Dimension = this.getCharacterDimension();
         let backgroundDimension: Dimension = this.getBackgroundDimension();
         let bpp: number = this.getBpp().valueOf();
@@ -97,12 +98,24 @@ export abstract class Background {
         let results: IColor[] = [];
         let xHarseEnd: number = xHarse + 32;
 
+        let attribute: ITileAttributes = {
+            height: characterDimension.height,
+            width: characterDimension.width,
+            bpp: this.getBpp(),
+            yFlipped: null,
+            xFlipped: null,
+        };
+
         for (;xHarse < xHarseEnd; xHarse++) {
             let tileMap: ITileMap = this.getTileMap(xHarse, yHarse);
-            let tile: ITile = this.getTile(tileMap);
+
+            attribute.xFlipped = tileMap.xFlipped;
+            attribute.yFlipped = tileMap.yFlipped;
+
+            let address: number = base + (8 * bpp * tileMap.characterNumber);
+            let sliver: number[] = this.ppu.tiles.getRowAt(address, yCoarse, attribute);
 
             let colors: IColor[] = this.ppu.palette.getPalettesForBppType(tileMap.paletteNumber, bpp);
-            let sliver: number[] = tile.image[yCoarse];
             for (let xIndex = 0; xIndex < sliver.length; xIndex++) {
                 let index: number = sliver[xIndex];
                 let color: IColor = colors[index];
