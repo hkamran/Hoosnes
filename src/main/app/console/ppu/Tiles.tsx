@@ -145,21 +145,23 @@ export class Tiles {
         const bpp: number = attributes.bpp.valueOf();
         const numOfPlanes = Math.floor(bpp / 2);
 
-        const rowCourse = row % TILE_HEIGHT;
-        const rowHarse = Math.floor(row / TILE_HEIGHT);
-
-        const rowIndex = attributes.yFlipped ?
-            (attributes.height - 1 - rowCourse) * BYTES_PER_PIXEL :
-            rowCourse * BYTES_PER_PIXEL;
         const bytesPerRow = TILE_WIDTH * bpp * (attributes.yFlipped ? -1 : 1);
         const bytesPerPlane = (TILE_WIDTH - 1) * numOfPlanes;
         const bytesPerTile = TILE_HEIGHT * TILE_WIDTH * BYTES_PER_PIXEL * bpp;
 
-        let image: number[] = new Array(attributes.width);
-        let counter = 0;
-        let offset = (counter * bytesPerRow) + rowIndex;
-        address += bytesPerTile * rowHarse;
+        const yCoarse = row % TILE_HEIGHT;
+        const yHarse = Math.floor(row / TILE_HEIGHT);
+        const yCoarseByteOffset = attributes.yFlipped ?
+            (attributes.height - 1 - yCoarse) * BYTES_PER_PIXEL :
+            yCoarse * BYTES_PER_PIXEL;
+        const yHarseByteOffset = bytesPerTile * yHarse;
 
+        let xHarse = 0;
+        let xHarseByteOffset = (xHarse * bytesPerRow);
+
+        let offset = yCoarseByteOffset + yHarseByteOffset;
+
+        let image: number[] = new Array(attributes.width);
         for (let xBase: number = 0; xBase < attributes.width; xBase += TILE_WIDTH) {
 
             let index = address + offset;
@@ -174,10 +176,10 @@ export class Tiles {
                 let shift: number = plane;
                 for (let cell of rows) {
                     let bits: number = cell;
-                    for (let bitIndex = 0; bitIndex < 8; bitIndex++) {
+                    for (let xCoarse = 0; xCoarse < 8; xCoarse++) {
                         let bit = bits & 1;
                         let xIndex: number = attributes.xFlipped ?
-                            (attributes.width - TILE_WIDTH - xBase) + bitIndex : xBase + (TILE_WIDTH - 1 - bitIndex);
+                            (attributes.width - TILE_WIDTH - xBase) + xCoarse : xBase + (TILE_WIDTH - 1 - xCoarse);
                         image[xIndex] |= (bit << shift);
                         bits = bits >> 1;
                     }
@@ -187,8 +189,8 @@ export class Tiles {
                 plane += 2;
                 index += bytesPerPlane;
             }
-            counter++;
-            offset = (counter * bytesPerRow) + rowIndex;
+            xHarseByteOffset += bytesPerRow;
+            offset = (xHarseByteOffset) + (yCoarseByteOffset + yHarseByteOffset);
         }
 
         return image;
