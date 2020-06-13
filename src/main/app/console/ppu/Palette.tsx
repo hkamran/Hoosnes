@@ -31,6 +31,8 @@ export function parseColor(data: number): IColor {
     };
 }
 
+const PALETTE_BYTE_LENGTH = 2;
+
 export class Palette {
 
     public cgram: CGram;
@@ -38,55 +40,27 @@ export class Palette {
     constructor(cgram: CGram) {
         this.cgram = cgram;
     }
-    // 256 indexed
-    public getPalettes(start: number, end: number) {
-        if (start == null || end == null || end < start || start < 0 || end < 0 || end > 256) {
-            throw new Error(`Invalid getPalettes from ${start} to ${end}`);
+
+    // 0-255 indexed
+    public getPaletteAt(paletteIndex: number, paletteTable?: number, type?: BppType): IColor {
+        if (paletteIndex == null || paletteIndex < 0 || paletteIndex > 256) {
+            throw new Error(`Invalid getPalette from ${paletteIndex}`);
         }
 
-        return this.fetchRange(start, end);
-    }
-
-    // 256 indexed
-    public getPalette(index: number): IColor {
-        if (index == null || index < 0 || index > 256) {
-            throw new Error(`Invalid getPalette from ${index}`);
+        let address = 0;
+        if (type == BppType.Four) {
+            address = paletteTable * 16 * PALETTE_BYTE_LENGTH;
+        } else if (type == BppType.Two) {
+            address = paletteTable * 4 * PALETTE_BYTE_LENGTH;
         }
+        address += paletteIndex * PALETTE_BYTE_LENGTH;
 
-        let lowHalf: number = this.cgram.readByte((index * 2) + 0);
-        let highHalf: number = this.cgram.readByte((index * 2) + 1);
+        let lowHalf: number = this.cgram.readByte(address + 0);
+        let highHalf: number = this.cgram.readByte(address+ 1);
 
         let data: number = Bit.toUint16(highHalf, lowHalf);
         let color: IColor = parseColor(data);
         return color;
-    }
-
-    // 256 indexed
-    public getPalettesForBppType(index: number, type: BppType) {
-        if (type == BppType.Eight) {
-            return this.fetchRange(0, 256);
-        } else if (type == BppType.Four) {
-            return this.fetchRange((index + 0) * 16, (index + 1) * 16);
-        } else if (type == BppType.Two) {
-            return this.fetchRange((index + 0) * 4, (index + 1) * 4);
-        } else {
-            throw new Error(`Invalid getPaletteWithBppType from ${index} ${type}`);
-        }
-    }
-
-    // 256 indexed
-    private fetchRange(startIndex: number, endIndex: number): IColor[] {
-        if (startIndex == null || startIndex < 0 || startIndex > 512 ||
-            endIndex == null || endIndex < 0 || endIndex > 512 || startIndex > endIndex) {
-            throw new Error("Invalid palette " + startIndex + " " + endIndex);
-        }
-
-        let colors: IColor[] = [];
-        for (let i = startIndex; i < endIndex; i++) {
-            let color = this.getPalette(i);
-            colors.push(color);
-        }
-        return colors;
     }
 
 }

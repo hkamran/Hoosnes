@@ -81,13 +81,6 @@ export class Sprite {
         return tileAddr;
     }
 
-    public getTile(): number[][] {
-        let attributes = this.getTileAttributes();
-        let address: number = this.getTileAddress();
-
-        return this.ppu.tiles.getTileAt(address, attributes);
-    }
-
     public getTileAttributes(): ITileAttributes {
         let dimensions: {small: Dimension, big: Dimension} = this.ppu.registers.oamselect.getObjectSizes();
         let height: number = this.isBig() ? dimensions.big.height : dimensions.small.height;
@@ -109,7 +102,7 @@ export class Sprite {
     }
 
     // https://sneslab.net/wiki/PPU_Registers
-    public getPaletteIndex(): number {
+    public getPaletteTable(): number {
         let val: number = (this.getAttributes() >> 1) & 7;
         let index: number = 8 + val;
         return index;

@@ -1,7 +1,7 @@
 import {Ppu} from "./Ppu";
 import {BppType, IColor} from "./Palette";
 import {Screen, ScreenRegion} from "./Screen";
-import {Dimension, ITile} from "./Tiles";
+import {Dimension, ITile, ITileAttributes} from "./Tiles";
 import {Sprite} from "./Sprites";
 
 export class Renderer {
@@ -30,7 +30,7 @@ export class Renderer {
      */
     public tick(): void {
         let mode: number = this.ppu.registers.bgmode.getMode();
-        let base: IColor = this.ppu.palette.getPalette(0);
+        let base: IColor = this.ppu.palette.getPaletteAt(0);
         let y: number = this.ppu.scanline - ScreenRegion.VERT_PRELINE.end;
 
         let bg1Colors: IColor[] = this.ppu.backgrounds.bg1.getLineImage(y);
@@ -62,13 +62,15 @@ export class Renderer {
             if (yStart <= y && y < yEnd) {
                 count++;
                 if (count == 31) break;
-                let tile: number[][] = sprite.getTile();
-                let colors: IColor[] = this.ppu.palette.getPalettesForBppType(sprite.getPaletteIndex(), BppType.Four);
+
+                let address: number = sprite.getTileAddress();
+                let attributes: ITileAttributes = sprite.getTileAttributes();
+                let tile: number[] = this.ppu.tiles.getTileRowAt(address, y - yStart, attributes);
 
                 for (let x: number = 0; x < width; x++) {
-                    let index: number = tile[y - yStart][x];
+                    let index: number = tile[x];
                     if (index == 0) continue;
-                    let color: IColor = colors[index];
+                    let color: IColor = this.ppu.palette.getPaletteAt(index, sprite.getPaletteTable(), BppType.Four);
                     let xIndex: number = ((sprite.isXWrapped() ? 0x100 : 0x0) + sprite.getXPosition() + x) % 0x1FF;
                     if (xIndex > Screen.WIDTH) continue;
                     this.screen.setPixel(sprite.getXPosition() + x , y, color);

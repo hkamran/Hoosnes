@@ -129,12 +129,9 @@ export class Tiles {
         const bpp: number = attributes.bpp.valueOf();
         const bytesPerTile = TILE_HEIGHT * TILE_WIDTH * BYTES_PER_PIXEL * bpp;
 
-        for (let yBase: number = 0; yBase < attributes.height; yBase += TILE_WIDTH) {
-            for (let yOffset: number = 0; yOffset < TILE_WIDTH; yOffset++) {
-                let row: number[] = this.getTileRowAt(address, yOffset, attributes);
-                image.push(row);
-            }
-            address += bytesPerTile;
+        for (let yBase: number = 0; yBase < attributes.height; yBase++) {
+            let row: number[] = this.getTileRowAt(address, yBase, attributes);
+            image.push(row);
         }
 
         return image;
@@ -148,15 +145,20 @@ export class Tiles {
         const bpp: number = attributes.bpp.valueOf();
         const numOfPlanes = Math.floor(bpp / 2);
 
+        const rowCourse = row % TILE_HEIGHT;
+        const rowHarse = Math.floor(row / TILE_HEIGHT);
+
         const rowIndex = attributes.yFlipped ?
-            (attributes.height - 1 - row) * BYTES_PER_PIXEL :
-            row * BYTES_PER_PIXEL;
-        const bytesPer8by8 = TILE_WIDTH * bpp * (attributes.yFlipped ? -1 : 1);
+            (attributes.height - 1 - rowCourse) * BYTES_PER_PIXEL :
+            rowCourse * BYTES_PER_PIXEL;
+        const bytesPerRow = TILE_WIDTH * bpp * (attributes.yFlipped ? -1 : 1);
         const bytesPerPlane = (TILE_WIDTH - 1) * numOfPlanes;
+        const bytesPerTile = TILE_HEIGHT * TILE_WIDTH * BYTES_PER_PIXEL * bpp;
 
         let image: number[] = new Array(attributes.width);
         let counter = 0;
-        let offset = (counter * bytesPer8by8) + rowIndex;
+        let offset = (counter * bytesPerRow) + rowIndex;
+        address += bytesPerTile * rowHarse;
 
         for (let xBase: number = 0; xBase < attributes.width; xBase += TILE_WIDTH) {
 
@@ -186,7 +188,7 @@ export class Tiles {
                 index += bytesPerPlane;
             }
             counter++;
-            offset = (counter * bytesPer8by8) + rowIndex;
+            offset = (counter * bytesPerRow) + rowIndex;
         }
 
         return image;

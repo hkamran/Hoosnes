@@ -14,7 +14,7 @@ import {AddressUtil} from "../../util/AddressUtil";
 
 export interface ITileMap {
     characterNumber: number;
-    paletteNumber: number;
+    paletteTable: number;
     xFlipped: boolean;
     yFlipped: boolean;
     hasPriority: boolean;
@@ -31,7 +31,7 @@ export function parseTileMap(data): ITileMap {
 
     return {
         characterNumber,
-        paletteNumber,
+        paletteTable: paletteNumber,
         xFlipped,
         yFlipped,
         hasPriority,

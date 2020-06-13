@@ -63,7 +63,8 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
 
         let sprite: Sprite = this.props.snes.ppu.sprites.getSprite(this.state.selected);
         let attributes = sprite.getTileAttributes();
-        let tile: number[][] = sprite.getTile();
+        let address = sprite.getTileAddress();
+        let tile: number[][] = this.props.snes.ppu.tiles.getTileAt(address, attributes);
 
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
 
@@ -88,8 +89,6 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
         let tileBottomIndex: number = ((this.state.tileHeightSize * this.state.tilePixelSize) * 0) * totalWidth;
         let tileRightIndex: number = (0 * this.state.tilePixelSize * this.state.tileWidthSize);
 
-        let colors: IColor[] = this.props.snes.ppu.palette.getPalettesForBppType(sprite.getPaletteIndex(), BppType.Four);
-
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 let palette: number = tile[y][x];
@@ -106,7 +105,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
                         index += (xIndex + xOffset);
                         index *= 4;
 
-                        let color: IColor = colors[palette];
+                        let color: IColor = this.props.snes.ppu.palette.getPaletteAt(palette, sprite.getPaletteTable(), BppType.Four);
                         if (color == null) {
                             continue;
                         }
@@ -177,7 +176,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
                                             <td>{sprite.getYPosition()}</td>
                                             <td>{sprite.getTileNumber()}</td>
                                             <td>{sprite.getSpritePriority()}</td>
-                                            <td>{sprite.getPaletteIndex()}</td>
+                                            <td>{sprite.getPaletteTable()}</td>
                                             <td>{Orientation[sprite.getOrientation()]}</td>
                                             <td>{sprite.isXWrapped().toString().toUpperCase()}</td>
                                         </tr>

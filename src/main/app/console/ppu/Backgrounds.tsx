@@ -115,10 +115,9 @@ export abstract class Background {
             let address: number = base + (8 * bpp * tileMap.characterNumber);
             let sliver: number[] = this.ppu.tiles.getTileRowAt(address, yCoarse, attribute);
 
-            let colors: IColor[] = this.ppu.palette.getPalettesForBppType(tileMap.paletteNumber, bpp);
             for (let xIndex = 0; xIndex < sliver.length; xIndex++) {
                 let index: number = sliver[xIndex];
-                let color: IColor = colors[index];
+                let color: IColor = this.ppu.palette.getPaletteAt(index, tileMap.paletteTable, bpp);
                 if (index == 0) color.opacity = 0;
                 results.push(color);
             }

@@ -91,7 +91,7 @@ export class BackgroundsCard extends React.Component<IBackgroundsCardProps, IBac
                 image.data[index + 3] = 255;
             }
 
-            let defaultColor: IColor = this.props.snes.ppu.palette.getPalette(0);
+            let defaultColor: IColor = this.props.snes.ppu.palette.getPaletteAt(0);
 
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
@@ -101,8 +101,8 @@ export class BackgroundsCard extends React.Component<IBackgroundsCardProps, IBac
                     let yIndex: number = ((y * this.state.tilePixelSize) * totalWidth);
                     let xIndex: number = (x * this.state.tilePixelSize);
 
-                    let colors: IColor[] = this.props.snes.ppu.palette.getPalettesForBppType(tileMap.paletteNumber, bpp);
-                    let color: IColor = palette == 0 ? defaultColor: colors[palette];
+                    let selected: IColor = this.props.snes.ppu.palette.getPaletteAt(palette, tileMap.paletteTable, bpp);
+                    let color: IColor = palette == 0 ? defaultColor: selected;
 
                     // Write pixel size
                     for (let yOffset = 0; yOffset < this.state.tilePixelSize; yOffset++) {
