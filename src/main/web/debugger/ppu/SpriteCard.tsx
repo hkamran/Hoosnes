@@ -62,12 +62,13 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
         }
 
         let sprite: Sprite = this.props.snes.ppu.sprites.getSprite(this.state.selected);
-        let tile: ITile = sprite.getTile();
+        let attributes = sprite.getTileAttributes();
+        let tile: number[][] = sprite.getTile();
 
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
 
-        let height: number = tile.attributes.height;
-        let width: number = tile.attributes.width;
+        let height: number = attributes.height;
+        let width: number = attributes.width;
 
         let totalWidth = width * this.state.tilePixelSize;
         let totalHeight = height * this.state.tilePixelSize;
@@ -91,7 +92,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
 
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
-                let palette: number = tile.image[y][x];
+                let palette: number = tile[y][x];
 
                 let yIndex: number = tileBottomIndex + ((y * this.state.tilePixelSize) * totalWidth);
                 let xIndex: number = tileRightIndex + (x * this.state.tilePixelSize);

@@ -130,7 +130,7 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
                 xFlipped: false,
                 yFlipped: false,
             };
-            let tile: ITile = this.props.snes.ppu.tiles.getTileAt(vramIndex, attributes);
+            let tile: number[][] = this.props.snes.ppu.tiles.getTileAt(vramIndex, attributes);
             vramIndex += getTileSizeInByte(attributes.bpp);
 
             let tileBottomIndex: number = ((this.state.tileHeightSize * this.state.tilePixelSize) * tileYIndex) * totalWidth;
@@ -140,7 +140,7 @@ export class TileCard extends React.Component<ITileCardProps, ITileCardState> {
             // Write pixel
             for (let y = 0; y < this.state.tileHeightSize; y++) {
                 for (let x = 0; x < this.state.tileWidthSize; x++) {
-                    let palette = tile.image[y][x];
+                    let palette = tile[y][x];
                     if (palette == 0) continue;
 
                     let yIndex: number = tileBottomIndex + ((y * this.state.tilePixelSize) * totalWidth);

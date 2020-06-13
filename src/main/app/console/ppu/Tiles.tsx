@@ -111,7 +111,7 @@ export class Tiles {
     }
 
 
-    public getTileAt(address: number, attributes: ITileAttributes): ITile {
+    public getTileAt(address: number, attributes: ITileAttributes): number[][] {
         Objects.requireNonNull(address);
         Objects.requireNonNull(attributes);
 
@@ -124,26 +124,23 @@ export class Tiles {
         }
     }
 
-    private getTileNon8Bpp(address: number, attributes: ITileAttributes): ITile {
+    private getTileNon8Bpp(address: number, attributes: ITileAttributes): number[][] {
         let image: number[][] = [];
         const bpp: number = attributes.bpp.valueOf();
         const bytesPerTile = TILE_HEIGHT * TILE_WIDTH * BYTES_PER_PIXEL * bpp;
 
         for (let yBase: number = 0; yBase < attributes.height; yBase += TILE_WIDTH) {
             for (let yOffset: number = 0; yOffset < TILE_WIDTH; yOffset++) {
-                let row: number[] = this.getRowAt(address, yOffset, attributes);
+                let row: number[] = this.getTileRowAt(address, yOffset, attributes);
                 image.push(row);
             }
             address += bytesPerTile;
         }
 
-        return {
-            image,
-            attributes,
-        };
+        return image;
     }
 
-    public getRowAt(address: number, row: number, attributes: ITileAttributes): number[] {
+    public getTileRowAt(address: number, row: number, attributes: ITileAttributes): number[] {
         if (attributes.bpp == BppType.Eight) {
             throw new Error("Not implemented!");
         }
@@ -167,7 +164,6 @@ export class Tiles {
             let plane: number = 0;
 
             for (let i = 0; i < numOfPlanes; i++) {
-
                 // Capture 8x8 tile from vram (8 bytes high, 2 bytes long)
                 rows[0] = this.vram.data[index++ % this.vram.data.length];
                 rows[1] = this.vram.data[index++ % this.vram.data.length];

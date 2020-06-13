@@ -81,7 +81,14 @@ export class Sprite {
         return tileAddr;
     }
 
-    public getTile(): ITile {
+    public getTile(): number[][] {
+        let attributes = this.getTileAttributes();
+        let address: number = this.getTileAddress();
+
+        return this.ppu.tiles.getTileAt(address, attributes);
+    }
+
+    public getTileAttributes(): ITileAttributes {
         let dimensions: {small: Dimension, big: Dimension} = this.ppu.registers.oamselect.getObjectSizes();
         let height: number = this.isBig() ? dimensions.big.height : dimensions.small.height;
         let width: number = this.isBig() ? dimensions.big.width : dimensions.small.width;
@@ -93,9 +100,7 @@ export class Sprite {
             yFlipped: this.isYFlipped(),
             xFlipped: this.isXFlipped(),
         };
-        let address: number = this.getTileAddress();
-
-        return this.ppu.tiles.getTileAt(address, attributes);
+        return attributes;
     }
 
     public getTileTable(): number {

@@ -113,7 +113,7 @@ export abstract class Background {
             attribute.yFlipped = tileMap.yFlipped;
 
             let address: number = base + (8 * bpp * tileMap.characterNumber);
-            let sliver: number[] = this.ppu.tiles.getRowAt(address, yCoarse, attribute);
+            let sliver: number[] = this.ppu.tiles.getTileRowAt(address, yCoarse, attribute);
 
             let colors: IColor[] = this.ppu.palette.getPalettesForBppType(tileMap.paletteNumber, bpp);
             for (let xIndex = 0; xIndex < sliver.length; xIndex++) {
@@ -127,7 +127,7 @@ export abstract class Background {
         return results;
     }
 
-    public getTile(tileMap: ITileMap) {
+    public getTile(tileMap: ITileMap): number[][] {
         Objects.requireNonNull(tileMap);
 
         // address_of_character = (base_location_bits << 13) + (8 * color_depth * character_number);
@@ -143,7 +143,7 @@ export abstract class Background {
             yFlipped: tileMap.yFlipped,
             xFlipped: tileMap.xFlipped,
         };
-        let tile: ITile = this.ppu.tiles.getTileAt(address, attribute);
+        let tile: number[][] = this.ppu.tiles.getTileAt(address, attribute);
 
         return tile;
     }
@@ -153,10 +153,10 @@ export abstract class Background {
         let isVerticallyExtended: boolean = this.isVerticallyExtended();
         let isHorizontallyExtended: boolean = this.isHorizontallyExtended();
 
-        let topLeft: ITile[] = this.convertToTiles(this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 0)));
-        let topRight: ITile[] = isHorizontallyExtended ? this.convertToTiles(this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 1))) : null;
-        let bottomLeft: ITile[] = isVerticallyExtended ? this.convertToTiles(this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 2))) : null;
-        let bottomRight: ITile[] = isHorizontallyExtended && isVerticallyExtended ? this.convertToTiles(this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 3))) : null;
+        let topLeft: number[][][] = this.convertToTiles(this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 0)));
+        let topRight: number[][][] = isHorizontallyExtended ? this.convertToTiles(this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 1))) : null;
+        let bottomLeft: number[][][] = isVerticallyExtended ? this.convertToTiles(this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 2))) : null;
+        let bottomRight: number[][][] = isHorizontallyExtended && isVerticallyExtended ? this.convertToTiles(this.ppu.tileMaps.getTileMaps(tileMapAddress + (0x800 * 3))) : null;
 
         return this.compose(topLeft, topRight, bottomLeft, bottomRight);
     }
@@ -239,10 +239,10 @@ export abstract class Background {
         return tileMaps;
     }
 
-    private convertToTiles(tileMaps: ITileMap[]): ITile[] {
-        let tiles: ITile[] = [];
+    private convertToTiles(tileMaps: ITileMap[]): number[][][] {
+        let tiles: number[][][] = [];
         for (let tileMap of tileMaps) {
-            let tile: ITile = this.getTile(tileMap);
+            let tile: number[][] = this.getTile(tileMap);
             if (tile == null) {
                 throw new Error("Invalid tile given!");
             }
@@ -251,7 +251,7 @@ export abstract class Background {
         return tiles;
     }
 
-    private compose(topLeft: ITile[], topRight: ITile[], bottomLeft: ITile[], bottomRight: ITile[]): ITile {
+    private compose(topLeft: number[][][], topRight: number[][][], bottomLeft: number[][][], bottomRight: number[][][]): ITile {
         let characterDimension: Dimension = this.getCharacterDimension();
         let backgroundDimension: Dimension = this.getBackgroundDimension();
         let bpp: BppType = this.getBpp();
@@ -266,12 +266,12 @@ export abstract class Background {
 
         if (topLeft) {
             for (let tile of topLeft) {
-                for (let yOffset = 0; yOffset < tile.image.length; yOffset++) {
-                    for (let xOffset = 0; xOffset < tile.image[yOffset].length; xOffset++) {
+                for (let yOffset = 0; yOffset < tile.length; yOffset++) {
+                    for (let xOffset = 0; xOffset < tile[yOffset].length; xOffset++) {
                         if (data[yIndex + yOffset] == null) {
                             break;
                         }
-                        data[yIndex + yOffset][xIndex + xOffset] = tile.image[yOffset][xOffset];
+                        data[yIndex + yOffset][xIndex + xOffset] = tile[yOffset][xOffset];
                     }
                 }
                 xIndex += characterDimension.width;
@@ -286,9 +286,9 @@ export abstract class Background {
 
         if (topRight) {
             for (let tile of topRight) {
-                for (let yOffset = 0; yOffset < tile.image.length; yOffset++) {
-                    for (let xOffset = 0; xOffset < tile.image[yOffset].length; xOffset++) {
-                        data[yIndex + yOffset][xIndex + xOffset] = tile.image[yOffset][xOffset];
+                for (let yOffset = 0; yOffset < tile.length; yOffset++) {
+                    for (let xOffset = 0; xOffset < tile[yOffset].length; xOffset++) {
+                        data[yIndex + yOffset][xIndex + xOffset] = tile[yOffset][xOffset];
                     }
                 }
                 xIndex += characterDimension.width;
@@ -304,9 +304,9 @@ export abstract class Background {
         if (bottomLeft) {
             xIndex = 0;
             for (let tile of bottomLeft) {
-                for (let yOffset = 0; yOffset < tile.image.length; yOffset++) {
-                    for (let xOffset = 0; xOffset < tile.image[yOffset].length; xOffset++) {
-                        data[yIndex + yOffset][xIndex + xOffset] = tile.image[yOffset][xOffset];
+                for (let yOffset = 0; yOffset < tile.length; yOffset++) {
+                    for (let xOffset = 0; xOffset < tile[yOffset].length; xOffset++) {
+                        data[yIndex + yOffset][xIndex + xOffset] = tile[yOffset][xOffset];
                     }
                 }
                 xIndex += characterDimension.width;
@@ -321,9 +321,9 @@ export abstract class Background {
 
         if (bottomRight) {
             for (let tile of bottomRight) {
-                for (let yOffset = 0; yOffset < tile.image.length; yOffset++) {
-                    for (let xOffset = 0; xOffset < tile.image[yOffset].length; xOffset++) {
-                        data[yIndex + yOffset][xIndex + xOffset] = tile.image[yOffset][xOffset];
+                for (let yOffset = 0; yOffset < tile.length; yOffset++) {
+                    for (let xOffset = 0; xOffset < tile[yOffset].length; xOffset++) {
+                        data[yIndex + yOffset][xIndex + xOffset] = tile[yOffset][xOffset];
                     }
                 }
                 xIndex += characterDimension.width;

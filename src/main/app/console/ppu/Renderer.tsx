@@ -62,11 +62,11 @@ export class Renderer {
             if (yStart <= y && y < yEnd) {
                 count++;
                 if (count == 31) break;
-                let tile: ITile = sprite.getTile();
+                let tile: number[][] = sprite.getTile();
                 let colors: IColor[] = this.ppu.palette.getPalettesForBppType(sprite.getPaletteIndex(), BppType.Four);
 
                 for (let x: number = 0; x < width; x++) {
-                    let index: number = tile.image[y - yStart][x];
+                    let index: number = tile[y - yStart][x];
                     if (index == 0) continue;
                     let color: IColor = colors[index];
                     let xIndex: number = ((sprite.isXWrapped() ? 0x100 : 0x0) + sprite.getXPosition() + x) % 0x1FF;
