@@ -43,17 +43,17 @@ export class Palette {
 
     // 0-255 indexed
     public getPaletteAt(paletteIndex: number, paletteTable?: number, type?: BppType): IColor {
-        if (paletteIndex == null || paletteIndex < 0 || paletteIndex > 256) {
+        if (paletteIndex == null || paletteIndex < 0 || paletteIndex > 255) {
             throw new Error(`Invalid getPalette from ${paletteIndex}`);
         }
 
-        let address = 0;
+        let address = paletteIndex;
         if (type == BppType.Four) {
-            address = paletteTable * 16 * PALETTE_BYTE_LENGTH;
+            address += paletteTable * 16;
         } else if (type == BppType.Two) {
-            address = paletteTable * 4 * PALETTE_BYTE_LENGTH;
+            address += paletteTable * 4;
         }
-        address += paletteIndex * PALETTE_BYTE_LENGTH;
+        address *= PALETTE_BYTE_LENGTH;
 
         let lowHalf: number = this.cgram.readByte(address + 0);
         let highHalf: number = this.cgram.readByte(address+ 1);
