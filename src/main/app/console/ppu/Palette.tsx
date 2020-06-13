@@ -38,13 +38,13 @@ export class Palette {
     constructor(cgram: CGram) {
         this.cgram = cgram;
     }
-
+    // 256 indexed
     public getPalettes(start: number, end: number) {
-        if (start == null || end == null || end < start || start < 0 || end < 0) {
+        if (start == null || end == null || end < start || start < 0 || end < 0 || end > 256) {
             throw new Error(`Invalid getPalettes from ${start} to ${end}`);
         }
 
-        return this.fetchRange((start * 2), (end * 2));
+        return this.fetchRange(start, end);
     }
 
     // 256 indexed

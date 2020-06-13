@@ -41,7 +41,7 @@ export class PaletteCard extends React.Component<IPaletteCardProps, any> {
         this.canvasRef.current.width = totalWidth;
         this.canvasRef.current.height = totalHeight;
 
-        let colors: IColor[] = this.props.snes.ppu.palette.getPalettes(0, 256);
+        let colors: IColor[] = this.props.snes.ppu.palette.getPalettes(0, 255);
         let image: ImageData = this.context.createImageData(totalWidth, totalHeight);
 
         for (let index = 0; index < image.data.length; index += 4) {

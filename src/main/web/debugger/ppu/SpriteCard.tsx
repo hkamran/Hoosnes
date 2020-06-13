@@ -2,7 +2,7 @@ import * as React from "react";
 import {Card} from "../../core/layout/Card";
 import {BppType, IColor} from "../../../app/console/ppu/Palette";
 import {Console} from "../../../app/console/Console";
-import {Dimension, Orientation, Tile} from "../../../app/console/ppu/Tiles";
+import {Dimension, Orientation, ITile} from "../../../app/console/ppu/Tiles";
 import {Sprite} from "../../../app/console/ppu/Sprites";
 
 interface ISpriteCardProps {
@@ -62,7 +62,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
         }
 
         let sprite: Sprite = this.props.snes.ppu.sprites.getSprite(this.state.selected);
-        let tile: Tile = sprite.getTile();
+        let tile: ITile = sprite.getTile();
 
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
 
@@ -91,7 +91,7 @@ export class SpriteCard extends React.Component<ISpriteCardProps, ISpriteCardSta
 
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
-                let palette: number = tile.data[y][x];
+                let palette: number = tile.image[y][x];
 
                 let yIndex: number = tileBottomIndex + ((y * this.state.tilePixelSize) * totalWidth);
                 let xIndex: number = tileRightIndex + (x * this.state.tilePixelSize);

@@ -1,7 +1,7 @@
 import {Oam} from "../memory/Oam";
 import {Ppu} from "./Ppu";
 import {Objects} from "../../util/Objects";
-import {Dimension, Orientation, Tile, ITileAttributes} from "./Tiles";
+import {Dimension, Orientation, ITile, ITileAttributes} from "./Tiles";
 import {BppType} from "./Palette";
 
 /*
@@ -81,7 +81,7 @@ export class Sprite {
         return tileAddr;
     }
 
-    public getTile(): Tile {
+    public getTile(): ITile {
         let dimensions: {small: Dimension, big: Dimension} = this.ppu.registers.oamselect.getObjectSizes();
         let height: number = this.isBig() ? dimensions.big.height : dimensions.small.height;
         let width: number = this.isBig() ? dimensions.big.width : dimensions.small.width;
@@ -95,7 +95,7 @@ export class Sprite {
         };
         let address: number = this.getTileAddress();
 
-        return this.ppu.tiles.getTile(address, attributes);
+        return this.ppu.tiles.getTileAt(address, attributes);
     }
 
     public getTileTable(): number {

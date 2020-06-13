@@ -78,20 +78,17 @@ export function getTileSizeInByte(bpp: BppType): number {
     return 8 * bpp.valueOf();
 }
 
-export class Tile {
-
-    public attributes: ITileAttributes;
-    public data: number[][];
-
-    constructor(data: number[][], attributes: ITileAttributes) {
-        this.data = data;
-        this.attributes = attributes;
-    }
-
-    public static create(data: number[][], attributes: ITileAttributes) {
-        return new Tile(data, attributes);
-    }
+export interface ITile {
+    image: number[][];
+    attributes: ITileAttributes;
 }
+
+const TILE_HEIGHT = 8;
+const TILE_WIDTH = 8;
+const BYTES_PER_PIXEL = 2;
+const BYTES_PER_ROW = 8;
+const BYTES_PER_PLANE = 16;
+const rows = [0, 0];
 
 export class Tiles {
 
@@ -117,78 +114,85 @@ export class Tiles {
     }
 
 
-    public getTile(address: number, attributes: ITileAttributes): Tile {
+    public getTileAt(address: number, attributes: ITileAttributes): ITile {
         Objects.requireNonNull(address);
         Objects.requireNonNull(attributes);
 
         AddressUtil.assertValid(address);
 
         if (attributes.bpp == BppType.Eight) {
-            return this.getTile8Bpp(address, attributes);
+            throw new Error("Not implemented!");
         } else {
             return this.getTileNon8Bpp(address, attributes);
         }
     }
 
-    private getTile8Bpp(address: number, attributes: ITileAttributes): Tile {
-        throw new Error("Not implemented!");
-    }
-
-    private getTileNon8Bpp(address: number, attributes: ITileAttributes): Tile {
-        let image: number[][] = ArrayUtil.create2dMatrix(attributes.height, attributes.width);
+    private getTileNon8Bpp(address: number, attributes: ITileAttributes): ITile {
+        let image: number[][] = [];
         const bpp: number = attributes.bpp.valueOf();
-        const bytesPerRow = getTileSizeInByte(bpp);
+        const bytesPerTile = TILE_HEIGHT * TILE_WIDTH * BYTES_PER_PIXEL * bpp;
 
-        let index: number = address;
-
-        let height: number = 8;
-        let width: number = 8;
-
-        let tilesPerRow = 16;
-
-        for (let yBase: number = 0; yBase < attributes.height; yBase += height) {
-            for (let xBase: number = 0; xBase < attributes.width; xBase += width) {
-
-                let plane: number = 0;
-                for (let i = 0; i < bpp / 2; i++) {
-
-                    // Capture 8x8 tile from vram (8 bytes high, 2 bytes long)
-                    let rows: number[][] = this.tileMatrixFor8By8;
-                    for (let y = 0; y < rows.length; y++) {
-                        for (let x = 0; x < rows[y].length; x++) {
-                            rows[y][x] = this.vram.data[index++ % this.vram.data.length];
-                        }
-                    }
-
-                    // Deconstruct planes into tile matrix
-                    let yOffset: number = 0;
-                    for (let row of rows) {
-                        let shift: number = plane;
-                        for (let cell of row) {
-                            let bits: number = cell;
-                            for (let bitIndex = 0; bitIndex < 8; bitIndex++) {
-                                let bit = bits & 1;
-                                let xIndex: number = attributes.xFlipped ?
-                                    (attributes.width - width - xBase) + bitIndex : xBase + (width - 1 - bitIndex);
-                                let yIndex: number = attributes.yFlipped ?
-                                    (attributes.height - height - yBase) + (height - 1 - yOffset) : yBase + yOffset;
-                                image[yIndex][xIndex] |= (bit << shift);
-                                bits = bits >> 1;
-                            }
-                            shift++;
-                        }
-                        yOffset++;
-                    }
-
-                    plane += 2;
-                }
+        for (let yBase: number = 0; yBase < attributes.height; yBase += TILE_WIDTH) {
+            for (let yOffset: number = 0; yOffset < TILE_WIDTH; yOffset++) {
+                let row: number[] = this.getTileRowAt(address, yOffset, attributes);
+                image.push(row);
             }
-            index += bytesPerRow * (tilesPerRow - (attributes.width / 8));
+            address += bytesPerTile;
         }
 
-
-        return Tile.create(image, attributes);
+        return {
+            image,
+            attributes,
+        };
     }
 
+    private getTileRowAt(address: number, row: number, attributes: ITileAttributes): number[] {
+        const bpp: number = attributes.bpp.valueOf();
+        const numOfPlanes = Math.floor(bpp / 2);
+
+        const rowIndex = attributes.yFlipped ?
+            (attributes.height - 1 - row) * BYTES_PER_PIXEL :
+            row * BYTES_PER_PIXEL;
+        const bytesPer8by8 = BYTES_PER_ROW * bpp * (attributes.yFlipped ? -1 : 1);
+        const bytesPerPlane = (BYTES_PER_ROW - 1) * numOfPlanes;
+
+        let image: number[] = new Array(attributes.width);
+        let counter = 0;
+        let offset = (counter * bytesPer8by8) + rowIndex;
+
+        for (let xBase: number = 0; xBase < attributes.width; xBase += TILE_WIDTH) {
+
+            let index = address + offset;
+            let plane: number = 0;
+
+            for (let i = 0; i < numOfPlanes; i++) {
+
+                // Capture 8x8 tile from vram (8 bytes high, 2 bytes long)
+                rows[0] = this.vram.data[index++ % this.vram.data.length];
+                rows[1] = this.vram.data[index++ % this.vram.data.length];
+
+                // Deconstruct planes into tile matrix
+                let shift: number = plane;
+                for (let cell of rows) {
+                    let bits: number = cell;
+                    for (let bitIndex = 0; bitIndex < 8; bitIndex++) {
+                        let bit = bits & 1;
+                        let xIndex: number = attributes.xFlipped ?
+                            (attributes.width - TILE_WIDTH - xBase) + bitIndex : xBase + (TILE_WIDTH - 1 - bitIndex);
+                        image[xIndex] |= (bit << shift);
+                        bits = bits >> 1;
+                    }
+                    shift++;
+                }
+
+                plane += 2;
+                index += bytesPerPlane;
+            }
+            counter++;
+            offset = (counter * bytesPer8by8) + rowIndex;
+        }
+
+        return image;
+    }
 
 }

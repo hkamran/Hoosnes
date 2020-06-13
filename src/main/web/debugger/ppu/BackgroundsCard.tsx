@@ -2,7 +2,7 @@ import {Console} from "../../../app/console/Console";
 import * as React from "react";
 import {Card} from "../../core/layout/Card";
 import {Background} from "../../../app/console/ppu/Backgrounds";
-import {Dimension, Tile} from "../../../app/console/ppu/Tiles";
+import {Dimension, ITile} from "../../../app/console/ppu/Tiles";
 import {BppType, IColor} from "../../../app/console/ppu/Palette";
 import {ITileMap} from "../../../app/console/ppu/TileMaps";
 
@@ -66,7 +66,7 @@ export class BackgroundsCard extends React.Component<IBackgroundsCardProps, IBac
         if (this.state.selected == 4) background = this.props.snes.ppu.backgrounds.bg4;
 
         if (background) {
-            let tile: Tile = background.getImage();
+            let tile: ITile = background.getImage();
             let tileMaps: ITileMap[][] = background.getTileMaps();
             if (tileMaps.length == 0) return;
             this.context = this.canvasRef.current.getContext("2d", {alpha: false});
@@ -95,7 +95,7 @@ export class BackgroundsCard extends React.Component<IBackgroundsCardProps, IBac
 
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
-                    let palette: number = tile.data[y][x];
+                    let palette: number = tile.image[y][x];
                     let tileMap: ITileMap = tileMaps[Math.floor(y / characterDimension.height)][Math.floor(x / characterDimension.width)];
 
                     let yIndex: number = ((y * this.state.tilePixelSize) * totalWidth);
