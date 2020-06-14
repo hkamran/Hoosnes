@@ -52,7 +52,7 @@
     "typescript.events": "^7.9.0",
     "url-loader": "^1.1.1",
     "uuid": "^3.3.2",
-    "webpack": "^4.19.0"
-  },
-  "devDependencies": {}
+    "webpack": "^4.19.0",
+    "ts-shader-loader": "^1.0.6"
+  }
 }
