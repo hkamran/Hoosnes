@@ -69,7 +69,7 @@ export class TileMaps {
 
         let amount = ((this.dimension.width * this.dimension.height) * 2);
         for (let offset = 0; offset < amount; offset += TILE_MAP_SIZE_IN_BYTES) {
-            const tilemap = this.getTileMap(address);
+            const tilemap = this.getTileMap(address + offset);
             entries.push(tilemap);
         }
 
