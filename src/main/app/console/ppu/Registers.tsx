@@ -1,5 +1,4 @@
 import {Ppu} from "./Ppu";
-import {Mode, Modes} from "../../Modes";
 import {Console} from "../Console";
 import {CGram} from "../memory/CGram";
 import {Bit} from "../../util/Bit";
@@ -15,7 +14,6 @@ import {Dimension} from "./Tiles";
 export class Register {
 
     protected val : number = 0;
-    protected mode : Mode = Modes.bit8;
     public console: Console;
     public label: string;
 
@@ -28,9 +26,6 @@ export class Register {
     public set(val : number): void {
         if (val == null || val < 0) {
             throw Error("Invalid set " + val + " to register.");
-        }
-        if (this.mode == Modes.bit8 && val > 0xFF) {
-            throw new Error("value is to big for register 0x" + val.toString(16));
         }
         this.val = val;
     }

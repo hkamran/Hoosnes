@@ -1,7 +1,6 @@
 import {Register} from "../ppu/Registers";
 import {Bit} from "../../util/Bit";
 import {Console} from "../Console";
-import {Mode, Modes} from "../../Modes";
 import {
     HdmaLineCounterRegister,
     HdmaTableAddressHighRegister,
@@ -107,7 +106,6 @@ export class DmaControlRegister extends Register {
 
 export class DmaPpuAddressRegister extends Register {
 
-    protected mode : Mode = Modes.bit16;
     public address: string = "0x43x1";
     public label: string = "BBADx";
 
@@ -161,7 +159,6 @@ export class DmaCpuAddressRegister extends Register {
 
 export class DmaTransferSizeRegister extends Register {
 
-    protected mode : Mode = Modes.bit16;
     public address: string = "0x43x5-0x43x6";
     public label: string = "DASx";
 
