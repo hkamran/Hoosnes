@@ -1,6 +1,7 @@
 import * as React from "react";
 import {RefObject} from "react";
 import {Console, ConsoleState} from "../app/console/Console";
+import {screenGl} from "../app/console/ppu/ScreenWebGl";
 
 
 declare let window : any;
@@ -18,22 +19,28 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
     };
     public animateStatic: boolean = true;
     public canvasRef: RefObject<HTMLCanvasElement>;
+    public canvasRefWebGl: RefObject<HTMLCanvasElement>;
 
     public context: CanvasRenderingContext2D;
+    private gl: WebGLRenderingContext;
 
     constructor(props : any) {
         super(props);
         this.canvasRef = React.createRef<HTMLCanvasElement>();
+        this.canvasRefWebGl = React.createRef<HTMLCanvasElement>();
     }
 
     public componentDidMount(): void {
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
+        this.gl = this.canvasRefWebGl.current.getContext("webgl");
         if (window) {
             window.canvas = this.canvasRef;
             window.context = this.context;
         }
         if (this.props.snes.state == ConsoleState.OFF) this.drawStatic();
         this.props.snes.ppu.screen.setCanvas(this.canvasRef.current);
+        screenGl.setRenderingContext(this.gl);
+        screenGl.render();
     }
 
     private drawStatic(): void {
@@ -63,6 +70,12 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
                             borderRadius: "4px",
                         }}
                         />
+                <canvas ref={this.canvasRefWebGl}
+                        style={{
+                            backgroundColor: "#000000",
+                            borderRadius: "4px",
+                        }}
+                />
             </div>
         );
     }
