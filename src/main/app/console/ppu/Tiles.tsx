@@ -145,32 +145,28 @@ export class Tiles {
         const bpp: number = attributes.bpp.valueOf();
         const numOfPlanes = Math.floor(bpp / 2);
 
-        const bytesPerRow = TILE_WIDTH * bpp * (attributes.yFlipped ? -1 : 1);
+        const bytesToNextTile = TILE_HEIGHT * BYTES_PER_PIXEL * numOfPlanes;
         const bytesPerPlane = (TILE_WIDTH - 1) * numOfPlanes;
-        const bytesPerTile = TILE_HEIGHT * TILE_WIDTH * BYTES_PER_PIXEL * bpp;
+        const bytesPerTile = TILE_WIDTH * BYTES_PER_PIXEL * TILE_HEIGHT * bpp;
 
-        const yCoarse = row % TILE_HEIGHT;
+        row = attributes.yFlipped ? attributes.height - row - 1: row;
+
+        const yCoarse = (row % TILE_HEIGHT);
         const yHarse = Math.floor(row / TILE_HEIGHT);
-        const yCoarseByteOffset = attributes.yFlipped ?
-            (attributes.height - 1 - yCoarse) * BYTES_PER_PIXEL :
-            yCoarse * BYTES_PER_PIXEL;
-        const yHarseByteOffset = bytesPerTile * yHarse;
-
-        let xHarse = 0;
-        let xHarseByteOffset = (xHarse * bytesPerRow);
+        const yCoarseByteOffset = yCoarse * BYTES_PER_PIXEL;
+        const yHarseByteOffset = yHarse * bytesPerTile;
 
         let offset = yCoarseByteOffset + yHarseByteOffset;
 
         let image: number[] = new Array(attributes.width);
         for (let xBase: number = 0; xBase < attributes.width; xBase += TILE_WIDTH) {
-
-            let index = address + offset;
+            let target = address + offset;
             let plane: number = 0;
 
             for (let i = 0; i < numOfPlanes; i++) {
                 // Capture 8x8 tile from vram (8 bytes high, 2 bytes long)
-                rows[0] = this.vram.data[index++ % this.vram.data.length];
-                rows[1] = this.vram.data[index++ % this.vram.data.length];
+                rows[0] = this.vram.data[target++ % this.vram.data.length];
+                rows[1] = this.vram.data[target++ % this.vram.data.length];
 
                 // Deconstruct planes into tile matrix
                 let shift: number = plane;
@@ -187,10 +183,9 @@ export class Tiles {
                 }
 
                 plane += 2;
-                index += bytesPerPlane;
+                target += bytesPerPlane;
             }
-            xHarseByteOffset += bytesPerRow;
-            offset = (xHarseByteOffset) + (yCoarseByteOffset + yHarseByteOffset);
+            offset += bytesToNextTile;
         }
 
         return image;
