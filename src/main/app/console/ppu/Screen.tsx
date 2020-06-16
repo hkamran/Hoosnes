@@ -107,7 +107,10 @@ export class Screen {
             "a_texCoord",
             gl.STATIC_DRAW,
         );
-        this.frame = WebGlUtil.createTexture(gl);
+        this.frame = WebGlUtil.createTexture(gl, gl.TEXTURE0);
+
+        let textureId = gl.getUniformLocation(program, `u_image`);
+        gl.uniform1i(textureId, 0);
 
         WebGlUtil.clear(gl, canvas);
     }
