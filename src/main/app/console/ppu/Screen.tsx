@@ -74,6 +74,7 @@ export class Screen {
         let program = WebGlUtil.createProgram(gl, vsGLSL, fsGLSL);
         this.program = program;
 
+        // clip space coords
         const vertexCoordinates = new Float32Array([
             -1, 1,
             1, 1,
@@ -82,6 +83,8 @@ export class Screen {
             1, -1,
             -1, -1,
         ]);
+
+        // uv coords
         const textureCoordinates = new Float32Array([
             0.0, 0.0,
             1.0, 0.0,
