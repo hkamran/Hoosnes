@@ -1,7 +1,7 @@
 import * as React from "react";
 import {RefObject} from "react";
 import {Console, ConsoleState} from "../app/console/Console";
-import {screenGl} from "../app/console/ppu/ScreenWebGl";
+import {ScreenWebGl} from "../app/console/ppu/ScreenWebGl";
 
 
 declare let window : any;
@@ -23,6 +23,7 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
 
     public context: CanvasRenderingContext2D;
     private gl: WebGLRenderingContext;
+    private webGl: ScreenWebGl;
 
     constructor(props : any) {
         super(props);
@@ -32,25 +33,27 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
 
     public componentDidMount(): void {
         this.context = this.canvasRef.current.getContext("2d", {alpha: false});
-        this.gl = this.canvasRefWebGl.current.getContext("webgl");
+
         if (window) {
             window.canvas = this.canvasRef;
             window.context = this.context;
         }
         if (this.props.snes.state == ConsoleState.OFF) this.drawStatic();
         this.props.snes.ppu.screen.setCanvas(this.canvasRef.current);
-        screenGl.setCanvas(this.canvasRef.current);
-        screenGl.setRenderingContext(this.gl);
-        screenGl.render();
+
+        this.webGl = new ScreenWebGl(this.canvasRefWebGl.current);
     }
 
     private drawStatic(): void {
         if (!this.animateStatic) return;
         if (this.props.snes.state != ConsoleState.OFF) return;
 
+        let width = this.props.snes.ppu.screen.getWidth();
+        let height = this.props.snes.ppu.screen.getHeight();
+
         let image: ImageData = window.context.createImageData(
-            this.props.snes.ppu.screen.getWidth(),
-            this.props.snes.ppu.screen.getHeight());
+            width,
+            height);
 
         let len = image.data.length - 1;
 
@@ -58,6 +61,7 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
             image.data[len] = Math.random() < 0.5 ? 0 : 255;
         }
 
+        if (this.webGl) this.webGl.render(image);
         window.context.putImageData(image, 0, 0);
         window.requestAnimationFrame(this.drawStatic.bind(this));
     }
