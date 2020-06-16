@@ -1,5 +1,8 @@
 import {Ppu} from "./Ppu";
 import {IColor} from "./Palette";
+import {WebGlUtil} from "../../util/WebGlUtil";
+import vsGLSL from "../../../shaders/screen_vertex_shader.glsl";
+import fsGLSL from "../../../shaders/screen_fragment_shader.glsl";
 
 export class ScreenRegion {
 
@@ -47,16 +50,63 @@ export class Screen {
     public static readonly MIN_ZOOM: number = 1;
     // Note PAL is 256x240
 
-    public buffer: ImageData;
-    public scaled: ImageData;
-    public sub: Uint8ClampedArray;
-    public zoom: number = 2;
+    private canvas: HTMLCanvasElement;
+    private gl: WebGLRenderingContext;
+    private program: WebGLProgram;
+    private frame: WebGLTexture;
 
-    public canvas: HTMLCanvasElement;
+    public buffer: ImageData;
+    public zoom: number = 2;
 
     public setCanvas(canvas: HTMLCanvasElement): void {
         this.canvas = canvas;
+        this.initialize(canvas);
         this.reset();
+    }
+
+    private initialize(canvas: HTMLCanvasElement) {
+        this.gl = canvas.getContext("webgl");
+        if (this.gl == null) {
+            throw new Error("WebGL not working!");
+        }
+
+        let gl = this.gl;
+        let program = WebGlUtil.createProgram(gl, vsGLSL, fsGLSL);
+        this.program = program;
+
+        const vertexCoordinates = new Float32Array([
+            -1, 1,
+            1, 1,
+            1, -1,
+            -1, 1,
+            1, -1,
+            -1, -1,
+        ]);
+        const textureCoordinates = new Float32Array([
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+        ]);
+        WebGlUtil.createAttribLocation(
+            gl,
+            program,
+            vertexCoordinates,
+            "a_position",
+            gl.STATIC_DRAW,
+        );
+        WebGlUtil.createAttribLocation(
+            gl,
+            program,
+            textureCoordinates,
+            "a_texCoord",
+            gl.STATIC_DRAW,
+        );
+        this.frame = WebGlUtil.createTexture(gl);
+
+        WebGlUtil.clear(gl, canvas);
     }
 
     public setPixel(x: number, y: number, color: IColor) {
@@ -76,7 +126,17 @@ export class Screen {
     }
 
     public render(): void {
-        this.context.putImageData(this.scale(this.buffer, this.scaled, this.zoom), 0, 0);
+        let gl = this.gl;
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+        WebGlUtil.updateTexture(gl, this.frame, this.buffer);
+
+        const itemSize = 2;
+        const numItems = 6; //vertexCoordinates.length / itemSize;
+
+        let offset = 0;
+        let count = numItems;
+        gl.drawArrays(gl.TRIANGLES, offset, count);
     }
 
     public zoomIn(): void {
@@ -95,9 +155,13 @@ export class Screen {
 
         this.canvas.width = this.getWidth();
         this.canvas.height = this.getHeight();
-        this.buffer = this.context.createImageData(Screen.WIDTH, Screen.HEIGHT);
-        this.scaled = this.context.createImageData(this.getWidth(), this.getHeight());
-        this.sub = this.context.createImageData(this.zoom, 1).data;
+
+        const length = Screen.WIDTH * Screen.HEIGHT * 4;
+        this.buffer = {
+            data: new Uint8ClampedArray(new ArrayBuffer(length)),
+            width: Screen.WIDTH,
+            height: Screen.HEIGHT,
+        };
     }
 
     public getWidth(): number {
@@ -108,25 +172,8 @@ export class Screen {
         return Screen.HEIGHT * this.zoom;
     }
 
-    private scale(imageData: ImageData, scaledImageData: ImageData, scale: number): ImageData {
-        if (scale == 1) return imageData;
-
-        for (let row = 0; row < imageData.height; row++) {
-            for (let col = 0; col < imageData.width; col++) {
-                let sourcePixel = imageData.data.subarray(
-                    (row * imageData.width + col) * 4,
-                    (row * imageData.width + col) * 4 + 4,
-                );
-                for (let x = 0; x < scale; x++) this.sub.set(sourcePixel, x*4);
-                for (let y = 0; y < scale; y++) {
-                    let destRow = row * scale + y;
-                    let destCol = col * scale;
-                    scaledImageData.data.set(this.sub, (destRow * scaledImageData.width + destCol) * 4);
-                }
-            }
-        }
-
-        return scaledImageData;
+    public isReady(): boolean {
+        return this.buffer != null;
     }
 }
 

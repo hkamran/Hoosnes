@@ -1,7 +1,8 @@
 import * as React from "react";
 import {RefObject} from "react";
 import {Console, ConsoleState} from "../app/console/Console";
-import {ScreenWebGl} from "../app/console/ppu/ScreenWebGl";
+import {IColor} from "../app/console/ppu/Palette";
+import {WebGlUtil} from "../app/util/WebGlUtil";
 
 
 declare let window : any;
@@ -19,50 +20,42 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
     };
     public animateStatic: boolean = true;
     public canvasRef: RefObject<HTMLCanvasElement>;
-    public canvasRefWebGl: RefObject<HTMLCanvasElement>;
-
-    public context: CanvasRenderingContext2D;
-    private gl: WebGLRenderingContext;
-    private webGl: ScreenWebGl;
 
     constructor(props : any) {
         super(props);
         this.canvasRef = React.createRef<HTMLCanvasElement>();
-        this.canvasRefWebGl = React.createRef<HTMLCanvasElement>();
     }
 
     public componentDidMount(): void {
-        this.context = this.canvasRef.current.getContext("2d", {alpha: false});
-
-        if (window) {
-            window.canvas = this.canvasRef;
-            window.context = this.context;
-        }
         if (this.props.snes.state == ConsoleState.OFF) this.drawStatic();
         this.props.snes.ppu.screen.setCanvas(this.canvasRef.current);
-
-        this.webGl = new ScreenWebGl(this.canvasRefWebGl.current);
     }
 
     private drawStatic(): void {
+        let screen = this.props.snes.ppu.screen;
         if (!this.animateStatic) return;
-        if (this.props.snes.state != ConsoleState.OFF) return;
-
-        let width = this.props.snes.ppu.screen.getWidth();
-        let height = this.props.snes.ppu.screen.getHeight();
-
-        let image: ImageData = window.context.createImageData(
-            width,
-            height);
-
-        let len = image.data.length - 1;
-
-        while (len--) {
-            image.data[len] = Math.random() < 0.5 ? 0 : 255;
+        if (this.props.snes.state != ConsoleState.OFF) {
+            screen.reset();
+            return;
         }
 
-        if (this.webGl) this.webGl.render(image);
-        window.context.putImageData(image, 0, 0);
+        if (screen.isReady()) {
+            let width = screen.getWidth();
+            let height = screen.getHeight();
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const color: IColor = {
+                        blue: Math.random() < 0.5 ? 0 : 240,
+                        green: Math.random() < 0.5 ? 0 : 240,
+                        red: Math.random() < 0.5 ? 0 : 240,
+                        opacity: 255,
+                    };
+                    screen.setPixel(x, y, color);
+                }
+            }
+            screen.render();
+        }
         window.requestAnimationFrame(this.drawStatic.bind(this));
     }
 
@@ -75,12 +68,6 @@ export class ScreenCard extends React.Component<IScreenCardProps, any> {
                             borderRadius: "4px",
                         }}
                         />
-                <canvas ref={this.canvasRefWebGl}
-                        style={{
-                            backgroundColor: "#000000",
-                            borderRadius: "4px",
-                        }}
-                />
             </div>
         );
     }

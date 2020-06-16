@@ -14,7 +14,7 @@ export class WebGlUtil {
             0,
             gl.RGBA,
             gl.UNSIGNED_BYTE,
-            image.data
+            image.data,
         );
     }
 
@@ -68,7 +68,7 @@ export class WebGlUtil {
 
     public static clear(gl: WebGLRenderingContext, canvas: HTMLCanvasElement) {
         gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.clearColor(0, 0.5, 0, 1);
+        gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
     }
 
