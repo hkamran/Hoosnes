@@ -1,7 +1,7 @@
 import {Dimension, ITile, ITileAttributes} from "./Tiles";
 import {Ppu} from "./Ppu";
 import {BppType, IColor} from "./Palette";
-import {ITileMap} from "./TileMaps";
+import {ITileMap, TILE_MAP_BYTE_SIZE, TileMaps, TOTAL_TILE_MAPS} from "./TileMaps";
 import {ArrayUtil} from "../../util/ArrayUtil";
 import {Objects} from "../../util/Objects";
 import {Screen} from "./Screen";
@@ -49,6 +49,9 @@ export class Backgrounds {
 
 }
 
+const TILE_MAP_BYTE_ROW = (TOTAL_TILE_MAPS * TILE_MAP_BYTE_SIZE);
+const TILE_MAP_BYTE_PER_BACKGROUND = (TOTAL_TILE_MAPS * TOTAL_TILE_MAPS) * TILE_MAP_BYTE_SIZE;
+
 export abstract class Background {
 
     protected ppu: Ppu;
@@ -61,28 +64,24 @@ export abstract class Background {
 
     public getTileMap(x: number, y: number): ITileMap {
         let tileMapAddress: number = this.getTileMapAddress();
-        let dimension: Dimension = this.getBackgroundDimension();
-        let tileMapSize = 2;
-        let totalTileMaps: number = 32;
+
+        // map index (background index) can be 0, 1, 2, 3
         let mapIndex: number = 0;
-        if (x > 31 && this.isHorizontallyExtended()) mapIndex = 1;
-        if (y > 31 && this.isVerticallyExtended()) mapIndex = 2;
-        if (x > 31 && y > 31 && this.isHorizontallyExtended() && this.isVerticallyExtended()) mapIndex = 3;
+        if (x > 31 && this.isHorizontallyExtended()) mapIndex += 1;
+        if (y > 31 && this.isVerticallyExtended()) mapIndex += 2;
 
-        let mapOffset: number = mapIndex * (totalTileMaps * totalTileMaps) * tileMapSize;
-        let yOffset: number = (y % totalTileMaps) * (totalTileMaps * tileMapSize);
-        let xOffset: number = (x % totalTileMaps) * tileMapSize;
+        let mapOffset: number = mapIndex * TILE_MAP_BYTE_PER_BACKGROUND;
+        let yOffset: number = (y % TOTAL_TILE_MAPS) * TILE_MAP_BYTE_ROW;
+        let xOffset: number = (x % TOTAL_TILE_MAPS) * TILE_MAP_BYTE_SIZE;
 
-        let index: number = tileMapAddress + yOffset + xOffset + mapOffset;
-
-        let tileMap: ITileMap = this.ppu.tileMaps.getTileMap(index);
+        let address: number = tileMapAddress + yOffset + xOffset + mapOffset;
+        let tileMap: ITileMap = this.ppu.tileMaps.getTileMap(address);
         return tileMap;
     }
 
     public getLineImage(y: number): IColor[] {
         let base: number = this.getBaseCharacterAddress();
         let characterDimension: Dimension = this.getCharacterDimension();
-        let backgroundDimension: Dimension = this.getBackgroundDimension();
         let bpp: number = this.getBpp().valueOf();
         let vertScrollOffset: number = this.getVerticalScrollOffset();
         let hortScrollOffset: number = this.getHorizontalScrollOffset();

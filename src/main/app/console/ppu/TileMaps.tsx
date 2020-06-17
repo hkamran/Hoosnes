@@ -25,9 +25,9 @@ export function parseTileMap(data): ITileMap {
 
     const characterNumber = data & 0x3FF;
     const paletteNumber = (data >> 10) & 0x7;
-    const xFlipped = ((data >> 14) & 0x1) == 1;
-    const yFlipped = ((data >> 15) & 0x1) == 1;
-    const hasPriority = ((data >> 13) & 0x1) == 1;
+    const hasPriority = (data & 0x2000) > 0;
+    const xFlipped = (data & 0x4000) > 0;
+    const yFlipped = (data & 0x8000) > 0;
 
     return {
         characterNumber,
@@ -39,8 +39,11 @@ export function parseTileMap(data): ITileMap {
 }
 
 const TILE_MAP_SIZE_IN_BYTES = 2;
+export const TILE_MAP_BYTE_SIZE = 2;
+export const TOTAL_TILE_MAPS: number = 32;
 
 export class TileMaps {
+
 
     private vram: Vram;
     private dimension: Dimension;
