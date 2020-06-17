@@ -64,6 +64,8 @@ export class Bus {
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 value = Bit.toUint8(this.cartridge.readByte(address));
             }
+        } else if (0x7E <= bank && bank <= 0x7F) {
+            value = Bit.toUint8(this.wram.readByte(address));
         } else if ((0x40 <= bank && bank <= 0x7D) ||
             (0xC0 <= bank && bank <= 0xFF)) {
             if (0x0000 <= page && page <= 0x7FFF) {
@@ -71,8 +73,6 @@ export class Bus {
             } else if (0x8000 <= page && page <= 0xFFFF) {
                 value = Bit.toUint8(this.cartridge.readByte(address));
             }
-        } else if (0x7E <= bank && bank <= 0x7F) {
-            value = Bit.toUint8(this.wram.readByte(address));
         }
 
         if (value == null) {

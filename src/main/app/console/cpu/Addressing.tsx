@@ -296,10 +296,7 @@ export class Accumulator implements IAddressingMode {
     public label: string = "ACCUMULATOR";
 
     public getValue(context: OpContext): number {
-        let low: number = context.registers.a.getA();
-        let high: number = context.registers.a.getB();
-
-        return Bit.toUint16(high, low);
+        return context.registers.a.getC();
     }
 
     public getAddressing(context: OpContext): Addressing {

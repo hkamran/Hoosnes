@@ -265,11 +265,11 @@ export class ASL extends Operation {
             if (!is8Bit) context.registers.a.setC(result);
         } else {
             let addressing: Addressing = this.mode.getAddressing(context);
-            let loData: number = Bit.getUint16Lower(result);
-            let hiData: number = Bit.getUint16Upper(result);
+            let loData: number = Bit.getUint16Lower(result) & 0xFF;
+            let hiData: number = Bit.getUint16Upper(result) & 0xFF;
 
-            context.bus.writeByte(addressing.toLow(), loData & 0xFF);
-            if (!is8Bit) context.bus.writeByte(addressing.toHigh(), hiData & 0xFF);
+            context.bus.writeByte(addressing.toLow(), loData);
+            if (!is8Bit) context.bus.writeByte(addressing.toHigh(), hiData);
         }
 
         context.setFlagZ(result, is8Bit);
@@ -625,9 +625,7 @@ class DEC extends Operation {
         let isAcc: boolean = this.mode == AddressingModes.accumulator;
 
         if (isAcc) {
-            let data: number = is8Bit ?
-                context.registers.a.getA() :
-                context.registers.a.get();
+            let data: number = context.registers.a.getC() & mask;
             let value: number = (data - 1) & mask;
 
             if (is8Bit) context.registers.a.setA(value);
@@ -737,9 +735,7 @@ class INC extends Operation {
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
         let isAcc: boolean = this.mode == AddressingModes.accumulator;
         if (isAcc) {
-            let data: number = is8Bit ?
-                context.registers.a.getA() :
-                context.registers.a.get();
+            let data: number = context.registers.a.getC() & mask;
             let value: number = (data + 1) & mask;
 
             if (is8Bit) context.registers.a.setA(value);
@@ -1326,23 +1322,24 @@ class LSR extends Operation {
         let is8Bit: boolean = this.cpu.registers.p.getM() == 1;
         let mask: number = is8Bit ? 0xFF : 0xFFFF;
 
-        let data = (isAccMode ? this.cpu.registers.a.get() :
-            this.mode.getValue(context)) & mask;
-
-        let value: number = ((data & mask) >> 1) & mask;
-
-        context.setFlagN(value, is8Bit);
-        context.setFlagZ(value, is8Bit);
-        this.cpu.registers.p.setC(data & 0x01);
+        let data = this.mode.getValue(context) & mask;
+        let result: number = (data >> 1) & mask;
 
         if (isAccMode) {
-            if (is8Bit) this.cpu.registers.a.setA(value);
-            if (!is8Bit) this.cpu.registers.a.setC(value);
+            if (is8Bit) this.cpu.registers.a.setA(result);
+            if (!is8Bit) this.cpu.registers.a.setC(result);
         } else {
             let addressing: Addressing = this.mode.getAddressing(context);
-            context.console.bus.writeByte(addressing.toLow(), Bit.getUint16Lower(value));
-            if (!is8Bit) context.console.bus.writeByte(addressing.toHigh(), Bit.getUint16Upper(value));
+            let loData: number = Bit.getUint16Lower(result) & 0xFF;
+            let hiData: number = Bit.getUint16Upper(result) & 0xFF;
+
+            context.bus.writeByte(addressing.toLow(), loData);
+            if (!is8Bit) context.bus.writeByte(addressing.toHigh(), hiData);
         }
+
+        context.setFlagN(result, is8Bit);
+        context.setFlagZ(result, is8Bit);
+        this.cpu.registers.p.setC(data & 0x1);
 
         return this.cycle;
     }
@@ -1370,14 +1367,14 @@ class MVN extends Operation {
             let val : number = context.bus.readByte(src);
             context.bus.writeByte(dest, val);
 
-            srcPage = ((srcPage + 1) % 0xFFFF) & 0xFFFF;
-            destPage = ((destPage + 1) % 0xFFFF) & 0xFFFF;
+            srcPage = ((srcPage + 1) % 0x10000) & 0xFFFF;
+            destPage = ((destPage + 1) % 0x10000) & 0xFFFF;
             amount = (amount - 1) & 0xFFFF;
             counter++;
         }
 
-        this.cpu.registers.x.set(((this.cpu.registers.x.get() + counter) % 0xFFFF) & 0xFFFF);
-        this.cpu.registers.y.set(((this.cpu.registers.y.get() + counter) % 0xFFFF) & 0xFFFF);
+        this.cpu.registers.x.set((this.cpu.registers.x.get() + counter) & 0xFFFF);
+        this.cpu.registers.y.set((this.cpu.registers.y.get() + counter) & 0xFFFF);
         this.cpu.registers.dbr.set(destBank);
         this.cpu.registers.a.setC(0xFFFF);
 
@@ -1406,14 +1403,14 @@ class MVP extends Operation {
             let val : number = context.bus.readByte(src);
             context.bus.writeByte(dest, val);
 
-            srcPage = ((srcPage - 1) % 0xFFFF) & 0xFFFF;
-            destPage = ((destPage - 1) % 0xFFFF) & 0xFFFF;
+            srcPage = ((srcPage - 1) % 0x10000) & 0xFFFF;
+            destPage = ((destPage - 1) % 0x10000) & 0xFFFF;
             amount = (amount - 1) & 0xFFFF;
             counter++;
         }
 
-        this.cpu.registers.x.set(((this.cpu.registers.x.get() - amount) % 0xFFFF) & 0xFFFF);
-        this.cpu.registers.y.set(((this.cpu.registers.y.get() - amount) % 0xFFFF) & 0xFFFF);
+        this.cpu.registers.x.set((this.cpu.registers.x.get() - amount) & 0xFFFF);
+        this.cpu.registers.y.set((this.cpu.registers.y.get() - amount) & 0xFFFF);
         this.cpu.registers.dbr.set(destBank);
         this.cpu.registers.a.setC(0xFFFF);
 
@@ -1642,7 +1639,7 @@ class ROL extends Operation {
         let isAcc: boolean = this.mode == AddressingModes.accumulator;
 
         if (isAcc) {
-            let data: number = context.registers.a.get() & mask;
+            let data: number = context.registers.a.getC() & mask;
             let value: number = ((data << 1) & mask) | c;
 
             context.registers.p.setC(((data >> shift) & 0x1) != 0 ? 1 : 0);
@@ -1689,7 +1686,7 @@ class ROR extends Operation {
         let isAcc: boolean = this.mode == AddressingModes.accumulator;
 
         if (isAcc) {
-            let data: number = context.registers.a.get() & mask;
+            let data: number = context.registers.a.getC() & mask;
             let value: number = ((data >> 1) & mask) | (c << shift);
 
             context.registers.p.setC(((data >> 0) & 0x1) != 0 ? 1 : 0);
@@ -2012,7 +2009,7 @@ class RTS extends Operation {
     public execute(context: OpContext): number {
         let pc: number = context.cpu.stack.popWord();
 
-        context.cpu.registers.pc.set((pc + 1) % 0xFFFF);
+        context.cpu.registers.pc.set((pc + 1) & 0xFFFF);
 
         return this.cycle;
     }
