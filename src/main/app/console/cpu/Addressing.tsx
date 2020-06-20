@@ -129,6 +129,8 @@ export class Absolute implements IAddressingMode {
         let dataLow: number = (rr << 16) | Bit.toUint16(HH, LL);
         let dataHigh: number = dataLow + 1;
 
+        context.bus.mdr = HH;
+
         return Addressing.toWord(dataLow, dataHigh);
     }
 }

@@ -1774,7 +1774,7 @@ class PHP extends Operation {
     public execute(context: OpContext): number {
         let p: number = context.registers.p.get();
 
-        context.cpu.stack.pushByte(p & 0xFF);
+        context.cpu.stack.pushByte(p);
 
         return this.cycle;
     }
@@ -1874,9 +1874,15 @@ class PLP extends Operation {
     public name: string = "PLP";
 
     public execute(context: OpContext): number {
+        let is8Bit: boolean = context.registers.p.getE() == 1;
         let p: number = context.cpu.stack.popByte();
 
         context.registers.p.set(p);
+
+        if (is8Bit) {
+            context.registers.p.setX(1);
+            context.registers.p.setM(1);
+        }
 
         return this.cycle;
     }

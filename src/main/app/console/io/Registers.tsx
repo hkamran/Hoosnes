@@ -41,7 +41,8 @@ export class NmiFlagRegister extends AbstractRegister {
     }
 
     public get(): number {
-        let result = this.console.io.chip5A22Version;
+        let open = this.console.bus.mdr & 0xF8;
+        let result = this.console.io.chip5A22Version | open;
         result |= (this.console.io.nmiStatus ? 1 : 0) << 7;
 
         this.console.io.nmiStatus = false;
