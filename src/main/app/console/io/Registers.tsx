@@ -4,6 +4,21 @@ import {HdmaEnableRegister} from "../cpu/Hdma";
 import {ScreenRegion} from "../ppu/Screen";
 import {joy1, joy2} from "../controller/Controller";
 import {AbstractRegister} from "../../interfaces/AbstractRegister";
+import {Bit} from "../../util/Bit";
+
+export class DebugAbstractRegister extends AbstractRegister {
+
+    public set(value: number, byteIndex?: number) {
+        super.set(value, byteIndex);
+        debugger;
+    }
+
+    public get(byteIndex?: number): number {
+        debugger;
+        return super.get(byteIndex);
+    }
+
+}
 
 export class InterruptEnableFlagsRegister extends AbstractRegister {
 
@@ -255,6 +270,131 @@ export class Joy2Register extends AbstractRegister {
 
 }
 
+export class MemSelectRegister extends AbstractRegister {
+
+    public address: string = "0x420D";
+    public name: string = "MEMSEL";
+
+    private isFast: boolean = false;
+
+    public set(value: number, byteIndex?: number) {
+        super.set(value, byteIndex);
+
+        this.isFast = (value & 1) == 1;
+    }
+
+}
+
+export class MultiplicandARegister extends AbstractRegister {
+
+    public address: string = "0x4202";
+    public name: string = "WRMPYA";
+
+}
+
+export class MultiplicandBRegister extends AbstractRegister {
+
+    public address: string = "0x4203";
+    public name: string = "WRMPYB";
+
+    public set(value: number, byteIndex?: number) {
+        super.set(value, byteIndex);
+
+        const a = this.console.io.registers.wrmpya.get();
+        const b = value;
+        const result = (a * b) & 0xFFFF;
+
+        const high = Bit.getUint16Upper(result);
+        const low = Bit.getUint16Lower(result);
+
+        this.console.io.registers.rdmpyl.set(low);
+        this.console.io.registers.rdmpyh.set(high);
+
+        this.console.io.registers.rddivl.set(value);
+        this.console.io.registers.rddivh.set(0x00);
+    }
+
+}
+
+export class MultiOrDivideRemainderLowRegister extends AbstractRegister {
+
+    public address: string = "0x4216";
+    public name: string = "RDMPYL";
+
+}
+
+export class MultiOrDivideRemainderHighRegister extends AbstractRegister {
+
+    public address: string = "0x4217";
+    public name: string = "RDMPYL";
+
+}
+
+export class DividendCLowRegister extends AbstractRegister {
+
+    public address: string = "0x4204";
+    public name: string = "WRDIVL";
+
+}
+
+export class DividendCHighRegister extends AbstractRegister {
+
+    public address: string = "0x4205";
+    public name: string = "WRDIVH";
+
+}
+
+export class QuotientDivideLowRegister extends AbstractRegister {
+
+    public address: string = "0x4214";
+    public name: string = "RDDIVL";
+
+}
+
+export class QuotientDivideHighRegister extends AbstractRegister {
+
+    public address: string = "0x4215";
+    public name: string = "RDDIVH";
+
+}
+
+export class DivisorBRegister extends AbstractRegister {
+
+    public address: string = "0x4206";
+    public name: string = "WRDIVB";
+
+    public set(value: number, byteIndex?: number) {
+        super.set(value, byteIndex);
+
+        const divisor = value;
+        const dividend = Bit.toUint16(
+            this.console.io.registers.wrdivh.get(),
+            this.console.io.registers.wrdivl.get(),
+        );
+
+        let quotient = 0xFFFF;
+        let remainder = dividend;
+
+        if (value != 0) {
+            quotient = Math.floor(dividend / divisor);
+            remainder = dividend % divisor;
+        }
+
+        const quotientHigh = Bit.getUint16Upper(quotient);
+        const quotienLow = Bit.getUint16Lower(quotient);
+
+        const remainderHigh = Bit.getUint16Upper(remainder);
+        const remainderLow = Bit.getUint16Lower(remainder);
+
+        this.console.io.registers.rddivl.set(quotienLow);
+        this.console.io.registers.rddivh.set(quotientHigh);
+
+        this.console.io.registers.rdmpyl.set(remainderLow);
+        this.console.io.registers.rdmpyh.set(remainderHigh);
+    }
+
+}
+
 export class Registers {
     public nmitimen : InterruptEnableFlagsRegister;
     public rdnmi : NmiFlagRegister;
@@ -338,21 +478,26 @@ export class Registers {
         ]);
         this.hdmaen = new HdmaEnableRegister(console);
 
+        this.wrmpya = new MultiplicandARegister(console);
+        this.wrmpyb = new MultiplicandBRegister(console);
+
+        this.rdmpyl = new MultiOrDivideRemainderLowRegister(console);
+        this.rdmpyh = new MultiOrDivideRemainderHighRegister(console);
+        this.rddivl = new QuotientDivideLowRegister(console);
+        this.rddivh = new QuotientDivideHighRegister(console);
+
+        this.wrdivl = new DividendCLowRegister(console);
+        this.wrdivh = new DividendCHighRegister(console);
+        this.wrdivb = new DivisorBRegister(console);
+
+        // TODO make use of it
+        this.memsel = new MemSelectRegister(console);
+
         // TODO do it
         this.wrio = new AbstractRegister(console);
-        this.wrmpya = new AbstractRegister(console);
-        this.wrmpyb = new AbstractRegister(console);
-        this.wrdivl = new AbstractRegister(console);
-        this.wrdivh = new AbstractRegister(console);
-        this.wrdivb = new AbstractRegister(console);
         this.htime = new AbstractRegister(console);
         this.vtime = new AbstractRegister(console);
-        this.memsel = new AbstractRegister(console);
         this.rdio = new AbstractRegister(console);
-        this.rddivl = new AbstractRegister(console);
-        this.rddivh = new AbstractRegister(console);
-        this.rdmpyl = new AbstractRegister(console);
-        this.rdmpyh = new AbstractRegister(console);
         this.joy3l = new AbstractRegister(console);
         this.joy3h = new AbstractRegister(console);
         this.joy4l = new AbstractRegister(console);
