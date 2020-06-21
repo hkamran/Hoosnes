@@ -31,6 +31,11 @@ export enum ScreenState {
     HBLANK, VBLANK, PRELINE, RENDER,
 }
 
+export interface IUniforms {
+    mosaic: WebGLUniformLocation;
+    brightness: WebGLUniformLocation;
+}
+
 /**
  * R = 255 / 8 = 31
  * G = 255 / 8 = 31
@@ -58,11 +63,13 @@ export class Screen {
     public buffer: ImageData;
     public zoom: number = 2;
 
-    public uniforms = {
+    public uniforms : IUniforms = {
         mosaic: null,
+        brightness: null,
     };
 
     private mosaic: number = 0;
+    private brightness: number = 1; // 0-1
 
     public setCanvas(canvas: HTMLCanvasElement): void {
         this.canvas = canvas;
@@ -123,6 +130,7 @@ export class Screen {
         gl.uniform1i(textureId, 0);
 
         this.uniforms.mosaic = gl.getUniformLocation(program, `u_mosaic`);
+        this.uniforms.brightness = gl.getUniformLocation(program, `u_brightness`);
 
         WebGlUtil.clear(gl, canvas);
     }
@@ -146,6 +154,7 @@ export class Screen {
     public render(): void {
         let gl = this.gl;
 
+        gl.uniform1f(this.uniforms.brightness, this.brightness);
         gl.uniform1f(this.uniforms.mosaic, this.mosaic);
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 

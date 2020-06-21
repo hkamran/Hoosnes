@@ -44,7 +44,7 @@ export class ScreenDisplayRegister extends Register {
     public val: number = 0x8F;
 
     public forceBlankEnable: boolean = false;
-    public brightness: number = 15;
+    public brightness: number = 255;
 
     public set(val: number) {
         super.set(val);
