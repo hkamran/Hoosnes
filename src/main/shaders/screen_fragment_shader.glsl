@@ -1,4 +1,3 @@
-#extension GL_EXT_shader_texture_lod: enable
 precision mediump float;
 
 // our texture
@@ -16,7 +15,7 @@ void main() {
     if(u_mosaic > 0.0) {
         float scale = max(1., (10. - u_mosaic) * 5.);
         st = ceil(st * scale) / scale;
-        color = texture2DLodEXT(u_image, st, u_mosaic).rgb;
+        color = texture2D(u_image, st).rgb;
     }
 
     gl_FragColor = vec4(color, 1.);
