@@ -58,10 +58,20 @@ export class Screen {
     public buffer: ImageData;
     public zoom: number = 2;
 
+    public uniforms = {
+        mosaic: null,
+    };
+
+    private mosaic: number = 0;
+
     public setCanvas(canvas: HTMLCanvasElement): void {
         this.canvas = canvas;
         this.initialize(canvas);
         this.reset();
+    }
+
+    public setMosaic(level: number) {
+        this.mosaic = level;
     }
 
     private initialize(canvas: HTMLCanvasElement) {
@@ -112,6 +122,8 @@ export class Screen {
         let textureId = gl.getUniformLocation(program, `u_image`);
         gl.uniform1i(textureId, 0);
 
+        this.uniforms.mosaic = gl.getUniformLocation(program, `u_mosaic`);
+
         WebGlUtil.clear(gl, canvas);
     }
 
@@ -133,6 +145,8 @@ export class Screen {
 
     public render(): void {
         let gl = this.gl;
+
+        gl.uniform1f(this.uniforms.mosaic, this.mosaic);
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
         WebGlUtil.updateTexture(gl, this.frame, this.buffer);

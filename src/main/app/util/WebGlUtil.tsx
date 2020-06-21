@@ -80,6 +80,8 @@ export class WebGlUtil {
                                 vertexShaderSource: string,
                                 fragmentShaderSource: string) {
 
+        gl.getExtension("EXT_shader_texture_lod");
+
         const vertexShader = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vertexShader, vertexShaderSource);
         gl.compileShader(vertexShader);

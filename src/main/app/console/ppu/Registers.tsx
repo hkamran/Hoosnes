@@ -233,7 +233,7 @@ export class MosaicRegister extends Register {
     public label: string = "MOSAIC";
 
     public getMosaicSize(): number {
-        return (this.val >> 4) & 0xFF;
+        return Math.floor(((this.val >> 4) & 0xF) / 2);
     }
 
     public getBG4MosaicEnable(): boolean {

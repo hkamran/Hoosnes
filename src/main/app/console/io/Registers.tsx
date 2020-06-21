@@ -6,19 +6,19 @@ import {joy1, joy2} from "../controller/Controller";
 import {AbstractRegister} from "../../interfaces/AbstractRegister";
 import {Bit} from "../../util/Bit";
 
-export class DebugAbstractRegister extends AbstractRegister {
-
-    public set(value: number, byteIndex?: number) {
-        super.set(value, byteIndex);
-        debugger;
-    }
-
-    public get(byteIndex?: number): number {
-        debugger;
-        return super.get(byteIndex);
-    }
-
-}
+// export class DebugAbstractRegister extends AbstractRegister {
+//
+//     public set(value: number, byteIndex?: number) {
+//         super.set(value, byteIndex);
+//         debugger;
+//     }
+//
+//     public get(byteIndex?: number): number {
+//         debugger;
+//         return super.get(byteIndex);
+//     }
+//
+// }
 
 export class InterruptEnableFlagsRegister extends AbstractRegister {
 

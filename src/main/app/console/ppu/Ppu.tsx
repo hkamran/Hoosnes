@@ -146,6 +146,7 @@ export class Ppu {
 
         if (isVblankEnd) {
             this.frames++;
+            this.screen.setMosaic(this.registers.mosaic.getMosaicSize());
             this.screen.render();
             this.status.toggleInterlaceFrame();
             this.status.rangeOver = false;
