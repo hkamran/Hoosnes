@@ -145,7 +145,7 @@ export class InterruptHandler {
 
         if (isNative) this.cpu.stack.pushByte(pb);
         this.cpu.stack.pushWord(pc);
-        this.cpu.stack.pushByte(p | 0x10);
+        this.cpu.stack.pushByte(p);
 
         this.registers.p.setI(1);
         this.registers.p.setD(0);
