@@ -163,10 +163,6 @@ export class BusA {
 
         let value = Bit.toUint8(this.mdr);
 
-        if (page < 0x2100 || page > 0x43FF) {
-            throw new Error("Invalid readByte at " + address);
-        }
-
         const register = this.map[page];
         if (register == null) {
             throw new Error(`Register not found for ${page}`);
@@ -188,9 +184,6 @@ export class BusA {
             throw new Error(`Invalid write given at ${address}=${value}`);
         }
 
-        if (page < 0x2100 || page > 0x43FF) {
-            throw new Error("Invalid writeByte at " + address);
-        }
         const register = this.map[page];
         if (register == null) {
             throw new Error(`Register not found for ${page}`);
