@@ -8,7 +8,7 @@ import {AbstractRegister} from "../../interfaces/AbstractRegister";
 /**
  * Bus for IO registers in the CPU
  */
-export class BusCpu {
+export class BusA {
 
     private console: Console;
     private registers: Registers;

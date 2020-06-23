@@ -1,15 +1,15 @@
 import {Objects} from "../../util/Objects";
 import {Console} from "../Console";
-import {BusCpu} from "./BusCpu";
 import {Cartridge} from "../cartridge/Cartridge";
 import {Wram} from "../memory/Wram";
 import {Bit} from "../../util/Bit";
 import {AddressUtil} from "../../util/AddressUtil";
 import {BusB} from "./BusB";
+import {BusA} from "./BusA";
 
 export class Bus {
 
-    public busCpu: BusCpu;
+    public busA: BusA;
     public busB: BusB;
     public cartridge: Cartridge;
     public wram: Wram;
@@ -21,7 +21,7 @@ export class Bus {
         Objects.requireNonNull(console);
 
         this.console = console;
-        this.busCpu = new BusCpu(console);
+        this.busA = new BusA(console);
         this.busB = new BusB(console);
         this.cartridge = console.cartridge;
         this.wram = console.cpu.wram;
@@ -58,7 +58,7 @@ export class Bus {
             } else if (0x3000 <= page && page <= 0x3FFF) {
                 value = this.mdr;
             } else if (0x4000 <= page && page <= 0x44FF) {
-                value = Bit.toUint8(this.busCpu.readByte(address));
+                value = Bit.toUint8(this.busA.readByte(address));
             } else if (0x4500 <= page && page <= 0x7FFF) {
                 value = this.mdr;
             } else if (0x8000 <= page && page <= 0xFFFF) {
@@ -112,7 +112,7 @@ export class Bus {
                 this.mdr = value;
                 return;
             } else if (0x4000 <= page && page <= 0x44FF) {
-                return this.busCpu.writeByte(address, value);
+                return this.busA.writeByte(address, value);
             } else if (0x4500 <= page && page <= 0x7FFF) {
                 this.mdr = value;
                 return;
