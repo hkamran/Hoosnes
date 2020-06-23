@@ -8,6 +8,7 @@ import {Bit} from "../../util/Bit";
 import {InterruptType} from "./Interrupts";
 import {AddressUtil} from "../../util/AddressUtil";
 
+
 export class OpContext {
 
     public opaddr: number;
@@ -17,6 +18,8 @@ export class OpContext {
     public cpu: Cpu;
     public bus: Bus;
     public registers: Registers;
+
+    private static singleton: OpContext = null;
 
     constructor(cpu: Cpu, opaddr: number, op: Operation) {
         Objects.requireNonNull(cpu);
@@ -34,7 +37,13 @@ export class OpContext {
     }
 
     public static create(cpu: Cpu, opaddr: number, op: Operation): OpContext {
-        return new OpContext(cpu, opaddr, op);
+        if (OpContext.singleton) {
+            OpContext.singleton.opaddr = opaddr;
+            OpContext.singleton.op = op;
+            return OpContext.singleton;
+        }
+        OpContext.singleton = new OpContext(cpu, opaddr, op);
+        return OpContext.singleton;
     }
 
     public getOperand(index: number): number {

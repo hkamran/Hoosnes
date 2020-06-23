@@ -246,7 +246,7 @@ export class PpuCard extends React.Component<IPpuCardProps, any> {
                                     <ul style={{margin: "5px"}}>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Mode 7 Scroll V-offset:</span>
-                                            <span>0x{registers.bg1vofs.getBG1Mode7VertOffset().toString(16)}</span>
+                                            <span>0x0</span>
                                         </li>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">BG1 Scroll V-offset:</span>
