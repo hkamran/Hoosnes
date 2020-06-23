@@ -3,6 +3,7 @@ import {Objects} from "../../util/Objects";
 import {Registers} from "../ppu/Registers";
 import {Bit} from "../../util/Bit";
 import {AddressUtil} from "../../util/AddressUtil";
+import {AbstractRegister} from "../../interfaces/AbstractRegister";
 
 /**
  * Bus for IO registers in the PPU
@@ -15,6 +16,8 @@ export class BusB {
     // Memory Data Register
     public mdr: number = 0x0;
 
+    public map: { [address: number] : AbstractRegister } = {};
+
     constructor(console: Console) {
         Objects.requireNonNull(console);
         Objects.requireNonNull(console.cpu);
@@ -23,6 +26,11 @@ export class BusB {
 
         this.console = console;
         this.registers = console.ppu.registers;
+
+        this.map[0x2100] = this.registers.inidisp;
+        this.map[0x2101] = this.registers.oamselect;
+        this.map[0x2102] = this.registers.oamaddr.oamaddl;
+        this.map[0x2103] = this.registers.oamaddr.oamaddh;
     }
 
     public readByte(address: number): number {
@@ -42,9 +50,9 @@ export class BusB {
         } else if (page == 0x2101) {
             value = Bit.toUint8(this.registers.oamselect.get());
         } else if (page == 0x2102) {
-            value = Bit.toUint8(this.registers.oamaddr.getLower());
+            value = Bit.toUint8(this.registers.oamaddr.oamaddl.get());
         } else if (page == 0x2103) {
-            value = Bit.toUint8(this.registers.oamaddr.getUpper());
+            value = Bit.toUint8(this.registers.oamaddr.oamaddh.get());
         } else if (page == 0x2104) {
             value = Bit.toUint8(this.registers.oamdataw.get());
         } else if (page == 0x2105) {
@@ -213,9 +221,9 @@ export class BusB {
         } else if (page == 0x2101) {
             this.registers.oamselect.set(value);
         } else if (page == 0x2102) {
-            this.registers.oamaddr.setLower(value);
+            this.registers.oamaddr.oamaddl.set(value);
         } else if (page == 0x2103) {
-            this.registers.oamaddr.setUpper(value);
+            this.registers.oamaddr.oamaddh.set(value);
         } else if (page == 0x2104) {
             this.registers.oamdataw.set(value);
         } else if (page == 0x2105) {

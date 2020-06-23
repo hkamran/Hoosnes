@@ -97,67 +97,74 @@ export class OamSizeAndDataAreaRegister extends AbstractRegister {
     }
 }
 
-export class OamAddressRegister extends Register {
+export class OamAddressLowRegister extends AbstractRegister {
 
-    public address: string = "0x2102-0x2103";
-    public label: string = "OAMADD";
+    public address = 0x2102;
+    public label: string = "OAMADDL";
 
     public counter: number = 0;
 
+    public set(value: number, byteIndex?: number) {
+        this.counter = 0;
+        super.set(value, byteIndex);
+    }
+
+    public update(value: number, byteIndex?: number) {
+        super.set(value, byteIndex);
+    }
+}
+
+export class OamAddressHighRegister extends AbstractRegister {
+
+    public address = 0x2103;
+    public label: string = "OAMADDH";
+}
+
+export class OamAddressRegister extends Register {
+
+    public oamaddl: OamAddressLowRegister;
+    public oamaddh: OamAddressHighRegister;
+
     constructor(console: Console) {
         super(console);
-    }
 
-    public setUpper(val: number): void {
-        this.val = Bit.setUint16Upper(this.val, val);
-    }
-
-    public setLower(val: number): void {
-        this.counter = 0;
-        this.val = Bit.setUint16Lower(this.val, val);
-    }
-
-    public getUpper(): number {
-        return Bit.getUint16Upper(this.val);
-    }
-
-    public getLower(): number {
-        return Bit.getUint16Lower(this.val);
+        this.oamaddh = new OamAddressHighRegister(console);
+        this.oamaddl = new OamAddressLowRegister(console);
     }
 
     public getTableIndex(): number {
-        return this.getLower();
+        return this.oamaddl.get();
     }
 
     public setTableIndex(index: number): void {
-        this.val = Bit.setUint16Lower(this.val, index % 256);
+        this.oamaddl.update(index % 256);
     }
 
     public getTableSelection(): number {
-        return this.getUpper() & 1;
+        return this.oamaddh.get() & 1;
     }
 
     public setTableSelection(index: number): void {
-        const high = Bit.getUint16Upper(this.val);
-        this.val = Bit.setUint16Upper(this.val, (high & 0xFE) | index);
+        const high = (this.oamaddh.get() & 0xFE) | index;
+        this.oamaddh.set(high);
     }
 
     public getPriority(): number {
-        return (this.getUpper() >> 7) & 0x1;
+        return (this.oamaddh.get() >> 7) & 0x1;
     }
 
     public setTableAddress(value : number) {
         if (value >= 512) this.setTableSelection(1);
         if (value >= 544) this.setTableSelection(0);
         let index: number = value < 512 ? Math.floor(value / 2) : value - 512;
-        this.counter = value % 2;
+        this.oamaddl.counter = value % 2;
         this.setTableIndex(index % 256);
     }
 
     public getTableAddress(): number {
         let index: number = this.getTableIndex();
         let selection: number = this.getTableSelection();
-        let addr: number = (selection == 1) ? (512 + index) : (index * 2) + this.counter;
+        let addr: number = (selection == 1) ? (512 + index) : (index * 2) + this.oamaddl.counter;
         return addr;
     }
 

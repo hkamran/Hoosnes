@@ -160,7 +160,7 @@ export class DmaCpuAddressRegister {
         return Bit.toUint24(
             this.a1th.get(),
             this.a1tm.get(),
-            this.a1tl.get()
+            this.a1tl.get(),
         );
     }
 
@@ -180,8 +180,8 @@ export class DmaTransferSizeHRegister extends AbstractRegister {
 
 export class DmaTransferSizeRegister {
 
-    dasl: DmaTransferSizeLRegister;
-    dash: DmaTransferSizeHRegister;
+    public dasl: DmaTransferSizeLRegister;
+    public dash: DmaTransferSizeHRegister;
 
     constructor(console: Console) {
         this.dash = new DmaTransferSizeHRegister(console);

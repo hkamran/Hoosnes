@@ -80,7 +80,7 @@ export class PpuCard extends React.Component<IPpuCardProps, any> {
                                     </ul>
                                 </li>
                                 <li style={{display: "flex", flexDirection: "column"}}>
-                                    <span style={{flexGrow: 1}} className="header">{registers.oamaddr.label} ({registers.oamaddr.address})</span>
+                                    <span style={{flexGrow: 1}} className="header">{registers.oamaddr.label} 0x2102-0x2103</span>
                                     <ul style={{margin: "5px"}}>
                                         <li style={{display: "flex"}}>
                                             <span style={{flexGrow: 1}} className="header">Priority:</span>
