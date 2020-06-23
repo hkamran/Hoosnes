@@ -170,15 +170,15 @@ export class OamAddressRegister extends Register {
 
 }
 
-export class OamDataWriteRegister extends Register {
+export class OamDataWriteRegister extends AbstractRegister {
 
-    public address: string = "0x2104";
+    public address: number = 0x2104;
     public label: string = "OAMDATA";
 
     public buffer: number = 0;
 
     public set(val: number): void {
-        this.val = val;
+        super.set(val);
 
         let ppu: Ppu = this.console.ppu;
         let addr: number = ppu.registers.oamaddr.getTableAddress();
@@ -200,64 +200,64 @@ export class OamDataWriteRegister extends Register {
     }
 }
 
-export class BhModeAndCharacterSizeRegister extends Register {
+export class BhModeAndCharacterSizeRegister extends AbstractRegister {
 
-    public address: string = "0x2105";
+    public address: number = 0x2105;
     public label: string = "BGMODE";
 
     public getBG4TileSize(): Dimension {
-        let is8by8 = ((this.val >> 7) & 1) == 0;
+        let is8by8 = ((this.get() >> 7) & 1) == 0;
         return is8by8 ? Dimension.get8by8() : Dimension.get16by16();
     }
 
     public getBG3TileSize(): Dimension {
-        let is8by8 = ((this.val >> 6) & 1) == 0;
+        let is8by8 = ((this.get() >> 6) & 1) == 0;
         return is8by8 ? Dimension.get8by8() : Dimension.get16by16();
     }
 
     public getBG2TileSize(): Dimension {
-        let is8by8 = ((this.val >> 5) & 1) == 0;
+        let is8by8 = ((this.get() >> 5) & 1) == 0;
         return is8by8 ? Dimension.get8by8() : Dimension.get16by16();
     }
 
     public getBG1TileSize(): Dimension {
-        let is8by8 = ((this.val >> 4) & 1) == 0;
+        let is8by8 = ((this.get() >> 4) & 1) == 0;
         return is8by8 ? Dimension.get8by8() : Dimension.get16by16();
     }
 
     public getBG3Priority(): boolean {
-        return ((this.val >> 3) & 1) == 1;
+        return ((this.get() >> 3) & 1) == 1;
     }
 
     public getMode(): number {
-        return ((this.val >> 0) & 7);
+        return ((this.get() >> 0) & 7);
     }
 
 }
 
-export class MosaicRegister extends Register {
+export class MosaicRegister extends AbstractRegister {
 
-    public address: string = "0x2106";
+    public address = 0x2106;
     public label: string = "MOSAIC";
 
     public getMosaicSize(): number {
-        return Math.floor(((this.val >> 4) & 0xF) / 2);
+        return Math.floor(((this.get() >> 4) & 0xF) / 2);
     }
 
     public getBG4MosaicEnable(): boolean {
-        return ((this.val >> 0) & 0x1) == 1;
+        return ((this.get() >> 0) & 0x1) == 1;
     }
 
     public getBG3MosaicEnable(): boolean {
-        return ((this.val >> 1) & 0x1) == 1;
+        return ((this.get() >> 1) & 0x1) == 1;
     }
 
     public getBG2MosaicEnable(): boolean {
-        return ((this.val >> 1) & 0x1) == 1;
+        return ((this.get() >> 1) & 0x1) == 1;
     }
 
     public getBG1MosaicEnable(): boolean {
-        return ((this.val >> 0) & 0x1) == 1;
+        return ((this.get() >> 0) & 0x1) == 1;
     }
 
 }
@@ -283,21 +283,21 @@ export class MosaicRegister extends Register {
  See the section "BACKGROUNDS" below for more details.
  */
 
-export class TileAddressForBG1Register extends Register {
+export class TileAddressForBG1Register extends AbstractRegister {
 
-    public address: string = "0x2107";
+    public address = 0x2107;
     public label: string = "BG1SC";
 
     public getTileMapAddress(): number {
-        return (((this.val >> 2) & 0x3F) * 0x800) & 0xFFFF;
+        return (((this.get() >> 2) & 0x3F) * 0x800) & 0xFFFF;
     }
 
     public isExtendedHorizontally() {
-        return ((this.val >> 0) & 0x1) == 0x1;
+        return ((this.get() >> 0) & 0x1) == 0x1;
     }
 
     public isExtendedVertically() {
-        return ((this.val >> 1) & 0x1) == 0x1;
+        return ((this.get() >> 1) & 0x1) == 0x1;
     }
 
     public getDimension(): Dimension {
@@ -313,21 +313,21 @@ export class TileAddressForBG1Register extends Register {
     }
 }
 
-export class TileAddressForBG2Register extends Register {
+export class TileAddressForBG2Register extends AbstractRegister {
 
-    public address: string = "0x2108";
+    public address = 0x2108;
     public label: string = "BG2SC";
 
     public getTileMapAddress(): number {
-        return (((this.val >> 2) & 0x3F) * 0x800) & 0xFFFF;
+        return (((this.get() >> 2) & 0x3F) * 0x800) & 0xFFFF;
     }
 
     public isExtendedHorizontally() {
-        return ((this.val >> 0) & 0x1) == 0x1;
+        return ((this.get() >> 0) & 0x1) == 0x1;
     }
 
     public isExtendedVertically() {
-        return ((this.val >> 1) & 0x1) == 0x1;
+        return ((this.get() >> 1) & 0x1) == 0x1;
     }
 
     public getDimension(): Dimension {
@@ -343,21 +343,21 @@ export class TileAddressForBG2Register extends Register {
     }
 }
 
-export class TileAddressForBG3Register extends Register {
+export class TileAddressForBG3Register extends AbstractRegister {
 
-    public address: string = "0x2109";
+    public address = 0x2109;
     public label: string = "BG3SC";
 
     public getTileMapAddress(): number {
-        return (((this.val >> 2) & 0x3F) * 0x800) & 0xFFFF;
+        return (((this.get() >> 2) & 0x3F) * 0x800) & 0xFFFF;
     }
 
     public isExtendedHorizontally() {
-        return ((this.val >> 0) & 0x1) == 0x1;
+        return ((this.get() >> 0) & 0x1) == 0x1;
     }
 
     public isExtendedVertically() {
-        return ((this.val >> 1) & 0x1) == 0x1;
+        return ((this.get() >> 1) & 0x1) == 0x1;
     }
 
     public getDimension(): Dimension {
@@ -373,21 +373,21 @@ export class TileAddressForBG3Register extends Register {
     }
 }
 
-export class TileAddressForBG4Register extends Register {
+export class TileAddressForBG4Register extends AbstractRegister {
 
-    public address: string = "0x210A";
+    public address = 0x210A;
     public label: string = "BG4SC";
 
     public getTileAddress(): number {
-        return (((this.val >> 2) & 0x3F) * 0x800) & 0xFFFF;
+        return (((this.get() >> 2) & 0x3F) * 0x800) & 0xFFFF;
     }
 
     public isExtendedHorizontally() {
-        return ((this.val >> 0) & 0x1) == 0x1;
+        return ((this.get() >> 0) & 0x1) == 0x1;
     }
 
     public isExtendedVertically() {
-        return ((this.val >> 1) & 0x1) == 0x1;
+        return ((this.get() >> 1) & 0x1) == 0x1;
     }
 
     public getDimension(): Dimension {
@@ -403,48 +403,48 @@ export class TileAddressForBG4Register extends Register {
     }
 }
 
-export class CharacterAddressForBG1And2Register extends Register {
+export class CharacterAddressForBG1And2Register extends AbstractRegister {
 
-    public address: string = "0x210B";
+    public address = 0x210B;
     public label: string = "BG12NBA";
 
     public getBaseAddressForBG1(): number {
-       return ((this.val >> 0) & 0xF) << 13;
+       return ((this.get() >> 0) & 0xF) << 13;
     }
 
     public getBaseAddressForBG2(): number {
-        return ((this.val >> 4) & 0xF) << 13;
+        return ((this.get() >> 4) & 0xF) << 13;
     }
 
 }
 
-export class CharacterAddressForBG3And4Register extends Register {
+export class CharacterAddressForBG3And4Register extends AbstractRegister {
 
-    public address: string = "0x210C";
+    public address = 0x210C;
     public label: string = "BG34NBA";
 
     public getBaseAddressForBG3(): number {
-        return ((this.val >> 0) & 0xF) << 13;
+        return ((this.get() >> 0) & 0xF) << 13;
     }
 
     public getBaseAddressForBG4(): number {
-        return ((this.val >> 4) & 0xF) << 13;
+        return ((this.get() >> 4) & 0xF) << 13;
     }
 }
 
-export class HorizontalScrollForBG1Register extends Register {
+export class HorizontalScrollForBG1Register extends AbstractRegister {
 
-    public address: string = "0x210D";
+    public address = 0x210D;
     public label: string = "BG1HOFS";
     public prev: number = 0;
 
     public set(val: number): void {
-        this.prev = this.val & 0xFF;
-        this.val = val & 0xFF;
+        this.prev = this.get() & 0xFF;
+        super.set(val & 0xFF);
     }
 
     public getBG1HortOffset(): number {
-        let offset = (this.val << 8) | (this.prev & ~7) | (this.prev & 7);
+        let offset = (this.get() << 8) | (this.prev & ~7) | (this.prev & 7);
         return offset & 1023;
     }
 
@@ -453,152 +453,152 @@ export class HorizontalScrollForBG1Register extends Register {
     }
 }
 
-export class VerticalScrollForBG1Register extends Register {
+export class VerticalScrollForBG1Register extends AbstractRegister {
 
-    public address: string = "0x210E";
+    public address = 0x210E;
     public label: string = "BG1VOFS";
     public prev: number = 0;
 
     public set(val: number): void {
-        this.prev = this.val & 0xFF;
-        this.val = val & 0xFF;
+        this.prev = this.get() & 0xFF;
+        super.set(val & 0xFF);
     }
 
     public getBG1VertOffset(): number {
         let low: number = this.prev & 0xFF;
-        let high: number = this.val & 0xFF;
+        let high: number = this.get() & 0xFF;
 
         let result = (high << 8) | low;
         return result & 1023;
     }
 
     public getBG1Mode7VertOffset(): number {
-        return 0;
+        throw new Error("Not implemented!");
     }
 
 }
 
-export class HorizontalScrollForBG2Register extends Register {
+export class HorizontalScrollForBG2Register extends AbstractRegister {
 
-    public address: string = "0x210F";
+    public address = 0x210F;
     public label: string = "BG2HOFS";
     public prev: number = 0;
 
     public set(val: number): void {
-        this.prev = this.val & 0xFF;
-        this.val = val & 0xFF;
+        this.prev = this.get() & 0xFF;
+        super.set(val & 0xFF);
     }
 
     public getBG2HortOffset(): number {
-        let offset = (this.val << 8) | (this.prev & ~7) | (this.prev & 7);
+        let offset = (this.get() << 8) | (this.prev & ~7) | (this.prev & 7);
         return offset & 1023;
     }
 
 }
 
-export class VerticalScrollForBG2Register extends Register {
+export class VerticalScrollForBG2Register extends AbstractRegister {
 
-    public address: string = "0x2110";
+    public address = 0x2110;
     public label: string = "BG2VOFS";
     public prev: number = 0;
 
     public set(val: number): void {
-        this.prev = this.val & 0xFF;
-        this.val = val & 0xFF;
+        this.prev = this.get() & 0xFF;
+        super.set(val & 0xFF);
     }
 
     public getBG2VertOffset(): number {
         let low: number = this.prev & 0xFF;
-        let high: number = this.val & 0xFF;
+        let high: number = this.get() & 0xFF;
 
         let result = (high << 8) | low;
         return result & 1023;
     }
 }
 
-export class HorizontalScrollForBG3Register extends Register {
+export class HorizontalScrollForBG3Register extends AbstractRegister {
 
-    public address: string = "0x2111";
+    public address = 0x2111;
     public label: string = "BG3HOFS";
     public prev: number = 0;
 
     public set(val: number): void {
-        this.prev = this.val & 0xFF;
-        this.val = val & 0xFF;
+        this.prev = this.get() & 0xFF;
+        super.set(val & 0xFF);
     }
 
     public getBG3HortOffset(): number {
-        let offset = (this.val << 8) | (this.prev & ~7) | (this.prev & 7);
+        let offset = (this.get() << 8) | (this.prev & ~7) | (this.prev & 7);
         return offset & 1023;
     }
 }
 
-export class VerticalScrollForBG3Register extends Register {
+export class VerticalScrollForBG3Register extends AbstractRegister {
 
-    public address: string = "0x2112";
+    public address = 0x2112;
     public label: string = "BG3VOFS";
     public prev: number = 0;
 
     public set(val: number): void {
-        this.prev = this.val & 0xFF;
-        this.val = val & 0xFF;
+        this.prev = this.get() & 0xFF;
+        super.set(val & 0xFF);
     }
 
     public getBG3VertOffset(): number {
         let low: number = this.prev & 0xFF;
-        let high: number = this.val & 0xFF;
+        let high: number = this.get() & 0xFF;
 
         let result = (high << 8) | low;
         return result & 1023;
     }
 }
 
-export class HorizontalScrollForBG4Register extends Register {
+export class HorizontalScrollForBG4Register extends AbstractRegister {
 
-    public address: string = "0x2113";
+    public address = 0x2113;
     public label: string = "BG4HOFS";
     public prev: number = 0;
 
     public set(val: number): void {
-        this.prev = this.val & 0xFF;
-        this.val = val & 0xFF;
+        this.prev = this.get() & 0xFF;
+        super.set(val & 0xFF);
     }
 
     public getBG4HortOffset(): number {
-        let offset = (this.val << 8) | (this.prev & ~7) | (this.prev & 7);
+        let offset = (this.get() << 8) | (this.prev & ~7) | (this.prev & 7);
         return offset & 1023;
     }
 }
 
-export class VerticalScrollForBG4Register extends Register {
+export class VerticalScrollForBG4Register extends AbstractRegister {
 
-    public address: string = "0x2114";
+    public address = 0x2114;
     public label: string = "BG4VOFS";
     public prev: number = 0;
 
     public set(val: number): void {
-        this.prev = this.val & 0xFF;
-        this.val = val & 0xFF;
+        this.prev = this.get() & 0xFF;
+        super.set(val & 0xFF);
     }
 
     public getBG4VertOffset(): number {
-        let result = (this.val << 8) | this.prev;
-        this.prev = this.val;
+        let result = (this.get() << 8) | this.prev;
+        this.prev = this.get();
         return result;
     }
 }
 
-export class VideoPortControlRegister extends Register {
+export class VideoPortControlRegister extends AbstractRegister {
 
-    public address: string = "0x2115";
+    public address = 0x2115;
     public label: string = "VMAIN";
 
     public getAddressIncrementMode(): number {
-        return (this.val >> 7) & 0x1;
+        return (this.get() >> 7) & 0x1;
     }
 
     public getAddressIncrementAmount(): number {
-        let result: number = (this.val & 0x3);
+        let result: number = (this.get() & 0x3);
         if (result == 0x00) {
             return 1;
         } else if (result == 0x01) {
@@ -615,7 +615,7 @@ export class VideoPortControlRegister extends Register {
         // 01 = Remap addressing aaaaaaaaBBBccccc => aaaaaaaacccccBBB
         // 10 = Remap addressing aaaaaaaBBBcccccc => aaaaaaaccccccBBB
         // 11 = Remap addressing aaaaaaBBBccccccc => aaaaaacccccccBBB
-        return (this.val >> 2) & 0x3;
+        return (this.get() >> 2) & 0x3;
     }
 
     public static remap(type: number, val: number) {
@@ -644,79 +644,106 @@ export class VideoPortControlRegister extends Register {
 
 }
 
-export class VRAMAddressRegister extends Register {
+export class VRAMAddressLowRegister extends AbstractRegister {
+
+    public address = 0x2115;
+    public label: string = "VMADDL";
+}
+
+export class VRAMAddressHighRegister extends AbstractRegister {
+
+    public address = 0x2116;
+    public label: string = "VMADDH";
+}
+
+export class VRAMAddressRegister {
 
     public address: string = "0x2115-0x2116";
     public label: string = "VMADD";
 
+    public vmaddh: VRAMAddressHighRegister;
+    public vmaddl: VRAMAddressLowRegister;
+
+    constructor(console: Console) {
+        this.vmaddh = new VRAMAddressHighRegister(console);
+        this.vmaddl = new VRAMAddressLowRegister(console);
+    }
+
     public set(val: number): void {
-        this.val = (val & 0xFFFF) % Vram.size;
-    }
+        const low = Bit.getUint16Lower(val);
+        const high = Bit.getUint16Upper(val);
 
-    public setLower(val: number) {
-        this.val = Bit.setUint16Lower(this.val, val);
-    }
-
-    public setUpper(val: number) {
-        this.val = Bit.setUint16Upper(this.val, val);
-    }
-
-    public getLower(): number {
-        return Bit.getUint16Lower(this.val);
-    }
-
-    public getUpper(): number {
-        return Bit.getUint16Upper(this.val);
+        this.vmaddl.set(low);
+        this.vmaddh.set(high);
     }
 
     public get(): number {
-        return this.val;
+        return Bit.toUint16(this.vmaddh.get(), this.vmaddl.get());
     }
 }
 
-export class VRAMDataWriteRegister extends Register {
+export class VRAMDataLowWriteRegister extends AbstractRegister {
 
-    public address: string = "0x2118-0x2119";
+    public address = 0x2118;
+    public label: string = "VMDATAL";
+
+    public set(value: number, byteIndex?: number) {
+        super.set(value, byteIndex);
+
+        const vportcntrl = this.console.ppu.registers.vportcntrl;
+        const vdataw = this.console.ppu.registers.vdataw;
+
+        let doIncrement = vportcntrl.getAddressIncrementMode() == 0;
+
+        let loData: number = vdataw.vmdatal.get();
+        let hiData: number = vdataw.vmdatah.get();
+
+        if (doIncrement) {
+            vdataw.write(true, loData);
+        } else {
+            vdataw.write(false, loData);
+        }
+    }
+}
+
+export class VRAMDataHighWriteRegister extends AbstractRegister {
+
+    public address = 0x2119;
+    public label: string = "VMDATAH";
+
+    public set(value: number, byteIndex?: number) {
+        super.set(value, byteIndex);
+
+        const vportcntrl = this.console.ppu.registers.vportcntrl;
+        const vdataw = this.console.ppu.registers.vdataw;
+
+        let doIncrement = vportcntrl.getAddressIncrementMode() == 1;
+
+        let loData: number = vdataw.vmdatal.get();
+        let hiData: number = vdataw.vmdatah.get();
+
+        if (doIncrement) {
+            vdataw.write(true, loData, hiData);
+        } else {
+            vdataw.write(false, loData, hiData);
+        }
+    }
+}
+
+export class VRAMDataWriteRegister {
+
     public label: string = "VMDATA";
 
-    public setLower(val: number) {
-        this.val = Bit.setUint16Lower(this.val, val);
+    public vmdatal : VRAMDataLowWriteRegister;
+    public vmdatah : VRAMDataHighWriteRegister;
 
-        let ppu: Ppu = this.console.ppu;
-        let doIncrement = ppu.registers.vportcntrl.getAddressIncrementMode() == 0;
+    private console: Console;
 
-        let loData: number = Bit.getUint16Lower(this.val);
-        let hiData: number = Bit.getUint16Upper(this.val);
+    constructor(console: Console) {
+        this.vmdatal = new VRAMDataLowWriteRegister(console);
+        this.vmdatah = new VRAMDataHighWriteRegister(console);
 
-        if (doIncrement) {
-            this.write(true, loData);
-        } else {
-            this.write(false, loData);
-        }
-    }
-
-    public setUpper(val: number) {
-        this.val = Bit.setUint16Upper(this.val, val);
-
-        let ppu: Ppu = this.console.ppu;
-        let doIncrement = ppu.registers.vportcntrl.getAddressIncrementMode() == 1;
-
-        let loData: number = Bit.getUint16Lower(this.val);
-        let hiData: number = Bit.getUint16Upper(this.val);
-
-        if (doIncrement) {
-            this.write(true, loData, hiData);
-        } else {
-            this.write(false, loData, hiData);
-        }
-    }
-
-    public getLower(): number {
-        return Bit.getUint16Lower(this.val);
-    }
-
-    public getUpper(): number {
-        return Bit.getUint16Upper(this.val);
+        this.console = console;
     }
 
     public write(doIncrement: boolean, loByte: number, hiByte?: number): void {
@@ -732,80 +759,80 @@ export class VRAMDataWriteRegister extends Register {
     }
 }
 
-export class Mode7Register extends Register {
+export class Mode7Register extends AbstractRegister {
 
-    public address: string = "0x211A";
+    public address = 0x211A;
     public label: string = "VMDATAH";
 
 }
 
-export class CosXRegister extends Register {
+export class CosXRegister extends AbstractRegister {
 
-    public address: string = "0x211B";
+    public address = 0x211B;
     public label: string = "VMDATAH";
 
 }
 
-export class SinXRegister extends Register {
+export class SinXRegister extends AbstractRegister {
 
-    public address: string = "0x211C";
+    public address = 0x211C;
     public label: string = "VMDATAH";
 
 }
 
-export class SinYRegister extends Register {
+export class SinYRegister extends AbstractRegister {
 
-    public address: string = "0x211D";
+    public address = 0x211D;
     public label: string = "VMDATAH";
 
 }
 
-export class CosYRegister extends Register {
+export class CosYRegister extends AbstractRegister {
 
-    public address: string = "0x211E";
+    public address = 0x211E;
     public label: string = "VMDATAH";
 
 }
 
-export class CenterPositionXRegister extends Register {
+export class CenterPositionXRegister extends AbstractRegister {
 
-    public address: string = "0x211F";
+    public address = 0x211F;
     public label: string = "VMDATAH";
 
 }
 
-export class CenterPositionYRegister extends Register {
+export class CenterPositionYRegister extends AbstractRegister {
 
-    public address: string = "0x2120";
+    public address = 0x2120;
     public label: string = "VMDATAH";
 
 }
 
-export class CGRAMAddressRegister extends Register {
+export class CGRAMAddressRegister extends AbstractRegister {
 
-    public address: string = "0x2121";
+    public address = 0x2121;
     public label: string = "CGADD";
 
     public set(val: number): void {
-        this.val = val & 0xFF;
+        super.set(val);
         if (val == 0) {
             this.console.ppu.registers.cgdataw.reset();
         }
     }
 
     public increment(): void {
-        this.set(this.val + 1);
+        this.set(this.get() + 1);
     }
 
     public getIndex(): number {
-        return (this.val * 2) % CGram.size;
+        return (this.get() * 2) % CGram.size;
     }
 
 }
 
-export class CGRAMDataWriteRegister extends Register {
+export class CGRAMDataWriteRegister extends AbstractRegister {
 
-    public address: string = "0x2122";
+    public address = 0x2122;
     public label: string = "CGDATA";
 
     public counter: number = 0;
@@ -818,9 +845,11 @@ export class CGRAMDataWriteRegister extends Register {
         this.counter = 0;
     }
 
-    public set(val: number): void {
+    public set(value: number, byteIndex?: number) {
+        super.set(value);
+
         this.low = this.high & 0xFF;
-        this.high = val & 0xFF;
+        this.high = value & 0xFF;
         this.counter++;
         let doWrite: boolean = this.counter == 2;
 
@@ -837,152 +866,152 @@ export class CGRAMDataWriteRegister extends Register {
 
 }
 
-export class WindowMaskSettingsForBG1And2Register extends Register {
+export class WindowMaskSettingsForBG1And2Register extends AbstractRegister {
 
-    public address: string = "0x2123";
+    public address = 0x2123;
     public label: string = "W12SEL";
 
 }
 
-export class WindowMaskSettingsForBG3And4Register extends Register {
+export class WindowMaskSettingsForBG3And4Register extends AbstractRegister {
 
-    public address: string = "0x2124";
+    public address = 0x2124;
     public label: string = "W34SEL";
 
 }
 
-export class WindowMaskSettingsForObjRegister extends Register {
+export class WindowMaskSettingsForObjRegister extends AbstractRegister {
 
-    public address: string = "0x2125";
+    public address = 0x2125;
     public label: string = "WOBJSEL";
 
 }
 
-export class WindowPositionForBG0Register extends Register {
+export class WindowPositionForBG0Register extends AbstractRegister {
 
-    public address: string = "0x2126";
+    public address = 0x2126;
     public label: string = "WH0";
 
 }
 
-export class WindowPositionForBG1Register extends Register {
+export class WindowPositionForBG1Register extends AbstractRegister {
 
-    public address: string = "0x2127";
+    public address = 0x2127;
     public label: string = "WH1";
 
 }
 
-export class WindowPositionForBG2Register extends Register {
+export class WindowPositionForBG2Register extends AbstractRegister {
 
-    public address: string = "0x2128";
+    public address = 0x2128;
     public label: string = "WH2";
 
 }
 
-export class WindowPositionForBG3Register extends Register {
+export class WindowPositionForBG3Register extends AbstractRegister {
 
-    public address: string = "0x2129";
+    public address = 0x2129;
     public label: string = "WH3";
 
 }
 
-export class WindowMaskLogicForBgRegister extends Register {
+export class WindowMaskLogicForBgRegister extends AbstractRegister {
 
-    public address: string = "0x212A";
+    public address = 0x212A;
     public label: string = "WBGLOG";
 
 }
 
-export class WindowMaskLogicForObjRegister extends Register {
+export class WindowMaskLogicForObjRegister extends AbstractRegister {
 
-    public address: string = "0x212B";
+    public address = 0x212B;
     public label: string = "WOBJLOG";
 
 }
 
-export class ScreenDestinationForMainRegister extends Register {
+export class ScreenDestinationForMainRegister extends AbstractRegister {
 
-    public address: string = "0x212C";
+    public address = 0x212;
     public label: string = "TM";
 
 }
 
-export class ScreenDestinationForSubRegister extends Register {
+export class ScreenDestinationForSubRegister extends AbstractRegister {
 
-    public address: string = "0x212D";
+    public address = 0x212D;
     public label: string = "TS";
 
 }
 
-export class WindowMaskDestinationForMainRegister extends Register {
+export class WindowMaskDestinationForMainRegister extends AbstractRegister {
 
-    public address: string = "0x212E";
+    public address = 0x212E;
     public label: string = "TMW";
 
 }
 
-export class WindowMaskDestinationForSubRegister extends Register {
+export class WindowMaskDestinationForSubRegister extends AbstractRegister {
 
-    public address: string = "0x212F";
+    public address = 0x212F;
     public label: string = "TSW";
 
 }
 
 // Fixed color addition or screen addition register [CGWSEL]
-export class ColorMathSelectionRegister extends Register {
+export class ColorMathSelectionRegister extends AbstractRegister {
 
-    public address: string = "0x2130";
+    public address = 0x2130;
     public label: string = "CGWSEL";
 
 }
 
 // Addition/subtraction for screens, BGs, & OBJs [CGADSUB]
-export class ColorMathAddSubAffectRegister extends Register {
+export class ColorMathAddSubAffectRegister extends AbstractRegister {
 
-    public address: string = "0x2131";
+    public address = 0x2131;
     public label: string = "CGADSUB";
 
 }
 
 // $2132
-export class ColorMathDataRegister extends Register {
+export class ColorMathDataRegister extends AbstractRegister {
 
-    public address: string = "0x2132";
+    public address = 0x2132;
     public label: string = "COLDATA";
 
 }
 
-export class ScreenModeSelectRegister extends Register {
+export class ScreenModeSelectRegister extends AbstractRegister {
 
-    public address: string = "0x2133";
+    public address = 0x2133;
     public label: string = "SETINI";
 
 }
 
-export class MultiplicationResultLowRegister extends Register {
+export class MultiplicationResultLowRegister extends AbstractRegister {
 
-    public address: string = "0x2134";
+    public address = 0x2134;
     public label: string = "MPYL";
 
 }
 
-export class MultiplicationResultMiddleRegister extends Register {
+export class MultiplicationResultMiddleRegister extends AbstractRegister {
 
-    public address: string = "0x2135";
+    public address = 0x2135;
     public label: string = "MPYM";
 
 }
 
-export class MultiplicationResultHighRegister extends Register {
+export class MultiplicationResultHighRegister extends AbstractRegister {
 
-    public address: string = "0x2136";
+    public address = 0x2136;
     public label: string = "MPYH";
 
 }
 
-export class SoftwareLatchRegister extends Register {
+export class SoftwareLatchRegister extends AbstractRegister {
 
-    public address: string = "0x2137";
+    public address = 0x2137;
     public label: string = "SLHV";
 
     public get(): number {
@@ -996,9 +1025,9 @@ export class SoftwareLatchRegister extends Register {
 
 }
 
-export class OAMDataReadRegister extends Register {
+export class OAMDataReadRegister extends AbstractRegister {
 
-    public address: string = "0x2138";
+    public address = 0x2138;
     public label: string = "OAMDATAREAD";
 
     public get(): number {
@@ -1011,39 +1040,60 @@ export class OAMDataReadRegister extends Register {
 
 }
 
-export class VRAMDataReadRegister extends Register {
+export class VRAMDataLowReadRegister extends AbstractRegister {
 
-    public address: string = "0x2139-0x213A";
-    public label: string = "VMDATA";
+    public address = 0x2139;
+    public label: string = "VMDATAL";
 
-    public setLower(val: number) {
-        this.val = Bit.setUint16Lower(this.val, val);
-    }
+    public get(byteIndex?: number): number {
+        const registers = this.console.ppu.registers;
+        const vportcntrl = registers.vportcntrl;
+        const vdatar = registers.vdatar;
 
-    public setUpper(val: number) {
-        this.val = Bit.setUint16Upper(this.val, val);
-    }
-
-    public getLower(): number {
-        let ppu: Ppu = this.console.ppu;
-        let doIncrement = ppu.registers.vportcntrl.getAddressIncrementMode() == 0;
+        let doIncrement = vportcntrl.getAddressIncrementMode() == 0;
 
         if (doIncrement) {
-            return this.read(true, false);
+            return vdatar.read(true, false);
         }
 
-        return this.read(false, false);
+        return vdatar.read(false, false);
     }
 
-    public getUpper(): number {
-        let ppu: Ppu = this.console.ppu;
-        let doIncrement = ppu.registers.vportcntrl.getAddressIncrementMode() == 1;
+}
+
+export class VRAMDataHighReadRegister extends AbstractRegister {
+
+    public address = 0x213A;
+    public label: string = "VMDATAH";
+
+    public get(byteIndex?: number): number {
+        const registers = this.console.ppu.registers;
+        const vportcntrl = registers.vportcntrl;
+        const vdatar = registers.vdatar;
+
+        let doIncrement = vportcntrl.getAddressIncrementMode() == 1;
 
         if (doIncrement) {
-            return this.read(true, true);
+            return vdatar.read(true, false);
         }
 
-        return this.read(false, true);
+        return vdatar.read(false, false);
+    }
+}
+
+
+export class VRAMDataReadRegister {
+
+    public vmdatal: VRAMDataLowReadRegister;
+    public vmdatah: VRAMDataHighReadRegister;
+
+    public console: Console;
+
+    constructor(console: Console) {
+        this.vmdatah = new VRAMDataHighReadRegister(console);
+        this.vmdatal = new VRAMDataLowReadRegister(console);
+
+        this.console = console;
     }
 
     public read(doIncrement: boolean, high?: boolean): number {
@@ -1059,14 +1109,14 @@ export class VRAMDataReadRegister extends Register {
     }
 }
 
-export class CGRAMDataReadRegister extends Register {
+export class CGRAMDataReadRegister extends AbstractRegister {
 
-    public address: string = "213B";
+    public address = 0x213B;
     public label: string = "CGDATAREAD";
 
     public counter: number = 0;
 
-    public get(): number {
+    public get(byteIndex?: number): number {
         let index: number = this.console.ppu.registers.cgramaddr.getIndex();
         let value: number = this.console.ppu.cgram.readByte((index + this.counter) % CGram.size);
 
@@ -1081,12 +1131,12 @@ export class CGRAMDataReadRegister extends Register {
 
 }
 
-export class ScanlineLocationHorizontalRegister extends Register {
+export class ScanlineLocationHorizontalRegister extends AbstractRegister {
 
-    public address: string = "0x213C";
+    public address = 0x213C;
     public label: string = "OPHCT";
 
-    public get(): number {
+    public get(byteIndex?: number): number {
         let result = this.console.ppu.status.latchedHCounter;
         if (this.console.ppu.status.opHCounterToggle) {
             result = Bit.getUint16Upper(result);
@@ -1099,12 +1149,12 @@ export class ScanlineLocationHorizontalRegister extends Register {
 
 }
 
-export class ScanlineLocationVerticalRegister extends Register {
+export class ScanlineLocationVerticalRegister extends AbstractRegister {
 
-    public address: string = "0x213D";
+    public address = 0x213D;
     public label: string = "OPVCT";
 
-    public get(): number {
+    public get(byteIndex?: number): number {
         let result = this.console.ppu.status.latchedVCounter;
         if (this.console.ppu.status.opVCounterToggle) {
             result = Bit.getUint16Upper(result);
@@ -1118,12 +1168,12 @@ export class ScanlineLocationVerticalRegister extends Register {
 
 }
 
-export class PPUStatus77Register extends Register {
+export class PPUStatus77Register extends AbstractRegister {
 
-    public address: string = "213E";
+    public address = 0x213E;
     public label: string = "STAT77";
 
-    public get(): number {
+    public get(byteIndex?: number): number {
         let status = this.console.ppu.status;
         let result = status.chip5C77Version;
 
@@ -1136,12 +1186,12 @@ export class PPUStatus77Register extends Register {
 
 }
 
-export class PPUStatus78Register extends Register {
+export class PPUStatus78Register extends AbstractRegister {
 
-    public address: string = "213F";
+    public address = 0x213F;
     public label: string = "STAT78";
 
-    public get(): number {
+    public get(byteIndex?: number): number {
         let status = this.console.ppu.status;
         let result = status.chip5C78Version;
 
