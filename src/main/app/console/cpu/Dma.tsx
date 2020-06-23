@@ -7,6 +7,7 @@ import {
     HdmaTableAddressLowRegister,
     HdmaTableIndirectAddressRegister,
 } from "./Hdma";
+import {AbstractRegister} from "../../interfaces/AbstractRegister";
 
 export enum DmaTransferType {
     CPU_TO_PPU, PPU_TO_CPU,
@@ -35,13 +36,13 @@ export enum DmaAddressingAutomaticType {
     DECREMENT,
 }
 
-export class DmaControlRegister extends Register {
+export class DmaControlRegister extends AbstractRegister {
 
-    public address: string = "0x43x0";
+    public address = 0x43F0;
     public label: string = "DMAPx";
 
     public getTransferDirection(): DmaTransferType {
-        let type: number = (this.val >> 7) & 0x1;
+        let type: number = (this.get() >> 7) & 0x1;
         if (type == 0) return DmaTransferType.CPU_TO_PPU;
         if (type == 1) return DmaTransferType.PPU_TO_CPU;
     }
@@ -55,22 +56,22 @@ export class DmaControlRegister extends Register {
      * HDMA Addressing Mode (0==Absolute, 1==Indirect)
      */
     public getAddressingMode(): DmaAddressingMode {
-        let isAbsolute: boolean = ((this.val >> 6) & 0x1) == 0;
+        let isAbsolute: boolean = ((this.get() >> 6) & 0x1) == 0;
         return isAbsolute ? DmaAddressingMode.ABSOLUTE: DmaAddressingMode.INDIRECT;
     }
 
     public getAddressingSelectionType(): DmaAddressingSelectionType {
-        let isAutomatic = ((this.val >> 3) & 0x1) == 0;
+        let isAutomatic = ((this.get() >> 3) & 0x1) == 0;
         return isAutomatic ? DmaAddressingSelectionType.AUTOMATIC: DmaAddressingSelectionType.FIXED;
     }
 
     public getAutomaticAddressingType(): DmaAddressingAutomaticType {
-        let isIncrement = ((this.val >> 4) & 0x1) == 0x0;
+        let isIncrement = ((this.get() >> 4) & 0x1) == 0x0;
         return isIncrement ? DmaAddressingAutomaticType.INCREMENT: DmaAddressingAutomaticType.DECREMENT;
     }
 
     public getWriteMode(isHDMA?: boolean): DmaWriteMode {
-        let type: number = ((this.val >> 0) & 0x7);
+        let type: number = ((this.get() >> 0) & 0x7);
         if (isHDMA) {
             if (type == 0x0) {
                 return DmaWriteMode.ONE_BYTE;
@@ -104,79 +105,101 @@ export class DmaControlRegister extends Register {
 
 }
 
-export class DmaPpuAddressRegister extends Register {
+export class DmaPpuAddressRegister extends AbstractRegister {
 
-    public address: string = "0x43x1";
+    public address: number = 0x43F1;
     public label: string = "BBADx";
 
     public getBbusAddress(): number {
-        return 0x2100 | (this.val & 0xFF);
+        return 0x2100 | (this.get() & 0xFF);
     }
 
 }
 
-export class DmaCpuAddressRegister extends Register {
 
-    public address: string = "0x43x2-0x43x4";
-    public label: string = "A1Tx";
 
-    public setLower(val: number): void {
-        this.val = Bit.setUint32Lower(this.val, val);
-    }
+export class DmaCpuLAddressRegister extends AbstractRegister {
 
-    public setMiddle(val: number): void {
-        this.val = Bit.setUint32Middle(this.val, val);
-    }
+    public address = 0x43F2;
+    public label: string = "A1TL";
+}
 
-    public setUpper(val: number): void {
-        this.val = Bit.setUint32Upper(this.val, val);
-    }
+export class DmaCpuMAddressRegister extends AbstractRegister {
 
-    public getLower(): number {
-        return Bit.getUint32Lower(this.val);
-    }
+    public address = 0x43F3;
+    public label: string = "A1TM";
+}
 
-    public getMiddle(): number {
-        return Bit.getUint32Middle(this.val);
-    }
+export class DmaCpuHAddressRegister extends AbstractRegister {
 
-    public getUpper(): number {
-        return Bit.getUint32Upper(this.val);
+    public address = 0x43F4;
+    public label: string = "A1TH";
+}
+
+export class DmaCpuAddressRegister {
+
+    public a1tl: DmaCpuLAddressRegister;
+    public a1tm: DmaCpuMAddressRegister;
+    public a1th: DmaCpuHAddressRegister;
+
+    constructor(console: Console) {
+        this.a1tl = new DmaCpuLAddressRegister(console);
+        this.a1tm = new DmaCpuMAddressRegister(console);
+        this.a1th = new DmaCpuHAddressRegister(console);
     }
 
     public getAbusBank(): number {
-        return Bit.getUint24Upper(this.val);
+        return this.a1th.get();
     }
 
     public getAbusAddress(): number {
-        return this.val & 0xFFFF;
+        return Bit.toUint16(this.a1tm.get(), this.a1tl.get());
     }
 
     public get(): number {
-        return this.val;
+        return Bit.toUint24(
+            this.a1th.get(),
+            this.a1tm.get(),
+            this.a1tl.get()
+        );
     }
+
 }
 
-export class DmaTransferSizeRegister extends Register {
+export class DmaTransferSizeLRegister extends AbstractRegister {
 
-    public address: string = "0x43x5-0x43x6";
+    public address = 0x43F5;
     public label: string = "DASx";
+}
 
-    public setLower(val: number): void {
-        this.val = Bit.setUint16Lower(this.val, val);
+export class DmaTransferSizeHRegister extends AbstractRegister {
+
+    public address = 0x43F5;
+    public label: string = "DASx";
+}
+
+export class DmaTransferSizeRegister {
+
+    dasl: DmaTransferSizeLRegister;
+    dash: DmaTransferSizeHRegister;
+
+    constructor(console: Console) {
+        this.dash = new DmaTransferSizeHRegister(console);
+        this.dasl = new DmaTransferSizeLRegister(console);
     }
 
-    public setUpper(val: number): void {
-        this.val = Bit.setUint16Upper(this.val, val);
+    public get(): number {
+        return Bit.toUint16(this.dash.get(), this.dasl.get());
     }
 
-    public getLower(): number {
-        return Bit.getUint24Lower(this.val);
+    public set(value: number): void {
+        const low = Bit.getUint16Lower(value);
+        const high = Bit.getUint16Upper(value);
+
+        this.dasl.set(low);
+        this.dash.set(high);
     }
 
-    public getUpper(): number {
-        return Bit.getUint24Upper(this.val);
-    }
 }
 
 export class DmaChannel {
@@ -309,9 +332,9 @@ export class DmaChannel {
     }
 }
 
-export class DmaEnableRegister extends Register {
+export class DmaEnableRegister extends AbstractRegister {
 
-    public address: string = "0x420B";
+    public address = 0x420B;
     public label: string = "MDMAEN";
 
     public channels: DmaChannel[];

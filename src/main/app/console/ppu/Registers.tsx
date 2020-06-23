@@ -5,6 +5,7 @@ import {Bit} from "../../util/Bit";
 import {Objects} from "../../util/Objects";
 import {Vram} from "../memory/Vram";
 import {Dimension} from "./Tiles";
+import {AbstractRegister} from "../../interfaces/AbstractRegister";
 
 
 // http://baltimorebarcams.com/eb/snes/docs/65816/SNES%20Registers.html
@@ -36,9 +37,9 @@ export class Register {
 
 }
 
-export class ScreenDisplayRegister extends Register {
+export class ScreenDisplayRegister extends AbstractRegister {
 
-    public address: string = "0x2100";
+    public address = 0x2100;
     public label: string = "INIDISP";
 
     public val: number = 0x8F;
@@ -56,13 +57,13 @@ export class ScreenDisplayRegister extends Register {
 }
 
 
-export class OamSizeAndDataAreaRegister extends Register {
+export class OamSizeAndDataAreaRegister extends AbstractRegister {
 
-    public address: string = "0x2101";
+    public address = 0x2101;
     public label: string = "OBSEL";
 
     public getSize(): number {
-        let type : number = (this.val >> 5) & 0x7;
+        let type : number = (this.get() >> 5) & 0x7;
         return type;
     }
 
@@ -88,11 +89,11 @@ export class OamSizeAndDataAreaRegister extends Register {
     }
 
     public getNameSelection(): number {
-        return ((this.val >> 3) & 0x2);
+        return ((this.get() >> 3) & 0x2);
     }
 
     public getBaseSelection(): number {
-        return ((this.val >> 0) & 0x3) << 13;
+        return ((this.get() >> 0) & 0x3) << 13;
     }
 }
 

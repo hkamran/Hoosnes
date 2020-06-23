@@ -170,10 +170,10 @@ export class Ppu {
 
             if (this.console.io.registers.nmitimen.getAutoJoypadEnable()) {
                 this.console.io.registers.hvbjoy.setJoypadFlag(false);
-                this.console.io.registers.joy1.setLower(joy1.readByte(0));
-                this.console.io.registers.joy1.setUpper(joy1.readByte(1));
-                this.console.io.registers.joy2.setLower(joy2.readByte(0));
-                this.console.io.registers.joy2.setUpper(joy2.readByte(1));
+                this.console.io.registers.joy1l.set(joy1.readByte(0));
+                this.console.io.registers.joy1h.set(joy1.readByte(1));
+                this.console.io.registers.joy2l.set(joy2.readByte(0));
+                this.console.io.registers.joy2h.set(joy2.readByte(1));
             }
         }
 

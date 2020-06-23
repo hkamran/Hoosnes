@@ -17,5 +17,4 @@ export class Io {
         this.console = console;
         this.registers = new Registers(console);
     }
-
 }

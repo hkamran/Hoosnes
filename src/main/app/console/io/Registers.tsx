@@ -22,7 +22,7 @@ import {Bit} from "../../util/Bit";
 
 export class InterruptEnableFlagsRegister extends AbstractRegister {
 
-    public address: string = "4200";
+    public address = 0x4200;
     public name: string = "NMITIMEN";
 
     public set(val: number) {
@@ -48,7 +48,7 @@ export class InterruptEnableFlagsRegister extends AbstractRegister {
 
 export class NmiFlagRegister extends AbstractRegister {
 
-    public address: string = "4210";
+    public address = 0x4210;
     public name: string = "RDNMI";
 
     public setNmiStatus(flag: boolean) {
@@ -74,7 +74,7 @@ export class NmiFlagRegister extends AbstractRegister {
  */
 export class TimeUpRegister extends AbstractRegister {
 
-    public address: string = "4211";
+    public address = 0x4211;
     public name: string = "TIMEUP";
 
     public irqFlag: boolean = false;
@@ -93,39 +93,27 @@ export class TimeUpRegister extends AbstractRegister {
 
 }
 
-export class WramMemoryAddressRegister extends AbstractRegister {
+export class WramMemoryLowAddressRegister extends AbstractRegister {
 
-    public address: string = "0x2181-0x2183";
-    public name: string = "WMADD";
+    public address = 0x2181;
+    public name: string = "WMADDL";
+}
 
-    public setLower(val: number): void {
-        this.set(val, 0);
-    }
+export class WramMemoryMidAddressRegister extends AbstractRegister {
 
-    public setMiddle(val: number) {
-        this.set(val, 1);
-    }
+    public address = 0x2182;
+    public name: string = "WMADDM";
+}
 
-    public setUpper(val: number) {
-        this.set(val, 2);
-    }
+export class WramMemoryHighAddressRegister extends AbstractRegister {
 
-    public getLower(): number {
-        return this.get(0);
-    }
-
-    public getMiddle(): number {
-        return this.get(1);
-    }
-
-    public getUpper(): number {
-        return this.get(2);
-    }
+    public address = 0x2183;
+    public name: string = "WMADDH";
 }
 
 export class WramMemoryDataRegister extends AbstractRegister {
 
-    public address: string = "0x2180";
+    public address = 0x2180;
     public name: string = "WMDATA";
 
     public set(val: number) {
@@ -140,7 +128,7 @@ export class WramMemoryDataRegister extends AbstractRegister {
 
 export class HvBStatusRegister extends AbstractRegister {
 
-    public address: string = "0x4212";
+    public address = 0x4212;
     public name: string = "HVBJOY";
 
     public val: number = 0x1;
@@ -196,7 +184,7 @@ export class HvBStatusRegister extends AbstractRegister {
 
 export class OldJoy1Register extends AbstractRegister {
 
-    public address: string = "0x4016";
+    public address = 0x4016;
     public name: string = "JOY1";
 
     public get(): number {
@@ -211,7 +199,7 @@ export class OldJoy1Register extends AbstractRegister {
 
 export class OldJoy2Register extends AbstractRegister {
 
-    public address: string = "0x4017";
+    public address = 0x4017;
     public name: string = "JOY2";
 
     public get(): number {
@@ -224,55 +212,66 @@ export class OldJoy2Register extends AbstractRegister {
 
 }
 
-export class Joy1Register extends AbstractRegister {
+export class Joy1LRegister extends AbstractRegister {
 
-    public address: string = "0x4218-0x4219";
-    public name: string = "JOY1";
-
-    public getLower(): number {
-        return this.get(0);
-    }
-
-    public getUpper(): number {
-        return this.get(1);
-    }
-
-    public setUpper(value: number) {
-        this.set(value, 1);
-    }
-
-    public setLower(value: number) {
-        this.set(value, 0);
-    }
+    public address = 0x4218;
+    public name: string = "JOY1L";
 
 }
 
-export class Joy2Register extends AbstractRegister {
+export class Joy1HRegister extends AbstractRegister {
 
-    public address: string = "0x421A-0x421B";
-    public name: string = "JOY2";
+    public address = 0x4219;
+    public name: string = "JOY1H";
 
-    public getLower(): number {
-        return this.get(0);
-    }
+}
 
-    public getUpper(): number {
-        return this.get(1);
-    }
+export class Joy2LRegister extends AbstractRegister {
 
-    public setUpper(value: number) {
-        this.set(value, 1);
-    }
+    public address = 0x421A;
+    public name: string = "JOY2L";
 
-    public setLower(value: number) {
-        this.set(value, 0);
-    }
+}
+
+export class Joy2HRegister extends AbstractRegister {
+
+    public address = 0x421B;
+    public name: string = "JOY2H";
+
+}
+
+
+export class Joy3LRegister extends AbstractRegister {
+
+    public address = 0x421C;
+    public name: string = "JOY3L";
+
+}
+
+export class Joy3HRegister extends AbstractRegister {
+
+    public address = 0x421D;
+    public name: string = "JOY3H";
+
+}
+
+export class Joy4LRegister extends AbstractRegister {
+
+    public address = 0x421E;
+    public name: string = "JOY4L";
+
+}
+
+export class Joy4HRegister extends AbstractRegister {
+
+    public address = 0x421F;
+    public name: string = "JOY4H";
 
 }
 
 export class MemSelectRegister extends AbstractRegister {
 
-    public address: string = "0x420D";
+    public address = 0x420D;
     public name: string = "MEMSEL";
 
     private isFast: boolean = false;
@@ -287,14 +286,14 @@ export class MemSelectRegister extends AbstractRegister {
 
 export class MultiplicandARegister extends AbstractRegister {
 
-    public address: string = "0x4202";
+    public address = 0x4202;
     public name: string = "WRMPYA";
 
 }
 
 export class MultiplicandBRegister extends AbstractRegister {
 
-    public address: string = "0x4203";
+    public address = 0x4203;
     public name: string = "WRMPYB";
 
     public set(value: number, byteIndex?: number) {
@@ -318,49 +317,49 @@ export class MultiplicandBRegister extends AbstractRegister {
 
 export class MultiOrDivideRemainderLowRegister extends AbstractRegister {
 
-    public address: string = "0x4216";
+    public address = 0x4216;
     public name: string = "RDMPYL";
 
 }
 
 export class MultiOrDivideRemainderHighRegister extends AbstractRegister {
 
-    public address: string = "0x4217";
-    public name: string = "RDMPYL";
+    public address = 0x4217;
+    public name: string = "RDMPYH";
 
 }
 
 export class DividendCLowRegister extends AbstractRegister {
 
-    public address: string = "0x4204";
+    public address = 0x4204;
     public name: string = "WRDIVL";
 
 }
 
 export class DividendCHighRegister extends AbstractRegister {
 
-    public address: string = "0x4205";
+    public address = 0x4205;
     public name: string = "WRDIVH";
 
 }
 
 export class QuotientDivideLowRegister extends AbstractRegister {
 
-    public address: string = "0x4214";
+    public address = 0x4214;
     public name: string = "RDDIVL";
 
 }
 
 export class QuotientDivideHighRegister extends AbstractRegister {
 
-    public address: string = "0x4215";
+    public address = 0x4215;
     public name: string = "RDDIVH";
 
 }
 
 export class DivisorBRegister extends AbstractRegister {
 
-    public address: string = "0x4206";
+    public address = 0x4206;
     public name: string = "WRDIVB";
 
     public set(value: number, byteIndex?: number) {
@@ -404,11 +403,10 @@ export class Registers {
     public oldJoy1 : OldJoy1Register;
     public oldJoy2 : OldJoy2Register;
 
-    public joy1 : Joy1Register;
-    public joy2 : Joy2Register;
-
     public wmdata : WramMemoryDataRegister;
-    public wmadd : WramMemoryAddressRegister;
+    public wmaddl : WramMemoryLowAddressRegister;
+    public wmaddm : WramMemoryMidAddressRegister;
+    public wmaddh : WramMemoryHighAddressRegister;
 
     public dma0: DmaChannel;
     public dma1: DmaChannel;
@@ -421,25 +419,29 @@ export class Registers {
     public mdmaen: DmaEnableRegister;
     public hdmaen : HdmaEnableRegister;
 
+    public wrmpya : MultiplicandARegister;
+    public wrmpyb : MultiplicandBRegister;
+    public wrdivl : DividendCLowRegister;
+    public wrdivh : DividendCHighRegister;
+    public wrdivb : DivisorBRegister;
+    public memsel : MemSelectRegister;
+    public rddivl : QuotientDivideLowRegister;
+    public rddivh : QuotientDivideHighRegister;
+    public rdmpyl : MultiOrDivideRemainderLowRegister;
+    public rdmpyh : MultiOrDivideRemainderHighRegister;
+
     public wrio : AbstractRegister;
-    public wrmpya : AbstractRegister;
-    public wrmpyb : AbstractRegister;
-    public wrdivl : AbstractRegister;
-    public wrdivh : AbstractRegister;
-    public wrdivb : AbstractRegister;
+    public rdio : AbstractRegister;
     public htime : AbstractRegister;
     public vtime : AbstractRegister;
-    public memsel : AbstractRegister;
-    public rdio : AbstractRegister;
-    public rddivl : AbstractRegister;
-    public rddivh : AbstractRegister;
-    public rdmpyl : AbstractRegister;
-    public rdmpyh : AbstractRegister;
-
-    public joy3l : AbstractRegister;
-    public joy3h : AbstractRegister;
-    public joy4l : AbstractRegister;
-    public joy4h : AbstractRegister;
+    public joy1l : Joy1LRegister;
+    public joy1h : Joy1HRegister;
+    public joy2l : Joy2LRegister;
+    public joy2h : Joy2HRegister;
+    public joy3l : Joy3LRegister;
+    public joy3h : Joy3HRegister;
+    public joy4l : Joy4LRegister;
+    public joy4h : Joy4HRegister;
 
     constructor(console: Console) {
 
@@ -451,11 +453,19 @@ export class Registers {
         this.oldJoy1 = new OldJoy1Register(console);
         this.oldJoy2 = new OldJoy2Register(console);
 
-        this.joy1 = new Joy1Register(console);
-        this.joy2 = new Joy2Register(console);
+        this.joy1l = new Joy1LRegister(console);
+        this.joy1h = new Joy1HRegister(console);
+        this.joy2l = new Joy2LRegister(console);
+        this.joy2h = new Joy2HRegister(console);
+        this.joy3l = new Joy3LRegister(console);
+        this.joy3h = new Joy3HRegister(console);
+        this.joy4l = new Joy4LRegister(console);
+        this.joy4h = new Joy4HRegister(console);
 
         this.wmdata = new WramMemoryDataRegister(console);
-        this.wmadd = new WramMemoryAddressRegister(console);
+        this.wmaddl = new WramMemoryLowAddressRegister(console);
+        this.wmaddm = new WramMemoryMidAddressRegister(console);
+        this.wmaddh = new WramMemoryHighAddressRegister(console);
 
         this.dma0 = new DmaChannel(console, 0);
         this.dma1 = new DmaChannel(console, 1);
@@ -498,10 +508,6 @@ export class Registers {
         this.htime = new AbstractRegister(console);
         this.vtime = new AbstractRegister(console);
         this.rdio = new AbstractRegister(console);
-        this.joy3l = new AbstractRegister(console);
-        this.joy3h = new AbstractRegister(console);
-        this.joy4l = new AbstractRegister(console);
-        this.joy4h = new AbstractRegister(console);
     }
 
 }
