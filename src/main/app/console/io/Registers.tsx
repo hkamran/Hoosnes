@@ -116,12 +116,40 @@ export class WramMemoryDataRegister extends AbstractRegister {
     public address = 0x2180;
     public name: string = "WMDATA";
 
-    public set(val: number) {
-        throw new Error("Not Implemented!");
+    public set(value: number, byteIndex?: number) {
+        const registers = this.console.io.registers;
+
+        const wmaddh = registers.wmaddh;
+        const wmaddm = registers.wmaddm;
+        const wmaddl = registers.wmaddl;
+
+        let offset = Bit.toUint24(wmaddh.get(), wmaddm.get(), wmaddl.get());
+        const address = 0x7E0000 + offset;
+        this.console.cpu.wram.writeByte(address, value);
+        offset++;
+
+        wmaddh.set(Bit.getUint24Upper(offset));
+        wmaddm.set(Bit.getUint24Middle(offset));
+        wmaddl.set(Bit.getUint24Lower(offset) & 1);
     }
 
-    public get(): number {
-        throw new Error("Not Implemented!");
+    public get(byteIndex?: number): number {
+        const registers = this.console.io.registers;
+
+        const wmaddh = registers.wmaddh;
+        const wmaddm = registers.wmaddm;
+        const wmaddl = registers.wmaddl;
+
+        let offset = Bit.toUint24(wmaddh.get(), wmaddm.get(), wmaddl.get());
+        const address = 0x7E0000 + offset;
+        const value = this.console.cpu.wram.readByte(address);
+        offset++;
+
+        wmaddh.set(Bit.getUint24Upper(offset));
+        wmaddm.set(Bit.getUint24Middle(offset));
+        wmaddl.set(Bit.getUint24Lower(offset) & 1);
+
+        return value;
     }
 
 }

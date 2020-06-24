@@ -10,8 +10,9 @@ const SHIFTS: number[] = [0, 8, 16];
 
 export class AbstractRegister {
 
-    private value: number = 0;
     public address: number = 0;
+
+    private value: number = 0;
     protected console: Console;
 
     protected cpu: Cpu;

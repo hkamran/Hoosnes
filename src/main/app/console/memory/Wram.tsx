@@ -12,7 +12,7 @@ export class Wram {
 
     public static readonly SIZE = 0x20000;
 
-    private data: number[];
+    public data: number[];
 
     constructor() {
         this.data = new Array(Wram.SIZE);

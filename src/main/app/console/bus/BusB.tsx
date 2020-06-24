@@ -96,11 +96,15 @@ export class BusB {
         this.map[0x213E] = this.registers.stat77;
         this.map[0x213F] = this.registers.stat78;
 
+        this.map[0x2140] = this.console.apu.registers.apuio0;
+        this.map[0x2141] = this.console.apu.registers.apuio1;
+        this.map[0x2142] = this.console.apu.registers.apuio2;
+        this.map[0x2143] = this.console.apu.registers.apuio3;
+
         this.map[0x2180] = this.console.io.registers.wmdata;
         this.map[0x2181] = this.console.io.registers.wmaddl;
         this.map[0x2182] = this.console.io.registers.wmaddm;
         this.map[0x2183] = this.console.io.registers.wmaddh;
-
     }
 
     public readByte(address: number): number {
@@ -115,24 +119,12 @@ export class BusB {
             throw new Error("Invalid readByte at " + address);
         }
 
-        if (page >= 0x2140 && page <= 0x2179) {
-            if (page % 4 == 0) {
-                value = Bit.toUint8(this.console.apu.registers.apuio0.get());
-            } else if (page % 4 == 1) {
-                value = Bit.toUint8(this.console.apu.registers.apuio1.get());
-            } else if (page % 4 == 2) {
-                value = Bit.toUint8(this.console.apu.registers.apuio2.get());
-            } else if (page % 4 == 3) {
-                value = Bit.toUint8(this.console.apu.registers.apuio3.get());
-            }
-        } else {
-            const register = this.map[page];
-            if (register == null) {
-                throw new Error(`Register not found for ${page}`);
-            }
-
-            value = register.get();
+        const register = this.map[page];
+        if (register == null) {
+            throw new Error(`Register not found for ${page}`);
         }
+
+        value = register.get();
 
         return Bit.toUint8(value);
     }
@@ -144,6 +136,8 @@ export class BusB {
         let bank = AddressUtil.getBank(address);
         let page = AddressUtil.getPage(address);
 
+        this.mdr = value;
+
         if (value == null || value < 0 || value > 0xFF) {
             throw new Error(`Invalid write given at ${address}=${value}`);
         }
@@ -152,23 +146,11 @@ export class BusB {
             throw new Error("Invalid writeByte at " + address.toString());
         }
 
-        if (page >= 0x2140 && page <= 0x2180) {
-            if (page % 4 == 0) {
-                this.console.apu.registers.apuio0.set(value);
-            } else if (page % 4 == 1) {
-                this.console.apu.registers.apuio1.set(value);
-            } else if (page % 4 == 2) {
-                this.console.apu.registers.apuio2.set(value);
-            } else if (page % 4 == 3) {
-                this.console.apu.registers.apuio3.set(value);
-            }
-        } else {
-            const register = this.map[page];
-            if (register == null) {
-                throw new Error(`Register not found for ${page}`);
-            }
-
-            register.set(value);
+        const register = this.map[page];
+        if (register == null) {
+            throw new Error(`Register not found for ${page}`);
         }
+
+        register.set(value);
     }
 }

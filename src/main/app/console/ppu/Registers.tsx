@@ -12,31 +12,6 @@ import {AbstractRegister} from "../../interfaces/AbstractRegister";
 // https://en.wikibooks.org/wiki/Super_NES_Programming/SNES_Hardware_Registers
 // https://wiki.superfamicom.org/registers
 
-export class Register {
-
-    protected val : number = 0;
-    public console: Console;
-    public label: string;
-
-    constructor(console: Console) {
-        Objects.requireNonNull(console);
-
-        this.console = console;
-    }
-
-    public set(val : number): void {
-        if (val == null || val < 0) {
-            throw Error("Invalid set " + val + " to register.");
-        }
-        this.val = val;
-    }
-
-    public get(): number {
-        return this.val;
-    }
-
-}
-
 export class ScreenDisplayRegister extends AbstractRegister {
 
     public address = 0x2100;
@@ -120,14 +95,14 @@ export class OamAddressHighRegister extends AbstractRegister {
     public label: string = "OAMADDH";
 }
 
-export class OamAddressRegister extends Register {
+export class OamAddressRegister {
 
     public oamaddl: OamAddressLowRegister;
     public oamaddh: OamAddressHighRegister;
 
-    constructor(console: Console) {
-        super(console);
+    public label: string = "OAMADD";
 
+    constructor(console: Console) {
         this.oamaddh = new OamAddressHighRegister(console);
         this.oamaddl = new OamAddressLowRegister(console);
     }
@@ -1204,16 +1179,6 @@ export class PPUStatus78Register extends AbstractRegister {
         return result;
     }
 
-}
-
-export class WRAMDataRegister extends Register {
-
-    public address: string = "2180";
-    public label: string = "WMDATA";
-
-    public set(val: number) {
-        throw new Error("Not Implemented");
-    }
 }
 
 export class Registers {

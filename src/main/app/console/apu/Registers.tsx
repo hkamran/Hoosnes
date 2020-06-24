@@ -1,6 +1,6 @@
-import {Register} from "../ppu/Registers";
 import {Console} from "../Console";
 import {ApuState} from "./Apu";
+import {AbstractRegister} from "../../interfaces/AbstractRegister";
 
 
 /*
@@ -48,74 +48,79 @@ import {ApuState} from "./Apu";
     the value in $2140 must be non-zero if the command is to start another transfer.)
 */
 
-export class ApuIO00 extends Register {
+export class ApuIO00 extends AbstractRegister {
 
-    public address: string = "0x2140";
+    public address = 0x2140;
     public label: string = "APUIO0";
 
     public read: number =  0;
     public write: number = 0;
 
-    public set(val: number): void {
-        this.write = val;
+    public set(value: number, byteIndex?: number) {
+        super.set(value, byteIndex);
+        this.write = value;
     }
 
-    public get(): number {
+    public get(byteIndex?: number): number {
         return this.read;
     }
 
 }
 
-export class ApuIO01 extends Register {
+export class ApuIO01 extends AbstractRegister {
 
-    public address: string = "0x2141";
+    public address = 0x2141;
     public label: string = "APUIO1";
 
     public read: number =  0;
     public write: number = 0;
 
-    public set(val: number): void {
-        this.write = val;
+    public set(value: number, byteIndex?: number) {
+        super.set(value, byteIndex);
+        this.write = value;
     }
 
-    public get(): number {
+    public get(byteIndex?: number): number {
         return this.read;
     }
+
 }
 
 // low addr
-export class ApuIO02 extends Register {
+export class ApuIO02 extends AbstractRegister {
 
-    public address: string = "0x2142";
+    public address = 0x2142;
     public label: string = "APUIO2";
 
     public read: number =  0;
     public write: number = 0;
 
-    public set(val: number): void {
-        this.write = val;
+    public set(value: number, byteIndex?: number) {
+        super.set(value, byteIndex);
+        this.write = value;
     }
 
-    public get(): number {
+    public get(byteIndex?: number): number {
         return this.read;
     }
 
 }
 
 // high addr
-export class ApuIO03 extends Register {
+export class ApuIO03 extends AbstractRegister {
 
-    public address: string = "0x2143";
+    public address = 0x2143;
     public label: string = "APUIO3";
 
     public read: number =  0;
     public write: number = 0;
 
-    public set(val: number): void {
-        this.write = val;
+    public set(value: number, byteIndex?: number) {
+        super.set(value, byteIndex);
+        this.write = value;
     }
 
-    public get(): number {
+    public get(byteIndex?: number): number {
         return this.read;
     }
 

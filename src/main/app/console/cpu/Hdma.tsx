@@ -1,4 +1,3 @@
-import {Register} from "../ppu/Registers";
 import {Console} from "../Console";
 import {AbstractRegister} from "../../interfaces/AbstractRegister";
 
