@@ -16,7 +16,7 @@ export class BusB {
     // Memory Data Register
     public mdr: number = 0x0;
 
-    public map: { [address: number] : AbstractRegister } = {};
+    public map: AbstractRegister[] = [];
 
     constructor(console: Console) {
         Objects.requireNonNull(console);

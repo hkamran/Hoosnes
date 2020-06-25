@@ -1,7 +1,6 @@
 import * as React from "react";
 import {CSSProperties} from "react";
 import {RefObject} from "react";
-import Stats from 'stats.js';
 
 const screenStyle: CSSProperties = {
     padding: '0.5rem',
