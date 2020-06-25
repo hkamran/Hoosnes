@@ -5,8 +5,7 @@
   "scripts": {
     "start": "http-server ./target -o",
     "build": "gulp build",
-    "watch": "gulp watch",
-    "install": "npm install"
+    "watch": "gulp watch"
   },
   "author": "",
   "license": "ISC",
