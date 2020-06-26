@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Console, ConsoleState} from "../app/console/Console";
-import {ScreenCard} from "./ScreenCard";
+import {Screen} from "./Screen";
 import ReactTooltip from "react-tooltip";
 import {debugCallback, Debugger} from "./debugger/Debugger";
 import Modal from 'react-modal';
@@ -302,7 +302,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                     </a>
                 </div>
                 <div className={"screen-container"}>
-                    <ScreenCard snes={window.snes} />
+                    <Screen snes={window.snes} />
                 </div>
                 <div style={{display: 'flex', flexDirection: 'row', marginTop: "30px"}}>
                     <div style={{flexGrow: 1}}/>

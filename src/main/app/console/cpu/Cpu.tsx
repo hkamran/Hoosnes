@@ -64,24 +64,12 @@ export class Cpu {
     }
 
     public reset(): void {
-        this.registers.p.setE(0x1);
+        this.cycles = 0;
+        this.ticks = 0;
 
-        this.registers.p.set(0x0);
-        this.registers.p.setI(0x1);
-        this.registers.p.setZ(0x0);
-        this.registers.p.setX(0x1);
-        this.registers.p.setM(0x1);
-        this.registers.p.setD(0x0);
-
-        this.registers.a.set(0x0);
-        this.registers.x.set(0x0000);
-        this.registers.y.set(0x0000);
-        this.registers.sp.set(0x1FF);
-        this.registers.d.set(0x0000);
-        this.registers.dbr.set(0x00);
-        this.registers.k.set(0x00);
-
-        this.registers.pc.set(0x0000);
+        this.stack.reset();
+        this.wram.reset();
+        this.registers.reset();
     }
 
     public load(cartridge: Cartridge): void {

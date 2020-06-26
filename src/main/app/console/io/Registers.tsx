@@ -538,4 +538,58 @@ export class Registers {
         this.rdio = new AbstractRegister(console);
     }
 
+    public reset(): void {
+        this.nmitimen.reset();
+        this.rdnmi.reset();
+        this.timeup.reset();
+        this.hvbjoy.reset();
+
+        this.oldJoy1.reset();
+        this.oldJoy2.reset();
+
+        this.joy1l.reset();
+        this.joy1h.reset();
+        this.joy2l.reset();
+        this.joy2h.reset();
+        this.joy3l.reset();
+        this.joy3h.reset();
+        this.joy4l.reset();
+        this.joy4h.reset();
+
+        this.wmdata.reset();
+        this.wmaddl.reset();
+        this.wmaddm.reset();
+        this.wmaddh.reset();
+
+        this.dma0.reset();
+        this.dma1.reset();
+        this.dma2.reset();
+        this.dma3.reset();
+        this.dma4.reset();
+        this.dma5.reset();
+        this.dma6.reset();
+        this.dma7.reset();
+
+        this.mdmaen.reset();
+        this.hdmaen.reset();
+
+        this.wrmpya.reset();
+        this.wrmpyb.reset();
+
+        this.rdmpyl.reset();
+        this.rdmpyh.reset();
+        this.rddivl.reset();
+        this.rddivh.reset();
+
+        this.wrdivl.reset();
+        this.wrdivh.reset();
+        this.wrdivb.reset();
+
+        this.memsel.reset();
+        this.wrio.reset();
+        this.htime.reset();
+        this.vtime.reset();
+        this.rdio.reset();
+    }
+
 }

@@ -163,6 +163,12 @@ export class DmaCpuAddressRegister {
         );
     }
 
+    public reset(): void {
+        this.a1tl.reset();
+        this.a1tm.reset();
+        this.a1th.reset();
+    }
+
 }
 
 export class DmaTransferSizeLRegister extends AbstractRegister {
@@ -185,6 +191,11 @@ export class DmaTransferSizeRegister {
     constructor(console: Console) {
         this.dash = new DmaTransferSizeHRegister(console);
         this.dasl = new DmaTransferSizeLRegister(console);
+    }
+
+    public reset(): void {
+        this.dash.reset();
+        this.dasl.reset();
     }
 
     public get(): number {
@@ -228,6 +239,17 @@ export class DmaChannel {
         this.a2axl = new HdmaTableAddressLowRegister(console);
         this.a2axh = new HdmaTableAddressHighRegister(console);
         this.ntlrx = new HdmaLineCounterRegister(console);
+    }
+
+    public reset(): void {
+        this.cpuAddressRegister.reset();
+        this.ppuAddressRegister.reset();
+        this.transferSize.reset();
+
+        this.dasbx.reset();
+        this.a2axl.reset();
+        this.a2axh.reset();
+        this.ntlrx.reset();
     }
 
     public execute(): number {

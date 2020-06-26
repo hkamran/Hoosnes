@@ -31,11 +31,12 @@ export class Status {
 
     public masterSlaveToggle = false;
 
+    public palMode: boolean = false;
+    public interlaceFrame: boolean = false;
+
     public chip5C77Version: number = 1;
     public chip5C78Version: number = 3;
 
-    public palMode: boolean = false;
-    public interlaceFrame: boolean = false;
 
     public toggleInterlaceFrame() {
         this.interlaceFrame = !this.interlaceFrame;
@@ -51,6 +52,23 @@ export class Status {
         this.externalLatchFlag = false;
         this.opHCounterToggle = false;
         this.opVCounterToggle = false;
+    }
+
+    public reset(): void {
+        this.latchedHCounter = 0;
+        this.latchedVCounter = 0;
+        this.externalLatchFlag = false;
+
+        this.opHCounterToggle = false;
+        this.opVCounterToggle = false;
+
+        this.timeOver = false;
+        this.rangeOver = false;
+
+        this.masterSlaveToggle = false;
+
+        this.palMode = false;
+        this.interlaceFrame = false;
     }
 }
 
@@ -193,6 +211,22 @@ export class Ppu {
     public reset():  void {
         this.screen.state = ScreenState.PRELINE;
 
+        this.scanline = 0;
+        this.cycle = 0;
+        this.frames = 0;
+
+        this.status.reset();
+        this.registers.reset();
+        this.cgram.reset();
+        this.oam.reset();
+        this.vram.reset();
+
+        this.tiles.reset();
+        this.tileMaps.reset();
+
+        this.palette.reset();
+        this.sprites.reset();
+        this.backgrounds.reset();
     }
 
     private triggerIRQ(): void {

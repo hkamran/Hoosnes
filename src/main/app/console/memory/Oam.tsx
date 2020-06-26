@@ -16,10 +16,14 @@ export class Oam {
 
     constructor() {
         this.low = new Array(Oam.TABLE_LOW_SIZE);
-        this.low.fill(0, 0, Oam.TABLE_LOW_SIZE);
-
         this.high = new Array(Oam.TABLE_HIGH_SIZE);
-        this.high.fill(0, 0, Oam.TABLE_HIGH_SIZE);
+
+        this.reset();
+    }
+
+    public reset(): void {
+        this.low.fill(0);
+        this.high.fill(0);
     }
 
     public readByte(address: number): number {

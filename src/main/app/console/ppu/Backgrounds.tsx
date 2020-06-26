@@ -47,6 +47,10 @@ export class Backgrounds {
         this.bg3 = new Background3(ppu);
     }
 
+    public reset(): void {
+
+    }
+
 }
 
 const TILE_MAP_BYTE_ROW = (TOTAL_TILE_MAPS * TILE_MAP_BYTE_SIZE);

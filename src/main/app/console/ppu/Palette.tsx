@@ -41,6 +41,10 @@ export class Palette {
         this.cgram = cgram;
     }
 
+    public reset(): void {
+        this.cgram.reset();
+    }
+
     // 0-255 indexed
     public getPaletteAt(paletteIndex: number, paletteTable?: number, type?: BppType): IColor {
         if (paletteIndex == null || paletteIndex < 0 || paletteIndex > 255) {

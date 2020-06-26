@@ -10,7 +10,12 @@ export class Sram {
         this.value = Math.min(Sram.MAX_SRAM_VALUE, value);
         this.size = this.value != 0 ? 0x400 << value : 0;
         this.data = new Array(this.size);
-        this.data.fill(0, 0, this.size);
+        this.reset();
+    }
+
+    public reset(): void {
+        this.data.fill(0);
+        this.value = 0;
     }
 
     public read(index: number): number {

@@ -177,6 +177,10 @@ export class Sprites {
         }
     }
 
+    public reset(): void {
+
+    }
+
     public getSprites(): Sprite[] {
         return this.sprites;
     }

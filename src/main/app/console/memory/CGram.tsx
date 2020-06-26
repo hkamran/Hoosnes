@@ -10,27 +10,10 @@ export class CGram {
     constructor() {
         this.data = new Array(CGram.size);
         this.data.fill(0, 0, CGram.size);
-        this.initialize();
     }
 
-    private initialize() {
-        let colors: number = 256;
-
-        let index = 0;
-        for (let i = 0; i < colors; i++) {
-            let red: number =  0;
-            let green: number =  0;
-            let blue: number =  0;
-
-            let value: number = 0 << 15 | red << 10 | green << 5 | blue;
-
-            let lowHalf = (value >> 0) & 0xFF;
-            let highHalf = (value >> 8) & 0xFF;
-
-            this.writeByte(index + 0, lowHalf);
-            this.writeByte(index + 1, highHalf);
-            index += 2;
-        }
+    public reset(): void {
+        this.data.fill(0);
     }
 
     public readByte(address: number, bank?: number): number {

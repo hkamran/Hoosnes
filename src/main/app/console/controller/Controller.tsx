@@ -35,6 +35,10 @@ export class Controller {
         this.data[key] = 0;
     }
 
+    public reset(): void {
+        this.data.fill(0);
+    }
+
     public readByte(address?: number): number {
         if (address == null) {
             let result = 0;

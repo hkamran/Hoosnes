@@ -92,17 +92,6 @@ export class Tiles {
     public ppu: Ppu;
     public vram: Vram;
 
-    private tileMatrixFor8By8 = [
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-    ];
-
     constructor(ppu: Ppu) {
         Objects.requireNonNull(ppu);
 
@@ -110,6 +99,9 @@ export class Tiles {
         this.vram = ppu.vram;
     }
 
+    public reset(): void {
+
+    }
 
     public getTileAt(address: number, attributes: ITileAttributes): number[][] {
         Objects.requireNonNull(address);
@@ -126,8 +118,6 @@ export class Tiles {
 
     private getTileNon8Bpp(address: number, attributes: ITileAttributes): number[][] {
         let image: number[][] = [];
-        const bpp: number = attributes.bpp.valueOf();
-        const bytesPerTile = TILE_HEIGHT * TILE_WIDTH * BYTES_PER_PIXEL * bpp;
 
         for (let yBase: number = 0; yBase < attributes.height; yBase++) {
             let row: number[] = this.getTileRowAt(address, yBase, attributes);

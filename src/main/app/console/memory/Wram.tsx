@@ -16,7 +16,11 @@ export class Wram {
 
     constructor() {
         this.data = new Array(Wram.SIZE);
-        this.data.fill(0, 0, Wram.SIZE);
+        this.reset();
+    }
+
+    public reset(): void {
+        this.data.fill(0);
     }
 
     public readByte(address: number): number {

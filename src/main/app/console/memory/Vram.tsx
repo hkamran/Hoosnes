@@ -7,7 +7,11 @@ export class Vram {
 
     constructor() {
         this.data = new Array(Vram.size);
-        this.data.fill(0, 0, Vram.size);
+        this.reset();
+    }
+
+    public reset(): void {
+        this.data.fill(0);
     }
 
     public readByte(address: number): number {

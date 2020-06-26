@@ -345,4 +345,25 @@ export class Registers {
         this.y = new IndirectYRegister(console);
     }
 
+    public reset(): void {
+        this.p.setE(0x1);
+
+        this.p.set(0x0);
+        this.p.setI(0x1);
+        this.p.setZ(0x0);
+        this.p.setX(0x1);
+        this.p.setM(0x1);
+        this.p.setD(0x0);
+
+        this.a.set(0x0);
+        this.x.set(0x0000);
+        this.y.set(0x0000);
+        this.sp.set(0x1FF);
+        this.d.set(0x0000);
+        this.dbr.set(0x00);
+        this.k.set(0x00);
+
+        this.pc.set(0x0000);
+    }
+
 }

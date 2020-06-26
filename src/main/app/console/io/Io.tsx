@@ -17,4 +17,13 @@ export class Io {
         this.console = console;
         this.registers = new Registers(console);
     }
+
+    public reset(): void {
+        this.registers.reset();
+
+        this.nmiEnable = false;
+        this.irqMode = 0;
+        this.autoJoypadEnable = false;
+        this.nmiEnable = false;
+    }
 }

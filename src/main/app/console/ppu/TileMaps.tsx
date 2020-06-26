@@ -66,6 +66,10 @@ export class TileMaps {
         return tileMap;
     }
 
+    public reset(): void {
+
+    }
+
     public getTileMaps(address: number): ITileMap[] {
         AddressUtil.assertValid(address);
         let entries: ITileMap[] = [];

@@ -107,6 +107,11 @@ export class OamAddressRegister {
         this.oamaddl = new OamAddressLowRegister(console);
     }
 
+    public reset(): void {
+        this.oamaddh.reset();
+        this.oamaddl.reset();
+    }
+
     public getTableIndex(): number {
         return this.oamaddl.get();
     }
@@ -652,6 +657,11 @@ export class VRAMAddressRegister {
         this.vmaddh.set(high);
     }
 
+    public reset(): void {
+        this.vmaddh.reset();
+        this.vmaddl.reset();
+    }
+
     public get(): number {
         return Bit.toUint16(this.vmaddh.get(), this.vmaddl.get());
     }
@@ -719,6 +729,11 @@ export class VRAMDataWriteRegister {
         this.vmdatah = new VRAMDataHighWriteRegister(console);
 
         this.console = console;
+    }
+
+    public reset(): void {
+        this.vmdatal.reset();
+        this.vmdatah.reset();
     }
 
     public write(doIncrement: boolean, loByte: number, hiByte?: number): void {
@@ -1071,6 +1086,11 @@ export class VRAMDataReadRegister {
         this.console = console;
     }
 
+    public reset(): void {
+        this.vmdatah.reset();
+        this.vmdatal.reset();
+    }
+
     public read(doIncrement: boolean, high?: boolean): number {
         let ppu: Ppu = this.console.ppu;
 
@@ -1325,6 +1345,79 @@ export class Registers {
 
         this.stat77 = new PPUStatus77Register(console);
         this.stat78 = new PPUStatus78Register(console);
+    }
+
+    public reset(): void {
+        this.mosaic.reset();
+        this.m7sel.reset();
+        this.m7a.reset();
+        this.m7b.reset();
+        this.m7c.reset();
+        this.m7d.reset();
+        this.m7x.reset();
+        this.m7y.reset();
+
+        this.oamselect.reset();
+        this.oamaddr.reset();
+        this.oamdataw.reset();
+        this.oamdatar.reset();
+
+        this.cgramaddr.reset();
+        this.cgdataw.reset();
+        this.cgdatar.reset();
+        this.cgwsel.reset();
+        this.cgadsub.reset();
+        this.coldata.reset();
+
+        this.setini.reset();
+        this.mpyl.reset();
+        this.mpym.reset();
+        this.mpyh.reset();
+        this.slhv.reset();
+
+        this.vtilebg1.reset();
+        this.vtilebg2.reset();
+        this.vtilebg3.reset();
+        this.vtilebg4.reset();
+        this.vcharlocbg12.reset();
+        this.vcharlocbg34.reset();
+        this.vportcntrl.reset();
+        this.vaddr.reset();
+        this.vdataw.reset();
+        this.vdatar.reset();
+
+        this.inidisp.reset();
+        this.bgmode.reset();
+
+        this.bg1hofs.reset();
+        this.bg1vofs.reset();
+        this.bg2hofs.reset();
+        this.bg2vofs.reset();
+        this.bg3hofs.reset();
+        this.bg3vofs.reset();
+        this.bg4hofs.reset();
+        this.bg4vofs.reset();
+
+        this.tm.reset();
+        this.ts.reset();
+
+        this.w12sel.reset();
+        this.w34sel.reset();
+        this.wobjsel.reset();
+        this.wh0.reset();
+        this.wh1.reset();
+        this.wh2.reset();
+        this.wh3.reset();
+        this.wbglog.reset();
+        this.wobjlog.reset();
+        this.tmw.reset();
+        this.tsw.reset();
+
+        this.scanlochort.reset();
+        this.scanlocvert.reset();
+
+        this.stat77.reset();
+        this.stat78.reset();
     }
 
 }

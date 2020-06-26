@@ -11,7 +11,7 @@ interface IScreenCardProps {
     snes: Console;
 }
 
-export class ScreenCard extends React.Component<IScreenCardProps, any> {
+export class Screen extends React.Component<IScreenCardProps, any> {
 
     public state = {
         width: 256,

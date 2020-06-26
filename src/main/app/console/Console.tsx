@@ -52,6 +52,7 @@ export class Console {
         this.cpu.reset();
         this.ppu.reset();
         this.apu.reset();
+        this.io.reset();
         this.bus.reset();
     }
 

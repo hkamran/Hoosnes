@@ -10,6 +10,10 @@ export class Stack {
         this.console = console;
     }
 
+    public reset(): void {
+        this.stack = [];
+    }
+
     public pushWord(value : number) {
         let lowByte: number = value & 0xFF;
         let highByte: number = (value >> 8) & 0xFF;

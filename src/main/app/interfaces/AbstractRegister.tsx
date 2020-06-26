@@ -71,4 +71,8 @@ export class AbstractRegister {
         return byte;
     }
 
+    public reset(): void {
+        this.value = 0;
+    }
+
 }
