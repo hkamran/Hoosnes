@@ -7,6 +7,7 @@ import {debugCallback, Debugger} from "./debugger/Debugger";
 import Modal from 'react-modal';
 import {Keyboard, KeyboardMapping} from "./Keyboard";
 import {joy1} from "../app/console/controller/Controller";
+import {PuffLoader} from "react-spinners";
 
 declare let window: any;
 window.snes = new Console();
@@ -41,6 +42,7 @@ export function animateFrames(): void {
 
 interface IMainStates {
     snes: Console;
+    loading: boolean;
     viewDebugger: boolean;
     viewCartridge: boolean;
     viewSettings: boolean;
@@ -58,6 +60,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         super(props);
         this.state = {
             snes: props.snes,
+            loading: false,
             viewDebugger: false,
             viewCartridge: false,
             viewSettings: false,
@@ -79,14 +82,24 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         });
     }
 
+    private setLoading(value: boolean) {
+        this.setState({
+            loading: value,
+        });
+    }
+
     public async loadCartridgeRemotely(url: string) {
+        this.setLoading(true);
         let file = await fetch(url).then((r) => r.blob());
+        this.setLoading(false);
         this.loadCartridge(file);
+        this.closeCartridge();
     }
 
     public loadCartridgeLocally(event) {
         let file: File = event.target.files[0];
         this.loadCartridge(file);
+        this.closeCartridge();
     }
 
     public loadCartridge(file: Blob) {
@@ -168,16 +181,18 @@ export class Main extends React.Component<IMainProps, IMainStates> {
     public async selectCartridge(event) {
         let selectElement = event.target;
         let value: string = selectElement.value;
-
-        if (value == "other") {
-            this.openFileInput();
-        } else if (value == "select") {
-            return;
-        } else {
-            this.loadCartridgeRemotely(value);
+        try {
+            if (value == "other") {
+                this.openFileInput();
+            } else if (value == "select") {
+                return;
+            } else {
+                this.loadCartridgeRemotely(value);
+            }
+        } catch (e) {
+            this.closeCartridge();
+            this.setLoading(false);
         }
-
-        this.closeCartridge();
     }
 
     public render() {
@@ -188,19 +203,29 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         <div style={{display: 'flex', flexDirection: 'row'}}>
                             <div className={"cartridge-title"}>Select Cartridge</div>
                             <div style={{flexGrow: 1, width: "70px"}}/>
-                            <a style={{color: "#656565", cursor: "pointer"}} onClick={this.closeCartridge.bind(this)}>
+                            <a style={{color: "#6e539c", cursor: "pointer"}} onClick={this.closeCartridge.bind(this)}>
                                 <i className="fas fa-times"/>
                             </a>
                         </div>
                         <hr/>
-                        <div className={"modal-content"} style={{display: 'flex', flexDirection: 'row'}}>
-                            <select className={"cartridge-select"} defaultValue={"select"}
-                                    onChange={this.selectCartridge.bind(this)}>
-                                <option value="select">Select</option>
-                                <option value="./roms/Dr. Mario (Japan) (NP).sfc">Dr Mario</option>
-                                <option value="./roms/Tetris & Dr. Mario (USA).sfc">Tetris & Dr. Mario</option>
-                                <option value="other">Load my own...</option>
-                            </select>
+                        <div className={"modal-content"} style={{display: 'flex', flexDirection: 'row',  alignItems: 'center', justifyContent: 'center'}}>
+                            {this.state.loading ?
+                                <div style={{paddingBottom: '20px'}}>
+                                    <PuffLoader
+                                        size={50}
+                                        color={"#323232"}
+                                        loading={this.state.loading}
+                                    />
+                                </div>
+                                :
+                                <select className={"cartridge-select"} defaultValue={"select"}
+                                        onChange={this.selectCartridge.bind(this)}>
+                                    <option value="select">Select</option>
+                                    <option value="./roms/Dr. Mario (Japan) (NP).sfc">Dr Mario</option>
+                                    <option value="./roms/Tetris & Dr. Mario (USA).sfc">Tetris & Dr. Mario</option>
+                                    <option value="other">Load my own...</option>
+                                </select>
+                            }
                         </div>
                     </div>
                 </Modal>
