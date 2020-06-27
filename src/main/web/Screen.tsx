@@ -1,6 +1,6 @@
 import * as React from "react";
 import {RefObject} from "react";
-import {Console, ConsoleState} from "../app/console/Console";
+import {Console, ConsoleStatus} from "../app/console/Console";
 import {IColor} from "../app/console/ppu/Palette";
 import {WebGlUtil} from "../app/util/WebGlUtil";
 
@@ -27,14 +27,14 @@ export class Screen extends React.Component<IScreenCardProps, any> {
     }
 
     public componentDidMount(): void {
-        if (this.props.snes.state == ConsoleState.OFF) this.drawStatic();
+        if (this.props.snes.status == ConsoleStatus.OFF) this.drawStatic();
         this.props.snes.ppu.screen.setCanvas(this.canvasRef.current);
     }
 
     private drawStatic(): void {
         let screen = this.props.snes.ppu.screen;
         if (!this.animateStatic) return;
-        if (this.props.snes.state != ConsoleState.OFF) {
+        if (this.props.snes.status != ConsoleStatus.OFF) {
             screen.reset();
             return;
         }

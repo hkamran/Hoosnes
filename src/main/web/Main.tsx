@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {Console, ConsoleState} from "../app/console/Console";
+import {Console, ConsoleStatus} from "../app/console/Console";
 import {Screen} from "./Screen";
 import ReactTooltip from "react-tooltip";
 import {debugCallback, Debugger} from "./debugger/Debugger";
@@ -31,7 +31,7 @@ Modal.setAppElement('#main');
 
 export function animateFrames(): void {
     let execution = function() {
-        if (window.snes.state == ConsoleState.RUNNING) {
+        if (window.snes.state == ConsoleStatus.RUNNING) {
             window.snes.ticks(window.snes.tpf);
             debugCallback();
             animateFrames.bind(this)();
@@ -140,7 +140,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
     }
 
     private play() {
-        if (this.props.snes.state != ConsoleState.RUNNING) {
+        if (this.props.snes.status != ConsoleStatus.RUNNING) {
             this.props.snes.play();
             animateFrames();
         }

@@ -6,11 +6,12 @@ import {Ppu} from "./ppu/Ppu";
 import {Apu} from "./apu/Apu";
 import {Io} from "./io/Io";
 
-export enum ConsoleState {
+export enum ConsoleStatus {
     RUNNING, PAUSED, RESET, OFF,
 }
 
 export const TICKS_PER_FRAME: number = 29780;
+
 
 export class Console {
 
@@ -22,7 +23,7 @@ export class Console {
     public io: Io;
     public bus: Bus;
     public cartridge : Cartridge;
-    public state: ConsoleState = ConsoleState.OFF;
+    public status: ConsoleStatus = ConsoleStatus.OFF;
     public tpf: number = TICKS_PER_FRAME;
 
     constructor() {
@@ -34,7 +35,7 @@ export class Console {
     }
 
     public load(romBytes : number[]) : void {
-        this.state = ConsoleState.PAUSED;
+        this.status = ConsoleStatus.PAUSED;
         this.reset();
 
         this.cartridge = new Cartridge(romBytes);
@@ -44,16 +45,28 @@ export class Console {
     }
 
     public play(): void {
-        this.state = ConsoleState.RUNNING;
+        this.status = ConsoleStatus.RUNNING;
     }
 
     public reset(): void {
-        this.state = ConsoleState.RESET;
+        this.status = ConsoleStatus.RESET;
         this.cpu.reset();
         this.ppu.reset();
         this.apu.reset();
         this.io.reset();
         this.bus.reset();
+    }
+
+    public pause(): void {
+        this.status = ConsoleStatus.PAUSED;
+    }
+
+    public export(): void {
+
+    }
+
+    public import(): void {
+
     }
 
     public tick(): void {
@@ -66,7 +79,7 @@ export class Console {
     }
 
     public stop(): void {
-        this.state = ConsoleState.PAUSED;
+        this.status = ConsoleStatus.PAUSED;
     }
 
     public ticks(count: number) {

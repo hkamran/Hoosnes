@@ -3,9 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const nodeExternals = require('webpack-node-externals');
 
-var ROOT_PATH = path.resolve(__dirname);
-var SHADER_PATH = path.resolve(ROOT_PATH, 'src/main/shaders');
-
 
 module.exports = {
     cache: true,

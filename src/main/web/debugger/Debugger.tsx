@@ -1,6 +1,6 @@
 import * as React from "react";
 import ReactTooltip from "react-tooltip";
-import {Console, ConsoleState, TICKS_PER_FRAME} from "../../app/console/Console";
+import {Console, ConsoleStatus, TICKS_PER_FRAME} from "../../app/console/Console";
 import {DebuggerTabCpu} from "./DebuggerTabCpu";
 import {DebuggerTabPpu} from "./DebuggerTabPpu";
 import {DebuggerTabCartridge} from "./DebuggerTabCartridge";
@@ -111,10 +111,10 @@ export class Debugger extends React.Component<IDebuggerProps, IDebuggerStates> {
             <div id="debugger">
                 <span className={"debug-menu"}>
                     <div className={"debug-title"}>Debugger</div>
-                    <div className={"debug-button" + (this.props.snes.state == ConsoleState.RUNNING ? " active" : "")} data-tip="Play" onClick={this.play.bind(this)}>
+                    <div className={"debug-button" + (this.props.snes.status == ConsoleStatus.RUNNING ? " active" : "")} data-tip="Play" onClick={this.play.bind(this)}>
                         <i className="fas fa-play" />
                     </div>
-                    <div className={"debug-button" + (this.props.snes.state == ConsoleState.PAUSED ? " active" : "")} data-tip="Stop" onClick={this.stop.bind(this)}>
+                    <div className={"debug-button" + (this.props.snes.status == ConsoleStatus.PAUSED ? " active" : "")} data-tip="Stop" onClick={this.stop.bind(this)}>
                         <i className="fas fa-stop" />
                     </div>
                     <div className={"debug-button"} data-tip="Step" onClick={this.tick.bind(this)}>
@@ -123,7 +123,7 @@ export class Debugger extends React.Component<IDebuggerProps, IDebuggerStates> {
                     <div className={"debug-button"} data-tip="Fast Forward" onClick={this.ticks.bind(this)}>
                         <i className="fas fa-fast-forward" />
                     </div>
-                    <div className={"debug-button" + (this.props.snes.state == ConsoleState.RESET ? " active" : "")} data-tip="Reset" onClick={this.reset.bind(this)}>
+                    <div className={"debug-button" + (this.props.snes.status == ConsoleStatus.RESET ? " active" : "")} data-tip="Reset" onClick={this.reset.bind(this)}>
                         <i className="fas fa-undo-alt" />
                     </div>
                     <div className={"debugger-button-item"} data-tip="Toggle Tracing" onClick={this.toggleTrace.bind(this)}>
