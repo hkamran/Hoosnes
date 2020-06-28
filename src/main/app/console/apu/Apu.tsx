@@ -8,9 +8,9 @@ export enum ApuState {
 }
 
 export interface IApuState {
-    amount: number,
-    state: ApuState,
-    registers: IApuRegisterState,
+    amount: number;
+    state: ApuState;
+    registers: IApuRegisterState;
 }
 
 export class Apu {
@@ -37,7 +37,7 @@ export class Apu {
         return {
             amount: this.amount,
             state: this.state,
-            registers: this.registers.export()
+            registers: this.registers.export(),
         };
     }
 

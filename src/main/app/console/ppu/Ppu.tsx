@@ -15,7 +15,34 @@ import {joy1, joy2} from "../controller/Controller";
 import {ICpuState} from "../cpu/Cpu";
 
 export interface IPpuState {
+    scanline: number;
+    cycle: number;
+    frames: number;
 
+    status: IStatusState;
+    cgram: number[];
+    oam: {
+        high: number[];
+        low: number[],
+    };
+    vram: number[];
+}
+
+export interface IStatusState {
+    latchedHCounter: number;
+    latchedVCounter: number;
+    externalLatchFlag: boolean;
+
+    opHCounterToggle: boolean;
+    opVCounterToggle: boolean;
+
+    timeOver: boolean;
+    rangeOver: boolean;
+
+    masterSlaveToggle: boolean;
+
+    palMode: boolean;
+    interlaceFrame: boolean;
 }
 
 export class Status {
@@ -74,6 +101,42 @@ export class Status {
 
         this.palMode = false;
         this.interlaceFrame = false;
+    }
+
+    public export(): IStatusState {
+        return {
+            latchedHCounter: this.latchedHCounter,
+            latchedVCounter: this.latchedVCounter,
+            externalLatchFlag: this.externalLatchFlag,
+
+            opHCounterToggle: this.opHCounterToggle,
+            opVCounterToggle: this.opVCounterToggle,
+
+            timeOver: this.timeOver,
+            rangeOver: this.rangeOver,
+
+            masterSlaveToggle: this.masterSlaveToggle,
+
+            palMode: this.palMode,
+            interlaceFrame: this.interlaceFrame,
+        };
+    }
+
+    public import(state: IStatusState): void {
+        this.latchedVCounter = state.latchedVCounter;
+        this.latchedHCounter = state.latchedHCounter;
+        this.externalLatchFlag = state.externalLatchFlag;
+
+        this.opVCounterToggle = state.opVCounterToggle;
+        this.opHCounterToggle = state.opHCounterToggle;
+
+        this.timeOver = state.timeOver;
+        this.rangeOver = state.rangeOver;
+
+        this.masterSlaveToggle = state.masterSlaveToggle;
+
+        this.palMode = state.palMode;
+        this.interlaceFrame = state.interlaceFrame;
     }
 }
 
@@ -234,7 +297,16 @@ export class Ppu {
     }
 
     public import(state: IPpuState): void {
+        this.scanline = state.scanline;
+        this.cycle = state.cycle;
+        this.frames = state.frames;
 
+        this.cgram.data = state.cgram;
+        this.oam.high = state.oam.high;
+        this.oam.low = state.oam.low;
+        this.vram.data = state.vram;
+
+        this.status.import(state.status);
     }
 
     public export(): IPpuState {
@@ -243,7 +315,7 @@ export class Ppu {
             cycle: this.cycle,
             frames: this.frames,
 
-            //status: this.status.export(),
+            status: this.status.export(),
             //registers: this.registers.export(),
             cgram: this.cgram.data,
             oam: {

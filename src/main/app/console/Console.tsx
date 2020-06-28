@@ -13,11 +13,11 @@ export enum ConsoleStatus {
 export const TICKS_PER_FRAME: number = 29780;
 
 export interface IConsoleState {
-    apu: IApuState,
-    cpu: ICpuState,
-    ppu: IPpuState,
-    io: IIoState,
-    cartridge: ICartridgeState,
+    apu: IApuState;
+    cpu: ICpuState;
+    ppu: IPpuState;
+    io: IIoState;
+    cartridge: ICartridgeState;
 }
 
 export class Console {

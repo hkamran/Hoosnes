@@ -3,7 +3,10 @@ import {Registers} from "./Registers";
 import {ICpuState} from "../cpu/Cpu";
 
 export interface IIoState {
-
+    nmiEnable: boolean;
+    irqMode: number;
+    autoJoypadEnable: boolean;
+    nmiStatus: boolean;
 }
 
 export class Io {
@@ -24,11 +27,19 @@ export class Io {
     }
 
     public import(state: IIoState): void {
-
+        this.nmiEnable = state.nmiStatus;
+        this.irqMode = state.irqMode;
+        this.autoJoypadEnable = state.autoJoypadEnable;
+        this.nmiStatus = state.nmiStatus;
     }
 
     public export(): IIoState {
-        return {};
+        return {
+            nmiEnable: this.nmiEnable,
+            irqMode: this.irqMode,
+            autoJoypadEnable: this.autoJoypadEnable,
+            nmiStatus: this.nmiStatus,
+        };
     }
 
     public reset(): void {

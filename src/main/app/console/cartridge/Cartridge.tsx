@@ -17,7 +17,7 @@ export interface ICartridgeMapping {
 }
 
 export interface ICartridgeState {
-    rom: number[],
+    rom: number[];
 }
 
 export class InterruptAddresses {

@@ -11,9 +11,9 @@ import {trace} from "../../../web/debugger/cpu/LogCard";
 import {IApuState} from "../apu/Apu";
 
 export interface ICpuState {
-    wram: number[],
-    registers: ICpuRegistersState,
-    cycles: number,
+    wram: number[];
+    registers: ICpuRegistersState;
+    cycles: number;
     ticks: number;
 }
 

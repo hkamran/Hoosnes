@@ -164,7 +164,7 @@ export class Registers {
             apuio3: {
                 read: this.apuio3.read,
                 write: this.apuio3.write,
-            }
+            },
         };
     }
 
