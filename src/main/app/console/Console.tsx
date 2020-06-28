@@ -67,7 +67,7 @@ export class Console {
         this.bus.reset();
     }
 
-    public pause(): void {
+    public stop(): void {
         this.status = ConsoleStatus.PAUSED;
     }
 
