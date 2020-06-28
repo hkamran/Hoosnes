@@ -6,6 +6,7 @@ import {Objects} from "../../util/Objects";
 import {Vram} from "../memory/Vram";
 import {Dimension} from "./Tiles";
 import {AbstractRegister} from "../../interfaces/AbstractRegister";
+import {ICpuRegistersState} from "../cpu/Registers";
 
 
 // http://baltimorebarcams.com/eb/snes/docs/65816/SNES%20Registers.html
@@ -1201,8 +1202,87 @@ export class PPUStatus78Register extends AbstractRegister {
 
 }
 
-export class Registers {
+export interface IPpuRegistersState {
+    mosaic: number;
+    m7sel: number;
+    m7a: number;
+    m7b: number;
+    m7c: number;
+    m7d: number;
+    m7x: number;
+    m7y: number;
 
+    oamselect: number;
+    oamaddrl: number;
+    oamaddrh: number;
+    oamdataw: number;
+    oamdatar: number;
+
+    cgramaddr: number;
+    cgdataw: number;
+    cgdatar: number;
+    cgwsel: number;
+    cgadsub: number;
+    coldata: number;
+
+    setini: number;
+    mpyl: number;
+    mpym: number;
+    mpyh: number;
+    slhv: number;
+
+    vtilebg1: number;
+    vtilebg2: number;
+    vtilebg3: number;
+    vtilebg4: number;
+    vcharlocbg12: number;
+    vcharlocbg34: number;
+    vportcntrl: number;
+
+    vdatawh: number;
+    vdatawl: number;
+
+    vaddrh: number;
+    vaddrl: number;
+
+    vdatarl: number;
+    vdatarh: number;
+
+    inidisp: number;
+    bgmode: number;
+
+    bg1hofs: number;
+    bg1vofs: number;
+    bg2hofs: number;
+    bg2vofs: number;
+    bg3hofs: number;
+    bg3vofs: number;
+    bg4hofs: number;
+    bg4vofs: number;
+
+    tm: number;
+    ts: number;
+
+    w12sel: number;
+    w34sel: number;
+    wobjsel: number;
+    wh0: number;
+    wh1: number;
+    wh2: number;
+    wh3: number;
+    wbglog: number;
+    wobjlog: number;
+    tmw: number;
+    tsw: number;
+
+    scanlochort: number;
+    scanlocvert: number;
+
+    stat77: number;
+    stat78: number;
+}
+
+export class Registers {
     public mosaic: MosaicRegister;
     public m7sel: Mode7Register;
     public m7a: CosXRegister;
@@ -1345,6 +1425,174 @@ export class Registers {
 
         this.stat77 = new PPUStatus77Register(console);
         this.stat78 = new PPUStatus78Register(console);
+    }
+
+    public export(): IPpuRegistersState {
+        return {
+            bg1hofs: this.bg1hofs.get(),
+            bg1vofs: this.bg1vofs.get(),
+            bg2hofs: this.bg2hofs.get(),
+            bg2vofs: this.bg2vofs.get(),
+            bg3hofs: this.bg3hofs.get(),
+            bg3vofs: this.bg3vofs.get(),
+            bg4hofs: this.bg4hofs.get(),
+            bg4vofs: this.bg4vofs.get(),
+
+            bgmode: this.bgmode.get(),
+            cgadsub: this.cgadsub.get(),
+            cgdatar: this.cgdatar.get(),
+            cgdataw: this.cgdataw.get(),
+            cgramaddr: this.cgramaddr.get(),
+            cgwsel: this.cgwsel.get(),
+            coldata: this.coldata.get(),
+            inidisp: this.inidisp.get(),
+
+            m7a: this.m7a.get(),
+            m7b: this.m7b.get(),
+            m7c: this.m7c.get(),
+            m7d: this.m7d.get(),
+            m7sel: this.m7sel.get(),
+            m7x: this.m7x.get(),
+            m7y: this.m7y.get(),
+
+            mosaic: this.mosaic.get(),
+            mpyh: this.mpyh.get(),
+            mpyl: this.mpyl.get(),
+            mpym: this.mpym.get(),
+
+            oamaddrl: this.oamaddr.oamaddl.get(),
+            oamaddrh: this.oamaddr.oamaddh.get(),
+
+            oamdatar: this.oamdatar.get(),
+            oamdataw: this.oamdataw.get(),
+            oamselect: this.oamselect.get(),
+
+            scanlochort: this.scanlochort.get(),
+            scanlocvert: this.scanlocvert.get(),
+
+            setini: this.setini.get(),
+            slhv: this.slhv.get(),
+            stat77: this.stat77.get(),
+            stat78: this.stat78.get(),
+
+            tm: this.tm.get(),
+            tmw: this.tmw.get(),
+            ts: this.ts.get(),
+            tsw: this.tsw.get(),
+
+            vaddrh: this.vaddr.vmaddh.get(),
+            vaddrl: this.vaddr.vmaddl.get(),
+
+            vdatarl: this.vdatar.vmdatal.get(),
+            vdatarh: this.vdatar.vmdatah.get(),
+
+            vcharlocbg12: this.vcharlocbg12.get(),
+            vcharlocbg34: this.vcharlocbg34.get(),
+
+            vdatawh: this.vdataw.vmdatah.get(),
+            vdatawl: this.vdataw.vmdatal.get(),
+
+            vportcntrl: this.vportcntrl.get(),
+
+            vtilebg1: this.vtilebg1.get(),
+            vtilebg2: this.vtilebg2.get(),
+            vtilebg3: this.vtilebg3.get(),
+            vtilebg4: this.vtilebg4.get(),
+
+            w12sel: this.w12sel.get(),
+            w34sel: this.w34sel.get(),
+
+            wbglog: this.wbglog.get(),
+            wh0: this.wh0.get(),
+            wh1: this.wh1.get(),
+            wh2: this.wh2.get(),
+            wh3: this.wh3.get(),
+            wobjlog: this.wobjlog.get(),
+            wobjsel: this.wobjsel.get(),
+        };
+    }
+
+    public import(state: IPpuRegistersState): void {
+        this.bg1hofs.set(state.bg1hofs);
+        this.bg1vofs.set(state.bg1vofs);
+        this.bg2hofs.set(state.bg2hofs);
+        this.bg2vofs.set(state.bg2vofs);
+        this.bg3hofs.set(state.bg3hofs);
+        this.bg3vofs.set(state.bg3vofs);
+        this.bg4hofs.set(state.bg4hofs);
+        this.bg4vofs.set(state.bg4vofs);
+
+        this.bgmode.set(state.bgmode);
+        this.cgadsub.set(state.cgadsub);
+        this.cgdatar.set(state.cgdatar);
+        this.cgdataw.set(state.cgdataw);
+        this.cgramaddr.set(state.cgramaddr);
+        this.cgwsel.set(state.cgwsel);
+        this.coldata.set(state.coldata);
+        this.inidisp.set(state.inidisp);
+
+        this.m7a.set(state.m7a);
+        this.m7b.set(state.m7b);
+        this.m7c.set(state.m7c);
+        this.m7d.set(state.m7d);
+        this.m7sel.set(state.m7sel);
+        this.m7x.set(state.m7x);
+        this.m7y.set(state.m7y);
+
+        this.mosaic.set(state.mosaic);
+        this.mpyh.set(state.mpyh);
+        this.mpyl.set(state.mpyl);
+        this.mpym.set(state.mpym);
+
+        this.oamaddr.oamaddl.set(state.oamaddrl);
+        this.oamaddr.oamaddh.set(state.oamaddrh);
+
+        this.oamdatar.set(state.oamdatar);
+        this.oamdataw.set(state.oamdataw);
+        this.oamselect.set(state.oamselect);
+
+        this.scanlochort.set(state.scanlochort);
+        this.scanlocvert.set(state.scanlocvert);
+
+        this.setini.set(state.setini);
+        this.slhv.set(state.slhv);
+        this.stat77.set(state.stat77);
+        this.stat78.set(state.stat78);
+
+        this.tm.set(state.tm);
+        this.tmw.set(state.tmw);
+        this.ts.set(state.ts);
+        this.tsw.set(state.tsw);
+
+        this.vaddr.vmaddh.set(state.vaddrh);
+        this.vaddr.vmaddl.set(state.vaddrl);
+
+        this.vdatar.vmdatah.set(state.vdatarh);
+        this.vdatar.vmdatal.set(state.vdatarl);
+
+        this.vcharlocbg12.set(state.vcharlocbg12);
+        this.vcharlocbg34.set(state.vcharlocbg34);
+
+        this.vdataw.vmdatah.set(state.vdatawh);
+        this.vdataw.vmdatal.set(state.vdatawl);
+
+        this.vportcntrl.set(state.vportcntrl);
+
+        this.vtilebg1.set(state.vtilebg1);
+        this.vtilebg2.set(state.vtilebg2);
+        this.vtilebg3.set(state.vtilebg3);
+        this.vtilebg4.set(state.vtilebg4);
+
+        this.w12sel.set(state.w12sel);
+        this.w34sel.set(state.w34sel);
+
+        this.wbglog.set(state.wbglog);
+        this.wh0.set(state.wh0);
+        this.wh1.set(state.wh1);
+        this.wh2.set(state.wh2);
+        this.wh3.set(state.wh3);
+        this.wobjlog.set(state.wobjlog);
+        this.wobjsel.set(state.wobjsel);
     }
 
     public reset(): void {

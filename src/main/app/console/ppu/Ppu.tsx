@@ -5,7 +5,7 @@ import {Sprites} from "./Sprites";
 import {Oam} from "../memory/Oam";
 import {TileMaps} from "./TileMaps";
 import {Vram} from "../memory/Vram";
-import {Registers} from "./Registers";
+import {IPpuRegistersState, Registers} from "./Registers";
 import {Screen, ScreenRegion, ScreenState} from "./Screen";
 import {InterruptType} from "../cpu/Interrupts";
 import {Renderer} from "./Renderer";
@@ -20,6 +20,7 @@ export interface IPpuState {
     frames: number;
 
     status: IStatusState;
+    registers: IPpuRegistersState;
     cgram: number[];
     oam: {
         high: number[];
@@ -316,7 +317,7 @@ export class Ppu {
             frames: this.frames,
 
             status: this.status.export(),
-            //registers: this.registers.export(),
+            registers: this.registers.export(),
             cgram: this.cgram.data,
             oam: {
                 high: this.oam.high,

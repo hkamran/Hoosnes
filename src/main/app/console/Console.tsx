@@ -64,7 +64,6 @@ export class Console {
         this.ppu.reset();
         this.apu.reset();
         this.io.reset();
-
         this.bus.reset();
     }
 
@@ -72,22 +71,20 @@ export class Console {
         this.status = ConsoleStatus.PAUSED;
     }
 
-    public export(): IConsoleState {
+    public getState(): IConsoleState {
         return {
             cartridge: this.cartridge.export(),
             apu: this.apu.export(),
             io: this.io.export(),
             cpu: this.cpu.export(),
-
             ppu: this.ppu.export(),
         };
     }
 
-    public set(state: IConsoleState): void {
+    public setState(state: IConsoleState): void {
         this.cartridge.import(state.cartridge);
         this.apu.import(state.apu);
         this.io.import(state.io);
-
         this.cpu.import(state.cpu);
         this.ppu.import(state.ppu);
     }
@@ -99,10 +96,6 @@ export class Console {
         for (let i = 0; i < cycles; i++) {
             this.ppu.tick();
         }
-    }
-
-    public stop(): void {
-        this.status = ConsoleStatus.PAUSED;
     }
 
     public ticks(count: number) {
