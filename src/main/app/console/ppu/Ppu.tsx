@@ -12,6 +12,11 @@ import {Renderer} from "./Renderer";
 import {Tiles} from "./Tiles";
 import {Backgrounds} from "./Backgrounds";
 import {joy1, joy2} from "../controller/Controller";
+import {ICpuState} from "../cpu/Cpu";
+
+export interface IPpuState {
+
+}
 
 export class Status {
     public latchedHCounter: number = 0;
@@ -223,10 +228,30 @@ export class Ppu {
 
         this.tiles.reset();
         this.tileMaps.reset();
-
         this.palette.reset();
         this.sprites.reset();
         this.backgrounds.reset();
+    }
+
+    public import(state: IPpuState): void {
+
+    }
+
+    public export(): IPpuState {
+        return {
+            scanline: this.scanline,
+            cycle: this.cycle,
+            frames: this.frames,
+
+            //status: this.status.export(),
+            //registers: this.registers.export(),
+            cgram: this.cgram.data,
+            oam: {
+                high: this.oam.high,
+                low: this.oam.low,
+            },
+            vram: this.vram.data,
+        };
     }
 
     private triggerIRQ(): void {

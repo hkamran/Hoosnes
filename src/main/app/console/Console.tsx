@@ -1,10 +1,10 @@
-import {Cpu} from "./cpu/Cpu";
-import {Cartridge} from "./cartridge/Cartridge";
+import {Cpu, ICpuState} from "./cpu/Cpu";
+import {Cartridge, ICartridgeMapping, ICartridgeState} from "./cartridge/Cartridge";
 import {Logger, LoggerManager} from 'typescript-logger';
 import {Bus} from "./bus/Bus";
-import {Ppu} from "./ppu/Ppu";
-import {Apu} from "./apu/Apu";
-import {Io} from "./io/Io";
+import {IPpuState, Ppu} from "./ppu/Ppu";
+import {Apu, IApuState} from "./apu/Apu";
+import {IIoState, Io} from "./io/Io";
 
 export enum ConsoleStatus {
     RUNNING, PAUSED, RESET, OFF,
@@ -12,6 +12,13 @@ export enum ConsoleStatus {
 
 export const TICKS_PER_FRAME: number = 29780;
 
+export interface IConsoleState {
+    apu: IApuState,
+    cpu: ICpuState,
+    ppu: IPpuState,
+    io: IIoState,
+    cartridge: ICartridgeState,
+}
 
 export class Console {
 
@@ -21,8 +28,10 @@ export class Console {
     public cpu : Cpu;
     public ppu: Ppu;
     public io: Io;
-    public bus: Bus;
     public cartridge : Cartridge;
+
+    public bus: Bus;
+
     public status: ConsoleStatus = ConsoleStatus.OFF;
     public tpf: number = TICKS_PER_FRAME;
 
@@ -54,6 +63,7 @@ export class Console {
         this.ppu.reset();
         this.apu.reset();
         this.io.reset();
+
         this.bus.reset();
     }
 
@@ -61,12 +71,28 @@ export class Console {
         this.status = ConsoleStatus.PAUSED;
     }
 
-    public export(): void {
+    public export(): IConsoleState {
+        this.pause();
 
+        return {
+            cartridge: this.cartridge.export(),
+            apu: this.apu.export(),
+            io: this.io.export(),
+            cpu: this.cpu.export(),
+
+            ppu: this.ppu.export(),
+        };
     }
 
-    public import(): void {
+    public set(state: IConsoleState): void {
+        this.pause();
 
+        this.cartridge.import(state.cartridge);
+        this.apu.import(state.apu);
+        this.io.import(state.io);
+
+        this.cpu.import(state.cpu);
+        this.ppu.import(state.ppu);
     }
 
     public tick(): void {

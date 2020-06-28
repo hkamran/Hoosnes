@@ -44,7 +44,6 @@ export const TOTAL_TILE_MAPS: number = 32;
 
 export class TileMaps {
 
-
     private vram: Vram;
     private dimension: Dimension;
 

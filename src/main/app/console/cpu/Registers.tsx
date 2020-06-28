@@ -319,6 +319,18 @@ export class IndirectXRegister extends AbstractRegister {
     }
 }
 
+export interface ICpuRegistersState {
+    a: number;
+    dbr: number;
+    d: number;
+    k: number;
+    pc: number;
+    p: number;
+    sp: number;
+    x: number;
+    y: number;
+}
+
 export class Registers {
 
     public a : AccumulatorRegister;
@@ -364,6 +376,32 @@ export class Registers {
         this.k.set(0x00);
 
         this.pc.set(0x0000);
+    }
+
+    public export(): ICpuRegistersState {
+        return {
+          a: this.a.getC(),
+          d: this.d.getD(),
+          dbr: this.dbr.get(),
+          k: this.k.get(),
+          p: this.p.get(),
+          pc: this.pc.get(),
+          sp: this.sp.get(),
+          x: this.x.get(),
+          y: this.y.get(),
+        };
+    }
+
+    public import(state: ICpuRegistersState) {
+        this.a.set(state.a);
+        this.d.set(state.d);
+        this.dbr.set(state.dbr);
+        this.k.set(state.k);
+        this.p.set(state.p);
+        this.pc.set(state.pc);
+        this.sp.set(state.sp);
+        this.x.set(state.x);
+        this.y.set(state.y);
     }
 
 }

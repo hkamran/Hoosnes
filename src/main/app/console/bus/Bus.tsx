@@ -135,7 +135,6 @@ export class Bus {
 
     public reset(): void {
         this.mdr = 0;
-        this.cartridge = this.console.cartridge;
     }
 
 }

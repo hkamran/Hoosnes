@@ -1,9 +1,16 @@
-import {Registers} from "./Registers";
+import {IApuRegisterState, Registers} from "./Registers";
 import {Console} from "../Console";
 import {Bit} from "../../util/Bit";
+import {ICpuState} from "../cpu/Cpu";
 
 export enum ApuState {
     BOOTING, START, BLOCK,TRANSFER, EXECUTE,
+}
+
+export interface IApuState {
+    amount: number,
+    state: ApuState,
+    registers: IApuRegisterState,
 }
 
 export class Apu {
@@ -24,6 +31,21 @@ export class Apu {
         this.registers.apuio1.write = 0xBB;
         this.amount = 0x00;
         this.state = ApuState.BOOTING;
+    }
+
+    public export(): IApuState {
+        return {
+            amount: this.amount,
+            state: this.state,
+            registers: this.registers.export()
+        };
+    }
+
+    public import(state: IApuState): void {
+        this.amount = state.amount;
+        this.state = state.state;
+
+        this.registers.import(state.registers);
     }
 
     public tick(): void {

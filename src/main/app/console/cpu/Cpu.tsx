@@ -1,13 +1,22 @@
-import {Registers} from "./Registers";
+import {ICpuRegistersState, Registers} from "./Registers";
 import {Opcodes, OpContext, Operation} from "./Opcodes";
 import {InterruptHandler} from "./Interrupts";
 import {Cartridge} from "../cartridge/Cartridge";
 import {Objects} from "../../util/Objects";
-import {Console} from "../Console";
+import {Console, IConsoleState} from "../Console";
 import {Stack} from "../memory/Stack";
 import {Wram} from "../memory/Wram";
 import {AddressUtil} from "../../util/AddressUtil";
 import {trace} from "../../../web/debugger/cpu/LogCard";
+import {IApuState} from "../apu/Apu";
+
+export interface ICpuState {
+    wram: number[],
+    registers: ICpuRegistersState,
+    cycles: number,
+    ticks: number;
+}
+
 
 export class Cpu {
 
@@ -17,7 +26,7 @@ export class Cpu {
     public interrupts: InterruptHandler;
 
     public stack: Stack;
-    public wram: Wram = new Wram();
+    public wram: Wram;
 
     public context: OpContext;
 
@@ -33,6 +42,7 @@ export class Cpu {
         this.opcodes = new Opcodes(this);
         this.registers = new Registers(console);
         this.stack = new Stack(console);
+        this.wram = new Wram(console);
         this.interrupts = new InterruptHandler(console, this);
     }
 
@@ -70,6 +80,24 @@ export class Cpu {
         this.stack.reset();
         this.wram.reset();
         this.registers.reset();
+    }
+
+    public export(): ICpuState {
+        return {
+            wram: this.wram.data,
+            registers: this.registers.export(),
+            cycles: this.cycles,
+            ticks: this.ticks,
+        };
+    }
+
+    public import(state: ICpuState): void {
+        this.wram.data = state.wram;
+
+        this.registers.import(state.registers);
+
+        this.cycles = state.cycles;
+        this.ticks = state.ticks;
     }
 
     public load(cartridge: Cartridge): void {

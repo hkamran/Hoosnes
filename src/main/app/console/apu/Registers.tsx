@@ -126,6 +126,13 @@ export class ApuIO03 extends AbstractRegister {
 
 }
 
+export interface IApuRegisterState {
+    apuio0: { read : number, write: number};
+    apuio1: { read : number, write: number};
+    apuio2: { read : number, write: number};
+    apuio3: { read : number, write: number};
+}
+
 export class Registers {
 
     public apuio0: ApuIO00;
@@ -138,6 +145,41 @@ export class Registers {
         this.apuio1 = new ApuIO01(console);
         this.apuio2 = new ApuIO02(console);
         this.apuio3 = new ApuIO03(console);
+    }
+
+    public export(): IApuRegisterState {
+        return {
+            apuio0: {
+                read: this.apuio0.read,
+                write: this.apuio0.write,
+            },
+            apuio1: {
+                read: this.apuio1.read,
+                write: this.apuio1.write,
+            },
+            apuio2: {
+                read: this.apuio2.read,
+                write: this.apuio2.write,
+            },
+            apuio3: {
+                read: this.apuio3.read,
+                write: this.apuio3.write,
+            }
+        };
+    }
+
+    public import(state: IApuRegisterState) {
+        this.apuio0.write = state.apuio0.write;
+        this.apuio0.read = state.apuio0.read;
+
+        this.apuio1.write = state.apuio1.write;
+        this.apuio1.read = state.apuio1.read;
+
+        this.apuio2.write = state.apuio2.write;
+        this.apuio2.read = state.apuio2.read;
+
+        this.apuio3.write = state.apuio3.write;
+        this.apuio3.read = state.apuio3.read;
     }
 
 }

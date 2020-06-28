@@ -8,11 +8,16 @@ import {CartridgeMapping2} from "./CartridgeMapping2";
 import {Sram} from "../memory/Sram";
 import {CartridgeMapping3} from "./CartridgeMapping3";
 import {Bit} from "../../util/Bit";
+import {ICpuState} from "../cpu/Cpu";
 
 export interface ICartridgeMapping {
     label: string;
     read(address: number): number;
     write(address: number, value: number): void;
+}
+
+export interface ICartridgeState {
+    rom: number[],
 }
 
 export class InterruptAddresses {
@@ -99,8 +104,10 @@ export class Cartridge {
     constructor(bytes: number[]) {
         Objects.requireNonNull(bytes, "Rom cannot be empty!");
 
-        this.rom = bytes;
+        this.extract(bytes);
+    }
 
+    private extract(bytes: number[]): void {
         // SMC header
         let romLength: number = this.rom.length;
         this.smcSize = romLength % 1024;
@@ -114,7 +121,6 @@ export class Cartridge {
         let mappingType: CartridgeMappingType = this.getLayoutType();
         let offset: number = this.getHeaderOffset(mappingType);
 
-        // Begin extraction
         this.mapping = this.getMapping(mappingType);
         this.title = this.getTitle(offset, offset + SNES_OFFSET_TITLE);
         this.type = this.getType(offset + SNES_OFFSET_ROM_TYPE);
@@ -198,5 +204,15 @@ export class Cartridge {
         } else {
             throw new Error("Unknown cartridge mapping type " + mappingType.valueOf());
         }
+    }
+
+    public import(state: ICartridgeState): void {
+        this.extract(state.rom);
+    }
+
+    public export(): ICartridgeState {
+        return {
+            rom: this.rom,
+        };
     }
 }

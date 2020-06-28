@@ -1,5 +1,10 @@
 import {Console} from "../Console";
 import {Registers} from "./Registers";
+import {ICpuState} from "../cpu/Cpu";
+
+export interface IIoState {
+
+}
 
 export class Io {
     private console: Console;
@@ -16,6 +21,14 @@ export class Io {
     constructor(console: Console) {
         this.console = console;
         this.registers = new Registers(console);
+    }
+
+    public import(state: IIoState): void {
+
+    }
+
+    public export(): IIoState {
+        return {};
     }
 
     public reset(): void {
