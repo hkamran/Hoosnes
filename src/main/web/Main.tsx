@@ -31,8 +31,10 @@ Modal.setAppElement('#main');
 
 export function animateFrames(): void {
     let execution = function() {
-        if (window.snes.state == ConsoleStatus.RUNNING) {
-            window.snes.ticks(window.snes.tpf);
+        let console: Console = window.snes;
+
+        if (console.status == ConsoleStatus.RUNNING) {
+            console.ticks(window.snes.tpf);
             debugCallback();
             animateFrames.bind(this)();
         }
@@ -106,6 +108,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         let promise = this.readFileDataAsBase64(file);
         promise.then((value: number[]) => {
             if (value == null || value.length == 0) return;
+
             this.props.snes.load(value);
             this.play();
         });

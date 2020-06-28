@@ -101,21 +101,17 @@ export class Cartridge {
     public checksum: number; // xFDE
     public interrupts: InterruptVectors;
 
-    constructor(bytes: number[]) {
-        Objects.requireNonNull(bytes, "Rom cannot be empty!");
+    public load(rom: number[]): void {
+        Objects.requireNonNull(rom, "Rom cannot be empty!");
 
-        this.extract(bytes);
-    }
-
-    private extract(bytes: number[]): void {
         // SMC header
-        let romLength: number = this.rom.length;
+        let romLength: number = rom.length;
         this.smcSize = romLength % 1024;
         if (this.smcSize != 0 && this.smcSize != 512) {
             throw new Error(`SMC is malformed! ${this.smcSize}`);
         }
 
-        this.rom = this.rom.slice(this.smcSize);
+        this.rom = rom.slice(this.smcSize);
 
         // Determine the offset
         let mappingType: CartridgeMappingType = this.getLayoutType();
@@ -124,13 +120,13 @@ export class Cartridge {
         this.mapping = this.getMapping(mappingType);
         this.title = this.getTitle(offset, offset + SNES_OFFSET_TITLE);
         this.type = this.getType(offset + SNES_OFFSET_ROM_TYPE);
-        this.size = 400 << ByteReader.readByte(this.rom, offset + SNES_OFFSET_ROM_SIZE);
-        this.sram = new Sram(ByteReader.readByte(this.rom, offset + SNES_OFFSET_SRAM_SIZE));
-        this.license = ByteReader.readByte(this.rom, offset + SNES_OFFSET_LICENSE);
-        this.version = ByteReader.readByte(this.rom, offset + SNES_OFFSET_VERSION);
-        this.complement = ByteReader.readWord(this.rom, offset + SNES_OFFSET_COMPLEMENT_CHECK);
-        this.checksum = ByteReader.readWord(this.rom, offset + SNES_OFFSET_CHECKSUM);
-        this.interrupts = new InterruptVectors(this.rom, offset);
+        this.size = 400 << ByteReader.readByte(rom, offset + SNES_OFFSET_ROM_SIZE);
+        this.sram = new Sram(ByteReader.readByte(rom, offset + SNES_OFFSET_SRAM_SIZE));
+        this.license = ByteReader.readByte(rom, offset + SNES_OFFSET_LICENSE);
+        this.version = ByteReader.readByte(rom, offset + SNES_OFFSET_VERSION);
+        this.complement = ByteReader.readWord(rom, offset + SNES_OFFSET_COMPLEMENT_CHECK);
+        this.checksum = ByteReader.readWord(rom, offset + SNES_OFFSET_CHECKSUM);
+        this.interrupts = new InterruptVectors(rom, offset);
     }
 
     private getLayoutType(): CartridgeMappingType {
@@ -207,7 +203,7 @@ export class Cartridge {
     }
 
     public import(state: ICartridgeState): void {
-        this.extract(state.rom);
+        this.load(state.rom);
     }
 
     public export(): ICartridgeState {

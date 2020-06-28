@@ -40,14 +40,15 @@ export class Console {
         this.ppu = new Ppu(this);
         this.apu = new Apu(this);
         this.io = new Io(this);
+        this.cartridge = new Cartridge();
         this.bus = new Bus(this);
     }
 
-    public load(romBytes : number[]) : void {
+    public load(rom : number[]) : void {
         this.status = ConsoleStatus.PAUSED;
         this.reset();
 
-        this.cartridge = new Cartridge(romBytes);
+        this.cartridge.load(rom);
         this.bus.reset();
         this.log.info("Cartridge is Loaded!", this.cartridge);
         this.cpu.load(this.cartridge);
@@ -72,8 +73,6 @@ export class Console {
     }
 
     public export(): IConsoleState {
-        this.pause();
-
         return {
             cartridge: this.cartridge.export(),
             apu: this.apu.export(),
@@ -85,8 +84,6 @@ export class Console {
     }
 
     public set(state: IConsoleState): void {
-        this.pause();
-
         this.cartridge.import(state.cartridge);
         this.apu.import(state.apu);
         this.io.import(state.io);
