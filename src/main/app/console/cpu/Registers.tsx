@@ -380,8 +380,8 @@ export class Registers {
 
     public export(): ICpuRegistersState {
         return {
-          a: this.a.getC(),
-          d: this.d.getD(),
+          a: this.a.get(),
+          d: this.d.get(),
           dbr: this.dbr.get(),
           k: this.k.get(),
           p: this.p.get(),

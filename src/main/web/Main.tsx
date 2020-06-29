@@ -8,6 +8,7 @@ import Modal from 'react-modal';
 import {Keyboard, KeyboardMapping} from "./Keyboard";
 import {joy1} from "../app/console/controller/Controller";
 import {PuffLoader} from "react-spinners";
+import {Netplay} from "./Netplay";
 
 declare let window: any;
 window.snes = new Console();
@@ -33,11 +34,13 @@ export function animateFrames(): void {
     let execution = function() {
         let console: Console = window.snes;
 
-        if (console.status == ConsoleStatus.RUNNING) {
-            console.ticks(window.snes.tpf);
-            debugCallback();
-            animateFrames.bind(this)();
+        if (console.status != ConsoleStatus.RUNNING) {
+            return;
         }
+
+        console.ticks(window.snes.tpf);
+        debugCallback();
+        animateFrames.bind(this)();
     }.bind(this);
     requestAnimationFrame(execution);
 }
@@ -45,6 +48,7 @@ export function animateFrames(): void {
 interface IMainStates {
     snes: Console;
     loading: boolean;
+    viewNetplay: boolean;
     viewDebugger: boolean;
     viewCartridge: boolean;
     viewSettings: boolean;
@@ -63,12 +67,19 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         this.state = {
             snes: props.snes,
             loading: false,
+            viewNetplay: false,
             viewDebugger: false,
             viewCartridge: false,
             viewSettings: false,
         };
 
         this.fileInputRef = React.createRef<HTMLInputElement>();
+    }
+
+    public toggleNetplay(): void {
+        this.setState({
+            viewNetplay: !this.state.viewNetplay,
+        });
     }
 
     public openDebugger(): void {
@@ -144,6 +155,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
 
     private play() {
         if (this.props.snes.status != ConsoleStatus.RUNNING) {
+            console.log("animating");
             this.props.snes.play();
             animateFrames();
         }
@@ -313,7 +325,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                             <i className="fas fa-download"/>
                         </div>
                     </a>
-                    <a className={"menu-button blue"} data-tip="Net Play">
+                    <a className={"menu-button blue"} data-tip="Net Play" onClick={this.toggleNetplay.bind(this)}>
                         <div>
                             <i className="fas fa-user-friends"/>
                         </div>
@@ -329,6 +341,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         </div>
                     </a>
                 </div>
+                { this.state.viewNetplay ? <Netplay /> : null }
                 <div className={"screen-container"}>
                     <Screen snes={window.snes} />
                 </div>

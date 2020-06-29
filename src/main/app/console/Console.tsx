@@ -86,7 +86,7 @@ export class Console {
         this.apu.import(state.apu);
         this.io.import(state.io);
         this.cpu.import(state.cpu);
-        this.ppu.import(state.ppu);
+        //this.ppu.import(state.ppu);
     }
 
     public tick(): void {

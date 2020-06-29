@@ -27,7 +27,7 @@ export class Io {
     }
 
     public import(state: IIoState): void {
-        this.nmiEnable = state.nmiStatus;
+        this.nmiEnable = state.nmiEnable;
         this.irqMode = state.irqMode;
         this.autoJoypadEnable = state.autoJoypadEnable;
         this.nmiStatus = state.nmiStatus;

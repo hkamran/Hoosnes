@@ -51,7 +51,9 @@ export class Debugger extends React.Component<IDebuggerProps, IDebuggerStates> {
 
     private play() {
         this.props.snes.play();
-        animateFrames();
+        if (this.props.snes.status != ConsoleStatus.RUNNING) {
+            animateFrames();
+        }
         this.setState({
             snes: this.state.snes,
         });

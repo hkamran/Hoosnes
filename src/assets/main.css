@@ -76,7 +76,7 @@ canvas {
 .extra-button-wrapper {
     display: flex;
     flex-direction: row;
-    background: linear-gradient(to bottom left, #4c4c4c, rgba(255, 255, 255, 0.5));
+    background: linear-gradient(to bottom left, #848484, rgba(255, 255, 255, 0.8));
     border-radius: 15px;
     transform: rotate(-40deg);
     height: 19px;
@@ -86,15 +86,15 @@ canvas {
 }
 
 .extra-button {
-    background: #707070;
+    background: #a5a5a5;
     padding-left: 5px;
     padding-right: 5px;
     color: #a8aaaa;
     font-size: 12px;
     width: 100%;
     height: 19px;
-    box-shadow: -1px 1px rgba(0, 0, 0, 0), inset -1px 1px rgba(255, 255, 255, 0.3);
-    border: 1px solid #434343;
+    box-shadow: -1px 1px rgba(0, 0, 0, 0), inset -1px 2px rgba(255, 255, 255, 0.34);
+    border: 1px solid #545454;
     border-radius: 14px;
     box-sizing: border-box;
 }
@@ -104,14 +104,14 @@ canvas {
 }
 
 .extra-button div {
-    font-size: 11px;
+    font-size: 12px;
     background: none;
     border: none;
     transform: rotate(45deg);
     padding: 0;
     margin-left: 8px;
-    margin-top: 7px;
-    color: #c6c6c6;
+    margin-top: 5px;
+    color: #505050;
 }
 
 .menu-button {
@@ -238,4 +238,71 @@ canvas {
 
 .modal-content table {
     color: #373737;
+}
+
+.netplay {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: row;
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgb(220, 220, 220) 0%, rgb(195, 195, 195) 15%);
+    padding: 1px;
+}
+
+.netplay .room {
+    flex-grow: 1;
+    display: flex;
+}
+
+.netplay .users {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    display: flex;
+    font-size: 10pt;
+    color: #2d2d2d;
+    padding-top: 2px;
+}
+
+.netplay .label {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    display: flex;
+    height: 100%;
+    width: 55px;
+    font-weight: bold;
+    font-size: 12px;
+    color: #595959;
+}
+
+.netplay .value {
+    flex-grow: 1;
+    background: #5f5f5f;
+    /* border: 2px solid #4e4e4e; */
+    box-shadow: inset 0px 0px 6px 0px rgba(0,0,0,0.55);
+    border-radius: 4px;
+}
+
+.netplay input {
+    width: 100%;
+    color: #a6a6a6;
+    font-size: 12px;
+    background: none;
+    border: 0px;
+    height: 22px;
+    padding-left: 10px;
+    box-sizing: border-box;
+}
+
+.netplay.wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    box-shadow: 0px 0px 7px 0px rgba(0,0,0,0.75);
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+
+    margin-bottom: 15px;
+    margin-top: 5px;
 }
