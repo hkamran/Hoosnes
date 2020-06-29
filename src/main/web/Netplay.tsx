@@ -14,11 +14,11 @@ export class Netplay extends React.Component<any, any> {
 
         const playerOneStyle = {
             marginRight: "8px",
-            color: (isPlayerOneJoined ? "#eaeaea": "#3e3e3e"),
+            color: (isPlayerOneJoined ? "#eaeaea": "#383838"),
         };
 
         const playerTwoStyle = {
-            color: (isPlayerTwoJoined ? "#eaeaea": "#3e3e3e"),
+            color: (isPlayerTwoJoined ? "#eaeaea": "#383838"),
         };
 
         if (isUserPlayerOne) {

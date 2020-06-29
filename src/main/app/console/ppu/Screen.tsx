@@ -51,8 +51,8 @@ export class Screen {
     public static readonly WIDTH: number = 256;
     public static readonly HEIGHT: number = 224;
 
-    public static readonly MAX_ZOOM: number = 4;
-    public static readonly MIN_ZOOM: number = 1;
+    public static readonly MAX_ZOOM: number = 5;
+    public static readonly MIN_ZOOM: number = 2;
     // Note PAL is 256x240
 
     private canvas: HTMLCanvasElement;

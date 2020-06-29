@@ -218,7 +218,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         <div style={{display: 'flex', flexDirection: 'row'}}>
                             <div className={"cartridge-title"}>Select Cartridge</div>
                             <div style={{flexGrow: 1, width: "70px"}}/>
-                            <a style={{color: "#6e539c", cursor: "pointer"}} onClick={this.closeCartridge.bind(this)}>
+                            <a style={{color: "#656565", cursor: "pointer"}} onClick={this.closeCartridge.bind(this)}>
                                 <i className="fas fa-times"/>
                             </a>
                         </div>
