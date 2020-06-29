@@ -7,10 +7,25 @@ export class Netplay extends React.Component<any, any> {
         const isPlayerOneJoined = false;
         const isPlayerTwoJoined = false;
 
-        const isPlayerOne = false;
+        const isUserPlayerOne = true;
 
-        const playerOneDataTip = `Player 1 ${(isPlayerOne ? ` (You)` : (isPlayerOneJoined ? ` (JOINED)` : ` (EMPTY)`))}`;
-        const playerTwoDataTip = `Player 2 ${(!isPlayerOne ? ` (You)` : (isPlayerTwoJoined ? ` (JOINED)` : ` (EMPTY)`))}`;
+        const playerOneDataTip = `Player 1 ${(isUserPlayerOne ? ` (You)` : (isPlayerOneJoined ? ` (JOINED)` : ` (EMPTY)`))}`;
+        const playerTwoDataTip = `Player 2 ${(!isUserPlayerOne ? ` (You)` : (isPlayerTwoJoined ? ` (JOINED)` : ` (EMPTY)`))}`;
+
+        const playerOneStyle = {
+            marginRight: "8px",
+            color: (isPlayerOneJoined ? "#eaeaea": "#3e3e3e"),
+        };
+
+        const playerTwoStyle = {
+            color: (isPlayerTwoJoined ? "#eaeaea": "#3e3e3e"),
+        };
+
+        if (isUserPlayerOne) {
+            playerOneStyle.color = "#fece15";
+        } else {
+            playerTwoStyle.color = "#fece15";
+        }
 
         const handleFocus = (event) => event.target.select();
         return (
@@ -19,7 +34,7 @@ export class Netplay extends React.Component<any, any> {
                     <div className={"netplay"}>
                         <div className={"room"}>
                             <div className={"label"}>
-                                ROOM
+                                SHARE
                             </div>
                             <div className={"value"}>
                                 <input type="text" id="roomId" readOnly={true} value="http://notimplemented.com" onFocus={handleFocus}/>
@@ -29,9 +44,11 @@ export class Netplay extends React.Component<any, any> {
                 </div>
                 <div className={"netplay wrapper"} style={{width: "55px", flexGrow: 0, marginLeft: "15px"}}>
                     <div className={"netplay"}>
-                        <div className={"value users"}>
-                            <i className="fa fa-user" aria-hidden="true" style={{marginRight: "8px"}} data-tip={playerOneDataTip} />
-                            <i className="fa fa-user" aria-hidden="true" data-tip={playerTwoDataTip} />
+                        <div className={"users"}>
+                            <div className={"value"}>
+                                <i className="fa fa-user" aria-hidden="true" style={playerOneStyle} data-tip={playerOneDataTip} />
+                                <i className="fa fa-user" aria-hidden="true" style={playerTwoStyle} data-tip={playerTwoDataTip} />
+                            </div>
                         </div>
                     </div>
                 </div>
