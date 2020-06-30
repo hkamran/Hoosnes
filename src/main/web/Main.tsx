@@ -9,6 +9,7 @@ import {Keyboard, KeyboardMapping} from "./Keyboard";
 import {joy1} from "../app/console/controller/Controller";
 import {PuffLoader} from "react-spinners";
 import {MultiplayerBar} from "./MultiplayerBar";
+import {ParsedUrlQuery, parse} from "querystring";
 
 declare let window: any;
 window.snes = new Console();
@@ -47,6 +48,7 @@ export function animateFrames(): void {
 
 interface IMainStates {
     snes: Console;
+    playerRoomId?: string;
     loading: boolean;
     viewNetplay: boolean;
     viewDebugger: boolean;
@@ -74,6 +76,17 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         };
 
         this.fileInputRef = React.createRef<HTMLInputElement>();
+    }
+
+    public componentDidMount() {
+        const queryString: ParsedUrlQuery = parse(window.location.href.split('?')[1]);
+        const playerRoomId: string = queryString.roomId as string;
+        const isJoiningRoom: boolean = playerRoomId != null;
+
+        this.setState({
+            playerRoomId,
+            viewNetplay: isJoiningRoom,
+        });
     }
 
     public toggleNetplay(): void {
@@ -341,7 +354,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         </div>
                     </a>
                 </div>
-                { this.state.viewNetplay ? <MultiplayerBar /> : null }
+                { this.state.viewNetplay ? <MultiplayerBar playerRoomId={this.state.playerRoomId} /> : null }
                 <div className={"screen-container"}>
                     <ScreenCanvas snes={window.snes} />
                 </div>

@@ -1,31 +1,103 @@
 import * as React from "react";
 import ReactTooltip from "react-tooltip";
+import {Client} from "../app/netplay/Client";
 
-export class MultiplayerBar extends React.Component<any, any> {
+interface IMultiplayerBarProps {
+    playerRoomId: string;
+}
+
+interface IMultiplayerBarState {
+    clientRoomId?: string;
+    hasPlayerOneJoined: boolean;
+    hasPlayerTwoJoined: boolean;
+    isUserPlayerOne: boolean;
+}
+
+export class MultiplayerBar extends React.Component<IMultiplayerBarProps, IMultiplayerBarState> {
+
+    private client: Client;
+
+    public state = {
+        hasPlayerOneJoined: false,
+        hasPlayerTwoJoined: false,
+        isUserPlayerOne: false,
+    };
+
+    public componentDidMount(): void {
+        const id: string = this.props.playerRoomId;
+        const doCreateRoom: boolean = id == null;
+
+        const isUserPlayerOne = id == null;
+
+        this.client = new Client();
+        if (doCreateRoom) {
+            this.client.createRoom(() => {
+                this.setState({
+                    clientRoomId: this.client.id,
+                    isUserPlayerOne,
+                    hasPlayerOneJoined: true,
+                });
+            }, (conn) => {
+                conn.on('open', () => {
+                    this.setState({
+                        hasPlayerTwoJoined: true,
+                    });
+                });
+                conn.on('close', () => {
+                    this.setState({
+                        hasPlayerTwoJoined: false,
+                    });
+                });
+                conn.on('error', (err) => {
+                    alert(''+err);
+                });
+            });
+        } else {
+            this.client.joinRoom(id, (conn) => {
+                this.setState({
+                    clientRoomId: this.client.id,
+                    isUserPlayerOne,
+                    hasPlayerTwoJoined: true,
+                });
+
+                conn.on('open', () => {
+                    this.setState({
+                        hasPlayerOneJoined: true,
+                    });
+                });
+                conn.on('close', () => {
+                    this.setState({
+                        hasPlayerOneJoined: false,
+                    });
+                });
+                conn.on('error', (err) => {
+                    alert(''+err);
+                });
+            });
+        }
+    }
 
     public render() {
-        const isPlayerOneJoined = false;
-        const isPlayerTwoJoined = false;
+        const {hasPlayerOneJoined, hasPlayerTwoJoined, isUserPlayerOne} = this.state;
 
-        const isUserPlayerOne = true;
+        const playerOneDataTip = `Player 1 ${(isUserPlayerOne ? ` (You)` : (hasPlayerOneJoined ? ` (JOINED)` : ` (EMPTY)`))}`;
+        const playerTwoDataTip = `Player 2 ${(!isUserPlayerOne ? ` (You)` : (hasPlayerTwoJoined ? ` (JOINED)` : ` (EMPTY)`))}`;
 
-        const playerOneDataTip = `Player 1 ${(isUserPlayerOne ? ` (You)` : (isPlayerOneJoined ? ` (JOINED)` : ` (EMPTY)`))}`;
-        const playerTwoDataTip = `Player 2 ${(!isUserPlayerOne ? ` (You)` : (isPlayerTwoJoined ? ` (JOINED)` : ` (EMPTY)`))}`;
+        const userColor = "#fece15";
+        const emptySlotColor = "#383838";
+        const filledSlotColor = "#eaeaea";
 
         const playerOneStyle = {
             marginRight: "8px",
-            color: (isPlayerOneJoined ? "#eaeaea": "#383838"),
+            color: (hasPlayerOneJoined ? (isUserPlayerOne ? userColor: filledSlotColor) : emptySlotColor),
         };
 
         const playerTwoStyle = {
-            color: (isPlayerTwoJoined ? "#eaeaea": "#383838"),
+            color: (hasPlayerTwoJoined ? (!isUserPlayerOne ? userColor: filledSlotColor) : emptySlotColor),
         };
 
-        if (isUserPlayerOne) {
-            playerOneStyle.color = "#fece15";
-        } else {
-            playerTwoStyle.color = "#fece15";
-        }
+        const host = window.location.href.split('?')[0];
+        const url = this.client ? `${host}?roomId=${this.client.id}` : ``;
 
         const handleFocus = (event) => event.target.select();
         return (
@@ -37,7 +109,7 @@ export class MultiplayerBar extends React.Component<any, any> {
                                 SHARE
                             </div>
                             <div className={"value"}>
-                                <input type="text" id="roomId" readOnly={true} value="http://notimplemented.com" onFocus={handleFocus}/>
+                                <input type="text" id="roomId" readOnly={true} value={url} onFocus={handleFocus}/>
                             </div>
                         </div>
                     </div>
