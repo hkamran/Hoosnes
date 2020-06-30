@@ -39,20 +39,10 @@ gulp.task('compile',  function (callback) {
     });
 });
 
-gulp.task('build', function (callback) {
-    runSequence(
-        'compile',
-        'assets',
-        callback);
-});
+gulp.task('build', gulp.series('compile', 'assets'));
 
 gulp.task('watch', function () {
     gulp.watch([dir.src, dir.assets], ['build']);
 });
 
-gulp.task('default', function (callback) {
-    runSequence('clean',
-        'build',
-        'assets',
-        callback);
-});
+gulp.task('default', gulp.series('clean', 'build', 'assets'));
