@@ -1,14 +1,14 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Console, ConsoleStatus} from "../app/console/Console";
-import {Screen} from "./Screen";
+import {ScreenCanvas} from "./ScreenCanvas";
 import ReactTooltip from "react-tooltip";
 import {debugCallback, Debugger} from "./debugger/Debugger";
 import Modal from 'react-modal';
 import {Keyboard, KeyboardMapping} from "./Keyboard";
 import {joy1} from "../app/console/controller/Controller";
 import {PuffLoader} from "react-spinners";
-import {Netplay} from "./Netplay";
+import {MultiplayerBar} from "./MultiplayerBar";
 
 declare let window: any;
 window.snes = new Console();
@@ -341,9 +341,9 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         </div>
                     </a>
                 </div>
-                { this.state.viewNetplay ? <Netplay /> : null }
+                { this.state.viewNetplay ? <MultiplayerBar /> : null }
                 <div className={"screen-container"}>
-                    <Screen snes={window.snes} />
+                    <ScreenCanvas snes={window.snes} />
                 </div>
                 <div style={{display: 'flex', flexDirection: 'row', marginTop: "30px"}}>
                     <div style={{flexGrow: 1}}/>

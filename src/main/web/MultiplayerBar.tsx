@@ -1,7 +1,7 @@
 import * as React from "react";
 import ReactTooltip from "react-tooltip";
 
-export class Netplay extends React.Component<any, any> {
+export class MultiplayerBar extends React.Component<any, any> {
 
     public render() {
         const isPlayerOneJoined = false;
@@ -42,10 +42,13 @@ export class Netplay extends React.Component<any, any> {
                         </div>
                     </div>
                 </div>
-                <div className={"netplay wrapper"} style={{width: "55px", flexGrow: 0, marginLeft: "15px"}}>
+                <div className={"netplay wrapper"} style={{flexGrow: 0, marginLeft: "15px"}}>
                     <div className={"netplay"}>
                         <div className={"users"}>
-                            <div className={"value"}>
+                            <div className={"label"}>
+                                ROOM
+                            </div>
+                            <div className={"value"} style={{width: "55px"}}>
                                 <i className="fa fa-user" aria-hidden="true" style={playerOneStyle} data-tip={playerOneDataTip} />
                                 <i className="fa fa-user" aria-hidden="true" style={playerTwoStyle} data-tip={playerTwoDataTip} />
                             </div>
