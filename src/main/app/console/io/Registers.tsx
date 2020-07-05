@@ -245,6 +245,10 @@ export class Joy1LRegister extends AbstractRegister {
     public address = 0x4218;
     public name: string = "JOY1L";
 
+    public get(byteIndex?: number): number {
+        return joy1.readByte(0);
+    }
+
 }
 
 export class Joy1HRegister extends AbstractRegister {
@@ -252,6 +256,9 @@ export class Joy1HRegister extends AbstractRegister {
     public address = 0x4219;
     public name: string = "JOY1H";
 
+    public get(byteIndex?: number): number {
+        return joy1.readByte(1);
+    }
 }
 
 export class Joy2LRegister extends AbstractRegister {
@@ -259,12 +266,20 @@ export class Joy2LRegister extends AbstractRegister {
     public address = 0x421A;
     public name: string = "JOY2L";
 
+    public get(byteIndex?: number): number {
+        return joy2.readByte(0);
+    }
+
 }
 
 export class Joy2HRegister extends AbstractRegister {
 
     public address = 0x421B;
     public name: string = "JOY2H";
+
+    public get(byteIndex?: number): number {
+        return joy2.readByte(1);
+    }
 
 }
 

@@ -2,12 +2,13 @@ import {Logger, LoggerManager} from "typescript-logger";
 import Peer from "peerjs";
 import {INetplayEventHandlers} from "./NetplayClient";
 import {Console} from "../console/Console";
+import {joy1, joy2} from "../console/controller/Controller";
 
 const HOST = "localhost";
 const PORT = 9000;
 
 export enum INetplayPayloadType {
-    RESET, PLAYER_ID, READY, STOP, PLAY, KEYS,
+    RESET, PLAYER_ID, STOP, PLAY, KEYS,
 }
 
 export interface INetplayPayload {
@@ -39,7 +40,6 @@ export class NetplayLeader {
         const broker = new Peer({
             host: HOST,
             port: PORT,
-            debug: 3,
         });
 
         broker.on('error', (err) => {
@@ -111,10 +111,27 @@ export class NetplayLeader {
         this.console.stop();
     }
 
-    private applyOnData(conn: Peer.DataConnection, data: { type: INetplayPayloadType, message?: any }): void {
-        if (!data) return;
+    private applyOnData(conn: Peer.DataConnection, data: any): void {
+        const { console, log } = this;
+        const json: { type: INetplayPayloadType, message?: any } = JSON.parse(data);
 
-        const type  = data.type;
+        const type  = json.type;
+        const message  = json.message;
+
+        if (type == INetplayPayloadType.KEYS) {
+            const id = message.id;
+            const state = message.controller;
+            joy2.loadState(state);
+
+            requestAnimationFrame(() => {
+                console.ticks(console.tpf);
+            });
+
+            conn.send(createMessage(INetplayPayloadType.KEYS, {
+                id: this.id,
+                controller: joy1.saveState(),
+            }));
+        }
     }
 
     private applyOnDisconnect(conn: Peer.DataConnection): void {

@@ -13,6 +13,12 @@ export enum Key {
     B = 15,
 }
 
+export interface IControllerState {
+    data: number[];
+    index: number;
+    strobe: number;
+}
+
 export class Controller {
 
     public id: number;
@@ -94,6 +100,21 @@ export class Controller {
             this.data[2] << 2 |
             this.data[1] << 1 |
             this.data[0] << 0;
+    }
+
+    public saveState(): IControllerState {
+        const {data, index, strobe} = this;
+        return {
+            data,
+            index,
+            strobe,
+        };
+    }
+
+    public loadState(state: IControllerState) {
+        this.data = state.data;
+        this.index = state.index;
+        this.strobe = state.strobe;
     }
 
 }

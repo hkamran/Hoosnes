@@ -1,7 +1,8 @@
 import Peer from "peerjs";
 import {Logger, LoggerManager} from "typescript-logger";
 import {Console, IConsoleState} from "../console/Console";
-import {INetplayPayloadType} from "./NetplayLeader";
+import {createMessage, INetplayPayloadType} from "./NetplayLeader";
+import {joy1, joy2} from "../console/controller/Controller";
 
 const HOST = "localhost";
 const PORT = 9000;
@@ -35,7 +36,6 @@ export class NetplayClient {
         const broker = new Peer({
             host: HOST,
             port: PORT,
-            debug: 3,
         });
 
         broker.on('error', (err) => {
@@ -76,7 +76,7 @@ export class NetplayClient {
 
     private applyOnCreate(id: string): void {
         this.roomId = id;
-        //this.console.stop();
+        this.console.stop();
     }
 
     private applyOnData(conn: Peer.DataConnection, data: any): void {
@@ -88,15 +88,35 @@ export class NetplayClient {
 
         if (type == INetplayPayloadType.STOP) {
             log.info("STOPPING");
-            //console.stop();
+            console.stop();
         } else if (type == INetplayPayloadType.RESET) {
             log.info("LOADING STATE");
             const state: IConsoleState = message;
             console.loadState(state);
+
+            conn.send(createMessage(
+                INetplayPayloadType.KEYS,
+                {
+                    id: this.id,
+                    controller: joy2.saveState(),
+                },
+            ));
+        } else if (type == INetplayPayloadType.KEYS) {
+            const id = message.id;
+            const state = message.controller;
+            joy1.loadState(state);
+
+            requestAnimationFrame(() => {
+                console.ticks(console.tpf);
+            });
+
+            conn.send(createMessage(INetplayPayloadType.KEYS, {
+                id: this.id,
+                controller: joy2.saveState(),
+            }));
         } else if (type == INetplayPayloadType.PLAYER_ID) {
             log.info("PLAYER ID");
             this.id = message;
-
         }
     }
 
