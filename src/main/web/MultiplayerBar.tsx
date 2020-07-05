@@ -1,6 +1,7 @@
 import * as React from "react";
 import ReactTooltip from "react-tooltip";
 import {NetplayClient} from "../app/netplay/NetplayClient";
+import {NetplayLeader} from "../app/netplay/NetplayLeader";
 
 interface IMultiplayerBarProps {
     playerRoomId: string;
@@ -17,9 +18,7 @@ declare let window: any;
 
 export class MultiplayerBar extends React.Component<IMultiplayerBarProps, IMultiplayerBarState> {
 
-    private client: NetplayClient;
-
-    public state = {
+    public state: IMultiplayerBarState = {
         hasPlayerOneJoined: false,
         hasPlayerTwoJoined: false,
         isUserPlayerOne: false,
@@ -29,64 +28,76 @@ export class MultiplayerBar extends React.Component<IMultiplayerBarProps, IMulti
         const id: string = this.props.playerRoomId;
         const doCreateRoom: boolean = id == null;
 
+        if (doCreateRoom) {
+            this.createRoom();
+        } else {
+            this.joinRoom();
+        }
+    }
+
+    public createRoom() {
+        const id: string = this.props.playerRoomId;
         const isUserPlayerOne = id == null;
 
-        this.client = new NetplayClient(2);
+        let leader = new NetplayLeader(2);
+        window.client = leader;
+        leader.create({
+            onCreate: (roomId) => {
+                this.setState({
+                    clientRoomId: roomId,
+                    isUserPlayerOne,
+                    hasPlayerOneJoined: true,
+                });
+            },
+            onConnect: () => {
+                this.setState({
+                    hasPlayerTwoJoined: true,
+                });
+            },
+            onDisconnect: () => {
+                this.setState({
+                    hasPlayerTwoJoined: false,
+                });
+            },
+            onError: (err) => {
+                alert(''+err);
+            },
+            onData: (data) => {
 
-        window.client = this.client;
-        if (doCreateRoom) {
-            this.client.createRoom({
-                onCreate: () => {
-                    this.setState({
-                        clientRoomId: this.client.id,
-                        isUserPlayerOne,
-                        hasPlayerOneJoined: true,
-                    });
-                },
-                onConnect: () => {
-                    this.setState({
-                        hasPlayerTwoJoined: true,
-                    });
-                },
-                onDisconnect: () => {
-                    this.setState({
-                        hasPlayerTwoJoined: false,
-                    });
-                },
-                onError: (err) => {
-                    alert(''+err);
-                },
-                onData: (data) => {
+            },
+        });
+    }
 
-                },
-            });
-        } else {
-            this.client.joinRoom(id, {
-                onCreate: () => {
-                    this.setState({
-                        clientRoomId: this.client.id,
-                        isUserPlayerOne,
-                        hasPlayerTwoJoined: true,
-                    });
-                },
-                onConnect: () => {
-                    this.setState({
-                        hasPlayerOneJoined: true,
-                    });
-                },
-                onDisconnect: () => {
-                    this.setState({
-                        hasPlayerOneJoined: false,
-                    });
-                },
-                onError: (err) => {
-                    alert(''+err);
-                },
-                onData: (data) => {
+    public joinRoom() {
+        const id: string = this.props.playerRoomId;
 
-                },
-            });
-        }
+        let client = new NetplayClient();
+        window.client = client;
+        client.join(id, {
+            onCreate: () => {
+                this.setState({
+                    clientRoomId: id,
+                    isUserPlayerOne: false,
+                    hasPlayerTwoJoined: true,
+                });
+            },
+            onConnect: () => {
+                this.setState({
+                    hasPlayerOneJoined: true,
+                });
+            },
+            onDisconnect: () => {
+                this.setState({
+                    hasPlayerOneJoined: false,
+                });
+            },
+            onError: (err) => {
+                alert(''+err);
+            },
+            onData: (data) => {
+
+            },
+        });
     }
 
     public render() {
@@ -109,7 +120,7 @@ export class MultiplayerBar extends React.Component<IMultiplayerBarProps, IMulti
         };
 
         const host = window.location.href.split('?')[0];
-        const url = this.client ? `${host}?roomId=${this.client.id}` : ``;
+        const url = this.state.clientRoomId ? `${host}?roomId=${this.state.clientRoomId}` : ``;
 
         const handleFocus = (event) => event.target.select();
         return (

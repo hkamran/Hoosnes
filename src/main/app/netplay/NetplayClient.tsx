@@ -5,7 +5,7 @@ const HOST = "localhost";
 const PORT = 9000;
 
 export interface INetplayEventHandlers {
-    onCreate?(): void;
+    onCreate?(id: string): void;
     onConnect?(): void;
     onDisconnect?(): void;
     onError?(err: any): void;
@@ -14,74 +14,26 @@ export interface INetplayEventHandlers {
 
 export class NetplayClient {
 
-    public log : Logger = LoggerManager.create('Client');
+    public log : Logger = LoggerManager.create('NetplayClient');
     public id: string;
-    public count: number = 0;
-    public size: number;
 
-    public broker: Peer;
-
-    constructor(size: number) {
-        this.size = size;
-
-        this.broker = new Peer({
+    public join(id: string, handlers: INetplayEventHandlers): void {
+        const broker = new Peer({
             host: HOST,
             port: PORT,
             debug: 3,
         });
 
-        this.broker.on('error', (err) => {
+        broker.on('error', (err) => {
             alert(''+err);
         });
-    }
 
-    public createRoom(handlers: INetplayEventHandlers): void {
-        this. broker.on('open', (id) => {
+        broker.on('open', () => {
             this.id = id;
-            this.log.info(`room created id=${id}`);
-            this.count = 1;
-
-            if (handlers && handlers.onCreate) handlers.onCreate();
-
-            this.broker.on('connection', (conn: Peer.DataConnection) => {
-                if (handlers && handlers.onConnect) handlers.onConnect();
-
-                this.count++;
-                if (this.count > this.size) {
-                    this.count = this.size;
-                    try {
-                        conn.close();
-                    } catch (e) {}
-                    return;
-                }
-
-                conn.on('close', () => {
-                    this.count--;
-                    if (handlers && handlers.onDisconnect) handlers.onDisconnect();
-                });
-
-                conn.on('error', (err) => {
-                    this.count--;
-                    try {
-                        conn.close();
-                    } finally {}
-                    if (handlers && handlers.onError) handlers.onError(err);
-                });
-
-                conn.on('data', (data) => {
-                    if (handlers && handlers.onData) handlers.onData(data);
-                });
-            });
-        });
-    }
-
-    public joinRoom(id: string, handlers: INetplayEventHandlers): void {
-        this.broker.on('open', () => {
-            this.id = id;
-            const conn = this.broker.connect(id, {
+            const conn = broker.connect(id, {
                 reliable: true,
             });
-            if (handlers && handlers.onCreate) handlers.onCreate();
+            if (handlers && handlers.onCreate) handlers.onCreate(id);
 
             conn.on('close', () => {
                 if (handlers && handlers.onDisconnect) handlers.onDisconnect();
