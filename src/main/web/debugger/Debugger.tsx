@@ -5,7 +5,6 @@ import {DebuggerTabCpu} from "./DebuggerTabCpu";
 import {DebuggerTabPpu} from "./DebuggerTabPpu";
 import {DebuggerTabCartridge} from "./DebuggerTabCartridge";
 import Toggle from 'react-toggle';
-import {animateFrames} from "../Main";
 import {DebuggerStats} from "./DebuggerStats";
 
 enum Tab {
@@ -51,9 +50,6 @@ export class Debugger extends React.Component<IDebuggerProps, IDebuggerStates> {
 
     private play() {
         this.props.snes.play();
-        if (this.props.snes.status != ConsoleStatus.RUNNING) {
-            animateFrames();
-        }
         this.setState({
             snes: this.state.snes,
         });

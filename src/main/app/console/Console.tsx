@@ -5,6 +5,7 @@ import {Bus} from "./bus/Bus";
 import {IPpuState, Ppu} from "./ppu/Ppu";
 import {Apu, IApuState} from "./apu/Apu";
 import {IIoState, Io} from "./io/Io";
+import {debugCallback} from "../../web/debugger/Debugger";
 
 export enum ConsoleStatus {
     RUNNING, PAUSED, RESET, OFF,
@@ -56,6 +57,7 @@ export class Console {
 
     public play(): void {
         this.status = ConsoleStatus.RUNNING;
+        animate(this);
     }
 
     public reset(): void {
@@ -73,12 +75,12 @@ export class Console {
 
     public saveState(): IConsoleState {
         return copy({
-                cartridge: this.cartridge.saveState(),
-                apu: this.apu.saveState(),
-                io: this.io.saveState(),
-                cpu: this.cpu.saveState(),
-                ppu: this.ppu.saveState(),
-            });
+            cartridge: this.cartridge.saveState(),
+            apu: this.apu.saveState(),
+            io: this.io.saveState(),
+            cpu: this.cpu.saveState(),
+            ppu: this.ppu.saveState(),
+        });
     }
 
     public loadState(state: IConsoleState): void {
@@ -111,6 +113,21 @@ export class Console {
     }
 }
 
-function copy(x) {
+export function copy(x) {
     return JSON.parse(JSON.stringify(x));
 }
+
+function animate(console: Console): void {
+    let execution = () => {
+        if (console.status == ConsoleStatus.RUNNING) {
+            console.ticks(console.tpf);
+            debugCallback();
+            animate.bind(this)(console);
+        }
+        return;
+    };
+    if (requestAnimationFrame) requestAnimationFrame(execution);
+}
+
+
+

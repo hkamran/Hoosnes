@@ -16,7 +16,7 @@ interface IMultiplayerBarState {
 
 declare let window: any;
 
-export class MultiplayerBar extends React.Component<IMultiplayerBarProps, IMultiplayerBarState> {
+export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplayerBarState> {
 
     public state: IMultiplayerBarState = {
         hasPlayerOneJoined: false,
@@ -39,9 +39,7 @@ export class MultiplayerBar extends React.Component<IMultiplayerBarProps, IMulti
         const id: string = this.props.playerRoomId;
         const isUserPlayerOne = id == null;
 
-        let leader = new NetplayLeader(2);
-        window.client = leader;
-        leader.create({
+        const handlers = {
             onCreate: (roomId) => {
                 this.setState({
                     clientRoomId: roomId,
@@ -65,15 +63,16 @@ export class MultiplayerBar extends React.Component<IMultiplayerBarProps, IMulti
             onData: (data) => {
 
             },
-        });
+        };
+        let leader = new NetplayLeader(2, window.snes, handlers);
+        leader.connect();
+        window.client = leader;
     }
 
     public joinRoom() {
         const id: string = this.props.playerRoomId;
 
-        let client = new NetplayClient();
-        window.client = client;
-        client.join(id, {
+        const handlers = {
             onCreate: () => {
                 this.setState({
                     clientRoomId: id,
@@ -97,7 +96,10 @@ export class MultiplayerBar extends React.Component<IMultiplayerBarProps, IMulti
             onData: (data) => {
 
             },
-        });
+        };
+        let client = new NetplayClient(id, window.snes, handlers);
+        client.connect();
+        window.client = client;
     }
 
     public render() {

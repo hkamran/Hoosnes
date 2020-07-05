@@ -8,7 +8,7 @@ import Modal from 'react-modal';
 import {Keyboard, KeyboardMapping} from "./Keyboard";
 import {joy1} from "../app/console/controller/Controller";
 import {PuffLoader} from "react-spinners";
-import {MultiplayerBar} from "./MultiplayerBar";
+import {NetplayBar} from "./NetplayBar";
 import {ParsedUrlQuery, parse} from "querystring";
 
 declare let window: any;
@@ -30,20 +30,6 @@ const customStyles = {
     },
 };
 Modal.setAppElement('#main');
-
-export function animateFrames(): void {
-    let execution = function() {
-        let console: Console = window.snes;
-
-        if (console.status == ConsoleStatus.RUNNING) {
-            console.ticks(window.snes.tpf);
-            debugCallback();
-        }
-
-        animateFrames.bind(this)();
-    }.bind(this);
-    requestAnimationFrame(execution);
-}
 
 interface IMainStates {
     snes: Console;
@@ -169,7 +155,6 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         if (this.props.snes.status != ConsoleStatus.RUNNING) {
             console.log("animating");
             this.props.snes.play();
-            animateFrames();
         }
     }
 
@@ -353,7 +338,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         </div>
                     </a>
                 </div>
-                { this.state.viewNetplay ? <MultiplayerBar playerRoomId={this.state.playerRoomId} /> : null }
+                { this.state.viewNetplay ? <NetplayBar playerRoomId={this.state.playerRoomId} /> : null }
                 <div className={"screen-container"}>
                     <ScreenCanvas snes={window.snes} />
                 </div>
