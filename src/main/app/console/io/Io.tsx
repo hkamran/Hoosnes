@@ -26,14 +26,14 @@ export class Io {
         this.registers = new Registers(console);
     }
 
-    public import(state: IIoState): void {
+    public loadState(state: IIoState): void {
         this.nmiEnable = state.nmiEnable;
         this.irqMode = state.irqMode;
         this.autoJoypadEnable = state.autoJoypadEnable;
         this.nmiStatus = state.nmiStatus;
     }
 
-    public export(): IIoState {
+    public saveState(): IIoState {
         return {
             nmiEnable: this.nmiEnable,
             irqMode: this.irqMode,

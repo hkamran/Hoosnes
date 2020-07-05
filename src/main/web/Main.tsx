@@ -35,12 +35,11 @@ export function animateFrames(): void {
     let execution = function() {
         let console: Console = window.snes;
 
-        if (console.status != ConsoleStatus.RUNNING) {
-            return;
+        if (console.status == ConsoleStatus.RUNNING) {
+            console.ticks(window.snes.tpf);
+            debugCallback();
         }
 
-        console.ticks(window.snes.tpf);
-        debugCallback();
         animateFrames.bind(this)();
     }.bind(this);
     requestAnimationFrame(execution);

@@ -82,22 +82,21 @@ export class Cpu {
         this.registers.reset();
     }
 
-    public export(): ICpuState {
+    public saveState(): ICpuState {
         return {
             wram: this.wram.data,
-            registers: this.registers.export(),
+            registers: this.registers.saveState(),
             cycles: this.cycles,
             ticks: this.ticks,
         };
     }
 
-    public import(state: ICpuState): void {
-        this.wram.data = state.wram;
-
-        this.registers.import(state.registers);
-
+    public loadState(state: ICpuState): void {
         this.cycles = state.cycles;
         this.ticks = state.ticks;
+        this.wram.data = state.wram;
+
+        this.registers.loadState(state.registers);
     }
 
     public load(cartridge: Cartridge): void {

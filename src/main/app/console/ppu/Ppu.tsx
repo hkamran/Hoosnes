@@ -104,7 +104,7 @@ export class Status {
         this.interlaceFrame = false;
     }
 
-    public export(): IStatusState {
+    public saveState(): IStatusState {
         return {
             latchedHCounter: this.latchedHCounter,
             latchedVCounter: this.latchedVCounter,
@@ -123,7 +123,7 @@ export class Status {
         };
     }
 
-    public import(state: IStatusState): void {
+    public loadState(state: IStatusState): void {
         this.latchedVCounter = state.latchedVCounter;
         this.latchedHCounter = state.latchedHCounter;
         this.externalLatchFlag = state.externalLatchFlag;
@@ -297,7 +297,7 @@ export class Ppu {
         this.backgrounds.reset();
     }
 
-    public import(state: IPpuState): void {
+    public loadState(state: IPpuState): void {
         this.scanline = state.scanline;
         this.cycle = state.cycle;
         this.frames = state.frames;
@@ -307,17 +307,17 @@ export class Ppu {
         this.oam.low = state.oam.low;
         this.vram.data = state.vram;
 
-        this.status.import(state.status);
+        this.status.loadState(state.status);
     }
 
-    public export(): IPpuState {
+    public saveState(): IPpuState {
         return {
             scanline: this.scanline,
             cycle: this.cycle,
             frames: this.frames,
 
-            status: this.status.export(),
-            registers: this.registers.export(),
+            status: this.status.saveState(),
+            registers: this.registers.saveState(),
             cgram: this.cgram.data,
             oam: {
                 high: this.oam.high,

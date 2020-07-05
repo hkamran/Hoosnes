@@ -202,11 +202,11 @@ export class Cartridge {
         }
     }
 
-    public import(state: ICartridgeState): void {
+    public loadState(state: ICartridgeState): void {
         this.load(state.rom);
     }
 
-    public export(): ICartridgeState {
+    public saveState(): ICartridgeState {
         return {
             rom: this.rom,
         };

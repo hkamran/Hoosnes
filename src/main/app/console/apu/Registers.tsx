@@ -147,7 +147,7 @@ export class Registers {
         this.apuio3 = new ApuIO03(console);
     }
 
-    public export(): IApuRegisterState {
+    public getState(): IApuRegisterState {
         return {
             apuio0: {
                 read: this.apuio0.read,
@@ -168,7 +168,7 @@ export class Registers {
         };
     }
 
-    public import(state: IApuRegisterState) {
+    public loadState(state: IApuRegisterState) {
         this.apuio0.write = state.apuio0.write;
         this.apuio0.read = state.apuio0.read;
 

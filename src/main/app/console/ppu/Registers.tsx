@@ -1427,7 +1427,7 @@ export class Registers {
         this.stat78 = new PPUStatus78Register(console);
     }
 
-    public export(): IPpuRegistersState {
+    public saveState(): IPpuRegistersState {
         return {
             bg1hofs: this.bg1hofs.get(),
             bg1vofs: this.bg1vofs.get(),

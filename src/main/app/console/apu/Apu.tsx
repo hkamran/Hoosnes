@@ -33,19 +33,19 @@ export class Apu {
         this.state = ApuState.BOOTING;
     }
 
-    public export(): IApuState {
+    public saveState(): IApuState {
         return {
             amount: this.amount,
             state: this.state,
-            registers: this.registers.export(),
+            registers: this.registers.getState(),
         };
     }
 
-    public import(state: IApuState): void {
+    public loadState(state: IApuState): void {
         this.amount = state.amount;
         this.state = state.state;
 
-        this.registers.import(state.registers);
+        this.registers.loadState(state.registers);
     }
 
     public tick(): void {

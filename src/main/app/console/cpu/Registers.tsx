@@ -378,7 +378,7 @@ export class Registers {
         this.pc.set(0x0000);
     }
 
-    public export(): ICpuRegistersState {
+    public saveState(): ICpuRegistersState {
         return {
           a: this.a.get(),
           d: this.d.get(),
@@ -392,7 +392,7 @@ export class Registers {
         };
     }
 
-    public import(state: ICpuRegistersState) {
+    public loadState(state: ICpuRegistersState) {
         this.a.set(state.a);
         this.d.set(state.d);
         this.dbr.set(state.dbr);
