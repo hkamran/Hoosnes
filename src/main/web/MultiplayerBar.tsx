@@ -1,6 +1,6 @@
 import * as React from "react";
 import ReactTooltip from "react-tooltip";
-import {Client} from "../app/netplay/Client";
+import {NetplayClient} from "../app/netplay/NetplayClient";
 
 interface IMultiplayerBarProps {
     playerRoomId: string;
@@ -13,9 +13,11 @@ interface IMultiplayerBarState {
     isUserPlayerOne: boolean;
 }
 
+declare let window: any;
+
 export class MultiplayerBar extends React.Component<IMultiplayerBarProps, IMultiplayerBarState> {
 
-    private client: Client;
+    private client: NetplayClient;
 
     public state = {
         hasPlayerOneJoined: false,
@@ -29,50 +31,60 @@ export class MultiplayerBar extends React.Component<IMultiplayerBarProps, IMulti
 
         const isUserPlayerOne = id == null;
 
-        this.client = new Client();
+        this.client = new NetplayClient(2);
+
+        window.client = this.client;
         if (doCreateRoom) {
-            this.client.createRoom(() => {
-                this.setState({
-                    clientRoomId: this.client.id,
-                    isUserPlayerOne,
-                    hasPlayerOneJoined: true,
-                });
-            }, (conn) => {
-                conn.on('open', () => {
+            this.client.createRoom({
+                onCreate: () => {
+                    this.setState({
+                        clientRoomId: this.client.id,
+                        isUserPlayerOne,
+                        hasPlayerOneJoined: true,
+                    });
+                },
+                onConnect: () => {
                     this.setState({
                         hasPlayerTwoJoined: true,
                     });
-                });
-                conn.on('close', () => {
+                },
+                onDisconnect: () => {
                     this.setState({
                         hasPlayerTwoJoined: false,
                     });
-                });
-                conn.on('error', (err) => {
+                },
+                onError: (err) => {
                     alert(''+err);
-                });
+                },
+                onData: (data) => {
+
+                },
             });
         } else {
-            this.client.joinRoom(id, (conn) => {
-                this.setState({
-                    clientRoomId: this.client.id,
-                    isUserPlayerOne,
-                    hasPlayerTwoJoined: true,
-                });
-
-                conn.on('open', () => {
+            this.client.joinRoom(id, {
+                onCreate: () => {
+                    this.setState({
+                        clientRoomId: this.client.id,
+                        isUserPlayerOne,
+                        hasPlayerTwoJoined: true,
+                    });
+                },
+                onConnect: () => {
                     this.setState({
                         hasPlayerOneJoined: true,
                     });
-                });
-                conn.on('close', () => {
+                },
+                onDisconnect: () => {
                     this.setState({
                         hasPlayerOneJoined: false,
                     });
-                });
-                conn.on('error', (err) => {
+                },
+                onError: (err) => {
                     alert(''+err);
-                });
+                },
+                onData: (data) => {
+
+                },
             });
         }
     }
