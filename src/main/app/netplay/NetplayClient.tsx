@@ -2,7 +2,8 @@ import Peer from "peerjs";
 import {Logger, LoggerManager} from "typescript-logger";
 import {Console, IConsoleState} from "../console/Console";
 import {createMessage, INetplayPayloadType} from "./NetplayLeader";
-import {joy1, joy2} from "../console/controller/Controller";
+import {joy1, joy2, Key} from "../console/controller/Controller";
+import {Keyboard} from "../../web/Keyboard";
 
 const HOST = "localhost";
 const PORT = 9000;
@@ -23,6 +24,7 @@ export class NetplayClient {
 
     private console: Console;
     private handlers: INetplayEventHandlers;
+    private broker: Peer;
 
     public constructor(roomId: string,  console: Console, handlers?: INetplayEventHandlers) {
         this.console = console;
@@ -39,8 +41,10 @@ export class NetplayClient {
         });
 
         broker.on('error', (err) => {
-            alert(''+err);
+            if (handlers && handlers.onError) handlers.onError(err);
         });
+
+        this.broker = broker;
 
         broker.on('open', () => {
             const conn = broker.connect(roomId, {
@@ -70,13 +74,16 @@ export class NetplayClient {
         });
     }
 
+    public disconnect(): void {
+        this.broker.destroy();
+    }
+
     private applyOnConnect(conn: Peer.DataConnection): void {
 
     }
 
     private applyOnCreate(id: string): void {
         this.roomId = id;
-        this.console.stop();
     }
 
     private applyOnData(conn: Peer.DataConnection, data: any): void {
@@ -116,10 +123,12 @@ export class NetplayClient {
             }));
         } else if (type == INetplayPayloadType.PLAYER_ID) {
             log.info("PLAYER ID");
+            Keyboard.initialize(joy2);
             this.id = message;
         }
     }
 
     private applyOnDisconnect(conn: Peer.DataConnection): void {
+        console.log("Disconnected");
     }
 }

@@ -39,6 +39,7 @@ interface IMainStates {
     viewDebugger: boolean;
     viewCartridge: boolean;
     viewSettings: boolean;
+    screenMessage: string;
 }
 
 interface IMainProps {
@@ -58,6 +59,7 @@ export class Main extends React.Component<IMainProps, IMainStates> {
             viewDebugger: false,
             viewCartridge: false,
             viewSettings: false,
+            screenMessage: "",
         };
 
         this.fileInputRef = React.createRef<HTMLInputElement>();
@@ -207,7 +209,16 @@ export class Main extends React.Component<IMainProps, IMainStates> {
         }
     }
 
+    public setScreenMessage(message: string) {
+        this.setState({
+            screenMessage: message,
+        });
+    }
+
     public render() {
+
+        const screenOpacity = this.state.screenMessage.length > 0 ? 0.5 : 1.0;
+
         return (
             <div style={{display: 'flex', flexDirection: 'column', margin: '0 auto'}}>
                 <Modal isOpen={this.state.viewCartridge} style={customStyles}>
@@ -338,9 +349,14 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                         </div>
                     </a>
                 </div>
-                { this.state.viewNetplay ? <NetplayBar playerRoomId={this.state.playerRoomId} /> : null }
+                { this.state.viewNetplay ? <NetplayBar
+                    playerRoomId={this.state.playerRoomId}
+                    setMessageHandler={this.setScreenMessage.bind(this)}/> : null }
                 <div className={"screen-container"}>
-                    <ScreenCanvas snes={window.snes} />
+                    <div className={"screen-border"}>
+                        <span className={"screen-message"}>{this.state.screenMessage}</span>
+                        <ScreenCanvas snes={window.snes} opacity={screenOpacity}/>
+                    </div>
                 </div>
                 <div style={{display: 'flex', flexDirection: 'row', marginTop: "30px"}}>
                     <div style={{flexGrow: 1}}/>

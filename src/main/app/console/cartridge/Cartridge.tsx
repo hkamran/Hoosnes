@@ -86,7 +86,7 @@ const SNES_OFFSET_CHECKSUM: number = 0x1e; // xFDE
 
 export class Cartridge {
 
-    public rom: number[];
+    public rom: number[] = [];
     public aux: number[] = [];
 
     public title: string = ""; // xFC0
@@ -203,7 +203,9 @@ export class Cartridge {
     }
 
     public loadState(state: ICartridgeState): void {
-        this.load(state.rom);
+        if (state.rom.length > 0) {
+            this.load(state.rom);
+        }
     }
 
     public saveState(): ICartridgeState {

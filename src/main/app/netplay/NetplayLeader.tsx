@@ -27,6 +27,7 @@ export class NetplayLeader {
 
     private console: Console;
     private handlers: INetplayEventHandlers;
+    private broker: Peer;
 
     public constructor(capacity: number, console: Console, handlers?: INetplayEventHandlers) {
         this.capacity = Math.max(0, capacity - 1);
@@ -40,15 +41,18 @@ export class NetplayLeader {
         const broker = new Peer({
             host: HOST,
             port: PORT,
+            debug: 3,
         });
 
+        this.broker = broker;
+        this.connections = {};
+
         broker.on('error', (err) => {
-            alert(''+err);
+            if (handlers && handlers.onError) handlers.onError(err);
         });
 
         broker.on('open', (id) => {
             this.applyOnCreate(id);
-
             if (handlers && handlers.onCreate) handlers.onCreate(id);
 
             broker.on('connection', (conn: Peer.DataConnection) => {
@@ -83,32 +87,38 @@ export class NetplayLeader {
         });
     }
 
-    private applyOnConnect(conn: Peer.DataConnection): void {
-        const occupants = Object.keys(this.connections).length;
+    public disconnect(): void {
+        this.broker.destroy();
+    }
 
+    private applyOnConnect(conn: Peer.DataConnection): void {
         this.connections[conn.peer] = conn;
+
+        let state = this.console.saveState();
+        if (state.cartridge.rom.length == 0) return;
+
         this.console.stop();
 
+        let counter = 1;
         for (const connection of Object.values(this.connections)) {
             connection.send(createMessage(
                 INetplayPayloadType.STOP,
             ));
+
+            conn.send(createMessage(
+                INetplayPayloadType.PLAYER_ID,
+                ++counter,
+            ));
+
+            conn.send(createMessage(
+                INetplayPayloadType.RESET,
+                state,
+            ));
         }
-
-        conn.send(createMessage(
-            INetplayPayloadType.PLAYER_ID,
-            occupants + 1,
-        ));
-
-        conn.send(createMessage(
-            INetplayPayloadType.RESET,
-            this.console.saveState(),
-        ));
     }
 
     private applyOnCreate(id: string): void {
         this.roomId = id;
-        this.console.stop();
     }
 
     private applyOnData(conn: Peer.DataConnection, data: any): void {

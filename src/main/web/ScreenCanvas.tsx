@@ -9,6 +9,7 @@ declare let window : any;
 
 interface IScreenCardProps {
     snes: Console;
+    opacity: number;
 }
 
 export class ScreenCanvas extends React.Component<IScreenCardProps, any> {
@@ -18,6 +19,7 @@ export class ScreenCanvas extends React.Component<IScreenCardProps, any> {
         height: 224,
         zoom: 1,
     };
+
     public animateStatic: boolean = true;
     public canvasRef: RefObject<HTMLCanvasElement>;
 
@@ -61,14 +63,7 @@ export class ScreenCanvas extends React.Component<IScreenCardProps, any> {
 
     public render() {
         return (
-            <div style={{display: "flex"}}>
-                <canvas ref={this.canvasRef}
-                        style={{
-                            backgroundColor: "#000000",
-                            borderRadius: "4px",
-                        }}
-                        />
-            </div>
+            <canvas ref={this.canvasRef} style={{opacity: this.props.opacity}}/>
         );
     }
 

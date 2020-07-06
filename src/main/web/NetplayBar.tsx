@@ -5,6 +5,7 @@ import {NetplayLeader} from "../app/netplay/NetplayLeader";
 
 interface IMultiplayerBarProps {
     playerRoomId: string;
+    setMessageHandler: (message: string) => void;
 }
 
 interface IMultiplayerBarState {
@@ -17,6 +18,9 @@ interface IMultiplayerBarState {
 declare let window: any;
 
 export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplayerBarState> {
+
+    private leader: NetplayLeader;
+    private client: NetplayClient;
 
     public state: IMultiplayerBarState = {
         hasPlayerOneJoined: false,
@@ -35,9 +39,25 @@ export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplay
         }
     }
 
+    public componentWillUnmount() {
+        const {leader, client} = this;
+
+        if (leader) {
+            leader.disconnect();
+        }
+
+        if (client) {
+            client.disconnect();
+        }
+
+        this.props.setMessageHandler("");
+    }
+
     public createRoom() {
         const id: string = this.props.playerRoomId;
         const isUserPlayerOne = id == null;
+
+        this.props.setMessageHandler("Connecting");
 
         const handlers = {
             onCreate: (roomId) => {
@@ -46,19 +66,22 @@ export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplay
                     isUserPlayerOne,
                     hasPlayerOneJoined: true,
                 });
+                this.props.setMessageHandler("Waiting");
             },
             onConnect: () => {
                 this.setState({
                     hasPlayerTwoJoined: true,
                 });
+                this.props.setMessageHandler("");
             },
             onDisconnect: () => {
                 this.setState({
                     hasPlayerTwoJoined: false,
                 });
+                this.props.setMessageHandler("Waiting");
             },
             onError: (err) => {
-                alert(''+err);
+                this.props.setMessageHandler("Disconnected");
             },
             onData: (data) => {
 
@@ -67,10 +90,12 @@ export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplay
         let leader = new NetplayLeader(2, window.snes, handlers);
         leader.connect();
         window.client = leader;
+        this.leader = leader;
     }
 
     public joinRoom() {
         const id: string = this.props.playerRoomId;
+
 
         const handlers = {
             onCreate: () => {
@@ -79,19 +104,22 @@ export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplay
                     isUserPlayerOne: false,
                     hasPlayerTwoJoined: true,
                 });
+                this.props.setMessageHandler("Connecting");
             },
             onConnect: () => {
                 this.setState({
                     hasPlayerOneJoined: true,
                 });
+                this.props.setMessageHandler("");
             },
             onDisconnect: () => {
                 this.setState({
                     hasPlayerOneJoined: false,
                 });
+                this.props.setMessageHandler("Disconnected");
             },
             onError: (err) => {
-                alert(''+err);
+                this.props.setMessageHandler("Disconnected");
             },
             onData: (data) => {
 
@@ -100,6 +128,7 @@ export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplay
         let client = new NetplayClient(id, window.snes, handlers);
         client.connect();
         window.client = client;
+        this.client = client;
     }
 
     public render() {
