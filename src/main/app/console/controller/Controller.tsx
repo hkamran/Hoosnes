@@ -105,7 +105,7 @@ export class Controller {
     public saveState(): IControllerState {
         const {data, index, strobe} = this;
         return {
-            data,
+            data: [...data],
             index,
             strobe,
         };
@@ -119,5 +119,6 @@ export class Controller {
 
 }
 
+export const netjoy: Controller = new Controller(0);
 export const joy1: Controller = new Controller(1);
 export const joy2: Controller = new Controller(2);

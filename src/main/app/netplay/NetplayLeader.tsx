@@ -2,7 +2,8 @@ import {Logger, LoggerManager} from "typescript-logger";
 import Peer from "peerjs";
 import {INetplayEventHandlers} from "./NetplayClient";
 import {Console} from "../console/Console";
-import {joy1, joy2} from "../console/controller/Controller";
+import {joy1, joy2, netjoy} from "../console/controller/Controller";
+import {Keyboard} from "../../web/Keyboard";
 
 const HOST = "localhost";
 const PORT = 9000;
@@ -27,11 +28,15 @@ export class NetplayLeader {
 
     private console: Console;
     private handlers: INetplayEventHandlers;
-    private broker: Peer;
+    public broker: Peer;
 
-    public constructor(capacity: number, console: Console, handlers?: INetplayEventHandlers) {
+
+    public constructor(capacity: number, console: Console) {
         this.capacity = Math.max(0, capacity - 1);
         this.console = console;
+    }
+
+    public setHandlers(handlers: INetplayEventHandlers) {
         this.handlers = handlers;
     }
 
@@ -41,7 +46,6 @@ export class NetplayLeader {
         const broker = new Peer({
             host: HOST,
             port: PORT,
-            debug: 3,
         });
 
         this.broker = broker;
@@ -49,6 +53,7 @@ export class NetplayLeader {
 
         broker.on('error', (err) => {
             if (handlers && handlers.onError) handlers.onError(err);
+            this.broker = null;
         });
 
         broker.on('open', (id) => {
@@ -56,8 +61,6 @@ export class NetplayLeader {
             if (handlers && handlers.onCreate) handlers.onCreate(id);
 
             broker.on('connection', (conn: Peer.DataConnection) => {
-                if (handlers && handlers.onConnect) handlers.onConnect();
-
                 const occupants = Object.keys(this.connections).length;
                 const isFull = occupants + 1 > this.capacity;
                 if (isFull) {
@@ -82,6 +85,7 @@ export class NetplayLeader {
 
                 conn.on('open', () => {
                     this.applyOnConnect(conn);
+                    if (handlers && handlers.onConnect) handlers.onConnect();
                 });
             });
         });
@@ -89,15 +93,16 @@ export class NetplayLeader {
 
     public disconnect(): void {
         this.broker.destroy();
+        this.broker = null;
     }
 
-    private applyOnConnect(conn: Peer.DataConnection): void {
-        this.connections[conn.peer] = conn;
-
-        let state = this.console.saveState();
-        if (state.cartridge.rom.length == 0) return;
+    public reset(): void {
+        if (!this.broker) return;
+        if (this.console.cartridge.rom.length == 0) return;
 
         this.console.stop();
+        const state = this.console.saveState();
+        this.console.loadState(state);
 
         let counter = 1;
         for (const connection of Object.values(this.connections)) {
@@ -105,20 +110,27 @@ export class NetplayLeader {
                 INetplayPayloadType.STOP,
             ));
 
-            conn.send(createMessage(
+            connection.send(createMessage(
                 INetplayPayloadType.PLAYER_ID,
                 ++counter,
             ));
 
-            conn.send(createMessage(
+            connection.send(createMessage(
                 INetplayPayloadType.RESET,
                 state,
             ));
         }
     }
 
+    private applyOnConnect(conn: Peer.DataConnection): void {
+        this.connections[conn.peer] = conn;
+
+        this.reset();
+    }
+
     private applyOnCreate(id: string): void {
         this.roomId = id;
+        Keyboard.initialize(netjoy);
     }
 
     private applyOnData(conn: Peer.DataConnection, data: any): void {
@@ -130,16 +142,19 @@ export class NetplayLeader {
 
         if (type == INetplayPayloadType.KEYS) {
             const id = message.id;
-            const state = message.controller;
-            joy2.loadState(state);
+            const joy2State = message.controller2;
+            const joy1State = netjoy.saveState();
+
+            joy1.loadState(joy1State);
+            joy2.loadState(joy2State);
 
             requestAnimationFrame(() => {
                 console.ticks(console.tpf);
             });
 
             conn.send(createMessage(INetplayPayloadType.KEYS, {
-                id: this.id,
-                controller: joy1.saveState(),
+                controller1: joy1State,
+                controller2: joy2State,
             }));
         }
     }

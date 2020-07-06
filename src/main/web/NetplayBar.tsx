@@ -6,6 +6,8 @@ import {NetplayLeader} from "../app/netplay/NetplayLeader";
 interface IMultiplayerBarProps {
     playerRoomId: string;
     setMessageHandler: (message: string) => void;
+    leader: NetplayLeader;
+    client: NetplayClient;
 }
 
 interface IMultiplayerBarState {
@@ -55,6 +57,7 @@ export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplay
 
     public createRoom() {
         const id: string = this.props.playerRoomId;
+        const leader = this.props.leader;
         const isUserPlayerOne = id == null;
 
         this.props.setMessageHandler("Connecting");
@@ -87,7 +90,7 @@ export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplay
 
             },
         };
-        let leader = new NetplayLeader(2, window.snes, handlers);
+        leader.setHandlers(handlers);
         leader.connect();
         window.client = leader;
         this.leader = leader;
@@ -95,7 +98,7 @@ export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplay
 
     public joinRoom() {
         const id: string = this.props.playerRoomId;
-
+        const client = this.props.client;
 
         const handlers = {
             onCreate: () => {
@@ -125,8 +128,8 @@ export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplay
 
             },
         };
-        let client = new NetplayClient(id, window.snes, handlers);
-        client.connect();
+        client.setHandlers(handlers);
+        client.connect(id);
         window.client = client;
         this.client = client;
     }

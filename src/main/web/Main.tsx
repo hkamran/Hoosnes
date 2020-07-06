@@ -10,6 +10,8 @@ import {joy1} from "../app/console/controller/Controller";
 import {PuffLoader} from "react-spinners";
 import {NetplayBar} from "./NetplayBar";
 import {ParsedUrlQuery, parse} from "querystring";
+import {NetplayLeader} from "../app/netplay/NetplayLeader";
+import {NetplayClient} from "../app/netplay/NetplayClient";
 
 declare let window: any;
 window.snes = new Console();
@@ -45,6 +47,10 @@ interface IMainStates {
 interface IMainProps {
     snes: Console;
 }
+
+
+let leader = new NetplayLeader(2, window.snes);
+let client = new NetplayClient(window.snes);
 
 export class Main extends React.Component<IMainProps, IMainStates> {
 
@@ -121,7 +127,11 @@ export class Main extends React.Component<IMainProps, IMainStates> {
             if (value == null || value.length == 0) return;
 
             this.props.snes.load(value);
-            this.play();
+            if (!leader.broker) {
+                this.play();
+            } else {
+                leader.reset();
+            }
         });
     }
 
@@ -169,7 +179,6 @@ export class Main extends React.Component<IMainProps, IMainStates> {
     }
 
     public readFileDataAsBase64(file: Blob) {
-
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
 
@@ -350,6 +359,8 @@ export class Main extends React.Component<IMainProps, IMainStates> {
                     </a>
                 </div>
                 { this.state.viewNetplay ? <NetplayBar
+                    client={client}
+                    leader={leader}
                     playerRoomId={this.state.playerRoomId}
                     setMessageHandler={this.setScreenMessage.bind(this)}/> : null }
                 <div className={"screen-container"}>

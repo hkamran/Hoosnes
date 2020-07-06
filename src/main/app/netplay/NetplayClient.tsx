@@ -2,7 +2,7 @@ import Peer from "peerjs";
 import {Logger, LoggerManager} from "typescript-logger";
 import {Console, IConsoleState} from "../console/Console";
 import {createMessage, INetplayPayloadType} from "./NetplayLeader";
-import {joy1, joy2, Key} from "../console/controller/Controller";
+import {joy1, joy2, Key, netjoy} from "../console/controller/Controller";
 import {Keyboard} from "../../web/Keyboard";
 
 const HOST = "localhost";
@@ -26,14 +26,17 @@ export class NetplayClient {
     private handlers: INetplayEventHandlers;
     private broker: Peer;
 
-    public constructor(roomId: string,  console: Console, handlers?: INetplayEventHandlers) {
+    public constructor(console: Console) {
         this.console = console;
-        this.handlers = handlers;
-        this.roomId = roomId;
     }
 
-    public connect(): void {
-        const { handlers, roomId } = this;
+    public setHandlers(handlers: INetplayEventHandlers) {
+        this.handlers = handlers;
+    }
+
+    public connect(roomId: string): void {
+        this.roomId = roomId;
+        const { handlers} = this;
 
         const broker = new Peer({
             host: HOST,
@@ -84,6 +87,7 @@ export class NetplayClient {
 
     private applyOnCreate(id: string): void {
         this.roomId = id;
+        Keyboard.initialize(netjoy);
     }
 
     private applyOnData(conn: Peer.DataConnection, data: any): void {
@@ -94,36 +98,36 @@ export class NetplayClient {
         const message  = json.message;
 
         if (type == INetplayPayloadType.STOP) {
-            log.info("STOPPING");
             console.stop();
         } else if (type == INetplayPayloadType.RESET) {
-            log.info("LOADING STATE");
             const state: IConsoleState = message;
+            console.reset();
             console.loadState(state);
 
             conn.send(createMessage(
-                INetplayPayloadType.KEYS,
-                {
-                    id: this.id,
-                    controller: joy2.saveState(),
+                INetplayPayloadType.KEYS,{
+                    controller2: netjoy.saveState(),
                 },
             ));
         } else if (type == INetplayPayloadType.KEYS) {
-            const id = message.id;
-            const state = message.controller;
-            joy1.loadState(state);
+            const joy1State = message.controller1;
+            const joy2State = message.controller2;
+
+            joy1.loadState(joy1State);
+            joy2.loadState(joy2State);
 
             requestAnimationFrame(() => {
                 console.ticks(console.tpf);
             });
 
-            conn.send(createMessage(INetplayPayloadType.KEYS, {
-                id: this.id,
-                controller: joy2.saveState(),
-            }));
+            conn.send(createMessage(
+                INetplayPayloadType.KEYS,
+                {
+                    controller2: netjoy.saveState(),
+                },
+            ));
         } else if (type == INetplayPayloadType.PLAYER_ID) {
             log.info("PLAYER ID");
-            Keyboard.initialize(joy2);
             this.id = message;
         }
     }
