@@ -2,7 +2,7 @@ import {Console} from "../Console";
 import {DmaChannel, DmaEnableRegister} from "../cpu/Dma";
 import {HdmaEnableRegister} from "../cpu/Hdma";
 import {ScreenRegion} from "../ppu/Screen";
-import {joy1, joy2} from "../controller/Controller";
+import {joypadForP1, joypadForP2} from "../controller/Controller";
 import {AbstractRegister} from "../../interfaces/AbstractRegister";
 import {Bit} from "../../util/Bit";
 
@@ -216,11 +216,11 @@ export class OldJoy1Register extends AbstractRegister {
     public name: string = "JOY1";
 
     public get(): number {
-        return joy1.readByte();
+        return joypadForP1.readByte();
     }
 
     public set(value: number): void {
-        joy1.writeByte(0, value);
+        joypadForP1.writeByte(0, value);
     }
 
 }
@@ -231,11 +231,11 @@ export class OldJoy2Register extends AbstractRegister {
     public name: string = "JOY2";
 
     public get(): number {
-        return joy2.readByte();
+        return joypadForP2.readByte();
     }
 
     public set(value: number): void {
-        joy2.writeByte(0, value);
+        joypadForP2.writeByte(0, value);
     }
 
 }
@@ -246,7 +246,7 @@ export class Joy1LRegister extends AbstractRegister {
     public name: string = "JOY1L";
 
     public get(byteIndex?: number): number {
-        return joy1.readByte(0);
+        return joypadForP1.readByte(0);
     }
 
 }
@@ -257,7 +257,7 @@ export class Joy1HRegister extends AbstractRegister {
     public name: string = "JOY1H";
 
     public get(byteIndex?: number): number {
-        return joy1.readByte(1);
+        return joypadForP1.readByte(1);
     }
 }
 
@@ -267,7 +267,7 @@ export class Joy2LRegister extends AbstractRegister {
     public name: string = "JOY2L";
 
     public get(byteIndex?: number): number {
-        return joy2.readByte(0);
+        return joypadForP2.readByte(0);
     }
 
 }
@@ -278,7 +278,7 @@ export class Joy2HRegister extends AbstractRegister {
     public name: string = "JOY2H";
 
     public get(byteIndex?: number): number {
-        return joy2.readByte(1);
+        return joypadForP2.readByte(1);
     }
 
 }

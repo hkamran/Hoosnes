@@ -11,7 +11,7 @@ import {InterruptType} from "../cpu/Interrupts";
 import {Renderer} from "./Renderer";
 import {Tiles} from "./Tiles";
 import {Backgrounds} from "./Backgrounds";
-import {joy1, joy2} from "../controller/Controller";
+import {joypadForP1, joypadForP2} from "../controller/Controller";
 import {ICpuState} from "../cpu/Cpu";
 
 export interface IPpuState {
@@ -257,10 +257,10 @@ export class Ppu {
 
             if (this.console.io.registers.nmitimen.getAutoJoypadEnable()) {
                 this.console.io.registers.hvbjoy.setJoypadFlag(false);
-                this.console.io.registers.joy1l.set(joy1.readByte(0));
-                this.console.io.registers.joy1h.set(joy1.readByte(1));
-                this.console.io.registers.joy2l.set(joy2.readByte(0));
-                this.console.io.registers.joy2h.set(joy2.readByte(1));
+                this.console.io.registers.joy1l.set(joypadForP1.readByte(0));
+                this.console.io.registers.joy1h.set(joypadForP1.readByte(1));
+                this.console.io.registers.joy2l.set(joypadForP2.readByte(0));
+                this.console.io.registers.joy2h.set(joypadForP2.readByte(1));
             }
         }
 

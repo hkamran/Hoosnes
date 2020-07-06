@@ -2,7 +2,7 @@ import {Logger, LoggerManager} from "typescript-logger";
 import Peer from "peerjs";
 import {INetplayEventHandlers} from "./NetplayClient";
 import {Console} from "../console/Console";
-import {joy1, joy2, netjoy} from "../console/controller/Controller";
+import {joypadForP1, joypadForP2, joypadForNetplay} from "../console/controller/Controller";
 import {Keyboard} from "../../web/Keyboard";
 
 const HOST = window.location.hostname;
@@ -130,7 +130,7 @@ export class NetplayLeader {
 
     private applyOnCreate(id: string): void {
         this.roomId = id;
-        Keyboard.initialize(netjoy);
+        Keyboard.initialize(joypadForNetplay);
     }
 
     private applyOnData(conn: Peer.DataConnection, data: any): void {
@@ -143,10 +143,10 @@ export class NetplayLeader {
         if (type == INetplayPayloadType.KEYS) {
             const id = message.id;
             const joy2State = message.controller2;
-            const joy1State = netjoy.saveState();
+            const joy1State = joypadForNetplay.saveState();
 
-            joy1.loadState(joy1State);
-            joy2.loadState(joy2State);
+            joypadForP1.loadState(joy1State);
+            joypadForP2.loadState(joy2State);
 
             requestAnimationFrame(() => {
                 console.ticks(console.tpf);

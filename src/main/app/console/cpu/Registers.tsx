@@ -7,7 +7,7 @@ import {ScreenRegion} from "../ppu/Screen";
 import {
     HdmaEnableRegister,
 } from "./Hdma";
-import {joy1, joy2} from "../controller/Controller";
+import {joypadForP1, joypadForP2} from "../controller/Controller";
 import {AbstractRegister} from "../../interfaces/AbstractRegister";
 
 /**

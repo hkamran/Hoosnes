@@ -1,4 +1,4 @@
-import {Controller, joy1, Key} from "../app/console/controller/Controller";
+import {Controller, joypadForP1, Key} from "../app/console/controller/Controller";
 
 export enum KeyboardMapping {
     R = "T",

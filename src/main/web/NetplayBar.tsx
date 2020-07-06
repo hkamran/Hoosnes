@@ -2,6 +2,8 @@ import * as React from "react";
 import ReactTooltip from "react-tooltip";
 import {NetplayClient} from "../app/netplay/NetplayClient";
 import {NetplayLeader} from "../app/netplay/NetplayLeader";
+import {Keyboard} from "./Keyboard";
+import {joypadForP1} from "../app/console/controller/Controller";
 
 interface IMultiplayerBarProps {
     playerRoomId: string;
@@ -53,6 +55,7 @@ export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplay
         }
 
         this.props.setMessageHandler("");
+        Keyboard.initialize(joypadForP1);
     }
 
     public createRoom() {

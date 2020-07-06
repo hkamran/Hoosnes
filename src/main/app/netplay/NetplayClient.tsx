@@ -2,7 +2,7 @@ import Peer from "peerjs";
 import {Logger, LoggerManager} from "typescript-logger";
 import {Console, IConsoleState} from "../console/Console";
 import {createMessage, INetplayPayloadType} from "./NetplayLeader";
-import {joy1, joy2, Key, netjoy} from "../console/controller/Controller";
+import {joypadForP1, joypadForP2, Key, joypadForNetplay} from "../console/controller/Controller";
 import {Keyboard} from "../../web/Keyboard";
 
 const HOST = window.location.hostname;
@@ -87,7 +87,7 @@ export class NetplayClient {
 
     private applyOnCreate(id: string): void {
         this.roomId = id;
-        Keyboard.initialize(netjoy);
+        Keyboard.initialize(joypadForNetplay);
     }
 
     private applyOnData(conn: Peer.DataConnection, data: any): void {
@@ -106,15 +106,15 @@ export class NetplayClient {
 
             conn.send(createMessage(
                 INetplayPayloadType.KEYS,{
-                    controller2: netjoy.saveState(),
+                    controller2: joypadForNetplay.saveState(),
                 },
             ));
         } else if (type == INetplayPayloadType.KEYS) {
             const joy1State = message.controller1;
             const joy2State = message.controller2;
 
-            joy1.loadState(joy1State);
-            joy2.loadState(joy2State);
+            joypadForP1.loadState(joy1State);
+            joypadForP2.loadState(joy2State);
 
             requestAnimationFrame(() => {
                 console.ticks(console.tpf);
@@ -123,7 +123,7 @@ export class NetplayClient {
             conn.send(createMessage(
                 INetplayPayloadType.KEYS,
                 {
-                    controller2: netjoy.saveState(),
+                    controller2: joypadForNetplay.saveState(),
                 },
             ));
         } else if (type == INetplayPayloadType.PLAYER_ID) {

@@ -6,7 +6,7 @@ import ReactTooltip from "react-tooltip";
 import {debugCallback, Debugger} from "./debugger/Debugger";
 import Modal from 'react-modal';
 import {Keyboard, KeyboardMapping} from "./Keyboard";
-import {joy1} from "../app/console/controller/Controller";
+import {joypadForP1} from "../app/console/controller/Controller";
 import {PuffLoader} from "react-spinners";
 import {NetplayBar} from "./NetplayBar";
 import {ParsedUrlQuery, parse} from "querystring";
@@ -405,4 +405,4 @@ ReactDOM.render(
     document.getElementById('main'),
 );
 
-Keyboard.initialize(joy1);
+Keyboard.initialize(joypadForP1);

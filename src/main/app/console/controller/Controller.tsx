@@ -27,7 +27,7 @@ export class Controller {
     private index: number = 0;
     private strobe: number = 0;
 
-    public constructor(id: number) {
+    public constructor(id?: number) {
         this.id = id;
     }
 
@@ -119,6 +119,6 @@ export class Controller {
 
 }
 
-export const netjoy: Controller = new Controller(0);
-export const joy1: Controller = new Controller(1);
-export const joy2: Controller = new Controller(2);
+export const joypadForNetplay: Controller = new Controller();
+export const joypadForP1: Controller = new Controller(1);
+export const joypadForP2: Controller = new Controller(2);
