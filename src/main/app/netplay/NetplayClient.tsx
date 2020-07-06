@@ -5,7 +5,7 @@ import {createMessage, INetplayPayloadType} from "./NetplayLeader";
 import {joy1, joy2, Key, netjoy} from "../console/controller/Controller";
 import {Keyboard} from "../../web/Keyboard";
 
-const HOST = "localhost";
+const HOST = window.location.hostname;
 const PORT = 9000;
 
 export interface INetplayEventHandlers {

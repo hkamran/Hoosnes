@@ -5,7 +5,7 @@ import {Console} from "../console/Console";
 import {joy1, joy2, netjoy} from "../console/controller/Controller";
 import {Keyboard} from "../../web/Keyboard";
 
-const HOST = "localhost";
+const HOST = window.location.hostname;
 const PORT = 9000;
 
 export enum INetplayPayloadType {
