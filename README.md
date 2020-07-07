@@ -23,7 +23,7 @@ some test roms, Dr. Mario, and Tetris.
 ## Credits
 
 I'd like to credit the people that made, and maintain the [resources](RESOURCES.md) that I've used. I'd like to also thank
-"Retro Game Mechanics Explained" youtube in helping me understand various complicated logic that occurs in SNES hardware.
+[Retro Game Mechanics Explained](https://www.youtube.com/channel/UCwRqWnW5ZkVaP_lZF7caZ-g) youtube in helping me understand various complicated logic that occurs in SNES hardware.
 
 
 
