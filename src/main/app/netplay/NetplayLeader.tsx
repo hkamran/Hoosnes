@@ -9,7 +9,7 @@ const HOST = window.location.hostname;
 const PORT = 9000;
 
 export enum INetplayPayloadType {
-    RESET, PLAYER_ID, STOP, PLAY, KEYS,
+    RESET, STOP, PLAY, KEYS, READY,
 }
 
 export interface INetplayPayload {
@@ -74,7 +74,7 @@ export class NetplayLeader {
                 });
 
                 conn.on('error', (err) => {
-                    this.applyOnDisconnect(conn);
+                    this.applyOnError(conn, err);
                     if (handlers && handlers.onError) handlers.onError(err);
                 });
 
@@ -102,24 +102,23 @@ export class NetplayLeader {
 
         this.console.stop();
         const state = this.console.saveState();
+        this.console.reset();
         this.console.loadState(state);
 
-        let counter = 1;
         for (const connection of Object.values(this.connections)) {
             connection.send(createMessage(
                 INetplayPayloadType.STOP,
             ));
-
-            connection.send(createMessage(
-                INetplayPayloadType.PLAYER_ID,
-                ++counter,
-            ));
-
             connection.send(createMessage(
                 INetplayPayloadType.RESET,
                 state,
             ));
         }
+    }
+
+    private applyOnError(conn: Peer.DataConnection, err: any): void {
+        try { conn.close(); } catch (e) {}
+        delete this.connections[conn.peer];
     }
 
     private applyOnConnect(conn: Peer.DataConnection): void {
@@ -134,7 +133,7 @@ export class NetplayLeader {
     }
 
     private applyOnData(conn: Peer.DataConnection, data: any): void {
-        const { console, log } = this;
+        const { console, handlers } = this;
         const json: { type: INetplayPayloadType, message?: any } = JSON.parse(data);
 
         const type  = json.type;
@@ -156,13 +155,13 @@ export class NetplayLeader {
                 controller1: joy1State,
                 controller2: joy2State,
             }));
+        } else if (type == INetplayPayloadType.READY) {
+            conn.send(createMessage(INetplayPayloadType.READY));
         }
     }
 
     private applyOnDisconnect(conn: Peer.DataConnection): void {
-        try {
-            conn.close();
-        } finally {}
+        try { conn.close(); } catch (e) {}
         delete this.connections[conn.peer];
     }
 

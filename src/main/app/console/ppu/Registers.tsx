@@ -179,6 +179,11 @@ export class OamDataWriteRegister extends AbstractRegister {
         }
         ppu.registers.oamaddr.setTableAddress(addr + 1);
     }
+
+    public reset() {
+        super.reset();
+        this.buffer = 0;
+    }
 }
 
 export class BhModeAndCharacterSizeRegister extends AbstractRegister {

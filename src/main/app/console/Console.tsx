@@ -6,6 +6,7 @@ import {IPpuState, Ppu} from "./ppu/Ppu";
 import {Apu, IApuState} from "./apu/Apu";
 import {IIoState, Io} from "./io/Io";
 import {debugCallback} from "../../web/debugger/Debugger";
+import {joypadForNetplay, joypadForP1, joypadForP2} from "./controller/Controller";
 
 export enum ConsoleStatus {
     RUNNING, PAUSED, RESET, OFF,
@@ -62,11 +63,15 @@ export class Console {
 
     public reset(): void {
         this.status = ConsoleStatus.RESET;
+        this.apu.reset();
         this.cpu.reset();
         this.ppu.reset();
-        this.apu.reset();
         this.io.reset();
         this.bus.reset();
+
+        joypadForP1.reset();
+        joypadForP2.reset();
+        joypadForNetplay.reset();
     }
 
     public stop(): void {

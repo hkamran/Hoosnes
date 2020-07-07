@@ -87,7 +87,7 @@ export class NetplayBar extends React.Component<IMultiplayerBarProps, IMultiplay
                 this.props.setMessageHandler("Waiting");
             },
             onError: (err) => {
-                this.props.setMessageHandler("Disconnected");
+                console.error(err);
             },
             onData: (data) => {
 

@@ -2,7 +2,7 @@ import Peer from "peerjs";
 import {Logger, LoggerManager} from "typescript-logger";
 import {Console, IConsoleState} from "../console/Console";
 import {createMessage, INetplayPayloadType} from "./NetplayLeader";
-import {joypadForP1, joypadForP2, Key, joypadForNetplay} from "../console/controller/Controller";
+import {joypadForNetplay, joypadForP1, joypadForP2} from "../console/controller/Controller";
 import {Keyboard} from "../../web/Keyboard";
 
 const HOST = window.location.hostname;
@@ -86,29 +86,27 @@ export class NetplayClient {
     }
 
     private applyOnCreate(id: string): void {
+        const { console } = this;
+
         this.roomId = id;
         Keyboard.initialize(joypadForNetplay);
     }
 
     private applyOnData(conn: Peer.DataConnection, data: any): void {
-        const { console, log } = this;
+        const { console, log, handlers } = this;
         const json: { type: INetplayPayloadType, message?: any } = JSON.parse(data);
 
         const type  = json.type;
         const message  = json.message;
 
-        if (type == INetplayPayloadType.STOP) {
-            console.stop();
-        } else if (type == INetplayPayloadType.RESET) {
+        if (type == INetplayPayloadType.RESET) {
             const state: IConsoleState = message;
+
+            console.stop();
             console.reset();
             console.loadState(state);
 
-            conn.send(createMessage(
-                INetplayPayloadType.KEYS,{
-                    controller2: joypadForNetplay.saveState(),
-                },
-            ));
+            conn.send(createMessage(INetplayPayloadType.READY));
         } else if (type == INetplayPayloadType.KEYS) {
             const joy1State = message.controller1;
             const joy2State = message.controller2;
@@ -126,9 +124,12 @@ export class NetplayClient {
                     controller2: joypadForNetplay.saveState(),
                 },
             ));
-        } else if (type == INetplayPayloadType.PLAYER_ID) {
-            log.info("PLAYER ID");
-            this.id = message;
+        } else if (type == INetplayPayloadType.READY) {
+            conn.send(createMessage(
+                INetplayPayloadType.KEYS,{
+                    controller2: joypadForNetplay.saveState(),
+                },
+            ));
         }
     }
 

@@ -43,6 +43,8 @@ export class Controller {
 
     public reset(): void {
         this.data.fill(0);
+        this.index = 0;
+        this.strobe = 0;
     }
 
     public readByte(address?: number): number {
@@ -119,6 +121,6 @@ export class Controller {
 
 }
 
-export const joypadForNetplay: Controller = new Controller();
+export const joypadForNetplay: Controller = new Controller(-1);
 export const joypadForP1: Controller = new Controller(1);
 export const joypadForP2: Controller = new Controller(2);
