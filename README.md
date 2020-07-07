@@ -18,7 +18,7 @@ Utilizes Web GL for rendering, and Web RTC for netplay!
 
 This emulator uses WebGL for rendering, and WebRTC for netplay. Wanted to also use 
 Web assembly but I don't think I will have time to implement it. This emulator can really only run
-some test roms, Dr. Mario, and Tetris.  
+some test roms, Dr. Mario, and Tetris. Note this  is not 100% correct emulation.
 
 ## Credits
 
